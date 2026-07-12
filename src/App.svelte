@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte'
   import { route, initRouter, navigate } from './lib/router.svelte'
   import Home from './routes/Home.svelte'
   import Library from './routes/Library.svelte'
@@ -6,8 +7,32 @@
   import Calendar from './routes/Calendar.svelte'
   import Settings from './routes/Settings.svelte'
   import Search from './routes/Search.svelte'
+  import { maybeAutoSync } from './lib/sync/engine'
+  import { beginSync, completeSync, failSync } from './lib/sync/status.svelte'
+  import { db } from './lib/db/schema'
 
   initRouter()
+
+  onMount(async () => {
+    beginSync()
+    try {
+      const result = await maybeAutoSync()
+      if (result.ran) {
+        completeSync(new Date().toISOString(), result.errors)
+      } else {
+        // スロットルによりスキップ: 直近の同期時刻を meta から読み直して表示する
+        const metaEntry = await db.meta.get('sync')
+        const lastSyncAt = (metaEntry?.value as { lastSyncAt?: string } | undefined)?.lastSyncAt
+        if (lastSyncAt) {
+          completeSync(lastSyncAt, result.errors)
+        } else {
+          failSync(result.errors)
+        }
+      }
+    } catch {
+      failSync({})
+    }
+  })
 
   const navItems: { label: string; path: string; name: typeof route.name }[] = [
     { label: 'HOME', path: '#/', name: 'home' },
