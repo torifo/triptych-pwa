@@ -17,6 +17,7 @@ import { apiGet, ApiError } from '../api';
 import { db as defaultDB, type TriptychDB } from '../db/schema';
 import type { Edition, EditionProgress, Release, Source, SourceRef } from '../db/schema';
 import { listEditions, listReleasesByEdition, mergeRelease, updateEditionProgress, deleteRelease } from '../db/store';
+import { runDetection } from './detect';
 
 // ---------------------------------------------------------------------------
 // Collector DTO shapes (mirrors backend/dto.py + backend/adapters/*.py).
@@ -157,6 +158,15 @@ export async function runSync(opts: SyncOptions = {}): Promise<SyncRunResult> {
     lastSyncErrors: errors,
   };
   await database.meta.put({ key: SYNC_META_KEY, value: nextMeta });
+
+  // アニメ化検知（FR-005）。24hスロットルは同期の force とは独立
+  // （design.md「検知スロットル」は Work 毎24h固定）。検知側の失敗
+  // (collector 障害等) で同期結果そのものを壊さないよう握りつぶす。
+  try {
+    await runDetection({ database, now: opts.now });
+  } catch {
+    // 検知は補助機能。ここで投げ直すと runSync 全体が失敗扱いになるため無視する。
+  }
 
   return { ran: true, errors };
 }

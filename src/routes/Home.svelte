@@ -1,10 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { listReleases, listEditions, listWorks, updateRelease } from '../lib/db/store';
-  import type { Release, Edition, Work } from '../lib/db/schema';
+  import { listReleases, listEditions, listWorks, updateRelease, listDetectionEvents } from '../lib/db/store';
+  import type { Release, Edition, Work, DetectionEvent } from '../lib/db/schema';
   import { navigate } from '../lib/router.svelte';
   import { runSync } from '../lib/sync/engine';
   import { syncStatus, beginSync, completeSync, failSync } from '../lib/sync/status.svelte';
+  import { acceptDetection, rejectDetection } from '../lib/sync/detect';
   import MediaBadge from '../lib/components/MediaBadge.svelte';
 
   const TRACKED_STATUSES: Edition['status'][] = ['plan', 'active', 'paused'];
@@ -13,9 +14,22 @@
   let releases = $state<Release[]>([]);
   let editions = $state<Edition[]>([]);
   let works = $state<Work[]>([]);
+  let detections = $state<DetectionEvent[]>([]);
 
   const editionMap = $derived(new Map(editions.map((e) => [e.id, e])));
   const workMap = $derived(new Map(works.map((w) => [w.id, w])));
+
+  const pendingDetections = $derived(
+    detections
+      .filter((d) => d.state === 'pending')
+      .sort((a, b) => b.matchScore - a.matchScore),
+  );
+
+  const AIRING_STATUS_LABELS: Record<DetectionEvent['candidate']['airingStatus'], string> = {
+    NOT_YET_RELEASED: '放送前',
+    RELEASING: '放送中',
+    FINISHED: '放送済',
+  };
 
   function todayStr(): string {
     return new Date().toISOString().slice(0, 10);
@@ -51,9 +65,35 @@
     releases = await listReleases();
     editions = await listEditions();
     works = await listWorks();
+    detections = await listDetectionEvents();
   }
 
   onMount(refresh);
+
+  let detectionBusy = $state<string | null>(null);
+
+  async function onAcceptDetection(detection: DetectionEvent) {
+    if (detectionBusy) return;
+    detectionBusy = detection.id;
+    try {
+      const { edition } = await acceptDetection(detection.id);
+      await refresh();
+      navigate(`#/work/${edition.workId}`);
+    } finally {
+      detectionBusy = null;
+    }
+  }
+
+  async function onRejectDetection(detection: DetectionEvent) {
+    if (detectionBusy) return;
+    detectionBusy = detection.id;
+    try {
+      await rejectDetection(detection.id);
+      await refresh();
+    } finally {
+      detectionBusy = null;
+    }
+  }
 
   function workTitleFor(editionId: string): string {
     const edition = editionMap.get(editionId);
@@ -124,6 +164,63 @@
       {syncing || syncStatus.running ? '同期中…' : '今すぐ同期'}
     </button>
   </div>
+
+  {#if pendingDetections.length > 0}
+    <div class="flex flex-col gap-2">
+      <h2 class="flex items-center gap-1.5 text-xs font-bold tracking-wide" style="color: var(--muted);">
+        アニメ化検知
+        <span
+          class="inline-block h-1.5 w-1.5 rounded-full"
+          style="background: var(--hi);"
+          aria-hidden="true"
+        ></span>
+      </h2>
+      <div class="flex flex-col gap-1.5">
+        {#each pendingDetections as detection (detection.id)}
+          {@const w = workMap.get(detection.workId)}
+          <div
+            class="flex flex-col gap-1.5 px-2 py-1.5"
+            style="border: 1px solid var(--line); min-width: 0;"
+          >
+            <div class="flex items-center gap-2" style="min-width: 0;">
+              <span class="min-w-0 flex-1 truncate text-sm">{detection.candidate.title}</span>
+              <span class="text-[11px]" style="color: var(--muted); white-space: nowrap;">
+                {AIRING_STATUS_LABELS[detection.candidate.airingStatus]}
+              </span>
+              <span class="text-[11px]" style="color: var(--muted); white-space: nowrap;">
+                {Math.round(detection.matchScore * 100)}%
+              </span>
+            </div>
+            <div class="flex items-center gap-2" style="min-width: 0;">
+              {#if w}
+                <span class="min-w-0 flex-1 truncate text-[11px]" style="color: var(--muted);">
+                  原作: {w.title}
+                </span>
+              {/if}
+              <button
+                type="button"
+                class="px-2 py-0.5 text-[11px]"
+                style="border: 1px solid var(--fg); color: var(--fg); white-space: nowrap;"
+                disabled={detectionBusy === detection.id}
+                onclick={() => onAcceptDetection(detection)}
+              >
+                リンクする
+              </button>
+              <button
+                type="button"
+                class="px-2 py-0.5 text-[11px]"
+                style="border: 1px solid var(--line); color: var(--muted); white-space: nowrap;"
+                disabled={detectionBusy === detection.id}
+                onclick={() => onRejectDetection(detection)}
+              >
+                却下
+              </button>
+            </div>
+          </div>
+        {/each}
+      </div>
+    </div>
+  {/if}
 
   <div class="flex flex-col gap-2">
     <h2 class="text-xs font-bold tracking-wide" style="color: var(--muted);">直近</h2>
