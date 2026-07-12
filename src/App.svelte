@@ -10,10 +10,31 @@
   import { maybeAutoSync } from './lib/sync/engine'
   import { beginSync, completeSync, failSync } from './lib/sync/status.svelte'
   import { db } from './lib/db/schema'
+  import { initStoragePersistence, shouldPromptAddToHomeScreen } from './lib/pwa'
 
   initRouter()
 
+  const A2HS_DISMISSED_KEY = 'triptych:a2hs-dismissed'
+  let showA2HSBanner = $state(false)
+
+  function dismissA2HSBanner() {
+    showA2HSBanner = false
+    try {
+      localStorage.setItem(A2HS_DISMISSED_KEY, '1')
+    } catch {
+      // localStorage不可の環境ではバナーを閉じるのみ（記憶はできない）
+    }
+  }
+
   onMount(async () => {
+    try {
+      const storageMeta = await initStoragePersistence()
+      const dismissed = localStorage.getItem(A2HS_DISMISSED_KEY) === '1'
+      showA2HSBanner = !dismissed && shouldPromptAddToHomeScreen(storageMeta)
+    } catch {
+      // ストレージ判定に失敗してもアプリ本体は継続動作させる
+    }
+
     beginSync()
     try {
       const result = await maybeAutoSync()
@@ -52,6 +73,25 @@
     <span style="width: 14px; height: 14px; background: var(--fg); display: inline-block;"></span>
     <span class="text-sm font-bold tracking-wide">triptych</span>
   </header>
+
+  {#if showA2HSBanner}
+    <div
+      class="flex items-center gap-3 px-4 py-2 text-xs"
+      style="border-bottom: 1px solid var(--line); background: var(--hi-soft); color: var(--fg);"
+    >
+      <span class="flex-1">
+        ホーム画面に追加すると、データが消えにくくなります（共有ボタン→「ホーム画面に追加」）
+      </span>
+      <button
+        type="button"
+        class="shrink-0 text-[10px] tracking-wide underline"
+        style="color: var(--muted);"
+        onclick={dismissA2HSBanner}
+      >
+        閉じる
+      </button>
+    </div>
+  {/if}
 
   <main class="flex-1 overflow-y-auto pb-16">
     {#if route.name === 'home'}
