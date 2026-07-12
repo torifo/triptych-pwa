@@ -5,11 +5,13 @@
   import WorkDetail from './routes/WorkDetail.svelte'
   import Calendar from './routes/Calendar.svelte'
   import Settings from './routes/Settings.svelte'
+  import Search from './routes/Search.svelte'
 
   initRouter()
 
   const navItems: { label: string; path: string; name: typeof route.name }[] = [
     { label: 'HOME', path: '#/', name: 'home' },
+    { label: '検索', path: '#/search', name: 'search' },
     { label: 'LIBRARY', path: '#/library', name: 'library' },
     { label: 'WORK', path: '#/work/', name: 'work' },
     { label: 'CALENDAR', path: '#/calendar', name: 'calendar' },
@@ -37,6 +39,8 @@
       <Calendar />
     {:else if route.name === 'settings'}
       <Settings />
+    {:else if route.name === 'search'}
+      <Search />
     {/if}
   </main>
 

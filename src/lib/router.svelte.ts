@@ -1,6 +1,6 @@
 // hash-based router (no extra dependency)
 
-export type RouteName = 'home' | 'library' | 'work' | 'calendar' | 'settings'
+export type RouteName = 'home' | 'library' | 'work' | 'calendar' | 'settings' | 'search'
 
 export interface RouteMatch {
   name: RouteName
@@ -15,6 +15,9 @@ function parseHash(hash: string): RouteMatch {
   }
   if (path === '/library') {
     return { name: 'library', params: {} }
+  }
+  if (path === '/search') {
+    return { name: 'search', params: {} }
   }
   if (path === '/calendar') {
     return { name: 'calendar', params: {} }
