@@ -40,7 +40,11 @@ last_adapter_errors: dict[str, AdapterErrorInfo] = {}
 
 
 def create_app() -> FastAPI:
+    from .api import anilist, kakuyomu, narou, ndl, openbd, syoboi
+
     app = FastAPI(title="triptych collector")
+    for module in (anilist, narou, openbd, ndl, syoboi, kakuyomu):
+        app.include_router(module.router)
 
     @app.middleware("http")
     async def bearer_auth_middleware(
