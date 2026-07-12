@@ -1,89 +1,58 @@
-<script>
-  import svelteLogo from './assets/svelte.svg'
-  import viteLogo from './assets/vite.svg'
-  import heroImg from './assets/hero.png'
-  import Counter from './lib/Counter.svelte'
+<script lang="ts">
+  import { route, initRouter, navigate } from './lib/router.svelte'
+  import Home from './routes/Home.svelte'
+  import Library from './routes/Library.svelte'
+  import WorkDetail from './routes/WorkDetail.svelte'
+  import Calendar from './routes/Calendar.svelte'
+  import Settings from './routes/Settings.svelte'
+
+  initRouter()
+
+  const navItems: { label: string; path: string; name: typeof route.name }[] = [
+    { label: 'HOME', path: '#/', name: 'home' },
+    { label: 'LIBRARY', path: '#/library', name: 'library' },
+    { label: 'WORK', path: '#/work/', name: 'work' },
+    { label: 'CALENDAR', path: '#/calendar', name: 'calendar' },
+    { label: 'SETTINGS', path: '#/settings', name: 'settings' },
+  ]
 </script>
 
-<section id="center">
-  <div class="hero">
-    <img src={heroImg} class="base" width="170" height="179" alt="" />
-    <img src={svelteLogo} class="framework" alt="Svelte logo" />
-    <img src={viteLogo} class="vite" alt="Vite logo" />
-  </div>
-  <div>
-    <h1>Get started</h1>
-    <p>Edit <code>src/App.svelte</code> and save to test <code>HMR</code></p>
-  </div>
-  <Counter />
-</section>
+<div class="flex min-h-svh flex-col" style="max-width: 480px; margin: 0 auto; background: var(--bg); color: var(--fg);">
+  <header
+    class="flex items-center gap-2 px-4 py-3"
+    style="border-bottom: 1px solid var(--line);"
+  >
+    <span style="width: 14px; height: 14px; background: var(--fg); display: inline-block;"></span>
+    <span class="text-sm font-bold tracking-wide">triptych</span>
+  </header>
 
-<div class="ticks"></div>
+  <main class="flex-1 overflow-y-auto pb-16">
+    {#if route.name === 'home'}
+      <Home />
+    {:else if route.name === 'library'}
+      <Library />
+    {:else if route.name === 'work'}
+      <WorkDetail id={route.params.id ?? ''} />
+    {:else if route.name === 'calendar'}
+      <Calendar />
+    {:else if route.name === 'settings'}
+      <Settings />
+    {/if}
+  </main>
 
-<section id="next-steps">
-  <div id="docs">
-    <svg class="icon" role="presentation" aria-hidden="true">
-      <use href="/icons.svg#documentation-icon"></use>
-    </svg>
-    <h2>Documentation</h2>
-    <p>Your questions, answered</p>
-    <ul>
-      <li>
-        <a href="https://vite.dev/" target="_blank" rel="noreferrer">
-          <img class="logo" src={viteLogo} alt="" />
-          Explore Vite
-        </a>
-      </li>
-      <li>
-        <a href="https://svelte.dev/" target="_blank" rel="noreferrer">
-          <img class="button-icon" src={svelteLogo} alt="" />
-          Learn more
-        </a>
-      </li>
-    </ul>
-  </div>
-  <div id="social">
-    <svg class="icon" role="presentation" aria-hidden="true">
-      <use href="/icons.svg#social-icon"></use>
-    </svg>
-    <h2>Connect with us</h2>
-    <p>Join the Vite community</p>
-    <ul>
-      <li>
-        <a href="https://github.com/vitejs/vite" target="_blank" rel="noreferrer">
-          <svg class="button-icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#github-icon"></use>
-          </svg>
-          GitHub
-        </a>
-      </li>
-      <li>
-        <a href="https://chat.vite.dev/" target="_blank" rel="noreferrer">
-          <svg class="button-icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#discord-icon"></use>
-          </svg>
-          Discord
-        </a>
-      </li>
-      <li>
-        <a href="https://x.com/vite_js" target="_blank" rel="noreferrer">
-          <svg class="button-icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#x-icon"></use>
-          </svg>
-          X.com
-        </a>
-      </li>
-      <li>
-        <a href="https://bsky.app/profile/vite.dev" target="_blank" rel="noreferrer">
-          <svg class="button-icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#bluesky-icon"></use>
-          </svg>
-          Bluesky
-        </a>
-      </li>
-    </ul>
-  </div>
-</section>
-
-<div class="ticks"></div>
-<section id="spacer"></section>
+  <nav
+    class="fixed bottom-0 left-0 right-0 flex"
+    style="max-width: 480px; margin: 0 auto; border-top: 1px solid var(--line); background: var(--bg);"
+  >
+    {#each navItems as item}
+      <button
+        type="button"
+        class="flex-1 py-2 text-center text-[10px] tracking-wide"
+        style={`color: ${route.name === item.name ? 'var(--fg)' : 'var(--muted)'}; background: ${route.name === item.name ? 'var(--hi-soft)' : 'transparent'};`}
+        onclick={() => navigate(item.path)}
+      >
+        {item.label}
+      </button>
+    {/each}
+  </nav>
+</div>
