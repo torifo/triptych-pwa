@@ -1,0 +1,395 @@
+<?xml version='1.0' encoding='utf-8'?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcndl="http://ndl.go.jp/dcndl/terms/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:openSearch="http://a9.com/-/spec/opensearchrss/1.0/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.0">
+  <channel>
+    <title>本好きの下剋上 - 国立国会図書館サーチ OpenSearch</title>
+    <link>https://ios-v2-prod-eks-alb.ndlsearch.ndl.go.jp/api/opensearch?title=%e6%9c%ac%e5%a5%bd%e3%81%8d%e3%81%ae%e4%b8%8b%e5%89%8b%e4%b8%8a</link>
+    <description>Search results for title=本好きの下剋上</description>
+    <language>ja</language>
+    <openSearch:totalResults>176</openSearch:totalResults>
+    <openSearch:startIndex>1</openSearch:startIndex>
+    <openSearch:itemsPerPage>11</openSearch:itemsPerPage>
+    <item>
+      <title>あの日のことば : TVアニメ『本好きの下剋上-司書になるためには手段を選んでいられません-』第3期オープニングテーマ</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I032034908</link>
+      <description>&lt;p&gt;フライングドッグ,2022,&lt;p&gt;&lt;ul&gt;&lt;li&gt;タイトル：あの日のことば : TVアニメ『本好きの下剋上-司書になるためには手段を選んでいられません-』第3期オープニングテーマ&lt;/li&gt;&lt;li&gt;タイトル（読み）：アノ ヒ ノ コトバ&lt;/li&gt;&lt;li&gt;責任表示：東山奈央,東山奈央&lt;/li&gt;&lt;/ul&gt;</description>
+      <author>東山奈央,東山奈央</author>
+      <category>録音資料</category>
+      <category>記録メディア</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I032034908</guid>
+      <pubDate>Sat, 6 Aug 2022 02:02:22 +0900</pubDate>
+      <dc:title>あの日のことば : TVアニメ『本好きの下剋上-司書になるためには手段を選んでいられません-』第3期オープニングテーマ</dc:title>
+      <dcndl:titleTranscription>アノ ヒ ノ コトバ</dcndl:titleTranscription>
+      <dc:publisher>フライングドッグ</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2022</dc:date>
+      <dcterms:issued>2022.6</dcterms:issued>
+      <dcndl:price>3200円</dcndl:price>
+      <dc:extent>CD 1枚</dc:extent>
+      <dc:identifier xsi:type="dcndl:RIS502">VTZL-204</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">032034908</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">23712991</dc:identifier>
+      <dc:subject xsi:type="dcndl:NDLC">YMC11</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description>本好き盤 (限定盤A)</dc:description>
+      <dc:description>所要時間: 18分44秒</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I032034908" />
+      <dc:description> 2022</dc:description>
+    </item>
+    <item>
+      <title>あの日のことば : TVアニメ『本好きの下剋上-司書になるためには手段を選んでいられません-』第3期オープニングテーマ</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I032034912</link>
+      <description>&lt;p&gt;フライングドッグ,2022,&lt;p&gt;&lt;ul&gt;&lt;li&gt;タイトル：あの日のことば : TVアニメ『本好きの下剋上-司書になるためには手段を選んでいられません-』第3期オープニングテーマ&lt;/li&gt;&lt;li&gt;タイトル（読み）：アノ ヒ ノ コトバ&lt;/li&gt;&lt;li&gt;責任表示：東山奈央,東山奈央&lt;/li&gt;&lt;/ul&gt;</description>
+      <author>東山奈央,東山奈央</author>
+      <category>録音資料</category>
+      <category>記録メディア</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I032034912</guid>
+      <pubDate>Sat, 6 Aug 2022 02:00:59 +0900</pubDate>
+      <dc:title>あの日のことば : TVアニメ『本好きの下剋上-司書になるためには手段を選んでいられません-』第3期オープニングテーマ</dc:title>
+      <dcndl:titleTranscription>アノ ヒ ノ コトバ</dcndl:titleTranscription>
+      <dc:publisher>フライングドッグ</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2022</dc:date>
+      <dcterms:issued>2022.6</dcterms:issued>
+      <dcndl:price>1300円</dcndl:price>
+      <dc:extent>CD 1枚</dc:extent>
+      <dc:identifier xsi:type="dcndl:RIS502">VTCL-35348</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">032034912</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">23712988</dc:identifier>
+      <dc:subject xsi:type="dcndl:NDLC">YMC11</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description>所要時間: 23分55秒</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I032034912" />
+      <dc:description> 2022</dc:description>
+    </item>
+    <item>
+      <title>今も、ありがとう</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034613983</link>
+      <description>&lt;p&gt;Sony Music Labels,2026,&lt;p&gt;&lt;ul&gt;&lt;li&gt;タイトル：今も、ありがとう&lt;/li&gt;&lt;li&gt;タイトル（読み）：イマ モ 、 アリガトウ&lt;/li&gt;&lt;li&gt;責任表示：生田絵梨花&lt;/li&gt;&lt;/ul&gt;</description>
+      <author>生田絵梨花</author>
+      <category>録音資料</category>
+      <category>記録メディア</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034613983</guid>
+      <pubDate>Fri, 26 Jun 2026 18:33:16 +0900</pubDate>
+      <dc:title>今も、ありがとう</dc:title>
+      <dcndl:titleTranscription>イマ モ 、 アリガトウ</dcndl:titleTranscription>
+      <dc:publisher>Sony Music Labels</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.5</dcterms:issued>
+      <dcndl:price>2454円</dcndl:price>
+      <dc:extent>CD 1枚</dc:extent>
+      <dc:identifier xsi:type="dcndl:RIS502">SRCL-13669</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034613983</dc:identifier>
+      <dc:subject xsi:type="dcndl:NDLC">YMC11</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description>期間生産限定盤</dc:description>
+      <dc:description>所要時間: 14分5秒</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034613983" />
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>貴族院外伝1年生</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000136-I1971993809754596250</link>
+      <description>&lt;p&gt;TOブックス,2018,9784864727327&lt;p&gt;&lt;ul&gt;&lt;li&gt;タイトル：貴族院外伝1年生&lt;/li&gt;&lt;li&gt;タイトル（読み）：キゾクイン ガイデン 1ネンセイ&lt;/li&gt;&lt;li&gt;NDC(9)：913.6&lt;/li&gt;&lt;/ul&gt;</description>
+      <author>香月, 美夜</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000136-I1971993809754596250</guid>
+      <pubDate>Fri, 6 Mar 2026 10:03:02 +0900</pubDate>
+      <dc:title>貴族院外伝1年生</dc:title>
+      <dcndl:titleTranscription>キゾクイン ガイデン 1ネンセイ</dcndl:titleTranscription>
+      <dc:creator>香月, 美夜</dc:creator>
+      <dcndl:creatorTranscription>カズキ, ミヤ</dcndl:creatorTranscription>
+      <dc:publisher>TOブックス</dc:publisher>
+      <dcndl:publicationPlace>ja</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2018</dc:date>
+      <dcterms:issued>2018.11</dcterms:issued>
+      <dc:identifier xsi:type="dcndl:ISBN">9784864727327</dc:identifier>
+      <dc:identifier xsi:type="dcndl:ISBN13">9784864727327</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NIIBibID">BB27260127</dc:identifier>
+      <dc:subject xsi:type="dcndl:NDC9">913.6</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC8">913.6</dc:subject>
+      <dc:description>折り込図1枚</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ci.nii.ac.jp/ncid/BB27260127" />
+      <dc:description> 2018</dc:description>
+    </item>
+    <item>
+      <title>貴族院の自称図書委員</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000136-I1971430859800671269</link>
+      <description>&lt;p&gt;1,TOブックス,2018,9784864726344&lt;p&gt;&lt;ul&gt;&lt;li&gt;タイトル：貴族院の自称図書委員&lt;/li&gt;&lt;li&gt;タイトル（読み）：キゾクイン ノ ジショウ トショ イイン&lt;/li&gt;&lt;li&gt;NDC(9)：913.6&lt;/li&gt;&lt;/ul&gt;</description>
+      <author>香月, 美夜</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000136-I1971430859800671269</guid>
+      <pubDate>Fri, 6 Mar 2026 10:03:02 +0900</pubDate>
+      <dc:title>貴族院の自称図書委員</dc:title>
+      <dcndl:titleTranscription>キゾクイン ノ ジショウ トショ イイン</dcndl:titleTranscription>
+      <dc:creator>香月, 美夜</dc:creator>
+      <dcndl:creatorTranscription>カズキ, ミヤ</dcndl:creatorTranscription>
+      <dcndl:volume>1</dcndl:volume>
+      <dc:publisher>TOブックス</dc:publisher>
+      <dcndl:publicationPlace>ja</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2018</dc:date>
+      <dcterms:issued>2018.1-2020.1</dcterms:issued>
+      <dc:identifier xsi:type="dcndl:ISBN">9784864726344</dc:identifier>
+      <dc:identifier xsi:type="dcndl:ISBN13">9784864726344</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NIIBibID">BB25268682</dc:identifier>
+      <dc:subject xsi:type="dcndl:NDC9">913.6</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC8">913.6</dc:subject>
+      <dc:description>折り込図各1枚</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ci.nii.ac.jp/ncid/BB25268682" />
+      <dc:description> 2018</dc:description>
+    </item>
+    <item>
+      <title>このライトノベルがすごい!</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033166130</link>
+      <description>&lt;p&gt;2024,宝島社,2023,978-4-299-04899-8&lt;p&gt;&lt;ul&gt;&lt;li&gt;タイトル：このライトノベルがすごい!&lt;/li&gt;&lt;li&gt;タイトル（読み）：コノ ライト ノベル ガ スゴイ&lt;/li&gt;&lt;li&gt;責任表示：『このライトノベルがすごい!』編集部 編&lt;/li&gt;&lt;li&gt;NDC(10)：910.265&lt;/li&gt;&lt;/ul&gt;</description>
+      <author>宝島社,『このライトノベルがすごい!』編集部 編</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033166130</guid>
+      <pubDate>Fri, 22 Dec 2023 06:21:51 +0900</pubDate>
+      <dc:title>このライトノベルがすごい!</dc:title>
+      <dcndl:titleTranscription>コノ ライト ノベル ガ スゴイ</dcndl:titleTranscription>
+      <dc:creator>宝島社</dc:creator>
+      <dcndl:creatorTranscription>タカラジマシャ</dcndl:creatorTranscription>
+      <dcndl:volume>2024</dcndl:volume>
+      <dc:publisher>宝島社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2023</dc:date>
+      <dcterms:issued>2023.12</dcterms:issued>
+      <dcndl:price>764円</dcndl:price>
+      <dc:extent>191p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-299-04899-8</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033166130</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">23916310</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34545343</dc:identifier>
+      <dc:subject>ライトノベル</dc:subject>
+      <dc:subject xsi:type="dcndl:NDLC">KG381</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">910.265</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.lib.city.saitama.jp/bookdetail?num=3341253&amp;ctg=1" />
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.chiba.lg.jp/licsxp-iopac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1000101118747" />
+      <rdfs:seeAlso rdf:resource="https://opac.lib.city.yokohama.lg.jp/winj/opac/switch-detail-iccap.do?bibid=1122099840" />
+      <rdfs:seeAlso rdf:resource="https://www.lib.sagamihara.kanagawa.jp/TOSHOW/asp/WwShousaiKen.aspx?FCode=2751340" />
+      <rdfs:seeAlso rdf:resource="https://www.toshokan.city.shizuoka.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1001103970050" />
+      <rdfs:seeAlso rdf:resource="https://www.library.city.nagoya.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1002310066680" />
+      <rdfs:seeAlso rdf:resource="https://www.shiga-pref-library.jp/wo/opc_srh/srh_detail/4958850/" />
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bib/?B14370744" />
+      <rdfs:seeAlso rdf:resource="https://www.oml.city.osaka.lg.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1000015453345" />
+      <rdfs:seeAlso rdf:resource="https://www.lib-sakai.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1007001350821" />
+      <rdfs:seeAlso rdf:resource="http://www.library.pref.tottori.jp/winj/opac/switch-detail-iccap.do?bibid=1120577624" />
+      <rdfs:seeAlso rdf:resource="https://opac.libnet.pref.okayama.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1009812721923" />
+      <rdfs:seeAlso rdf:resource="https://library.pref.yamaguchi.lg.jp//wo/opc_srh/srh_detail/1002023504/" />
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.kagawa.lg.jp/winj/opac/switch-detail-iccap.do?bibid=1130506566" />
+      <rdfs:seeAlso rdf:resource="https://opac.miraionlibrary.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1000003164966" />
+      <rdfs:seeAlso rdf:resource="https://library.pref.oita.jp/winj/opac/switch-detail-iccap.do?bibid=1110529793" />
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033166130" />
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B14370744" />
+      <rdfs:seeAlso rdf:resource="https://ci.nii.ac.jp/ncid/BD05420734" />
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784299048998" />
+      <dc:description> 2023</dc:description>
+    </item>
+    <item>
+      <title>神殿の巫女見習い</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000136-I1971712334777376542</link>
+      <description>&lt;p&gt;1,TOブックス,2015,9784864724241&lt;p&gt;&lt;ul&gt;&lt;li&gt;タイトル：神殿の巫女見習い&lt;/li&gt;&lt;li&gt;タイトル（読み）：シンデン ノ ミコ ミナライ&lt;/li&gt;&lt;li&gt;NDC(9)：913.6&lt;/li&gt;&lt;/ul&gt;</description>
+      <author>香月, 美夜</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000136-I1971712334777376542</guid>
+      <pubDate>Fri, 6 Mar 2026 10:03:02 +0900</pubDate>
+      <dc:title>神殿の巫女見習い</dc:title>
+      <dcndl:titleTranscription>シンデン ノ ミコ ミナライ</dcndl:titleTranscription>
+      <dc:creator>香月, 美夜</dc:creator>
+      <dcndl:creatorTranscription>カズキ, ミヤ</dcndl:creatorTranscription>
+      <dcndl:volume>1</dcndl:volume>
+      <dc:publisher>TOブックス</dc:publisher>
+      <dcndl:publicationPlace>ja</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2015</dc:date>
+      <dcterms:issued>2015.10-2016.7</dcterms:issued>
+      <dc:identifier xsi:type="dcndl:ISBN">9784864724241</dc:identifier>
+      <dc:identifier xsi:type="dcndl:ISBN13">9784864724241</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NIIBibID">BB25255873</dc:identifier>
+      <dc:subject xsi:type="dcndl:NDLC">KH851</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC9">913.6</dc:subject>
+      <dc:description>折り込図各1枚</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ci.nii.ac.jp/ncid/BB25255873" />
+      <dc:description> 2015</dc:description>
+    </item>
+    <item>
+      <title>兵士の娘</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000136-I1970867909770689567</link>
+      <description>&lt;p&gt;1,TOブックス,2015,9784864723428&lt;p&gt;&lt;ul&gt;&lt;li&gt;タイトル：兵士の娘&lt;/li&gt;&lt;li&gt;タイトル（読み）：ヘイシ ノ ムスメ&lt;/li&gt;&lt;li&gt;NDC(9)：913.6&lt;/li&gt;&lt;/ul&gt;</description>
+      <author>香月, 美夜</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000136-I1970867909770689567</guid>
+      <pubDate>Fri, 6 Mar 2026 10:03:02 +0900</pubDate>
+      <dc:title>兵士の娘</dc:title>
+      <dcndl:titleTranscription>ヘイシ ノ ムスメ</dcndl:titleTranscription>
+      <dc:creator>香月, 美夜</dc:creator>
+      <dcndl:creatorTranscription>カズキ, ミヤ</dcndl:creatorTranscription>
+      <dcndl:volume>1</dcndl:volume>
+      <dc:publisher>TOブックス</dc:publisher>
+      <dcndl:publicationPlace>ja</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2015</dc:date>
+      <dcterms:issued>2015.2-2015.7</dcterms:issued>
+      <dc:identifier xsi:type="dcndl:ISBN">9784864723428</dc:identifier>
+      <dc:identifier xsi:type="dcndl:ISBN13">9784864723428</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NIIBibID">BB18469527</dc:identifier>
+      <dc:subject xsi:type="dcndl:NDLC">KH851</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC9">913.6</dc:subject>
+      <dc:description>記述は1の第2刷(2015.3刊)による</dc:description>
+      <dc:description>折り込図各1枚</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ci.nii.ac.jp/ncid/BB18469527" />
+      <dc:description> 2015</dc:description>
+    </item>
+    <item>
+      <title>兵士の娘</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000136-I1970304959895186215</link>
+      <description>&lt;p&gt;2,TOブックス,2019,9784864728515&lt;p&gt;&lt;ul&gt;&lt;li&gt;タイトル：兵士の娘&lt;/li&gt;&lt;li&gt;タイトル（読み）：ヘイシ ノ ムスメ&lt;/li&gt;&lt;li&gt;責任表示：香月美夜作 ; 椎名優絵&lt;/li&gt;&lt;/ul&gt;</description>
+      <author>香月, 美夜,椎名, 優,香月美夜作 ; 椎名優絵</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000136-I1970304959895186215</guid>
+      <pubDate>Sat, 20 Jun 2026 00:40:07 +0900</pubDate>
+      <dc:title>兵士の娘</dc:title>
+      <dcndl:titleTranscription>ヘイシ ノ ムスメ</dcndl:titleTranscription>
+      <dc:creator>香月, 美夜</dc:creator>
+      <dc:creator>椎名, 優</dc:creator>
+      <dcndl:creatorTranscription>カズキ, ミヤ</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>シイナ, ユウ</dcndl:creatorTranscription>
+      <dcndl:volume>2</dcndl:volume>
+      <dc:publisher>TOブックス</dc:publisher>
+      <dcndl:publicationPlace>ja</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2019</dc:date>
+      <dcterms:issued>2019.-</dcterms:issued>
+      <dc:identifier xsi:type="dcndl:ISBN">9784864728515</dc:identifier>
+      <dc:identifier xsi:type="dcndl:ISBN13">9784864728515</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NIIBibID">BB30945972</dc:identifier>
+      <rdfs:seeAlso rdf:resource="https://ci.nii.ac.jp/ncid/BB30945972" />
+      <dc:description> 2019</dc:description>
+    </item>
+    <item>
+      <title>本好きの下剋上 : 司書になるためには手段を選んでいられません</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I026022670</link>
+      <description>&lt;p&gt;第1部[1] (兵士の娘 1),TOブックス,2015,978-4-86472-342-8&lt;p&gt;&lt;ul&gt;&lt;li&gt;タイトル：本好きの下剋上 : 司書になるためには手段を選んでいられません&lt;/li&gt;&lt;li&gt;タイトル（読み）：ホンズキ ノ ゲコクジョウ : シショ ニ ナル タメ ニワ シュダン オ エランデ イラレマセン&lt;/li&gt;&lt;li&gt;責任表示：香月美夜 著&lt;/li&gt;&lt;li&gt;NDC(9)：913.6&lt;/li&gt;&lt;/ul&gt;</description>
+      <author>香月, 美夜,香月美夜 著</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I026022670</guid>
+      <pubDate>Tue, 3 Mar 2015 02:22:12 +0900</pubDate>
+      <dc:title>本好きの下剋上 : 司書になるためには手段を選んでいられません</dc:title>
+      <dcndl:titleTranscription>ホンズキ ノ ゲコクジョウ : シショ ニ ナル タメ ニワ シュダン オ エランデ イラレマセン</dcndl:titleTranscription>
+      <dc:creator>香月, 美夜</dc:creator>
+      <dcndl:creatorTranscription>カズキ, ミヤ</dcndl:creatorTranscription>
+      <dcndl:volume>第1部[1] (兵士の娘 1)</dcndl:volume>
+      <dc:publisher>TOブックス</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2015</dc:date>
+      <dcterms:issued>2015.2</dcterms:issued>
+      <dcndl:price>1200円</dcndl:price>
+      <dc:extent>351p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86472-342-8</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">026022670</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">22531647</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">33207613</dc:identifier>
+      <dc:subject xsi:type="dcndl:NDLC">KH851</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC9">913.6</dc:subject>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.hokkaido.jp/wo/opc_srh/" />
+      <rdfs:seeAlso rdf:resource="https://www.library.city.sapporo.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1008000899933" />
+      <rdfs:seeAlso rdf:resource="https://www.lib.city.saitama.jp/bookdetail?num=506561&amp;ctg=1" />
+      <rdfs:seeAlso rdf:resource="https://www.library.city.chiba.jp/licsxp-opac/WOpacTifSchCmpdDispAction.do" />
+      <rdfs:seeAlso rdf:resource="https://opac.lib.city.yokohama.lg.jp/winj/opac/switch-detail-iccap.do?bibid=1113235058" />
+      <rdfs:seeAlso rdf:resource="https://www.library.city.kawasaki.jp/bookdetail?num=2600635&amp;ctg=1" />
+      <rdfs:seeAlso rdf:resource="https://www.lib.sagamihara.kanagawa.jp/TOSHOW/asp/WwShousaiKen.aspx?FCode=1849597" />
+      <rdfs:seeAlso rdf:resource="https://opac.pref-lib.niigata.niigata.jp/winj/opac/switch-detail-iccap.do?bibid=1107810907" />
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000000820098/" />
+      <rdfs:seeAlso rdf:resource="https://www.library-archives.pref.fukui.lg.jp/wo/opc_srh/srh_detail/1110080096/" />
+      <rdfs:seeAlso rdf:resource="http://www.library.pref.gifu.lg.jp/winj/opac/switch-detail-iccap.do?bibid=1190183446" />
+      <rdfs:seeAlso rdf:resource="https://www.toshokan.city.shizuoka.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1001103199521" />
+      <rdfs:seeAlso rdf:resource="https://www.library.city.nagoya.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1001410092818" />
+      <rdfs:seeAlso rdf:resource="http://opac1.library.pref.mie.lg.jp/winj/opac/switch-detail-iccap.do?bibid=1110433033" />
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bib/?B13121932" />
+      <rdfs:seeAlso rdf:resource="https://www.oml.city.osaka.lg.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1000013403052" />
+      <rdfs:seeAlso rdf:resource="https://www.lib-sakai.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1007000494607" />
+      <rdfs:seeAlso rdf:resource="http://www.lib.wakayama-c.ed.jp/winj/opac/switch-detail-iccap.do?bibid=1102726781" />
+      <rdfs:seeAlso rdf:resource="http://www.library.pref.tottori.jp/winj/opac/switch-detail-iccap.do?bibid=1102072719" />
+      <rdfs:seeAlso rdf:resource="https://opac.libnet.pref.okayama.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1009811867814" />
+      <rdfs:seeAlso rdf:resource="http://www.library.city.hiroshima.jp/winj/opac/switch-detail-iccap.do?bibid=1103683234" />
+      <rdfs:seeAlso rdf:resource="https://alislibopac.bunmori.tokushima.jp/winj/opac/switch-detail-iccap.do?bibid=1103803696" />
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.kagawa.lg.jp/winj/opac/switch-detail-iccap.do?bibid=1110264226" />
+      <rdfs:seeAlso rdf:resource="https://www2.tosyo-saga.jp/kentosyo2/opac/switch-detail-iccap.do?bibid=1101802562" />
+      <rdfs:seeAlso rdf:resource="https://opac.miraionlibrary.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1000002329268" />
+      <rdfs:seeAlso rdf:resource="https://www2.library.pref.kagoshima.jp/kento/opac/switch-detail-iccap.do?bibid=1111423799" />
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.okinawa.jp/winj/opac/switch-detail-iccap.do?bibid=1101201379" />
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I026022670" />
+      <rdfs:seeAlso rdf:resource="https://library.sapie.or.jp/cgi-bin/CN1MN1?S00101=J00DTL04&amp;S00222=3448656" />
+      <rdfs:seeAlso rdf:resource="https://library.sapie.or.jp/cgi-bin/CN1MN1?S00101=J00DTL04&amp;S00222=3711963" />
+      <rdfs:seeAlso rdf:resource="https://library.sapie.or.jp/cgi-bin/CN1MN1?S00101=J00DTL04&amp;S00222=4014287" />
+      <rdfs:seeAlso rdf:resource="https://mina.ndl.go.jp/books/R100000073-I11457964" />
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784864723428" />
+      <dc:description> 2015</dc:description>
+    </item>
+    <item>
+      <title>本好きの下剋上 : 司書になるためには手段を選んでいられません</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I026089732</link>
+      <description>&lt;p&gt;第1部[2] (兵士の娘 2),TOブックス,2015,978-4-86472-347-3&lt;p&gt;&lt;ul&gt;&lt;li&gt;タイトル：本好きの下剋上 : 司書になるためには手段を選んでいられません&lt;/li&gt;&lt;li&gt;タイトル（読み）：ホンズキ ノ ゲコクジョウ : シショ ニ ナル タメ ニワ シュダン オ エランデ イラレマセン&lt;/li&gt;&lt;li&gt;責任表示：香月美夜 著&lt;/li&gt;&lt;li&gt;NDC(9)：913.6&lt;/li&gt;&lt;/ul&gt;</description>
+      <author>香月, 美夜,香月美夜 著</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I026089732</guid>
+      <pubDate>Mon, 23 Mar 2015 23:34:14 +0900</pubDate>
+      <dc:title>本好きの下剋上 : 司書になるためには手段を選んでいられません</dc:title>
+      <dcndl:titleTranscription>ホンズキ ノ ゲコクジョウ : シショ ニ ナル タメ ニワ シュダン オ エランデ イラレマセン</dcndl:titleTranscription>
+      <dc:creator>香月, 美夜</dc:creator>
+      <dcndl:creatorTranscription>カズキ, ミヤ</dcndl:creatorTranscription>
+      <dcndl:volume>第1部[2] (兵士の娘 2)</dcndl:volume>
+      <dc:publisher>TOブックス</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2015</dc:date>
+      <dcterms:issued>2015.3</dcterms:issued>
+      <dcndl:price>1200円</dcndl:price>
+      <dc:extent>381p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86472-347-3</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">026089732</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">22541503</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">33221446</dc:identifier>
+      <dc:subject xsi:type="dcndl:NDLC">KH851</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC9">913.6</dc:subject>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.hokkaido.jp/wo/opc_srh/" />
+      <rdfs:seeAlso rdf:resource="https://www.library.city.sapporo.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1008000908307" />
+      <rdfs:seeAlso rdf:resource="https://www.lib.city.saitama.jp/bookdetail?num=513575&amp;ctg=1" />
+      <rdfs:seeAlso rdf:resource="https://www.library.city.chiba.jp/licsxp-opac/WOpacTifSchCmpdDispAction.do" />
+      <rdfs:seeAlso rdf:resource="https://opac.lib.city.yokohama.lg.jp/winj/opac/switch-detail-iccap.do?bibid=1113243315" />
+      <rdfs:seeAlso rdf:resource="https://www.library.city.kawasaki.jp/bookdetail?num=2609862&amp;ctg=1" />
+      <rdfs:seeAlso rdf:resource="https://www.lib.sagamihara.kanagawa.jp/TOSHOW/asp/WwShousaiKen.aspx?FCode=1856005" />
+      <rdfs:seeAlso rdf:resource="https://opac.pref-lib.niigata.niigata.jp/winj/opac/switch-detail-iccap.do?bibid=1107817300" />
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000000827245/" />
+      <rdfs:seeAlso rdf:resource="https://www.library-archives.pref.fukui.lg.jp/wo/opc_srh/srh_detail/1110085692/" />
+      <rdfs:seeAlso rdf:resource="https://www.toshokan.city.shizuoka.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1001103207409" />
+      <rdfs:seeAlso rdf:resource="https://www.library.city.nagoya.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1001410101252" />
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bib/?B13132134" />
+      <rdfs:seeAlso rdf:resource="https://www.oml.city.osaka.lg.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1000013421518" />
+      <rdfs:seeAlso rdf:resource="https://www.lib-sakai.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1007000502125" />
+      <rdfs:seeAlso rdf:resource="http://www.lib.wakayama-c.ed.jp/winj/opac/switch-detail-iccap.do?bibid=1102734080" />
+      <rdfs:seeAlso rdf:resource="http://www.library.pref.tottori.jp/winj/opac/switch-detail-iccap.do?bibid=1102078386" />
+      <rdfs:seeAlso rdf:resource="https://opac.libnet.pref.okayama.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1009811875962" />
+      <rdfs:seeAlso rdf:resource="http://www.library.city.hiroshima.jp/winj/opac/switch-detail-iccap.do?bibid=1103690570" />
+      <rdfs:seeAlso rdf:resource="https://alislibopac.bunmori.tokushima.jp/winj/opac/switch-detail-iccap.do?bibid=1103813078" />
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.kagawa.lg.jp/winj/opac/switch-detail-iccap.do?bibid=1110270289" />
+      <rdfs:seeAlso rdf:resource="https://www2.tosyo-saga.jp/kentosyo2/opac/switch-detail-iccap.do?bibid=1101809591" />
+      <rdfs:seeAlso rdf:resource="https://opac.miraionlibrary.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1000002336512" />
+      <rdfs:seeAlso rdf:resource="https://www2.library.pref.kagoshima.jp/kento/opac/switch-detail-iccap.do?bibid=1111431068" />
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.okinawa.jp/winj/opac/switch-detail-iccap.do?bibid=1101208708" />
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I026089732" />
+      <rdfs:seeAlso rdf:resource="https://library.sapie.or.jp/cgi-bin/CN1MN1?S00101=J00DTL04&amp;S00222=3645864" />
+      <rdfs:seeAlso rdf:resource="https://library.sapie.or.jp/cgi-bin/CN1MN1?S00101=J00DTL04&amp;S00222=3711964" />
+      <rdfs:seeAlso rdf:resource="https://library.sapie.or.jp/cgi-bin/CN1MN1?S00101=J00DTL04&amp;S00222=4182989" />
+      <rdfs:seeAlso rdf:resource="https://mina.ndl.go.jp/books/R100000073-I11656316" />
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784864723473" />
+      <dc:description> 2015</dc:description>
+    </item>
+    </channel>
+</rss>
