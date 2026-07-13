@@ -1,4 +1,7 @@
 @import 'tailwindcss';
+@import '@fontsource/dm-sans/400.css';
+@import '@fontsource/dm-sans/500.css';
+@import '@fontsource/dm-sans/700.css';
 
 :root {
   --bg: #ffffff;
@@ -7,6 +10,7 @@
   --line: #dcdcdc;
   --hi: #eaff00;
   --hi-soft: #fffbd1;
+  --font: 'DM Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic', Meiryo, sans-serif;
 }
 
 .dark {
@@ -15,6 +19,7 @@
   --muted: #8a8a8a;
   --line: #2a2a2a;
   --hi: #eaff00;
+  --hi-soft: #3a3800;
 }
 
 * {
@@ -30,10 +35,108 @@ body {
 body {
   background: var(--bg);
   color: var(--fg);
-  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-family: var(--font);
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
   -webkit-font-smoothing: antialiased;
 }
 
 #app {
   min-height: 100svh;
+}
+
+/* ─── mono 由来の共通パターン ─── */
+
+/* 章見出し: baseline揃え + 黒罫線で締める（mono .shou） */
+.shou {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--fg);
+  margin-bottom: 1rem;
+}
+.shou h2 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+.shou .no {
+  font-size: 0.68rem;
+  letter-spacing: 0.3em;
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* ページタイトル: 大きく・詰めて・マーカーで一点だけ黄を効かせる */
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0 0 1.2rem;
+}
+.page-title .hi-marker {
+  background: linear-gradient(transparent 65%, var(--hi) 65%);
+  padding: 0 0.05em;
+}
+
+/* 小さな活字ラベル（メタ情報・バッジ補助） */
+.type-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  font-weight: 500;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* 行・カードのホバー: 罫線が黒く締まる（mono .item） */
+.hover-line {
+  border: 1px solid var(--line);
+  transition: border-color 0.25s ease;
+}
+.hover-line:hover {
+  border-color: var(--fg);
+}
+
+/* --hi の効かせ方: 面で塗らず左の短い黄バーで指す */
+.hi-bar {
+  border-left: 3px solid var(--hi);
+  padding-left: calc(0.75rem - 3px);
+}
+
+/* ナビ・リンクのホバー黄下線（mono nav） */
+.hi-underline {
+  position: relative;
+  padding-bottom: 0.2em;
+}
+.hi-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--hi);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.3s;
+}
+.hi-underline:hover::after,
+.hi-underline.active::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* リスト行ホバー: 小面積の黄で反応（mono .cat の応用） */
+.row-hover {
+  transition: background 0.2s ease;
+}
+.row-hover:hover {
+  background: var(--hi-soft);
 }

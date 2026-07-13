@@ -93,8 +93,8 @@
   {:else if work}
     <div class="flex flex-col gap-1">
       <input
-        class="w-full px-1.5 py-1.5 text-base font-bold"
-        style="border: 1px solid var(--line); background: var(--bg); color: var(--fg);"
+        class="w-full px-0 py-1.5 font-bold"
+        style="border: 0; border-bottom: 1px solid var(--line); background: var(--bg); color: var(--fg); font-size: 1.5rem; letter-spacing: -0.02em; line-height: 1.2; outline: none;"
         bind:value={titleDraft}
         onblur={saveTitle}
         onkeydown={(e) => {
@@ -106,9 +106,10 @@
     <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
       {#each columns as column (column.key)}
         <div class="flex flex-col gap-2" style="min-width: 0;">
-          <h2 class="text-xs font-bold tracking-wide" style="color: var(--muted); white-space: nowrap;">
-            {column.label}
-          </h2>
+          <div class="shou">
+            <h2 style="white-space: nowrap;">{column.label}</h2>
+            <span class="no">{column.key === 'source' ? 'ORIGIN' : column.key === 'manga' ? 'COMIC' : 'ANIME'}</span>
+          </div>
 
           <div class="flex flex-col gap-2">
             {#each editionsFor(column) as edition (edition.id)}

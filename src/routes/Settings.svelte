@@ -158,7 +158,7 @@
 </script>
 
 <section class="flex flex-col gap-5 p-4">
-  <h1 class="text-lg font-bold">Settings</h1>
+  <h1 class="page-title">Settings<span class="type-label" style="margin-left: 0.8em;">設定とデータ</span></h1>
 
   {#if statusMessage}
     <p

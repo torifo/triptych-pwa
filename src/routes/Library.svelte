@@ -51,7 +51,7 @@
 
 <section class="flex flex-col gap-3 p-4">
   <div class="flex items-center justify-between gap-2">
-    <h1 class="text-lg font-bold">Library</h1>
+    <h1 class="page-title">Library<span class="type-label" style="margin-left: 0.8em;">追跡中の作品</span></h1>
     <button
       type="button"
       class="px-2 py-1 text-xs"
@@ -136,7 +136,7 @@
     {#each filtered as edition (edition.id)}
       <button
         type="button"
-        class="flex items-center gap-2 py-2 text-left"
+        class="row-hover flex items-center gap-2 py-2 text-left"
         style="border-bottom: 1px solid var(--line); min-width: 0;"
         onclick={() => navigate(`#/work/${edition.workId}`)}
       >

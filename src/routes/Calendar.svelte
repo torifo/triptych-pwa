@@ -126,7 +126,7 @@
 
 <section class="flex flex-col gap-3 p-4">
   <div class="flex items-center justify-between gap-2">
-    <h1 class="text-lg font-bold">Calendar</h1>
+    <h1 class="page-title">Calendar<span class="type-label" style="margin-left: 0.8em;">発売・配信</span></h1>
     <div class="flex" style="border: 1px solid var(--fg);">
       <button
         type="button"

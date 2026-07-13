@@ -27,6 +27,7 @@
     "vitest": "^4.1.10"
   },
   "dependencies": {
+    "@fontsource/dm-sans": "^5.2.8",
     "dexie": "^4.4.4",
     "nanoid": "^6.0.0"
   }

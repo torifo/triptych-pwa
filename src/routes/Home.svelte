@@ -142,7 +142,7 @@
 </script>
 
 <section class="flex flex-col gap-4 p-4">
-  <h1 class="text-lg font-bold">Home</h1>
+  <h1 class="page-title"><span class="hi-marker">追いかける。</span></h1>
 
   <div
     class="flex flex-wrap items-center gap-2 px-2 py-1.5 text-[11px]"
@@ -167,14 +167,13 @@
 
   {#if pendingDetections.length > 0}
     <div class="flex flex-col gap-2">
-      <h2 class="flex items-center gap-1.5 text-xs font-bold tracking-wide" style="color: var(--muted);">
-        アニメ化検知
-        <span
-          class="inline-block h-1.5 w-1.5 rounded-full"
-          style="background: var(--hi);"
-          aria-hidden="true"
-        ></span>
-      </h2>
+      <div class="shou">
+        <h2 class="flex items-center gap-1.5">
+          アニメ化検知
+          <span class="inline-block h-1.5 w-1.5" style="background: var(--hi);" aria-hidden="true"></span>
+        </h2>
+        <span class="no">DETECTED</span>
+      </div>
       <div class="flex flex-col gap-1.5">
         {#each pendingDetections as detection (detection.id)}
           {@const w = workMap.get(detection.workId)}
@@ -223,20 +222,20 @@
   {/if}
 
   <div class="flex flex-col gap-2">
-    <h2 class="text-xs font-bold tracking-wide" style="color: var(--muted);">直近</h2>
+    <div class="shou"><h2>直近</h2><span class="no">NEXT 7 DAYS</span></div>
     {#if upcoming.length === 0}
       <p class="text-xs" style="color: var(--muted);">7日以内の予定はありません</p>
     {:else}
-      <div class="flex flex-col gap-1.5">
+      <div class="flex flex-col" style="border-top: 1px solid var(--line);">
         {#each upcoming as release (release.id)}
           {@const edition = editionMap.get(release.editionId)}
           <button
             type="button"
-            class="flex items-center gap-2 px-2 py-1.5 text-left"
-            style="border: 1px solid var(--hi); background: var(--hi-soft); min-width: 0;"
+            class="hi-bar row-hover flex items-center gap-2 py-2 pr-2 text-left"
+            style="border-bottom: 1px solid var(--line); min-width: 0;"
             onclick={() => openRelease(release, false)}
           >
-            <span class="text-[11px] font-bold" style="white-space: nowrap;">{formatDate(release.date)}</span>
+            <span class="text-[11px] font-bold" style="white-space: nowrap; font-variant-numeric: tabular-nums;">{formatDate(release.date)}</span>
             {#if edition}
               <MediaBadge mediaType={edition.mediaType} />
             {/if}
@@ -249,7 +248,7 @@
   </div>
 
   <div class="flex flex-col gap-2">
-    <h2 class="text-xs font-bold tracking-wide" style="color: var(--muted);">新着</h2>
+    <div class="shou"><h2>新着</h2><span class="no">UNSEEN</span></div>
     {#if fresh.length === 0}
       <p class="text-xs" style="color: var(--muted);">新着はありません</p>
     {:else}
@@ -258,7 +257,7 @@
           {@const edition = editionMap.get(release.editionId)}
           <button
             type="button"
-            class="flex items-center gap-2 py-2 text-left"
+            class="row-hover flex items-center gap-2 py-2 text-left"
             style="border-bottom: 1px solid var(--line); min-width: 0;"
             onclick={() => openRelease(release, true)}
           >

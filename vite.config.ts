@@ -10,6 +10,9 @@ export default defineConfig({
     svelte(),
     VitePWA({
       registerType: 'autoUpdate',
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+      },
       // /api は collector 直結・ステートレスなプロキシのためキャッシュ対象外
       // (runtimeCaching 未設定 = デフォルトでネットワークのみ、App Shell だけを precache)
       manifest: {

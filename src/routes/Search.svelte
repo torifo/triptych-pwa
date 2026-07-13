@@ -180,7 +180,7 @@
 </script>
 
 <section class="flex flex-col gap-3 p-4">
-  <h1 class="text-lg font-bold">検索</h1>
+  <h1 class="page-title">検索<span class="type-label" style="margin-left: 0.8em;">SEARCH &amp; ADD</span></h1>
 
   <div class="flex items-center gap-2">
     <input

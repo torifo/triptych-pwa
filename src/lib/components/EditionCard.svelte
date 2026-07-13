@@ -66,7 +66,7 @@
   }
 </script>
 
-<div class="flex flex-col gap-2 p-2" style="border: 1px solid var(--line);">
+<div class="hover-line flex flex-col gap-2 p-2">
   <div class="flex items-center justify-between gap-2">
     <MediaBadge mediaType={edition.mediaType} />
     <StatusSelect value={edition.status} onchange={onStatusChange} />

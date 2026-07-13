@@ -67,11 +67,11 @@
 
 <div class="flex min-h-svh flex-col" style="max-width: 480px; margin: 0 auto; background: var(--bg); color: var(--fg);">
   <header
-    class="flex items-center gap-2 px-4 py-3"
-    style="border-bottom: 1px solid var(--line);"
+    class="sticky top-0 z-50 flex items-center gap-2.5 px-4 py-3"
+    style="border-bottom: 1px solid var(--fg); background: var(--bg);"
   >
-    <span style="width: 14px; height: 14px; background: var(--fg); display: inline-block;"></span>
-    <span class="text-sm font-bold tracking-wide">triptych</span>
+    <span style="width: 15px; height: 15px; background: var(--fg); display: inline-block;"></span>
+    <span class="text-sm font-bold" style="letter-spacing: 0.18em;">triptych</span>
   </header>
 
   {#if showA2HSBanner}
@@ -116,11 +116,11 @@
     {#each navItems as item}
       <button
         type="button"
-        class="flex-1 py-2 text-center text-[10px] tracking-wide"
-        style={`color: ${route.name === item.name ? 'var(--fg)' : 'var(--muted)'}; background: ${route.name === item.name ? 'var(--hi-soft)' : 'transparent'};`}
+        class="flex-1 py-2.5 text-center text-[9px] font-medium"
+        style={`letter-spacing: 0.06em; white-space: nowrap; min-width: 0; color: ${route.name === item.name ? 'var(--fg)' : 'var(--muted)'};`}
         onclick={() => navigate(item.path)}
       >
-        {item.label}
+        <span class="hi-underline" class:active={route.name === item.name}>{item.label}</span>
       </button>
     {/each}
   </nav>
