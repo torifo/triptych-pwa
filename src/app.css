@@ -140,3 +140,17 @@ body {
 .row-hover:hover {
   background: var(--hi-soft);
 }
+
+/* フォーム: フォーカスで罫線が黒く締まる（インラインstyle上書きのため!important） */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  border-color: var(--fg) !important;
+}
+input,
+select,
+textarea {
+  accent-color: var(--fg);
+  font-family: inherit;
+}

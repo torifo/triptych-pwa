@@ -184,8 +184,8 @@
 
   <div class="flex items-center gap-2">
     <input
-      class="min-w-0 flex-1 px-1.5 py-1.5 text-sm"
-      style="border: 1px solid var(--line); background: var(--bg); color: var(--fg);"
+      class="min-w-0 flex-1 px-0 py-1.5"
+      style="border: 0; border-bottom: 1px solid var(--fg); background: var(--bg); color: var(--fg); font-size: 1.05rem; outline: none;"
       placeholder="作品タイトルで検索"
       bind:value={query}
       onkeydown={(e) => {
@@ -194,8 +194,8 @@
     />
     <button
       type="button"
-      class="px-2 py-1.5 text-xs"
-      style="border: 1px solid var(--fg); color: var(--fg); white-space: nowrap;"
+      class="px-3 py-1.5 text-xs font-medium"
+      style="border: 1px solid var(--fg); color: var(--bg); background: var(--fg); white-space: nowrap; letter-spacing: 0.08em;"
       disabled={!query.trim() || loading}
       onclick={runSearch}
     >
@@ -280,7 +280,7 @@
     {#each results as result (resultKey(result))}
       {@const existing = existingWorkFor(result)}
       <div
-        class="flex items-center gap-2 py-2"
+        class="row-hover flex items-center gap-2 py-2"
         style="border-bottom: 1px solid var(--line); min-width: 0;"
       >
         <MediaBadge mediaType={result.mediaType} />

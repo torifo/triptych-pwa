@@ -170,8 +170,8 @@
   {/if}
 
   <!-- データ -->
-  <div class="flex flex-col gap-2" style="border-top: 1px solid var(--line); padding-top: 12px;">
-    <h2 class="text-xs font-bold tracking-wide" style="color: var(--muted);">データ</h2>
+  <div class="flex flex-col gap-2">
+    <div class="shou"><h2>データ</h2><span class="no">DATA</span></div>
 
     <div class="flex flex-wrap items-center gap-2">
       <button
@@ -240,8 +240,8 @@
   </div>
 
   <!-- 同期 -->
-  <div class="flex flex-col gap-2" style="border-top: 1px solid var(--line); padding-top: 12px;">
-    <h2 class="text-xs font-bold tracking-wide" style="color: var(--muted);">同期</h2>
+  <div class="flex flex-col gap-2">
+    <div class="shou"><h2>同期</h2><span class="no">SYNC</span></div>
     <p class="text-[11px]" style="color: var(--muted);">
       最終同期: {syncStatus.lastSyncAt ? formatDateTime(syncStatus.lastSyncAt) : '未実施'}
       {#if syncStatus.running}(実行中){/if}
@@ -262,8 +262,8 @@
   </div>
 
   <!-- collector 接続 -->
-  <div class="flex flex-col gap-2" style="border-top: 1px solid var(--line); padding-top: 12px;">
-    <h2 class="text-xs font-bold tracking-wide" style="color: var(--muted);">collector 接続</h2>
+  <div class="flex flex-col gap-2">
+    <div class="shou"><h2>collector 接続</h2><span class="no">COLLECTOR</span></div>
 
     <label class="flex flex-col gap-1 text-[11px]" style="color: var(--muted);">
       接続先 URL
@@ -313,8 +313,8 @@
   </div>
 
   <!-- 表示 -->
-  <div class="flex flex-col gap-2" style="border-top: 1px solid var(--line); padding-top: 12px;">
-    <h2 class="text-xs font-bold tracking-wide" style="color: var(--muted);">表示</h2>
+  <div class="flex flex-col gap-2">
+    <div class="shou"><h2>表示</h2><span class="no">DISPLAY</span></div>
     <button
       type="button"
       class="self-start px-2 py-1 text-xs"
