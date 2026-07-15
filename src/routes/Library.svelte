@@ -68,6 +68,7 @@
         class="min-w-0 flex-1 px-1.5 py-1 text-sm"
         style="border: 1px solid var(--line); background: var(--bg); color: var(--fg);"
         placeholder="作品タイトル"
+        aria-label="作品タイトル"
         bind:value={newTitle}
         onkeydown={(e) => {
           if (e.key === 'Enter') onCreateWork();

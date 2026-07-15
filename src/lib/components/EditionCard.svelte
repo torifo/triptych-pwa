@@ -10,6 +10,7 @@
   import MediaBadge from './MediaBadge.svelte';
   import StatusSelect from './StatusSelect.svelte';
   import ProgressFields from './ProgressFields.svelte';
+  import { DEFAULT_PROGRESS_UNIT } from './labels';
 
   let {
     edition,
@@ -21,7 +22,11 @@
     onchange: () => void;
   } = $props();
 
-  let titleDraft = $state(edition.title);
+  const defaultUnit = $derived(DEFAULT_PROGRESS_UNIT[edition.mediaType]);
+
+  // 初期値はプレースホルダ。実際の値は下の $effect が mount 時に同期する
+  // （$state の初期化子でプロップを直接参照すると state_referenced_locally 警告になるため）。
+  let titleDraft = $state('');
   let reassignTarget = $state('');
   let confirmingDelete = $state(false);
 
@@ -75,6 +80,7 @@
   <input
     class="w-full px-1.5 py-1 text-sm"
     style="border: 1px solid var(--line); background: var(--bg); color: var(--fg); min-width: 0;"
+    aria-label="Edition タイトル"
     bind:value={titleDraft}
     onblur={saveTitle}
     onkeydown={(e) => {
@@ -82,7 +88,7 @@
     }}
   />
 
-  <ProgressFields progress={edition.progress} onsave={onProgressSave} />
+  <ProgressFields progress={edition.progress} {defaultUnit} onsave={onProgressSave} />
 
   {#if otherWorks.length > 0}
     <div class="flex flex-wrap items-center gap-1 text-[11px]" style="color: var(--muted);">
@@ -90,6 +96,7 @@
       <select
         class="min-w-0 flex-1 px-1 py-1 text-[11px]"
         style="border: 1px solid var(--line); background: var(--bg); color: var(--fg);"
+        aria-label="付け替え先の作品"
         bind:value={reassignTarget}
       >
         <option value="">作品を選択</option>

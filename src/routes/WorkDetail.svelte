@@ -95,6 +95,7 @@
       <input
         class="w-full px-0 py-1.5 font-bold"
         style="border: 0; border-bottom: 1px solid var(--line); background: var(--bg); color: var(--fg); font-size: 1.5rem; letter-spacing: -0.02em; line-height: 1.2; outline: none;"
+        aria-label="作品タイトル"
         bind:value={titleDraft}
         onblur={saveTitle}
         onkeydown={(e) => {

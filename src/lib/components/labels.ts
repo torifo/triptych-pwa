@@ -21,5 +21,13 @@ export const PROGRESS_UNIT_LABELS: Record<'volume' | 'episode' | 'part', string>
   part: '部分',
 };
 
+// メディア種別ごとの進捗単位の既定値（anime→話 / web-novel→部分 / manga・light-novel→巻）
+export const DEFAULT_PROGRESS_UNIT: Record<MediaType, 'volume' | 'episode' | 'part'> = {
+  'web-novel': 'part',
+  'light-novel': 'volume',
+  manga: 'volume',
+  anime: 'episode',
+};
+
 export const MEDIA_TYPES: MediaType[] = ['web-novel', 'light-novel', 'manga', 'anime'];
 export const STATUSES: Status[] = ['plan', 'active', 'paused', 'done', 'dropped'];

@@ -4,18 +4,22 @@
 
   let {
     progress,
+    defaultUnit = 'volume',
     onsave,
   }: {
     progress: EditionProgress | undefined;
+    defaultUnit?: EditionProgress['unit'];
     onsave: (next: EditionProgress) => void;
   } = $props();
 
-  let unit = $state<EditionProgress['unit']>(progress?.unit ?? 'volume');
-  let current = $state<number>(progress?.current ?? 0);
-  let total = $state<number | undefined>(progress?.total);
+  // 初期値はプレースホルダ。実際の値は下の $effect が mount 時に同期する
+  // （$state の初期化子でプロップを直接参照すると state_referenced_locally 警告になるため）。
+  let unit = $state<EditionProgress['unit']>('volume');
+  let current = $state<number>(0);
+  let total = $state<number | undefined>(undefined);
 
   $effect(() => {
-    unit = progress?.unit ?? 'volume';
+    unit = progress?.unit ?? defaultUnit;
     current = progress?.current ?? 0;
     total = progress?.total;
   });
@@ -43,6 +47,7 @@
     type="number"
     min="0"
     inputmode="numeric"
+    aria-label="現在の進捗"
     class="w-14 px-1 py-1 text-xs"
     style="border: 1px solid var(--line); background: var(--bg); color: var(--fg);"
     value={current}
@@ -57,6 +62,7 @@
     min="0"
     inputmode="numeric"
     placeholder="全"
+    aria-label="全体数"
     class="w-14 px-1 py-1 text-xs"
     style="border: 1px solid var(--line); background: var(--bg); color: var(--fg);"
     value={total ?? ''}

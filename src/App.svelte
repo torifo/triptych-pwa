@@ -70,7 +70,7 @@
     class="sticky top-0 z-50 flex items-center gap-2.5 px-4 py-3"
     style="border-bottom: 1px solid var(--fg); background: var(--bg);"
   >
-    <span style="width: 15px; height: 15px; background: var(--fg); display: inline-block;"></span>
+    <span aria-hidden="true" style="width: 15px; height: 15px; background: var(--fg); display: inline-block;"></span>
     <span class="text-sm font-bold" style="letter-spacing: 0.18em;">triptych</span>
   </header>
 
@@ -118,6 +118,7 @@
         type="button"
         class="flex-1 py-2.5 text-center text-[9px] font-medium"
         style={`letter-spacing: 0.06em; white-space: nowrap; min-width: 0; color: ${route.name === item.name ? 'var(--fg)' : 'var(--muted)'};`}
+        aria-current={route.name === item.name ? 'page' : undefined}
         onclick={() => navigate(item.path)}
       >
         <span class="hi-underline" class:active={route.name === item.name}>{item.label}</span>

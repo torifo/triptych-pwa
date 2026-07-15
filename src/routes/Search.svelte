@@ -187,6 +187,7 @@
       class="min-w-0 flex-1 px-0 py-1.5"
       style="border: 0; border-bottom: 1px solid var(--fg); background: var(--bg); color: var(--fg); font-size: 1.05rem; outline: none;"
       placeholder="作品タイトルで検索"
+      aria-label="作品タイトルで検索"
       bind:value={query}
       onkeydown={(e) => {
         if (e.key === 'Enter') runSearch();
