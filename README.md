@@ -1,5 +1,15 @@
 # triptych
 
+<!-- tech-stack:start (auto-generated) -->
+<p align="center">
+  <img src="https://img.shields.io/badge/Svelte-FF3E00?style=for-the-badge&logo=svelte&logoColor=white" alt="Svelte">
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite">
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS">
+</p>
+<!-- tech-stack:end -->
+
 小説（Web小説・紙書籍）・漫画・アニメを一つの「作品（Work）」として結びつけ、原作↔メディア展開の対応関係、視聴・読書ステータス、発売日・配信日、アニメ化発表を一元管理するローカルファーストPWAです。
 
 「三連画（triptych）」の名の通り、同じ物語の三つの面 — 原作（小説）・漫画・アニメ — を並べて見ることをコアコンセプトにしています。作品詳細画面では、この3種のメディア展開を横並び（モバイルでは縦積み）で対置し、それぞれの読書・視聴ステータスと進捗、次のリリースを一望できます。
