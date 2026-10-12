@@ -1,8 +1,10 @@
-import Dexie, { type EntityTable } from 'dexie';
+import Dexie, { type EntityTable, type Transaction } from 'dexie';
 
 export type MediaType = 'web-novel' | 'light-novel' | 'manga' | 'anime';
 export type Status = 'plan' | 'active' | 'paused' | 'done' | 'dropped';
 export type Source = 'anilist' | 'narou' | 'openbd' | 'ndl' | 'syoboi' | 'kakuyomu' | 'manual';
+export type DatePrecision = 'day' | 'month' | 'year';
+export type AiringStatus = 'NOT_YET_RELEASED' | 'RELEASING' | 'FINISHED' | 'CANCELLED' | 'HIATUS';
 
 export interface Work {
   id: string; // nanoid
@@ -37,8 +39,16 @@ export interface Edition {
   progress?: EditionProgress; // US-002 現在位置
   linkSource: 'auto' | 'manual'; // US-001 リンク由来（検知却下の判定に使用）
   note?: string;
+  completed?: boolean; // v2: 原作側の完結（なろう end=0 の連載、カクヨム完結など）
+  syncHints?: EditionSyncHints; // v2
   createdAt: string;
   updatedAt: string;
+}
+
+export interface EditionSyncHints {
+  ndlLine?: string; // 採用した NDL の line キー（'' = 本編）
+  anilistSourceId?: string; // 検知用に解決した AniList NOVEL/MANGA の id
+  syoboiTid?: string; // しょぼいカレンダーの TID
 }
 
 export interface ReleaseDateHistoryEntry {
@@ -51,7 +61,11 @@ export interface Release {
   editionId: string; // → Edition
   kind: 'volume' | 'episode' | 'season-start' | 'stream-start';
   label: string; // 「第12巻」「第2期 第1話」
-  date: string; // YYYY-MM-DD（時刻不明も許容）
+  date: string; // YYYY-MM-DD（month/year 精度では月初・年初で埋めた並べ替え用の値）
+  precision?: DatePrecision; // v2（未設定は 'day'）
+  time?: string; // v2 アニメの放送時刻（JST・朝5時区切り表記 例 '25:30'）
+  externalId?: string; // v2 volume=ISBN13 / episode='<anilistId>:<n>' / season-start=anilistId
+  origin?: 'sync' | 'manual'; // v2（未設定は 'sync'）。manual は同期で上書きも削除もしない
   dateHistory: ReleaseDateHistoryEntry[]; // 延期履歴 (US-003)
   source: Source;
   seenAt?: string; // ユーザーが新着マークを確認した時刻
@@ -64,8 +78,10 @@ export interface DetectionCandidate {
   source: 'anilist';
   externalId: string;
   title: string;
-  airingStatus: 'NOT_YET_RELEASED' | 'RELEASING' | 'FINISHED';
+  airingStatus: AiringStatus;
+  format?: string; // v2 TV / MOVIE / OVA ...
   startDate?: string;
+  startPrecision?: DatePrecision; // v2
 }
 
 export interface DetectionEvent {
@@ -73,7 +89,8 @@ export interface DetectionEvent {
   id: string;
   workId: string;
   candidate: DetectionCandidate;
-  matchScore: number; // タイトル照合スコア (0-1)
+  matchScore: number; // タイトル照合スコア (0-1)。relation/sequel 由来は 1
+  via?: 'relation' | 'sequel' | 'title'; // v2（未設定は 'title'）
   state: 'pending' | 'accepted' | 'rejected';
   createdAt: string;
 }
@@ -99,7 +116,35 @@ export class TriptychDB extends Dexie {
       detections: 'id, workId, state',
       meta: 'key',
     });
+    this.version(2)
+      .stores({
+        releases: 'id, editionId, date, [editionId+kind+externalId]',
+      })
+      .upgrade(upgradeToV2);
   }
+}
+
+/**
+ * v1 → v2: 既定値（precision/origin/via）を補い、監査で見つかった誤データ
+ * （anime 以外の Edition に付いた AniList 由来の Release）を消す。
+ */
+export async function upgradeToV2(tx: Transaction): Promise<void> {
+  const editions = (await tx.table('editions').toArray()) as Edition[];
+  const nonAnime = new Set(editions.filter((e) => e.mediaType !== 'anime').map((e) => e.id));
+  const releases = tx.table('releases');
+  await releases
+    .filter((r: Release) => r.source === 'anilist' && nonAnime.has(r.editionId))
+    .delete();
+  await releases.toCollection().modify((r: Release) => {
+    if (!r.precision) r.precision = 'day';
+    if (!r.origin) r.origin = 'sync';
+  });
+  await tx
+    .table('detections')
+    .toCollection()
+    .modify((d: DetectionEvent) => {
+      if (!d.via) d.via = 'title';
+    });
 }
 
 export function createDB(name?: string): TriptychDB {

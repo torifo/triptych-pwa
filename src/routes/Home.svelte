@@ -29,6 +29,8 @@
     NOT_YET_RELEASED: '放送前',
     RELEASING: '放送中',
     FINISHED: '放送済',
+    CANCELLED: '中止',
+    HIATUS: '休止中',
   };
 
   function todayStr(): string {
