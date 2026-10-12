@@ -38,7 +38,8 @@
   let label = $state('');
   let precision = $state<DatePrecision>('day');
   let dayValue = $state('');
-  let yearValue = $state('');
+  // <input type="number"> の bind:value は数値（空欄は null）を書き戻すので、文字列に限らない
+  let yearValue = $state<string | number | null>('');
   let monthValue = $state('1');
   let timeValue = $state('');
   let busy = $state(false);
@@ -60,7 +61,11 @@
     errorMessage = null;
   });
 
-  const fields = $derived<DateFields>({ day: dayValue, year: yearValue, month: monthValue });
+  const fields = $derived<DateFields>({
+    day: dayValue,
+    year: yearValue == null ? '' : String(yearValue),
+    month: monthValue,
+  });
   const date = $derived(buildReleaseDate(precision, fields));
   const time = $derived(precision === 'day' ? parseTimeInput(timeValue) : parseTimeInput(''));
   const trimmedLabel = $derived(label.trim());
