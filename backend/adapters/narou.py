@@ -6,6 +6,17 @@ this module (see specs/mvp-core/design.md, "API Design").
 - User-Agent: `triptych/0.1 (personal tracker)` (see design.md, "レート制御・キャッシュ")
 - Rate limit: 1 req/s, shared across `novel()` and `search()` for this source.
 - gzip: `Accept-Encoding: gzip` is sent explicitly; httpx decodes transparently.
+
+Facts verified against the live API (specs/data-coverage/design.md):
+- `title=1` limits the keyword match to the title (otherwise the synopsis is
+  searched too and the real work drops out of the first page).
+- `type=re` keeps serialized works only (short stories are mostly reviews).
+- `order=hyoka` sorts by rating, so the original work ranks first.
+- `end`: 0 = completed serial or short story, 1 = still being serialized.
+- `noveltype`: 1 = serial, 2 = short story.
+- `of=` narrows the response to the listed fields. The plain-text names of
+  the fields we ask for: t=title, n=ncode, w=writer, ga=general_all_no,
+  gl=general_lastup (JST), e=end, nt=noveltype.
 """
 
 from __future__ import annotations
@@ -14,10 +25,10 @@ import re
 from typing import Any, Optional
 
 import httpx
-from pydantic import BaseModel
+from pydantic import ValidationError
 
 from ..cache import TTLCache
-from ..dto import SearchResult, SourceUnavailable
+from ..dto import SearchResult, SourceUnavailable, WebNovelDTO
 from ..ratelimit import TokenBucket
 
 NAROU_API_URL = "https://api.syosetu.com/novelapi/api/"
@@ -30,21 +41,16 @@ NCODE_PATTERN = re.compile(r"^n\d{4}[a-z]{1,2}$")
 DETAIL_TTL_SECONDS = 6 * 60 * 60  # 詳細: 6h
 SEARCH_TTL_SECONDS = 60 * 60  # 検索: 1h
 
+SEARCH_LIMIT = 20
+RESPONSE_FIELDS = "t-n-w-ga-gl-e-nt"
+
+# Cache keys carry a schema version: older entries held a different shape
+# (NarouNovelDetail / title-only SearchResult) and must not be read back.
+_NOVEL_CACHE_PREFIX = "narou:novel:v2:"
+_SEARCH_CACHE_PREFIX = "narou:search:v2:"
+
 # One bucket per adapter (module-level singleton), shared by novel()/search().
 _rate_limiter = TokenBucket(rate=1.0, capacity=1.0)
-
-
-class NarouNovelDetail(BaseModel):
-    """Normalized detail for a single なろう小説 work."""
-
-    source: str = "narou"
-    ncode: str
-    title: str
-    author: str
-    generalAllNo: int
-    generalLastup: str  # YYYY-MM-DD
-    completed: bool
-    url: str
 
 
 def validate_ncode(ncode: str) -> str:
@@ -59,18 +65,35 @@ def _novel_url(ncode: str) -> str:
     return f"https://ncode.syosetu.com/{ncode}/"
 
 
-def _normalize_novel(raw: dict[str, Any]) -> NarouNovelDetail:
+def _is_short_story(raw: dict[str, Any]) -> bool:
+    # `of=nt` answers with `noveltype`; the full (no `of`) payload spells it
+    # `novel_type`. Accept both.
+    value = raw.get("noveltype", raw.get("novel_type"))
+    return value is not None and int(value) == 2
+
+
+def _is_completed(raw: dict[str, Any]) -> bool:
+    # `end`: 0 = completed serial or short story, 1 = still serializing.
+    # A missing value is "unknown", which must not be reported as completed.
+    value = raw.get("end")
+    return value is not None and int(value) == 0
+
+
+def _normalize_novel(raw: dict[str, Any]) -> WebNovelDTO:
     """Normalizes a single record from the なろうAPI `novelapi` response."""
     ncode = str(raw["ncode"]).lower()
-    lastup = str(raw["general_lastup"]).split(" ")[0]
-    return NarouNovelDetail(
-        ncode=ncode,
+    # general_lastup is "YYYY-MM-DD HH:MM:SS" in JST: the date part is JST.
+    lastup = str(raw.get("general_lastup") or "").split(" ")[0] or None
+    return WebNovelDTO(
+        source="narou",
+        externalId=ncode,
         title=raw["title"],
-        author=raw["writer"],
-        generalAllNo=int(raw["general_all_no"]),
-        generalLastup=lastup,
-        completed=int(raw.get("end", 0)) == 1,
+        author=raw.get("writer"),
         url=_novel_url(ncode),
+        episodeCount=int(raw.get("general_all_no") or 0),
+        completed=_is_completed(raw),
+        isShortStory=_is_short_story(raw),
+        lastUpdate=lastup,
     )
 
 
@@ -79,6 +102,7 @@ def _normalize_search(raw: list[dict[str, Any]]) -> list[SearchResult]:
     results: list[SearchResult] = []
     for record in raw[1:]:
         ncode = str(record["ncode"]).lower()
+        writer = (record.get("writer") or "").strip()
         results.append(
             SearchResult(
                 source="narou",
@@ -87,6 +111,7 @@ def _normalize_search(raw: list[dict[str, Any]]) -> list[SearchResult]:
                 title=record["title"],
                 cover=None,
                 url=_novel_url(ncode),
+                subtitle=writer or None,
             )
         )
     return results
@@ -114,15 +139,18 @@ async def novel(
     client: Optional[httpx.AsyncClient] = None,
     cache: Optional[TTLCache] = None,
     refresh: bool = False,
-) -> NarouNovelDetail:
+) -> WebNovelDTO:
     """Fetches and normalizes a single novel's metadata by ncode."""
     normalized_ncode = validate_ncode(ncode)
-    cache_key = f"narou:novel:{normalized_ncode}"
+    cache_key = f"{_NOVEL_CACHE_PREFIX}{normalized_ncode}"
 
     if cache is not None and not refresh:
         cached = cache.get(cache_key)
         if cached is not None:
-            return NarouNovelDetail.model_validate(cached)
+            try:
+                return WebNovelDTO.model_validate(cached)
+            except ValidationError:
+                pass  # unreadable entry: fall through and refetch
 
     await _rate_limiter.acquire()
 
@@ -131,7 +159,8 @@ async def novel(
         client = httpx.AsyncClient()
     try:
         raw = await _get_json(
-            client, {"ncode": normalized_ncode, "out": "json"}
+            client,
+            {"ncode": normalized_ncode, "of": RESPONSE_FIELDS, "out": "json"},
         )
     finally:
         if owns_client:
@@ -153,13 +182,16 @@ async def search(
     cache: Optional[TTLCache] = None,
     refresh: bool = False,
 ) -> list[SearchResult]:
-    """Searches なろう小説 by title, returning normalized SearchResult hits."""
-    cache_key = f"narou:search:{q}"
+    """Searches なろう小説 by title (serials only, best rated first)."""
+    cache_key = f"{_SEARCH_CACHE_PREFIX}{q}"
 
     if cache is not None and not refresh:
         cached = cache.get(cache_key)
         if cached is not None:
-            return [SearchResult.model_validate(item) for item in cached]
+            try:
+                return [SearchResult.model_validate(item) for item in cached]
+            except ValidationError:
+                pass
 
     await _rate_limiter.acquire()
 
@@ -167,7 +199,18 @@ async def search(
     if owns_client:
         client = httpx.AsyncClient()
     try:
-        raw = await _get_json(client, {"word": q, "out": "json"})
+        raw = await _get_json(
+            client,
+            {
+                "word": q,
+                "title": 1,
+                "type": "re",
+                "order": "hyoka",
+                "lim": SEARCH_LIMIT,
+                "of": RESPONSE_FIELDS,
+                "out": "json",
+            },
+        )
     finally:
         if owns_client:
             await client.aclose()

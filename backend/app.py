@@ -14,7 +14,8 @@ from fastapi import FastAPI, Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from .dto import AdapterErrorInfo, HealthResponse
+from . import errors
+from .dto import HealthResponse
 
 BACKEND_DIR = Path(__file__).resolve().parent
 DIST_DIR = BACKEND_DIR.parent / "dist"
@@ -32,11 +33,6 @@ def get_auth_token() -> Optional[str]:
     """
     token = os.environ.get(TOKEN_ENV_VAR)
     return token or None
-
-
-# Per-adapter last error, populated by adapters as they are implemented in
-# later tasks. Kept as a plain module-level dict for now (no user data).
-last_adapter_errors: dict[str, AdapterErrorInfo] = {}
 
 
 def create_app() -> FastAPI:
@@ -62,7 +58,9 @@ def create_app() -> FastAPI:
 
     @app.get("/api/health", response_model=HealthResponse)
     async def health() -> HealthResponse:
-        return HealthResponse(status="ok", errors=dict(last_adapter_errors))
+        # Routers record failures via `errors.record_adapter_error`; read the
+        # module attribute at request time rather than binding it at import.
+        return HealthResponse(status="ok", errors=dict(errors.last_adapter_errors))
 
     if DIST_DIR.is_dir():
         app.mount(
