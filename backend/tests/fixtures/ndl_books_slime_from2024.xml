@@ -1,0 +1,2525 @@
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:openSearch="http://a9.com/-/spec/opensearchrss/1.0/" xmlns:dcndl="http://ndl.go.jp/dcndl/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" version="2.0">
+  <channel>
+    <title>転生したらスライムだった件 books 2024 - 国立国会図書館サーチ OpenSearch</title>
+    <link>https://ios-v2-prod-eks-alb.ndlsearch.ndl.go.jp/api/opensearch?title=%e8%bb%a2%e7%94%9f%e3%81%97%e3%81%9f%e3%82%89%e3%82%b9%e3%83%a9%e3%82%a4%e3%83%a0%e3%81%a0%e3%81%a3%e3%81%9f%e4%bb%b6&amp;mediatype=books&amp;from=2024&amp;cnt=500</link>
+    <description>Search results for title=転生したらスライムだった件 mediatype=books from=2024 cnt=500</description>
+    <language>ja</language>
+    <openSearch:totalResults>64</openSearch:totalResults>
+    <openSearch:startIndex>1</openSearch:startIndex>
+    <openSearch:itemsPerPage>500</openSearch:itemsPerPage>
+    <item>
+      <title>転スラ日記 : 転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033240319</link>
+      <description><![CDATA[<p>7,講談社,2024,978-4-06-534119-3<p><ul><li>タイトル：転スラ日記 : 転生したらスライムだった件</li><li>タイトル（読み）：テンスラ ニッキ</li><li>責任表示：伏瀬 原作,柴 漫画,みっつばー キャラクター原案</li><li>シリーズ名：シリウスKC</li><li>シリーズ名（読み）：シリウス ケーシー</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,柴,伏瀬 原作,柴 漫画,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033240319</guid>
+      <pubDate>Fri, 19 Jan 2024 18:31:27 +0900</pubDate>
+      <dc:title>転スラ日記 : 転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンスラ ニッキ</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>柴</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>シバ</dcndl:creatorTranscription>
+      <dcndl:volume>7</dcndl:volume>
+      <dcndl:seriesTitle>シリウスKC</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>シリウス ケーシー</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2024</dc:date>
+      <dcterms:issued>2024.1</dcterms:issued>
+      <dcndl:price>690円</dcndl:price>
+      <dc:extent>157p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-534119-3</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033240319</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">23932237</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07519438</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033240319"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B16949731"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000739743I"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065341193"/>
+      <dc:description> 2024</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件異世界サバイバルマニュアル</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033517335</link>
+      <description><![CDATA[<p>講談社,2024,978-4-06-533567-3<p><ul><li>タイトル：転生したらスライムだった件異世界サバイバルマニュアル</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン イセカイ サバイバル マニュアル</li><li>責任表示：堀川よしあき 文・構成</li><li>シリーズ名：KCDX</li><li>NDC(10)：726.101</li></ul>]]></description>
+      <author>堀川, よしあき,堀川よしあき 文・構成</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033517335</guid>
+      <pubDate>Tue, 25 Jun 2024 22:09:04 +0900</pubDate>
+      <dc:title>転生したらスライムだった件異世界サバイバルマニュアル</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン イセカイ サバイバル マニュアル</dcndl:titleTranscription>
+      <dc:creator>堀川, よしあき</dc:creator>
+      <dcndl:creatorTranscription>ホリカワ, ヨシアキ</dcndl:creatorTranscription>
+      <dcndl:seriesTitle>KCDX</dcndl:seriesTitle>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2024</dc:date>
+      <dcterms:issued>2024.6</dcterms:issued>
+      <dcndl:price>1000円</dcndl:price>
+      <dc:extent>191p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-533567-3</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033517335</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">23992633</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07527703</dc:identifier>
+      <dc:subject>漫画</dc:subject>
+      <dc:subject xsi:type="dcndl:NDLC">Y88</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.101</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033517335"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17011944"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000793270W"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065335673"/>
+      <dc:description> 2024</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件異聞 : 魔国暮らしのトリニティ</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033240318</link>
+      <description><![CDATA[<p>9,講談社,2024,978-4-06-534107-0<p><ul><li>タイトル：転生したらスライムだった件異聞 : 魔国暮らしのトリニティ</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン イブン : マコクグラシ ノ トリニティ</li><li>責任表示：伏瀬 原作,戸野タエ 漫画,みっつばー キャラクター原案</li><li>シリーズ名：シリウスKC</li><li>シリーズ名（読み）：シリウス ケーシー</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,戸野, タエ,伏瀬 原作,戸野タエ 漫画,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033240318</guid>
+      <pubDate>Mon, 3 Jun 2024 22:39:55 +0900</pubDate>
+      <dc:title>転生したらスライムだった件異聞 : 魔国暮らしのトリニティ</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン イブン : マコクグラシ ノ トリニティ</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>戸野, タエ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>トノ, タエ</dcndl:creatorTranscription>
+      <dcndl:volume>9</dcndl:volume>
+      <dcndl:seriesTitle>シリウスKC</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>シリウス ケーシー</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2024</dc:date>
+      <dcterms:issued>2024.1</dcterms:issued>
+      <dcndl:price>690円</dcndl:price>
+      <dc:extent>157p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-534107-0</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033240318</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">23936408</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07519436</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033240318"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B16949730"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000739741G"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065341070"/>
+      <dc:description> 2024</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件異聞 : 魔国暮らしのトリニティ</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033517342</link>
+      <description><![CDATA[<p>10,講談社,2024,978-4-06-535707-1<p><ul><li>タイトル：転生したらスライムだった件異聞 : 魔国暮らしのトリニティ</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン イブン : マコクグラシ ノ トリニティ</li><li>責任表示：伏瀬 原作,戸野タエ 漫画,みっつばー キャラクター原案</li><li>シリーズ名：シリウスKC</li><li>シリーズ名（読み）：シリウス ケーシー</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,戸野, タエ,伏瀬 原作,戸野タエ 漫画,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033517342</guid>
+      <pubDate>Wed, 19 Jun 2024 19:42:27 +0900</pubDate>
+      <dc:title>転生したらスライムだった件異聞 : 魔国暮らしのトリニティ</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン イブン : マコクグラシ ノ トリニティ</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>戸野, タエ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>トノ, タエ</dcndl:creatorTranscription>
+      <dcndl:volume>10</dcndl:volume>
+      <dcndl:seriesTitle>シリウスKC</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>シリウス ケーシー</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2024</dc:date>
+      <dcterms:issued>2024.6</dcterms:issued>
+      <dcndl:price>690円</dcndl:price>
+      <dc:extent>158p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-535707-1</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033517342</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">23990202</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07527273</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033517342"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17012084"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000786261D"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065357071"/>
+      <dc:description> 2024</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件異聞 : 魔国暮らしのトリニティ</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033907725</link>
+      <description><![CDATA[<p>11,講談社,2025,978-4-06-538002-4<p><ul><li>タイトル：転生したらスライムだった件異聞 : 魔国暮らしのトリニティ</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン イブン : マコクグラシ ノ トリニティ</li><li>責任表示：伏瀬 原作,戸野タエ 漫画,みっつばー キャラクター原案</li><li>シリーズ名：シリウスKC</li><li>シリーズ名（読み）：シリウス ケーシー</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,戸野, タエ,伏瀬 原作,戸野タエ 漫画,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033907725</guid>
+      <pubDate>Fri, 14 Feb 2025 20:48:08 +0900</pubDate>
+      <dc:title>転生したらスライムだった件異聞 : 魔国暮らしのトリニティ</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン イブン : マコクグラシ ノ トリニティ</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>戸野, タエ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>トノ, タエ</dcndl:creatorTranscription>
+      <dcndl:volume>11</dcndl:volume>
+      <dcndl:seriesTitle>シリウスKC</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>シリウス ケーシー</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.1</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>157p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-538002-4</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033907725</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24080431</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07539403</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033907725"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17097671"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000858824G"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065380024"/>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件異聞 : 魔国暮らしのトリニティ</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034122625</link>
+      <description><![CDATA[<p>12,講談社,2025,978-4-06-539657-5<p><ul><li>タイトル：転生したらスライムだった件異聞 : 魔国暮らしのトリニティ</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン イブン : マコクグラシ ノ トリニティ</li><li>責任表示：伏瀬 原作,戸野タエ 漫画,みっつばー キャラクター原案</li><li>シリーズ名：シリウスKC</li><li>シリーズ名（読み）：シリウス ケーシー</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,戸野, タエ,伏瀬 原作,戸野タエ 漫画,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034122625</guid>
+      <pubDate>Thu, 19 Jun 2025 02:15:12 +0900</pubDate>
+      <dc:title>転生したらスライムだった件異聞 : 魔国暮らしのトリニティ</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン イブン : マコクグラシ ノ トリニティ</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>戸野, タエ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>トノ, タエ</dcndl:creatorTranscription>
+      <dcndl:volume>12</dcndl:volume>
+      <dcndl:seriesTitle>シリウスKC</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>シリウス ケーシー</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.6</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>159p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-539657-5</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034122625</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24128229</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07547271</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034122625"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17152424"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000911261M"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065396575"/>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件異聞 : 魔国暮らしのトリニティ</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034546276</link>
+      <description><![CDATA[<p>13,講談社,2026,978-4-06-541337-1<p><ul><li>タイトル：転生したらスライムだった件異聞 : 魔国暮らしのトリニティ</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン イブン : マコクグラシ ノ トリニティ</li><li>責任表示：伏瀬 原作,戸野タエ 漫画,みっつばー キャラクター原案</li><li>シリーズ名：シリウスKC</li><li>シリーズ名（読み）：シリウス ケーシー</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,戸野, タエ,伏瀬 原作,戸野タエ 漫画,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034546276</guid>
+      <pubDate>Tue, 17 Feb 2026 20:39:57 +0900</pubDate>
+      <dc:title>転生したらスライムだった件異聞 : 魔国暮らしのトリニティ</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン イブン : マコクグラシ ノ トリニティ</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>戸野, タエ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>トノ, タエ</dcndl:creatorTranscription>
+      <dcndl:volume>13</dcndl:volume>
+      <dcndl:seriesTitle>シリウスKC</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>シリウス ケーシー</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.2</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>158p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-541337-1</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034546276</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24221860</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07561218</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034546276"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17246460"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065413371"/>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件異聞 : 魔国暮らしのトリニティ</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034860426</link>
+      <description><![CDATA[<p>14,講談社,2026,978-4-06-544452-8<p><ul><li>タイトル：転生したらスライムだった件異聞 : 魔国暮らしのトリニティ</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン イブン : マコクグラシ ノ トリニティ</li><li>責任表示：伏瀬 原作,戸野タエ 漫画,みっつばー キャラクター原案</li><li>シリーズ名：シリウスKC</li><li>シリーズ名（読み）：シリウス ケーシー</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,戸野, タエ,伏瀬 原作,戸野タエ 漫画,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034860426</guid>
+      <pubDate>Wed, 19 Aug 2026 00:45:23 +0900</pubDate>
+      <dc:title>転生したらスライムだった件異聞 : 魔国暮らしのトリニティ</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン イブン : マコクグラシ ノ トリニティ</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>戸野, タエ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>トノ, タエ</dcndl:creatorTranscription>
+      <dcndl:volume>14</dcndl:volume>
+      <dcndl:seriesTitle>シリウスKC</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>シリウス ケーシー</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.8</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>172p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-544452-8</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034860426</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24289346</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07571067</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034860426"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17314237"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000001035092I"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065444528"/>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件クレイマンREVENGE</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033357724</link>
+      <description><![CDATA[<p>4,講談社,2024,978-4-06-534892-5<p><ul><li>タイトル：転生したらスライムだった件クレイマンREVENGE</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン クレイマン リベンジ</li><li>責任表示：伏瀬 原作,カジカ航 漫画,みっつばー キャラクター原案</li><li>シリーズ名：シリウスKC</li><li>シリーズ名（読み）：シリウス ケーシー</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,カジカ, 航,伏瀬 原作,カジカ航 漫画,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033357724</guid>
+      <pubDate>Tue, 9 Apr 2024 02:54:05 +0900</pubDate>
+      <dc:title>転生したらスライムだった件クレイマンREVENGE</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン クレイマン リベンジ</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>カジカ, 航</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>カジカ, ワタル</dcndl:creatorTranscription>
+      <dcndl:volume>4</dcndl:volume>
+      <dcndl:seriesTitle>シリウスKC</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>シリウス ケーシー</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2024</dc:date>
+      <dcterms:issued>2024.3</dcterms:issued>
+      <dcndl:price>690円</dcndl:price>
+      <dc:extent>140p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-534892-5</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033357724</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">23962861</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07522218</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033357724"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17177820"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000759001O"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065348925"/>
+      <dc:description> 2024</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件クレイマンREVENGE</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033678960</link>
+      <description><![CDATA[<p>5,講談社,2024,978-4-06-536809-1<p><ul><li>タイトル：転生したらスライムだった件クレイマンREVENGE</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン クレイマン リベンジ</li><li>責任表示：伏瀬 原作,カジカ航 漫画,みっつばー キャラクター原案</li><li>シリーズ名：シリウスKC</li><li>シリーズ名（読み）：シリウス ケーシー</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,カジカ, 航,伏瀬 原作,カジカ航 漫画,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033678960</guid>
+      <pubDate>Fri, 27 Sep 2024 19:29:00 +0900</pubDate>
+      <dc:title>転生したらスライムだった件クレイマンREVENGE</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン クレイマン リベンジ</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>カジカ, 航</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>カジカ, ワタル</dcndl:creatorTranscription>
+      <dcndl:volume>5</dcndl:volume>
+      <dcndl:seriesTitle>シリウスKC</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>シリウス ケーシー</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2024</dc:date>
+      <dcterms:issued>2024.9</dcterms:issued>
+      <dcndl:price>690円</dcndl:price>
+      <dc:extent>140p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-536809-1</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033678960</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24028554</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07532024</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033678960"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17177822"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000817861I"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065368091"/>
+      <dc:description> 2024</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件クレイマンREVENGE</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033907726</link>
+      <description><![CDATA[<p>6,講談社,2025,978-4-06-538035-2<p><ul><li>タイトル：転生したらスライムだった件クレイマンREVENGE</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン クレイマン リベンジ</li><li>責任表示：伏瀬 原作,カジカ航 漫画,みっつばー キャラクター原案</li><li>シリーズ名：シリウスKC</li><li>シリーズ名（読み）：シリウス ケーシー</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,カジカ, 航,伏瀬 原作,カジカ航 漫画,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033907726</guid>
+      <pubDate>Fri, 14 Feb 2025 20:48:39 +0900</pubDate>
+      <dc:title>転生したらスライムだった件クレイマンREVENGE</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン クレイマン リベンジ</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>カジカ, 航</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>カジカ, ワタル</dcndl:creatorTranscription>
+      <dcndl:volume>6</dcndl:volume>
+      <dcndl:seriesTitle>シリウスKC</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>シリウス ケーシー</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.1</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>139p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-538035-2</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033907726</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24080435</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07539406</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033907726"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17097674"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000858832H"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065380352"/>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件クレイマンREVENGE</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034230532</link>
+      <description><![CDATA[<p>7,講談社,2025,978-4-06-539691-9<p><ul><li>タイトル：転生したらスライムだった件クレイマンREVENGE</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン クレイマン リベンジ</li><li>責任表示：伏瀬 原作,カジカ航 漫画,みっつばー キャラクター原案</li><li>シリーズ名：シリウスKC</li><li>シリーズ名（読み）：シリウス ケーシー</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,カジカ, 航,伏瀬 原作,カジカ航 漫画,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034230532</guid>
+      <pubDate>Wed, 27 Aug 2025 20:58:51 +0900</pubDate>
+      <dc:title>転生したらスライムだった件クレイマンREVENGE</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン クレイマン リベンジ</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>カジカ, 航</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>カジカ, ワタル</dcndl:creatorTranscription>
+      <dcndl:volume>7</dcndl:volume>
+      <dcndl:seriesTitle>シリウスKC</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>シリウス ケーシー</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.8</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>155p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-539691-9</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034230532</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24155055</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07550938</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034230532"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17177893"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000911269U"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065396919"/>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件クレイマンREVENGE</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034546277</link>
+      <description><![CDATA[<p>8,講談社,2026,978-4-06-541338-8<p><ul><li>タイトル：転生したらスライムだった件クレイマンREVENGE</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン クレイマン リベンジ</li><li>責任表示：伏瀬 原作,カジカ航 漫画,みっつばー キャラクター原案</li><li>シリーズ名：シリウスKC</li><li>シリーズ名（読み）：シリウス ケーシー</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,カジカ, 航,伏瀬 原作,カジカ航 漫画,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034546277</guid>
+      <pubDate>Mon, 16 Feb 2026 18:40:00 +0900</pubDate>
+      <dc:title>転生したらスライムだった件クレイマンREVENGE</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン クレイマン リベンジ</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>カジカ, 航</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>カジカ, ワタル</dcndl:creatorTranscription>
+      <dcndl:volume>8</dcndl:volume>
+      <dcndl:seriesTitle>シリウスKC</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>シリウス ケーシー</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.2</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>140p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-541338-8</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034546277</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24221164</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07561217</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034546277"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17246461"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000981314I"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065413388"/>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件クレイマンREVENGE</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034860423</link>
+      <description><![CDATA[<p>9,講談社,2026,978-4-06-544444-3<p><ul><li>タイトル：転生したらスライムだった件クレイマンREVENGE</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン クレイマン リベンジ</li><li>責任表示：伏瀬 原作,カジカ航 漫画,みっつばー キャラクター原案</li><li>シリーズ名：シリウスKC</li><li>シリーズ名（読み）：シリウス ケーシー</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,カジカ, 航,伏瀬 原作,カジカ航 漫画,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034860423</guid>
+      <pubDate>Wed, 19 Aug 2026 00:25:59 +0900</pubDate>
+      <dc:title>転生したらスライムだった件クレイマンREVENGE</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン クレイマン リベンジ</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>カジカ, 航</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>カジカ, ワタル</dcndl:creatorTranscription>
+      <dcndl:volume>9</dcndl:volume>
+      <dcndl:seriesTitle>シリウスKC</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>シリウス ケーシー</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.8</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>141p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-544444-3</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034860423</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24289338</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07571068</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034860423"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17321671"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000001035090G"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065444443"/>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件で学ぶことわざ100</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033897371</link>
+      <description><![CDATA[<p>講談社,2025,978-4-06-537946-2<p><ul><li>タイトル：転生したらスライムだった件で学ぶことわざ100</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン デ マナブ コトワザ ヒャク</li><li>責任表示：講談社 編</li><li>NDC(10)：814.4</li></ul>]]></description>
+      <author>講談社,講談社 編</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033897371</guid>
+      <pubDate>Thu, 26 Mar 2026 02:19:48 +0900</pubDate>
+      <dc:title>転生したらスライムだった件で学ぶことわざ100</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン デ マナブ コトワザ ヒャク</dcndl:titleTranscription>
+      <dc:creator>講談社</dc:creator>
+      <dcndl:creatorTranscription>コウダンシャ</dcndl:creatorTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.1</dcterms:issued>
+      <dcndl:price>1100円</dcndl:price>
+      <dc:extent>127p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-537946-2</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033897371</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24079605</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34699081</dc:identifier>
+      <dc:subject>諺 日本</dc:subject>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y8</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">814.4</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description>文献あり</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000001725846/"/>
+      <rdfs:seeAlso rdf:resource="https://www.tosyokan.pref.shizuoka.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1006000885886"/>
+      <rdfs:seeAlso rdf:resource="https://opac.miraionlibrary.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1000003262420"/>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033897371"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17096953"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000866199U"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065379462"/>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件で学ぶ四字熟語100</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033897374</link>
+      <description><![CDATA[<p>講談社,2025,978-4-06-537947-9<p><ul><li>タイトル：転生したらスライムだった件で学ぶ四字熟語100</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン デ マナブ ヨジ ジュクゴ ヒャク</li><li>責任表示：講談社 編</li><li>NDC(10)：814.4</li></ul>]]></description>
+      <author>講談社,講談社 編</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033897374</guid>
+      <pubDate>Thu, 26 Mar 2026 02:19:51 +0900</pubDate>
+      <dc:title>転生したらスライムだった件で学ぶ四字熟語100</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン デ マナブ ヨジ ジュクゴ ヒャク</dcndl:titleTranscription>
+      <dc:creator>講談社</dc:creator>
+      <dcndl:creatorTranscription>コウダンシャ</dcndl:creatorTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.1</dcterms:issued>
+      <dcndl:price>1100円</dcndl:price>
+      <dc:extent>127p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-537947-9</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033897374</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24079604</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34699084</dc:identifier>
+      <dc:subject>故事熟語</dc:subject>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y8</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">814.4</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description>文献あり</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000001725847/"/>
+      <rdfs:seeAlso rdf:resource="https://www.tosyokan.pref.shizuoka.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1006000885887"/>
+      <rdfs:seeAlso rdf:resource="https://opac.miraionlibrary.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1000003262421"/>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033897374"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17096954"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000866200K"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065379479"/>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件で学べるBOOK人体</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033585954</link>
+      <description><![CDATA[<p>講談社,2024,978-4-06-536397-3<p><ul><li>タイトル：転生したらスライムだった件で学べるBOOK人体</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン デ マナベル ブック ジンタイ</li><li>責任表示：講談社 編,転スラ製作委員会 監修,山本健人 医療監修</li><li>シリーズ名：講談社まんがで学べるシリーズ</li><li>シリーズ名（読み）：コウダンシャ マンガ デ マナベル シリーズ</li><li>NDC(10)：491.3</li></ul>]]></description>
+      <author>講談社,山本, 健人,講談社 編,転スラ製作委員会 監修,山本健人 医療監修</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033585954</guid>
+      <pubDate>Mon, 31 Mar 2025 20:25:46 +0900</pubDate>
+      <dc:title>転生したらスライムだった件で学べるBOOK人体</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン デ マナベル ブック ジンタイ</dcndl:titleTranscription>
+      <dc:creator>講談社</dc:creator>
+      <dc:creator>山本, 健人</dc:creator>
+      <dcndl:creatorTranscription>コウダンシャ</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>ヤマモト, タケヒト</dcndl:creatorTranscription>
+      <dcndl:seriesTitle>講談社まんがで学べるシリーズ</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>コウダンシャ マンガ デ マナベル シリーズ</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2024</dc:date>
+      <dcterms:issued>2024.7</dcterms:issued>
+      <dcndl:price>1300円</dcndl:price>
+      <dc:extent>112p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-536397-3</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033585954</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24010586</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34629665</dc:identifier>
+      <dc:subject>人体</dc:subject>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y11</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">491.3</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description>文献あり</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000001687223/"/>
+      <rdfs:seeAlso rdf:resource="https://www.oml.city.osaka.lg.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1000015561387"/>
+      <rdfs:seeAlso rdf:resource="https://www2.tosyo-saga.jp/kentosyo2/opac/switch-detail-iccap.do?bibid=1102618076"/>
+      <rdfs:seeAlso rdf:resource="https://opac.miraionlibrary.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1000003220347"/>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033585954"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17026521"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065363973"/>
+      <dc:description> 2024</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件で学べるBOOK昆虫</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033750347</link>
+      <description><![CDATA[<p>講談社,2024,978-4-06-537229-6<p><ul><li>タイトル：転生したらスライムだった件で学べるBOOK昆虫</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン デ マナベル ブック コンチュウ</li><li>責任表示：講談社 編,転スラ製作委員会 監修,石川忠 学術監修</li><li>シリーズ名：講談社まんがで学べるシリーズ</li><li>シリーズ名（読み）：コウダンシャ マンガ デ マナベル シリーズ</li><li>NDC(10)：486.1</li></ul>]]></description>
+      <author>講談社,石川, 忠, 1975-,講談社 編,転スラ製作委員会 監修,石川忠 学術監修</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033750347</guid>
+      <pubDate>Mon, 31 Mar 2025 20:27:32 +0900</pubDate>
+      <dc:title>転生したらスライムだった件で学べるBOOK昆虫</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン デ マナベル ブック コンチュウ</dcndl:titleTranscription>
+      <dc:creator>講談社</dc:creator>
+      <dc:creator>石川, 忠, 1975-</dc:creator>
+      <dcndl:creatorTranscription>コウダンシャ</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>イシカワ, タダシ, 1975-</dcndl:creatorTranscription>
+      <dcndl:seriesTitle>講談社まんがで学べるシリーズ</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>コウダンシャ マンガ デ マナベル シリーズ</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2024</dc:date>
+      <dcterms:issued>2024.10</dcterms:issued>
+      <dcndl:price>1300円</dcndl:price>
+      <dc:extent>112p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-537229-6</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033750347</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24044935</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34666669</dc:identifier>
+      <dc:subject>昆虫</dc:subject>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y11</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">486.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description>文献あり</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000001707062/"/>
+      <rdfs:seeAlso rdf:resource="https://www2.tosyo-saga.jp/kentosyo2/opac/switch-detail-iccap.do?bibid=1102637640"/>
+      <rdfs:seeAlso rdf:resource="https://opac.miraionlibrary.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1000003242272"/>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033750347"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17065858"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000823571W"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065372296"/>
+      <dc:description> 2024</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件で学べるBOOKロボット</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033980926</link>
+      <description><![CDATA[<p>講談社,2025,978-4-06-537230-2<p><ul><li>タイトル：転生したらスライムだった件で学べるBOOKロボット</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン デ マナベル ブック ロボット</li><li>責任表示：講談社 編,転スラ製作委員会 監修,石黒浩, 今井翔太 学術監修</li><li>シリーズ名：講談社まんがで学べるシリーズ</li><li>シリーズ名（読み）：コウダンシャ マンガ デ マナベル シリーズ</li><li>NDC(10)：548.3</li></ul>]]></description>
+      <author>講談社,石黒, 浩,今井, 翔太, 1994-,講談社 編,転スラ製作委員会 監修,石黒浩, 今井翔太 学術監修</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033980926</guid>
+      <pubDate>Thu, 26 Mar 2026 02:18:41 +0900</pubDate>
+      <dc:title>転生したらスライムだった件で学べるBOOKロボット</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン デ マナベル ブック ロボット</dcndl:titleTranscription>
+      <dc:creator>講談社</dc:creator>
+      <dc:creator>石黒, 浩</dc:creator>
+      <dc:creator>今井, 翔太, 1994-</dc:creator>
+      <dcndl:creatorTranscription>コウダンシャ</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>イシグロ, ヒロシ</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>イマイ, ショウタ, 1994-</dcndl:creatorTranscription>
+      <dcndl:seriesTitle>講談社まんがで学べるシリーズ</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>コウダンシャ マンガ デ マナベル シリーズ</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.3</dcterms:issued>
+      <dcndl:price>1500円</dcndl:price>
+      <dc:extent>112p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-537230-2</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033980926</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24100174</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34716337</dc:identifier>
+      <dc:subject>ロボット</dc:subject>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y11</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">548.3</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description>文献あり</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000001736857/"/>
+      <rdfs:seeAlso rdf:resource="https://opac.miraionlibrary.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1000003274407"/>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033980926"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17117764"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000886978X"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065372302"/>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件　とある時空の物語⑰　（上）</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000137-I9784825000674</link>
+      <description><![CDATA[<p>マイクロマガジン社,2026-11-22,9784825000674<p><ul><li>タイトル：転生したらスライムだった件　とある時空の物語⑰　（上）</li><li>タイトル（読み）：テンセイシタラスライムダッタケントアルジクウノモノガタリジュウナナジョウ</li><li>責任表示：伏瀬 著・文・その他,もりょ イラスト</li><li>シリーズ名：かなで文庫</li><li>シリーズ名（読み）：カナデブンコ</li></ul>]]></description>
+      <author>伏瀬,もりょ,伏瀬 著・文・その他,もりょ イラスト</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000137-I9784825000674</guid>
+      <pubDate>Mon, 31 Aug 2026 18:53:00 +0900</pubDate>
+      <dc:title>転生したらスライムだった件　とある時空の物語⑰　（上）</dc:title>
+      <dcndl:titleTranscription>テンセイシタラスライムダッタケントアルジクウノモノガタリジュウナナジョウ</dcndl:titleTranscription>
+      <dc:creator>伏瀬</dc:creator>
+      <dc:creator>もりょ</dc:creator>
+      <dcndl:creatorTranscription>フセ</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>モリョ</dcndl:creatorTranscription>
+      <dcndl:seriesTitle>かなで文庫</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>カナデブンコ</dcndl:seriesTitleTranscription>
+      <dc:publisher>マイクロマガジン社</dc:publisher>
+      <dc:publisher>マイクロマガジン社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026-11-22</dc:date>
+      <dcterms:issued>2026-11-22</dcterms:issued>
+      <dcndl:price>820</dcndl:price>
+      <dc:extent>300p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">9784825000674</dc:identifier>
+      <dc:identifier xsi:type="dcndl:ISBN13">9784825000674</dc:identifier>
+      <dc:description>発売</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784825000674"/>
+      <dc:description> 2026-11-22</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件番外編 : とある休暇の過ごし方</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033240317</link>
+      <description><![CDATA[<p>1,講談社,2024,978-4-06-534106-3<p><ul><li>タイトル：転生したらスライムだった件番外編 : とある休暇の過ごし方</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン バンガイヘン : トアル キュウカ ノ スゴシカタ</li><li>責任表示：伏瀬 原作,高田裕三 漫画,みっつばー キャラクター原案</li><li>シリーズ名：シリウスKC</li><li>シリーズ名（読み）：シリウス ケーシー</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,高田, 裕三, 1963-,伏瀬 原作,高田裕三 漫画,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033240317</guid>
+      <pubDate>Fri, 19 Jan 2024 18:30:33 +0900</pubDate>
+      <dc:title>転生したらスライムだった件番外編 : とある休暇の過ごし方</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン バンガイヘン : トアル キュウカ ノ スゴシカタ</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>高田, 裕三, 1963-</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>タカダ, ユウゾウ, 1963-</dcndl:creatorTranscription>
+      <dcndl:volume>1</dcndl:volume>
+      <dcndl:seriesTitle>シリウスKC</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>シリウス ケーシー</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2024</dc:date>
+      <dcterms:issued>2024.1</dcterms:issued>
+      <dcndl:price>690円</dcndl:price>
+      <dc:extent>158p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-534106-3</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033240317</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">23932235</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07519435</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033240317"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B16949670"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000739739L"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065341063"/>
+      <dc:description> 2024</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件番外編 : とある休暇の過ごし方</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033678940</link>
+      <description><![CDATA[<p>2,講談社,2024,978-4-06-536003-3<p><ul><li>タイトル：転生したらスライムだった件番外編 : とある休暇の過ごし方</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン バンガイヘン : トアル キュウカ ノ スゴシカタ</li><li>責任表示：伏瀬 原作,高田裕三 漫画,みっつばー キャラクター原案</li><li>シリーズ名：シリウスKC</li><li>シリーズ名（読み）：シリウス ケーシー</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,高田, 裕三, 1963-,伏瀬 原作,高田裕三 漫画,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033678940</guid>
+      <pubDate>Mon, 30 Sep 2024 21:00:16 +0900</pubDate>
+      <dc:title>転生したらスライムだった件番外編 : とある休暇の過ごし方</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン バンガイヘン : トアル キュウカ ノ スゴシカタ</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>高田, 裕三, 1963-</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>タカダ, ユウゾウ, 1963-</dcndl:creatorTranscription>
+      <dcndl:volume>2</dcndl:volume>
+      <dcndl:seriesTitle>シリウスKC</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>シリウス ケーシー</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2024</dc:date>
+      <dcterms:issued>2024.9</dcterms:issued>
+      <dcndl:price>690円</dcndl:price>
+      <dc:extent>158p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-536003-3</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033678940</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24029316</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07532013</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033678940"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17048011"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000817838G"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065360033"/>
+      <dc:description> 2024</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件番外編 : とある休暇の過ごし方</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034122628</link>
+      <description><![CDATA[<p>3,講談社,2025,978-4-06-539689-6<p><ul><li>タイトル：転生したらスライムだった件番外編 : とある休暇の過ごし方</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン バンガイヘン : トアル キュウカ ノ スゴシカタ</li><li>責任表示：伏瀬 原作,高田裕三 漫画,みっつばー キャラクター原案</li><li>シリーズ名：シリウスKC</li><li>シリーズ名（読み）：シリウス ケーシー</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,高田, 裕三, 1963-,伏瀬 原作,高田裕三 漫画,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034122628</guid>
+      <pubDate>Wed, 18 Jun 2025 01:21:30 +0900</pubDate>
+      <dc:title>転生したらスライムだった件番外編 : とある休暇の過ごし方</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン バンガイヘン : トアル キュウカ ノ スゴシカタ</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>高田, 裕三, 1963-</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>タカダ, ユウゾウ, 1963-</dcndl:creatorTranscription>
+      <dcndl:volume>3</dcndl:volume>
+      <dcndl:seriesTitle>シリウスKC</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>シリウス ケーシー</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.6</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>150p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-539689-6</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034122628</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24127554</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07547461</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034122628"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17152427"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000911267S"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065396896"/>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件番外編 : とある休暇の過ごし方</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034419353</link>
+      <description><![CDATA[<p>マイクロマガジン社,2025,978-4-86716-874-5<p><ul><li>タイトル：転生したらスライムだった件番外編 : とある休暇の過ごし方</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン バンガイヘン</li><li>責任表示：伏瀬 著</li><li>シリーズ名：GC NOVELS</li><li>NDC(10)：913.6</li></ul>]]></description>
+      <author>伏瀬, 1975-,伏瀬 著</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034419353</guid>
+      <pubDate>Fri, 5 Dec 2025 18:02:59 +0900</pubDate>
+      <dc:title>転生したらスライムだった件番外編 : とある休暇の過ごし方</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン バンガイヘン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:seriesTitle>GC NOVELS</dcndl:seriesTitle>
+      <dc:publisher>マイクロマガジン社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.12</dcterms:issued>
+      <dcndl:price>1000円</dcndl:price>
+      <dc:extent>371p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86716-874-5</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034419353</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24195833</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34809531</dc:identifier>
+      <dc:subject xsi:type="dcndl:NDLC">KH971</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">913.6</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.apl.pref.akita.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1009921221004"/>
+      <rdfs:seeAlso rdf:resource="https://www.lib.city.saitama.jp/bookdetail?num=3516171&amp;ctg=1"/>
+      <rdfs:seeAlso rdf:resource="https://opac.lib.city.yokohama.lg.jp/winj/opac/switch-detail-iccap.do?bibid=1125047081"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.city.kawasaki.jp/bookdetail?num=3926201&amp;ctg=1"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000001788959/"/>
+      <rdfs:seeAlso rdf:resource="https://www.toshokan.city.shizuoka.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1002000061139"/>
+      <rdfs:seeAlso rdf:resource="https://www.shiga-pref-library.jp/wo/opc_srh/srh_detail/5089353/"/>
+      <rdfs:seeAlso rdf:resource="https://www.oml.city.osaka.lg.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1002000084759"/>
+      <rdfs:seeAlso rdf:resource="https://www.lib-sakai.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1007001528446"/>
+      <rdfs:seeAlso rdf:resource="https://opac.libnet.pref.okayama.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1009812889698"/>
+      <rdfs:seeAlso rdf:resource="https://alislibopac.bunmori.tokushima.jp/winj/opac/switch-detail-iccap.do?bibid=1111635519"/>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034419353"/>
+      <rdfs:seeAlso rdf:resource="https://library.sapie.or.jp/cgi-bin/CN1MN1?S00101=J00DTL04&amp;S00222=4859899"/>
+      <rdfs:seeAlso rdf:resource="https://library.sapie.or.jp/cgi-bin/CN1MN1?S00101=J00DTL04&amp;S00222=4874240"/>
+      <rdfs:seeAlso rdf:resource="https://cir.nii.ac.jp/crid/1971153202089628851"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784867168745"/>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件番外編 : とある休暇の過ごし方</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034427642</link>
+      <description><![CDATA[<p>4,講談社,2025,978-4-06-541350-0<p><ul><li>タイトル：転生したらスライムだった件番外編 : とある休暇の過ごし方</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン バンガイヘン : トアル キュウカ ノ スゴシカタ</li><li>責任表示：伏瀬 原作,高田裕三 漫画,みっつばー キャラクター原案</li><li>シリーズ名：シリウスKC</li><li>シリーズ名（読み）：シリウス ケーシー</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,高田, 裕三, 1963-,伏瀬 原作,高田裕三 漫画,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034427642</guid>
+      <pubDate>Wed, 10 Dec 2025 23:34:20 +0900</pubDate>
+      <dc:title>転生したらスライムだった件番外編 : とある休暇の過ごし方</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン バンガイヘン : トアル キュウカ ノ スゴシカタ</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>高田, 裕三, 1963-</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>タカダ, ユウゾウ, 1963-</dcndl:creatorTranscription>
+      <dcndl:volume>4</dcndl:volume>
+      <dcndl:seriesTitle>シリウスKC</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>シリウス ケーシー</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.11</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>155p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-541350-0</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034427642</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24198108</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07556219</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034427642"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17222100"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000957395X"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065413500"/>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件美食伝 : ペコとリムルの料理手帖</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033240322</link>
+      <description><![CDATA[<p>1,講談社,2024,978-4-06-534155-1<p><ul><li>タイトル：転生したらスライムだった件美食伝 : ペコとリムルの料理手帖</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン ビショクデン</li><li>責任表示：伏瀬 原作,中谷チカ 漫画,みっつばー キャラクター原案</li><li>シリーズ名：シリウスKC</li><li>シリーズ名（読み）：シリウス ケーシー</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,中谷, チカ,伏瀬 原作,中谷チカ 漫画,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033240322</guid>
+      <pubDate>Mon, 3 Jun 2024 22:40:34 +0900</pubDate>
+      <dc:title>転生したらスライムだった件美食伝 : ペコとリムルの料理手帖</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン ビショクデン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>中谷, チカ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>ナカタニ, チカ</dcndl:creatorTranscription>
+      <dcndl:volume>1</dcndl:volume>
+      <dcndl:seriesTitle>シリウスKC</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>シリウス ケーシー</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2024</dc:date>
+      <dcterms:issued>2024.1</dcterms:issued>
+      <dcndl:price>690円</dcndl:price>
+      <dc:extent>158p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-534155-1</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033240322</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">23936412</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07519441</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033240322"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B16949671"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000739747M"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065341551"/>
+      <dc:description> 2024</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件美食伝 : ペコとリムルの料理手帖</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033517339</link>
+      <description><![CDATA[<p>2,講談社,2024,978-4-06-535685-2<p><ul><li>タイトル：転生したらスライムだった件美食伝 : ペコとリムルの料理手帖</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン ビショクデン</li><li>責任表示：伏瀬 原作,中谷チカ 漫画,みっつばー キャラクター原案</li><li>シリーズ名：シリウスKC</li><li>シリーズ名（読み）：シリウス ケーシー</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,中谷, チカ,伏瀬 原作,中谷チカ 漫画,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033517339</guid>
+      <pubDate>Wed, 19 Jun 2024 22:42:52 +0900</pubDate>
+      <dc:title>転生したらスライムだった件美食伝 : ペコとリムルの料理手帖</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン ビショクデン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>中谷, チカ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>ナカタニ, チカ</dcndl:creatorTranscription>
+      <dcndl:volume>2</dcndl:volume>
+      <dcndl:seriesTitle>シリウスKC</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>シリウス ケーシー</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2024</dc:date>
+      <dcterms:issued>2024.6</dcterms:issued>
+      <dcndl:price>690円</dcndl:price>
+      <dc:extent>158p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-535685-2</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033517339</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">23990317</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07527270</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033517339"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17012086"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000786254D"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065356852"/>
+      <dc:description> 2024</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件美食伝 : ペコとリムルの料理手帖</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033678951</link>
+      <description><![CDATA[<p>3,講談社,2024,978-4-06-536656-1<p><ul><li>タイトル：転生したらスライムだった件美食伝 : ペコとリムルの料理手帖</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン ビショクデン</li><li>責任表示：伏瀬 原作,中谷チカ 漫画,みっつばー キャラクター原案</li><li>シリーズ名：シリウスKC</li><li>シリーズ名（読み）：シリウス ケーシー</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,中谷, チカ,伏瀬 原作,中谷チカ 漫画,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033678951</guid>
+      <pubDate>Mon, 30 Sep 2024 20:58:43 +0900</pubDate>
+      <dc:title>転生したらスライムだった件美食伝 : ペコとリムルの料理手帖</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン ビショクデン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>中谷, チカ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>ナカタニ, チカ</dcndl:creatorTranscription>
+      <dcndl:volume>3</dcndl:volume>
+      <dcndl:seriesTitle>シリウスKC</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>シリウス ケーシー</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2024</dc:date>
+      <dcterms:issued>2024.9</dcterms:issued>
+      <dcndl:price>690円</dcndl:price>
+      <dc:extent>158p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-536656-1</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033678951</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24029312</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07532016</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033678951"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17048010"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000817845G"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065366561"/>
+      <dc:description> 2024</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件美食伝 : ペコとリムルの料理手帖</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034122627</link>
+      <description><![CDATA[<p>4,講談社,2025,978-4-06-539686-5<p><ul><li>タイトル：転生したらスライムだった件美食伝 : ペコとリムルの料理手帖</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン ビショクデン</li><li>責任表示：伏瀬 原作,中谷チカ 漫画,みっつばー キャラクター原案</li><li>シリーズ名：シリウスKC</li><li>シリーズ名（読み）：シリウス ケーシー</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,中谷, チカ,伏瀬 原作,中谷チカ 漫画,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034122627</guid>
+      <pubDate>Tue, 17 Jun 2025 23:19:56 +0900</pubDate>
+      <dc:title>転生したらスライムだった件美食伝 : ペコとリムルの料理手帖</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン ビショクデン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>中谷, チカ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>ナカタニ, チカ</dcndl:creatorTranscription>
+      <dcndl:volume>4</dcndl:volume>
+      <dcndl:seriesTitle>シリウスKC</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>シリウス ケーシー</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.6</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>158p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-539686-5</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034122627</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24127355</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07547459</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034122627"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17152426"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000911265Q"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065396865"/>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件美食伝 : ペコとリムルの料理手帖</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034338814</link>
+      <description><![CDATA[<p>5,講談社,2025,978-4-06-541054-7<p><ul><li>タイトル：転生したらスライムだった件美食伝 : ペコとリムルの料理手帖</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン ビショクデン</li><li>責任表示：伏瀬 原作,中谷チカ 漫画,みっつばー キャラクター原案</li><li>シリーズ名：シリウスKC</li><li>シリーズ名（読み）：シリウス ケーシー</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,中谷, チカ,伏瀬 原作,中谷チカ 漫画,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034338814</guid>
+      <pubDate>Tue, 4 Nov 2025 22:03:28 +0900</pubDate>
+      <dc:title>転生したらスライムだった件美食伝 : ペコとリムルの料理手帖</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン ビショクデン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>中谷, チカ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>ナカタニ, チカ</dcndl:creatorTranscription>
+      <dcndl:volume>5</dcndl:volume>
+      <dcndl:seriesTitle>シリウスKC</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>シリウス ケーシー</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.10</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>157p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-541054-7</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034338814</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24181415</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07554138</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034338814"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17201273"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000948771T"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065410547"/>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件美食伝 : ペコとリムルの料理手帖</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034546280</link>
+      <description><![CDATA[<p>6,講談社,2026,978-4-06-542383-7<p><ul><li>タイトル：転生したらスライムだった件美食伝 : ペコとリムルの料理手帖</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン ビショクデン</li><li>責任表示：伏瀬 原作,中谷チカ 漫画,みっつばー キャラクター原案</li><li>シリーズ名：シリウスKC</li><li>シリーズ名（読み）：シリウス ケーシー</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,中谷, チカ,伏瀬 原作,中谷チカ 漫画,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034546280</guid>
+      <pubDate>Fri, 20 Feb 2026 02:05:39 +0900</pubDate>
+      <dc:title>転生したらスライムだった件美食伝 : ペコとリムルの料理手帖</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン ビショクデン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>中谷, チカ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>ナカタニ, チカ</dcndl:creatorTranscription>
+      <dcndl:volume>6</dcndl:volume>
+      <dcndl:seriesTitle>シリウスKC</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>シリウス ケーシー</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.2</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>158p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-542383-7</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034546280</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24223181</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07561225</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034546280"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17246462"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000981320H"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065423837"/>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033236056</link>
+      <description><![CDATA[<p>10[中],マイクロマガジン社,2024,978-4-86716-516-4<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 作,もりょ 絵,みっつばー キャラクター原案</li><li>シリーズ名：かなで文庫 ; ふ-1-29</li><li>シリーズ名（読み）：カナデ ブンコ ; フ-1-29</li><li>NDC(10)：913.6</li></ul>]]></description>
+      <author>伏瀬, 1975-,もりょ,伏瀬 作,もりょ 絵,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033236056</guid>
+      <pubDate>Thu, 22 Feb 2024 18:50:54 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>もりょ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>モリョ</dcndl:creatorTranscription>
+      <dcndl:volume>10[中]</dcndl:volume>
+      <dcndl:seriesTitle>かなで文庫 ; ふ-1-29</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>カナデ ブンコ ; フ-1-29</dcndl:seriesTitleTranscription>
+      <dc:publisher>マイクロマガジン社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2024</dc:date>
+      <dcterms:issued>2024.1</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>237p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86716-516-4</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033236056</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">23945202</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34557773</dc:identifier>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y7</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">913.6</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description>2017年刊を児童向けの表現に一部調整、3分冊</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000001642558/"/>
+      <rdfs:seeAlso rdf:resource="https://www.tosyokan.pref.shizuoka.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1006000792638"/>
+      <rdfs:seeAlso rdf:resource="https://opac.libnet.pref.okayama.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1009812730204"/>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033236056"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B16949149"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784867165164"/>
+      <dc:description> 2024</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033363914</link>
+      <description><![CDATA[<p>10[下],マイクロマガジン社,2024,978-4-86716-543-0<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 作,もりょ 絵,みっつばー キャラクター原案</li><li>シリーズ名：かなで文庫 ; ふ-1-30</li><li>シリーズ名（読み）：カナデ ブンコ ; フ-1-30</li><li>NDC(10)：913.6</li></ul>]]></description>
+      <author>伏瀬, 1975-,もりょ,伏瀬 作,もりょ 絵,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033363914</guid>
+      <pubDate>Mon, 15 Apr 2024 18:24:33 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>もりょ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>モリョ</dcndl:creatorTranscription>
+      <dcndl:volume>10[下]</dcndl:volume>
+      <dcndl:seriesTitle>かなで文庫 ; ふ-1-30</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>カナデ ブンコ ; フ-1-30</dcndl:seriesTitleTranscription>
+      <dc:publisher>マイクロマガジン社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2024</dc:date>
+      <dcterms:issued>2024.3</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>225p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86716-543-0</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033363914</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">23965129</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34581138</dc:identifier>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y7</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">913.6</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description>2017年刊を児童向けの表現に一部調整、3分冊</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000001657054/"/>
+      <rdfs:seeAlso rdf:resource="https://www.tosyokan.pref.shizuoka.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1006000809717"/>
+      <rdfs:seeAlso rdf:resource="https://opac.libnet.pref.okayama.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1009812746298"/>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033363914"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B16969123"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784867165430"/>
+      <dc:description> 2024</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033459702</link>
+      <description><![CDATA[<p>11[上],マイクロマガジン社,2024,978-4-86716-573-7<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 作,もりょ 絵,みっつばー キャラクター原案</li><li>シリーズ名：かなで文庫 ; ふ-1-31</li><li>シリーズ名（読み）：カナデ ブンコ ; フ-1-31</li><li>NDC(10)：913.6</li></ul>]]></description>
+      <author>伏瀬, 1975-,もりょ,伏瀬 作,もりょ 絵,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033459702</guid>
+      <pubDate>Thu, 20 Jun 2024 00:03:40 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>もりょ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>モリョ</dcndl:creatorTranscription>
+      <dcndl:volume>11[上]</dcndl:volume>
+      <dcndl:seriesTitle>かなで文庫 ; ふ-1-31</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>カナデ ブンコ ; フ-1-31</dcndl:seriesTitleTranscription>
+      <dc:publisher>マイクロマガジン社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2024</dc:date>
+      <dcterms:issued>2024.5</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>275p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86716-573-7</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033459702</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">23990412</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34603889</dc:identifier>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y7</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">913.6</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000001672306/"/>
+      <rdfs:seeAlso rdf:resource="https://www.tosyokan.pref.shizuoka.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1006000825853"/>
+      <rdfs:seeAlso rdf:resource="https://opac.libnet.pref.okayama.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1009812762185"/>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033459702"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B16998851"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784867165737"/>
+      <dc:description> 2024</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033572237</link>
+      <description><![CDATA[<p>11[中],マイクロマガジン社,2024,978-4-86716-604-8<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 作,もりょ 絵</li><li>シリーズ名：かなで文庫 ; ふ-1-32</li><li>シリーズ名（読み）：カナデ ブンコ ; フ-1-32</li><li>NDC(10)：913.6</li></ul>]]></description>
+      <author>伏瀬, 1975-,もりょ,伏瀬 作,もりょ 絵</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033572237</guid>
+      <pubDate>Fri, 2 Aug 2024 18:49:09 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>もりょ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>モリョ</dcndl:creatorTranscription>
+      <dcndl:volume>11[中]</dcndl:volume>
+      <dcndl:seriesTitle>かなで文庫 ; ふ-1-32</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>カナデ ブンコ ; フ-1-32</dcndl:seriesTitleTranscription>
+      <dc:publisher>マイクロマガジン社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2024</dc:date>
+      <dcterms:issued>2024.7</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>277p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86716-604-8</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033572237</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24008008</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34624427</dc:identifier>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y7</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">913.6</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000001684769/"/>
+      <rdfs:seeAlso rdf:resource="https://www.tosyokan.pref.shizuoka.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1006000841061"/>
+      <rdfs:seeAlso rdf:resource="https://opac.libnet.pref.okayama.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1009812776045"/>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033572237"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17022245"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784867166048"/>
+      <dc:description> 2024</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033681213</link>
+      <description><![CDATA[<p>11[下],マイクロマガジン社,2024,978-4-86716-627-7<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 作,もりょ 絵</li><li>シリーズ名：かなで文庫 ; ふ-1-33</li><li>シリーズ名（読み）：カナデ ブンコ ; フ-1-33</li><li>NDC(10)：913.6</li></ul>]]></description>
+      <author>伏瀬, 1975-,もりょ,伏瀬 作,もりょ 絵</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033681213</guid>
+      <pubDate>Wed, 2 Oct 2024 18:59:58 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>もりょ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>モリョ</dcndl:creatorTranscription>
+      <dcndl:volume>11[下]</dcndl:volume>
+      <dcndl:seriesTitle>かなで文庫 ; ふ-1-33</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>カナデ ブンコ ; フ-1-33</dcndl:seriesTitleTranscription>
+      <dc:publisher>マイクロマガジン社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2024</dc:date>
+      <dcterms:issued>2024.9</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>201p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86716-627-7</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033681213</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24030189</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34648271</dc:identifier>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y7</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">913.6</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000001697115/"/>
+      <rdfs:seeAlso rdf:resource="https://www.tosyokan.pref.shizuoka.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1006000854808"/>
+      <rdfs:seeAlso rdf:resource="https://opac.libnet.pref.okayama.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1009812790097"/>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033681213"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17046820"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784867166277"/>
+      <dc:description> 2024</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033777777</link>
+      <description><![CDATA[<p>12[上],マイクロマガジン社,2024,978-4-86716-659-8<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 作,もりょ 絵</li><li>シリーズ名：かなで文庫 ; ふ-1-34</li><li>シリーズ名（読み）：カナデ ブンコ ; フ-1-34</li><li>NDC(10)：913.6</li></ul>]]></description>
+      <author>伏瀬, 1975-,もりょ,伏瀬 作,もりょ 絵</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033777777</guid>
+      <pubDate>Thu, 28 Nov 2024 23:57:48 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>もりょ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>モリョ</dcndl:creatorTranscription>
+      <dcndl:volume>12[上]</dcndl:volume>
+      <dcndl:seriesTitle>かなで文庫 ; ふ-1-34</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>カナデ ブンコ ; フ-1-34</dcndl:seriesTitleTranscription>
+      <dc:publisher>マイクロマガジン社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2024</dc:date>
+      <dcterms:issued>2024.11</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>233p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86716-659-8</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033777777</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24053530</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34672098</dc:identifier>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y7</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">913.6</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000001709988/"/>
+      <rdfs:seeAlso rdf:resource="https://www.tosyokan.pref.shizuoka.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1006000868713"/>
+      <rdfs:seeAlso rdf:resource="https://opac.libnet.pref.okayama.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1009812804586"/>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033777777"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17069830"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784867166598"/>
+      <dc:description> 2024</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033865588</link>
+      <description><![CDATA[<p>12[中],マイクロマガジン社,2025,978-4-86716-697-0<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 作,もりょ 絵</li><li>シリーズ名：かなで文庫 ; ふ-1-35</li><li>シリーズ名（読み）：カナデ ブンコ ; フ-1-35</li><li>NDC(10)：913.6</li></ul>]]></description>
+      <author>伏瀬, 1975-,もりょ,伏瀬 作,もりょ 絵</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033865588</guid>
+      <pubDate>Thu, 6 Feb 2025 01:12:41 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>もりょ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>モリョ</dcndl:creatorTranscription>
+      <dcndl:volume>12[中]</dcndl:volume>
+      <dcndl:seriesTitle>かなで文庫 ; ふ-1-35</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>カナデ ブンコ ; フ-1-35</dcndl:seriesTitleTranscription>
+      <dc:publisher>マイクロマガジン社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.1</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>225p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86716-697-0</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033865588</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24076753</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34692322</dc:identifier>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y7</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">913.6</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000001722799/"/>
+      <rdfs:seeAlso rdf:resource="https://www.tosyokan.pref.shizuoka.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1006000882714"/>
+      <rdfs:seeAlso rdf:resource="https://opac.libnet.pref.okayama.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1009812818399"/>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033865588"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17092518"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784867166970"/>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033976454</link>
+      <description><![CDATA[<p>12[下],マイクロマガジン社,2025,978-4-86716-727-4<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 作,もりょ 絵</li><li>シリーズ名：かなで文庫 ; ふ-1-36</li><li>シリーズ名（読み）：カナデ ブンコ ; フ-1-36</li><li>NDC(10)：913.6</li></ul>]]></description>
+      <author>伏瀬, 1975-,もりょ,伏瀬 作,もりょ 絵</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033976454</guid>
+      <pubDate>Tue, 15 Apr 2025 00:41:37 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>もりょ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>モリョ</dcndl:creatorTranscription>
+      <dcndl:volume>12[下]</dcndl:volume>
+      <dcndl:seriesTitle>かなで文庫 ; ふ-1-36</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>カナデ ブンコ ; フ-1-36</dcndl:seriesTitleTranscription>
+      <dc:publisher>マイクロマガジン社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.3</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>193p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86716-727-4</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033976454</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24103247</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34714200</dc:identifier>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y7</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">913.6</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000001735126/"/>
+      <rdfs:seeAlso rdf:resource="https://www.tosyokan.pref.shizuoka.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1006000896071"/>
+      <rdfs:seeAlso rdf:resource="https://opac.libnet.pref.okayama.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1009812831986"/>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033976454"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17115478"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784867167274"/>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034069160</link>
+      <description><![CDATA[<p>13[上],マイクロマガジン社,2025,978-4-86716-756-4<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 作,もりょ 絵</li><li>シリーズ名：かなで文庫 ; ふ-1-37</li><li>シリーズ名（読み）：カナデ ブンコ ; フ-1-37</li><li>NDC(10)：913.6</li></ul>]]></description>
+      <author>伏瀬, 1975-,もりょ,伏瀬 作,もりょ 絵</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034069160</guid>
+      <pubDate>Thu, 12 Jun 2025 00:04:01 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>もりょ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>モリョ</dcndl:creatorTranscription>
+      <dcndl:volume>13[上]</dcndl:volume>
+      <dcndl:seriesTitle>かなで文庫 ; ふ-1-37</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>カナデ ブンコ ; フ-1-37</dcndl:seriesTitleTranscription>
+      <dc:publisher>マイクロマガジン社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.5</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>265p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86716-756-4</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034069160</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24125302</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34734658</dc:identifier>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y7</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">913.6</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000001748138/"/>
+      <rdfs:seeAlso rdf:resource="https://www.tosyokan.pref.shizuoka.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1006000909686"/>
+      <rdfs:seeAlso rdf:resource="https://opac.libnet.pref.okayama.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1009812845945"/>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034069160"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17139939"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784867167564"/>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034174825</link>
+      <description><![CDATA[<p>13[中],マイクロマガジン社,2025,978-4-86716-791-5<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 作,もりょ 絵</li><li>シリーズ名：かなで文庫 ; ふ-1-38</li><li>シリーズ名（読み）：カナデ ブンコ ; フ-1-38</li><li>NDC(10)：913.6</li></ul>]]></description>
+      <author>伏瀬, 1975-,もりょ,伏瀬 作,もりょ 絵</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034174825</guid>
+      <pubDate>Thu, 25 Sep 2025 02:59:49 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>もりょ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>モリョ</dcndl:creatorTranscription>
+      <dcndl:volume>13[中]</dcndl:volume>
+      <dcndl:seriesTitle>かなで文庫 ; ふ-1-38</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>カナデ ブンコ ; フ-1-38</dcndl:seriesTitleTranscription>
+      <dc:publisher>マイクロマガジン社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.7</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>277p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86716-791-5</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034174825</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24165778</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34756831</dc:identifier>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y7</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">913.6</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000001759770/"/>
+      <rdfs:seeAlso rdf:resource="https://www.tosyokan.pref.shizuoka.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1006000921922"/>
+      <rdfs:seeAlso rdf:resource="https://opac.libnet.pref.okayama.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1009812858868"/>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034174825"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17162861"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784867167915"/>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034282093</link>
+      <description><![CDATA[<p>13[下],マイクロマガジン社,2025,978-4-86716-834-9<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 作,もりょ 絵</li><li>シリーズ名：かなで文庫 ; ふ-1-39</li><li>シリーズ名（読み）：カナデ ブンコ ; フ-1-39</li><li>NDC(10)：913.6</li></ul>]]></description>
+      <author>伏瀬, 1975-,もりょ,伏瀬 作,もりょ 絵</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034282093</guid>
+      <pubDate>Thu, 23 Oct 2025 22:26:20 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>もりょ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>モリョ</dcndl:creatorTranscription>
+      <dcndl:volume>13[下]</dcndl:volume>
+      <dcndl:seriesTitle>かなで文庫 ; ふ-1-39</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>カナデ ブンコ ; フ-1-39</dcndl:seriesTitleTranscription>
+      <dc:publisher>マイクロマガジン社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.9</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>217p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86716-834-9</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034282093</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24176952</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34781670</dc:identifier>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y7</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">913.6</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000001772056/"/>
+      <rdfs:seeAlso rdf:resource="https://www.tosyokan.pref.shizuoka.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1006000934585"/>
+      <rdfs:seeAlso rdf:resource="https://opac.libnet.pref.okayama.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1009812872133"/>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034282093"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17188955"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784867168349"/>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034392406</link>
+      <description><![CDATA[<p>14[上],マイクロマガジン社,2025,978-4-86716-865-3<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 作,もりょ 絵</li><li>シリーズ名：かなで文庫 ; ふ-1-40</li><li>シリーズ名（読み）：カナデ ブンコ ; フ-1-40</li><li>NDC(10)：913.6</li></ul>]]></description>
+      <author>伏瀬, 1975-,もりょ,伏瀬 作,もりょ 絵</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034392406</guid>
+      <pubDate>Wed, 3 Dec 2025 02:43:47 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>もりょ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>モリョ</dcndl:creatorTranscription>
+      <dcndl:volume>14[上]</dcndl:volume>
+      <dcndl:seriesTitle>かなで文庫 ; ふ-1-40</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>カナデ ブンコ ; フ-1-40</dcndl:seriesTitleTranscription>
+      <dc:publisher>マイクロマガジン社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.11</dcterms:issued>
+      <dcndl:price>820円</dcndl:price>
+      <dc:extent>325p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86716-865-3</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034392406</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24194252</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34804187</dc:identifier>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y7</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">913.6</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000001785629/"/>
+      <rdfs:seeAlso rdf:resource="https://www.tosyokan.pref.shizuoka.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1006000948345"/>
+      <rdfs:seeAlso rdf:resource="https://opac.libnet.pref.okayama.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1009812886123"/>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034392406"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17212349"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784867168653"/>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034487006</link>
+      <description><![CDATA[<p>14[下],マイクロマガジン社,2026,978-4-86716-898-1<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 作,もりょ 絵</li><li>シリーズ名：かなで文庫 ; ふ-1-41</li><li>シリーズ名（読み）：カナデ ブンコ ; フ-1-41</li><li>NDC(10)：913.6</li></ul>]]></description>
+      <author>伏瀬, 1975-,もりょ,伏瀬 作,もりょ 絵</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034487006</guid>
+      <pubDate>Tue, 27 Jan 2026 22:18:46 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>もりょ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>モリョ</dcndl:creatorTranscription>
+      <dcndl:volume>14[下]</dcndl:volume>
+      <dcndl:seriesTitle>かなで文庫 ; ふ-1-41</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>カナデ ブンコ ; フ-1-41</dcndl:seriesTitleTranscription>
+      <dc:publisher>マイクロマガジン社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.1</dcterms:issued>
+      <dcndl:price>820円</dcndl:price>
+      <dc:extent>325p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86716-898-1</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034487006</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24213849</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34824053</dc:identifier>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y7</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">913.6</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000001798139/"/>
+      <rdfs:seeAlso rdf:resource="https://www.tosyokan.pref.shizuoka.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1006000961210"/>
+      <rdfs:seeAlso rdf:resource="https://opac.libnet.pref.okayama.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1009812899130"/>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034487006"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17234587"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784867168981"/>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034589127</link>
+      <description><![CDATA[<p>15[上],マイクロマガジン社,2026,978-4-86716-931-5<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 作,もりょ 絵</li><li>シリーズ名：かなで文庫 ; ふ-1-42</li><li>シリーズ名（読み）：カナデ ブンコ ; フ-1-42</li><li>NDC(10)：913.6</li></ul>]]></description>
+      <author>伏瀬, 1975-,もりょ,伏瀬 作,もりょ 絵</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034589127</guid>
+      <pubDate>Tue, 21 Apr 2026 18:42:24 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>もりょ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>モリョ</dcndl:creatorTranscription>
+      <dcndl:volume>15[上]</dcndl:volume>
+      <dcndl:seriesTitle>かなで文庫 ; ふ-1-42</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>カナデ ブンコ ; フ-1-42</dcndl:seriesTitleTranscription>
+      <dc:publisher>マイクロマガジン社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.3</dcterms:issued>
+      <dcndl:price>820円</dcndl:price>
+      <dc:extent>393p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86716-931-5</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034589127</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24245419</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34844326</dc:identifier>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y7</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">913.6</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000001810854/"/>
+      <rdfs:seeAlso rdf:resource="https://www.tosyokan.pref.shizuoka.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1006000974383"/>
+      <rdfs:seeAlso rdf:resource="https://opac.libnet.pref.okayama.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1009812912853"/>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034589127"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17256741"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784867169315"/>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034694357</link>
+      <description><![CDATA[<p>15[下],マイクロマガジン社,2026,978-4-86716-962-9<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 作,もりょ 絵</li><li>シリーズ名：かなで文庫 ; ふ-1-43</li><li>シリーズ名（読み）：カナデ ブンコ ; フ-1-43</li><li>NDC(10)：913.6</li></ul>]]></description>
+      <author>伏瀬, 1975-,もりょ,伏瀬 作,もりょ 絵</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034694357</guid>
+      <pubDate>Tue, 2 Jun 2026 18:14:44 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>もりょ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>モリョ</dcndl:creatorTranscription>
+      <dcndl:volume>15[下]</dcndl:volume>
+      <dcndl:seriesTitle>かなで文庫 ; ふ-1-43</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>カナデ ブンコ ; フ-1-43</dcndl:seriesTitleTranscription>
+      <dc:publisher>マイクロマガジン社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.5</dcterms:issued>
+      <dcndl:price>820円</dcndl:price>
+      <dc:extent>389p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86716-962-9</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034694357</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24260327</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34863560</dc:identifier>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y7</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">913.6</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000001823187/"/>
+      <rdfs:seeAlso rdf:resource="https://www.tosyokan.pref.shizuoka.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1006000986964"/>
+      <rdfs:seeAlso rdf:resource="https://opac.libnet.pref.okayama.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1009812926600"/>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034694357"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17279868"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784867169629"/>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034802526</link>
+      <description><![CDATA[<p>16[上],マイクロマガジン社,2026,978-4-86716-999-5<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 作,もりょ 絵</li><li>シリーズ名：かなで文庫 ; ふ-1-44</li><li>シリーズ名（読み）：カナデ ブンコ ; フ-1-44</li><li>NDC(10)：913.6</li></ul>]]></description>
+      <author>伏瀬, 1975-,もりょ,伏瀬 作,もりょ 絵</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034802526</guid>
+      <pubDate>Tue, 4 Aug 2026 00:51:38 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>もりょ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>モリョ</dcndl:creatorTranscription>
+      <dcndl:volume>16[上]</dcndl:volume>
+      <dcndl:seriesTitle>かなで文庫 ; ふ-1-44</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>カナデ ブンコ ; フ-1-44</dcndl:seriesTitleTranscription>
+      <dc:publisher>マイクロマガジン社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.7</dcterms:issued>
+      <dcndl:price>820円</dcndl:price>
+      <dc:extent>313p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86716-999-5</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034802526</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24284281</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34884001</dc:identifier>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y7</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">913.6</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000001835159/"/>
+      <rdfs:seeAlso rdf:resource="https://opac.libnet.pref.okayama.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1009812940384"/>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034802526"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784867169995"/>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034908748</link>
+      <description><![CDATA[<p>16[下],マイクロマガジン社,2026,978-4-8250-0036-0<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 作,もりょ 絵</li><li>シリーズ名：かなで文庫 ; ふ-1-45</li><li>シリーズ名（読み）：カナデ ブンコ ; フ-1-45</li><li>NDC(10)：913.6</li></ul>]]></description>
+      <author>伏瀬, 1975-,もりょ,伏瀬 作,もりょ 絵</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034908748</guid>
+      <pubDate>Wed, 30 Sep 2026 01:37:08 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>もりょ</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>モリョ</dcndl:creatorTranscription>
+      <dcndl:volume>16[下]</dcndl:volume>
+      <dcndl:seriesTitle>かなで文庫 ; ふ-1-45</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>カナデ ブンコ ; フ-1-45</dcndl:seriesTitleTranscription>
+      <dc:publisher>マイクロマガジン社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.9</dcterms:issued>
+      <dcndl:price>820円</dcndl:price>
+      <dc:extent>309p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-8250-0036-0</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034908748</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24303411</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34906796</dc:identifier>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y7</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">913.6</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034908748"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784825000360"/>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件 : バイリンガル版デラックス</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034530494</link>
+      <description><![CDATA[<p>1,講談社,2026,978-4-06-542240-3<p><ul><li>タイトル：転生したらスライムだった件 : バイリンガル版デラックス</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 原作,川上泰樹 漫画,みっつばー キャラクター原案,Stephen Paul 訳</li><li>シリーズ名：KODANSHA BILINGUAL COMICS</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,川上, 泰樹,Paul, Stephen,伏瀬 原作,川上泰樹 漫画,みっつばー キャラクター原案,Stephen Paul 訳</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034530494</guid>
+      <pubDate>Fri, 13 Feb 2026 18:52:06 +0900</pubDate>
+      <dc:title>転生したらスライムだった件 : バイリンガル版デラックス</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>川上, 泰樹</dc:creator>
+      <dc:creator>Paul, Stephen</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>カワカミ, タイキ</dcndl:creatorTranscription>
+      <dcndl:volume>1</dcndl:volume>
+      <dcndl:seriesTitle>KODANSHA BILINGUAL COMICS</dcndl:seriesTitle>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.2</dcterms:issued>
+      <dcndl:price>1400円</dcndl:price>
+      <dc:extent>254p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-542240-3</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034530494</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24220676</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34831187</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034530494"/>
+      <rdfs:seeAlso rdf:resource="https://cir.nii.ac.jp/crid/1970588935543940692"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000981505I"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065422403"/>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033894789</link>
+      <description><![CDATA[<p>22,マイクロマガジン社,2025,978-4-86716-707-6<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 著</li><li>シリーズ名：GC NOVELS</li><li>NDC(10)：913.6</li></ul>]]></description>
+      <author>伏瀬, 1975-,伏瀬 著</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033894789</guid>
+      <pubDate>Tue, 18 Feb 2025 22:58:44 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:volume>22</dcndl:volume>
+      <dcndl:seriesTitle>GC NOVELS</dcndl:seriesTitle>
+      <dc:publisher>マイクロマガジン社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.2</dcterms:issued>
+      <dcndl:price>1000円</dcndl:price>
+      <dc:extent>363p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86716-707-6</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033894789</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24081839</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34698023</dc:identifier>
+      <dc:subject xsi:type="dcndl:NDLC">KH971</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">913.6</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.library.city.sapporo.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1008001916338"/>
+      <rdfs:seeAlso rdf:resource="https://www.apl.pref.akita.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1009921156035"/>
+      <rdfs:seeAlso rdf:resource="https://www.lib.city.saitama.jp/bookdetail?num=3444695&amp;ctg=1"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.city.chiba.jp/licsxp-opac/WOpacTifSchCmpdDispAction.do"/>
+      <rdfs:seeAlso rdf:resource="https://opac.lib.city.yokohama.lg.jp/winj/opac/switch-detail-iccap.do?bibid=1124059705"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.city.kawasaki.jp/bookdetail?num=3854455&amp;ctg=1"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000001725441/"/>
+      <rdfs:seeAlso rdf:resource="https://www.toshokan.city.shizuoka.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1000000088497"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.city.nagoya.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1002410079137"/>
+      <rdfs:seeAlso rdf:resource="https://www.shiga-pref-library.jp/wo/opc_srh/srh_detail/5035104/"/>
+      <rdfs:seeAlso rdf:resource="https://www.oml.city.osaka.lg.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1002000007617"/>
+      <rdfs:seeAlso rdf:resource="https://www.lib-sakai.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1007001455031"/>
+      <rdfs:seeAlso rdf:resource="https://opac.libnet.pref.okayama.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1009812821426"/>
+      <rdfs:seeAlso rdf:resource="https://opac.miraionlibrary.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1000003262015"/>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033894789"/>
+      <rdfs:seeAlso rdf:resource="https://library.sapie.or.jp/cgi-bin/CN1MN1?S00101=J00DTL04&amp;S00222=4760818"/>
+      <rdfs:seeAlso rdf:resource="https://library.sapie.or.jp/cgi-bin/CN1MN1?S00101=J00DTL04&amp;S00222=4765973"/>
+      <rdfs:seeAlso rdf:resource="https://cir.nii.ac.jp/crid/1970586434879578555"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784867167076"/>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034419352</link>
+      <description><![CDATA[<p>23,マイクロマガジン社,2025,978-4-86716-873-8<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 著</li><li>シリーズ名：GC NOVELS</li><li>NDC(10)：913.6</li></ul>]]></description>
+      <author>伏瀬, 1975-,伏瀬 著</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034419352</guid>
+      <pubDate>Fri, 5 Dec 2025 18:00:10 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:volume>23</dcndl:volume>
+      <dcndl:seriesTitle>GC NOVELS</dcndl:seriesTitle>
+      <dc:publisher>マイクロマガジン社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.12</dcterms:issued>
+      <dcndl:price>1300円</dcndl:price>
+      <dc:extent>507p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86716-873-8</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034419352</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24195832</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34809530</dc:identifier>
+      <dc:subject xsi:type="dcndl:NDLC">KH971</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">913.6</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://www.apl.pref.akita.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1009921221000"/>
+      <rdfs:seeAlso rdf:resource="https://www.lib.city.saitama.jp/bookdetail?num=3515798&amp;ctg=1"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.city.chiba.jp/licsxp-opac/WOpacTifSchCmpdDispAction.do"/>
+      <rdfs:seeAlso rdf:resource="https://opac.lib.city.yokohama.lg.jp/winj/opac/switch-detail-iccap.do?bibid=1125047080"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.city.kawasaki.jp/bookdetail?num=3925851&amp;ctg=1"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.ishikawa.lg.jp/wo/opc_srh/srh_detail/1000001788955/"/>
+      <rdfs:seeAlso rdf:resource="https://www.toshokan.city.shizuoka.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1002000061135"/>
+      <rdfs:seeAlso rdf:resource="https://www.shiga-pref-library.jp/wo/opc_srh/srh_detail/5089352/"/>
+      <rdfs:seeAlso rdf:resource="https://www.oml.city.osaka.lg.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1002000084434"/>
+      <rdfs:seeAlso rdf:resource="https://www.lib-sakai.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1007001528442"/>
+      <rdfs:seeAlso rdf:resource="https://opac.libnet.pref.okayama.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1009812889380"/>
+      <rdfs:seeAlso rdf:resource="https://alislibopac.bunmori.tokushima.jp/winj/opac/switch-detail-iccap.do?bibid=1111635518"/>
+      <rdfs:seeAlso rdf:resource="https://opac.miraionlibrary.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1000003330054"/>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034419352"/>
+      <rdfs:seeAlso rdf:resource="https://library.sapie.or.jp/cgi-bin/CN1MN1?S00101=J00DTL04&amp;S00222=4859897"/>
+      <rdfs:seeAlso rdf:resource="https://library.sapie.or.jp/cgi-bin/CN1MN1?S00101=J00DTL04&amp;S00222=4865481"/>
+      <rdfs:seeAlso rdf:resource="https://cir.nii.ac.jp/crid/1970025056901408512"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784867168738"/>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000128-IB16949729</link>
+      <description><![CDATA[<p>25,講談社,2024,9784065341179<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 原作,川上泰樹 漫画,みっつばー キャラクター原案</li><li>シリーズ名：シリウスKC</li><li>シリーズ名（読み）：シリウス ケーシー</li></ul>]]></description>
+      <author>伏瀬,川上/泰樹,みっつばー,伏瀬 原作,川上泰樹 漫画,みっつばー キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000128-IB16949729</guid>
+      <pubDate>Fri, 10 Oct 2025 11:48:45 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬</dc:creator>
+      <dc:creator>川上/泰樹</dc:creator>
+      <dc:creator>みっつばー</dc:creator>
+      <dcndl:volume>25</dcndl:volume>
+      <dcndl:seriesTitle>シリウスKC</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>シリウス ケーシー</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JA</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2024</dc:date>
+      <dcterms:issued>2024.1</dcterms:issued>
+      <dcndl:price>690円</dcndl:price>
+      <dc:extent>172p ; 19×13cm</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">9784065341179</dc:identifier>
+      <dc:identifier xsi:type="dcndl:ISBN13">9784065341179</dc:identifier>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B16949729"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000739742H"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065341179"/>
+      <dc:description> 2024</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033236253</link>
+      <description><![CDATA[<p>25,講談社,2024,978-4-06-534118-6<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 原作,川上泰樹 漫画</li><li>シリーズ名：講談社キャラクターズA</li><li>シリーズ名（読み）：コウダンシャ キャラクターズ A</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,川上, 泰樹,伏瀬 原作,川上泰樹 漫画</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033236253</guid>
+      <pubDate>Fri, 19 Jan 2024 00:13:11 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>川上, 泰樹</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>カワカミ, タイキ</dcndl:creatorTranscription>
+      <dcndl:volume>25</dcndl:volume>
+      <dcndl:edition>特装版</dcndl:edition>
+      <dcndl:seriesTitle>講談社キャラクターズA</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>コウダンシャ キャラクターズ A</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2024</dc:date>
+      <dcterms:issued>2024.1</dcterms:issued>
+      <dcndl:price>2000円</dcndl:price>
+      <dc:extent>170 p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-534118-6</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033236253</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">23931991</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033236253"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065341186"/>
+      <dc:description> 2024</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033514878</link>
+      <description><![CDATA[<p>26,講談社,2024,978-4-06-535686-9<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 原作,川上泰樹 漫画</li><li>シリーズ名：講談社キャラクターズA</li><li>シリーズ名（読み）：コウダンシャ キャラクターズ A</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,川上, 泰樹,伏瀬 原作,川上泰樹 漫画</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033514878</guid>
+      <pubDate>Fri, 14 Jun 2024 01:15:01 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>川上, 泰樹</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>カワカミ, タイキ</dcndl:creatorTranscription>
+      <dcndl:volume>26</dcndl:volume>
+      <dcndl:edition>特装版</dcndl:edition>
+      <dcndl:seriesTitle>講談社キャラクターズA</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>コウダンシャ キャラクターズ A</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2024</dc:date>
+      <dcterms:issued>2024.6</dcterms:issued>
+      <dcndl:price>2000円</dcndl:price>
+      <dc:extent>172 p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-535686-9</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033514878</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">23988285</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033514878"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17012079"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000805227O"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065356869"/>
+      <dc:description> 2024</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033676174</link>
+      <description><![CDATA[<p>27,講談社,2024,978-4-06-537170-1<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 原作,川上泰樹 漫画</li><li>シリーズ名：講談社キャラクターズA</li><li>シリーズ名（読み）：コウダンシャ キャラクターズ A</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,川上, 泰樹,伏瀬 原作,川上泰樹 漫画</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033676174</guid>
+      <pubDate>Sat, 14 Sep 2024 02:51:25 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>川上, 泰樹</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>カワカミ, タイキ</dcndl:creatorTranscription>
+      <dcndl:volume>27</dcndl:volume>
+      <dcndl:edition>特装版</dcndl:edition>
+      <dcndl:seriesTitle>講談社キャラクターズA</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>コウダンシャ キャラクターズ A</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2024</dc:date>
+      <dcterms:issued>2024.9</dcterms:issued>
+      <dcndl:price>2000円</dcndl:price>
+      <dc:extent>167 p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-537170-1</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033676174</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24024410</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033676174"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17048008"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000834351S"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065371701"/>
+      <dc:description> 2024</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I033905621</link>
+      <description><![CDATA[<p>28,講談社,2025,978-4-06-538390-2<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 原作,川上泰樹 漫画</li><li>シリーズ名：講談社キャラクターズA</li><li>シリーズ名（読み）：コウダンシャ キャラクターズ A</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,川上, 泰樹,伏瀬 原作,川上泰樹 漫画</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I033905621</guid>
+      <pubDate>Thu, 13 Feb 2025 20:44:39 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>川上, 泰樹</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>カワカミ, タイキ</dcndl:creatorTranscription>
+      <dcndl:volume>28</dcndl:volume>
+      <dcndl:edition>特装版</dcndl:edition>
+      <dcndl:seriesTitle>講談社キャラクターズA</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>コウダンシャ キャラクターズ A</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.1</dcterms:issued>
+      <dcndl:price>2000円</dcndl:price>
+      <dc:extent>190 p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-538390-2</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">033905621</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24079787</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I033905621"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17097673"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000883119O"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065383902"/>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034119425</link>
+      <description><![CDATA[<p>29,講談社,2025,978-4-06-539769-5<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 原作,川上泰樹 漫画</li><li>シリーズ名：講談社キャラクターズA</li><li>シリーズ名（読み）：コウダンシャ キャラクターズ A</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,川上, 泰樹,伏瀬 原作,川上泰樹 漫画</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034119425</guid>
+      <pubDate>Wed, 2 Jul 2025 23:46:08 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>川上, 泰樹</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>カワカミ, タイキ</dcndl:creatorTranscription>
+      <dcndl:volume>29</dcndl:volume>
+      <dcndl:edition>特装版</dcndl:edition>
+      <dcndl:seriesTitle>講談社キャラクターズA</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>コウダンシャ キャラクターズ A</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.6</dcterms:issued>
+      <dcndl:price>2000円</dcndl:price>
+      <dc:extent>188 p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-539769-5</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034119425</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24133796</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034119425"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17152422"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000923227N"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065397695"/>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034336746</link>
+      <description><![CDATA[<p>30,講談社,2025,978-4-06-541514-6<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 原作,川上泰樹 漫画</li><li>シリーズ名：講談社キャラクターズA</li><li>シリーズ名（読み）：コウダンシャ キャラクターズ A</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,川上, 泰樹,伏瀬 原作,川上泰樹 漫画</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034336746</guid>
+      <pubDate>Sat, 25 Oct 2025 01:42:27 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>川上, 泰樹</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>カワカミ, タイキ</dcndl:creatorTranscription>
+      <dcndl:volume>30</dcndl:volume>
+      <dcndl:edition>特装版</dcndl:edition>
+      <dcndl:seriesTitle>講談社キャラクターズA</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>コウダンシャ キャラクターズ A</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.10</dcterms:issued>
+      <dcndl:price>2700円</dcndl:price>
+      <dc:extent>189 p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-541514-6</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034336746</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24177867</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">YU51</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034336746"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17213290"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065415146"/>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000136-I1970307460567230879</link>
+      <description><![CDATA[<p>31,講談社,2026,9784065423844<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬原作 ; 川上泰樹漫画 ; みっつばーキャラクター原案 = Regarding Reincarnated to Slime</li><li>NDC(10)：726.1</li><li>NDC(9)：726.1</li></ul>]]></description>
+      <author>伏瀬,川上, 泰樹,みっつばー,伏瀬原作 ; 川上泰樹漫画 ; みっつばーキャラクター原案 = Regarding Reincarnated to Slime</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000136-I1970307460567230879</guid>
+      <pubDate>Fri, 25 Sep 2026 11:13:32 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬</dc:creator>
+      <dc:creator>川上, 泰樹</dc:creator>
+      <dc:creator>みっつばー</dc:creator>
+      <dcndl:creatorTranscription>フセ</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>カワカミ, タイキ</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>ミッツバー</dcndl:creatorTranscription>
+      <dcndl:volume>31</dcndl:volume>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.2</dcterms:issued>
+      <dc:identifier xsi:type="dcndl:ISBN">9784065423844</dc:identifier>
+      <dc:identifier xsi:type="dcndl:ISBN13">9784065423844</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NIIBibID">BD14809355</dc:identifier>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC9">726.1</dc:subject>
+      <dc:description>表現種別: テキスト (ncrcontent), 静止画 (ncrcontent), 機器種別: 機器不用 (ncrmedia), キャリア種別: 冊子 (ncrcarrier)</dc:description>
+      <rdfs:seeAlso rdf:resource="https://cir.nii.ac.jp/crid/1970307460567230879"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000981321I"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065423844"/>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034543901</link>
+      <description><![CDATA[<p>31,講談社,2026,978-4-06-542550-3<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 原作,川上泰樹 漫画</li><li>シリーズ名：講談社キャラクターズA</li><li>シリーズ名（読み）：コウダンシャ キャラクターズ A</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,川上, 泰樹,伏瀬 原作,川上泰樹 漫画</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034543901</guid>
+      <pubDate>Tue, 17 Feb 2026 20:26:04 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>川上, 泰樹</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>カワカミ, タイキ</dcndl:creatorTranscription>
+      <dcndl:volume>31</dcndl:volume>
+      <dcndl:edition>特装版</dcndl:edition>
+      <dcndl:seriesTitle>講談社キャラクターズA</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>コウダンシャ キャラクターズ A</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.2</dcterms:issued>
+      <dcndl:price>2000円</dcndl:price>
+      <dc:extent>189 p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-542550-3</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034543901</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24221842</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034543901"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17246459"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065425503"/>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000136-I1970590329476889729</link>
+      <description><![CDATA[<p>32,講談社,2026,9784065437544<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：伏瀬原作 ; 川上泰樹漫画 ; みっつばーキャラクター原案 = Regarding Reincarnated to Slime</li><li>NDC(10)：726.1</li><li>NDC(9)：726.1</li></ul>]]></description>
+      <author>伏瀬,川上, 泰樹,みっつばー,伏瀬原作 ; 川上泰樹漫画 ; みっつばーキャラクター原案 = Regarding Reincarnated to Slime</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000136-I1970590329476889729</guid>
+      <pubDate>Fri, 25 Sep 2026 11:13:32 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬</dc:creator>
+      <dc:creator>川上, 泰樹</dc:creator>
+      <dc:creator>みっつばー</dc:creator>
+      <dcndl:creatorTranscription>フセ</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>カワカミ, タイキ</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>ミッツバー</dcndl:creatorTranscription>
+      <dcndl:volume>32</dcndl:volume>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.6</dcterms:issued>
+      <dc:identifier xsi:type="dcndl:ISBN">9784065437544</dc:identifier>
+      <dc:identifier xsi:type="dcndl:ISBN13">9784065437544</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NIIBibID">BD19395737</dc:identifier>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC9">726.1</dc:subject>
+      <dc:description>表現種別: テキスト (ncrcontent), 静止画 (ncrcontent), 機器種別: 機器不用 (ncrmedia), キャリア種別: 冊子 (ncrcarrier)</dc:description>
+      <rdfs:seeAlso rdf:resource="https://cir.nii.ac.jp/crid/1970590329476889729"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000001013187D"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065437544"/>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034745738</link>
+      <description><![CDATA[<p>32,講談社,2026,978-4-06-543920-3<p><ul><li>タイトル：転生したらスライムだった件</li><li>タイトル（読み）：テンセイシタラ スライム ダッタ ケン</li><li>責任表示：伏瀬 原作,川上泰樹 漫画</li><li>シリーズ名：講談社キャラクターズA</li><li>シリーズ名（読み）：コウダンシャ キャラクターズ A</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>伏瀬, 1975-,川上, 泰樹,伏瀬 原作,川上泰樹 漫画</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034745738</guid>
+      <pubDate>Thu, 25 Jun 2026 21:54:22 +0900</pubDate>
+      <dc:title>転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>テンセイシタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>伏瀬, 1975-</dc:creator>
+      <dc:creator>川上, 泰樹</dc:creator>
+      <dcndl:creatorTranscription>フセ, 1975-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>カワカミ, タイキ</dcndl:creatorTranscription>
+      <dcndl:volume>32</dcndl:volume>
+      <dcndl:edition>特装版</dcndl:edition>
+      <dcndl:seriesTitle>講談社キャラクターズA</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>コウダンシャ キャラクターズ A</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.6</dcterms:issued>
+      <dcndl:price>2000円</dcndl:price>
+      <dc:extent>164 p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-543920-3</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034745738</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24270285</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034745738"/>
+      <rdfs:seeAlso rdf:resource="https://www.library.pref.osaka.jp/bibj/?B17291661"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000001035640W"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065439203"/>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>ミニクリアファイル付き　転生したらスライムだった件（33）　特装版</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000137-I9784065454350</link>
+      <description><![CDATA[<p>講談社,2026-10-08,9784065454350<p><ul><li>タイトル：ミニクリアファイル付き　転生したらスライムだった件（33）　特装版</li><li>タイトル（読み）：ミニクリアファイルツキ テンセイシタラスライムダッタケン33 トクソウバン</li><li>責任表示：川上 泰樹 著・文・その他,伏瀬 原著,みっつばー 著・文・その他</li><li>シリーズ名：講談社キャラクターズA</li><li>シリーズ名（読み）：コウダンシャキャラクターズA</li></ul>]]></description>
+      <author>川上 泰樹,伏瀬,みっつばー,川上 泰樹 著・文・その他,伏瀬 原著,みっつばー 著・文・その他</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000137-I9784065454350</guid>
+      <pubDate>Thu, 8 Oct 2026 18:48:00 +0900</pubDate>
+      <dc:title>ミニクリアファイル付き　転生したらスライムだった件（33）　特装版</dc:title>
+      <dcndl:titleTranscription>ミニクリアファイルツキ テンセイシタラスライムダッタケン33 トクソウバン</dcndl:titleTranscription>
+      <dc:creator>川上 泰樹</dc:creator>
+      <dc:creator>伏瀬</dc:creator>
+      <dc:creator>みっつばー</dc:creator>
+      <dcndl:creatorTranscription>カワカミ タイキ</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>フセ</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>ミッツバー</dcndl:creatorTranscription>
+      <dcndl:seriesTitle>講談社キャラクターズA</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>コウダンシャキャラクターズA</dcndl:seriesTitleTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026-10-08</dc:date>
+      <dcterms:issued>2026-10-08</dcterms:issued>
+      <dcndl:price>1800</dcndl:price>
+      <dc:extent>192p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">9784065454350</dc:identifier>
+      <dc:identifier xsi:type="dcndl:ISBN13">9784065454350</dc:identifier>
+      <dc:subject>女性にもオススメ</dc:subject>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065454350"/>
+      <dc:description> 2026-10-08</dc:description>
+    </item>
+    <item>
+      <title>リーダーシップはスライムに学べ : 多様な人材を活かしてチームで成果を出す最強のマネジメント術 : 転生したらスライムだった件</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034318438</link>
+      <description><![CDATA[<p>講談社,2025,978-4-06-540267-2<p><ul><li>タイトル：リーダーシップはスライムに学べ : 多様な人材を活かしてチームで成果を出す最強のマネジメント術 : 転生したらスライムだった件</li><li>タイトル（読み）：リーダーシップ ワ スライム ニ マナベ : タヨウ ナ ジンザイ オ イカシテ チーム デ セイカ オ ダス サイキョウ ノ マネジメントジュツ : テンセイ シタラ スライム ダッタ ケン</li><li>責任表示：吉田幸弘 著</li><li>NDC(10)：336.3</li></ul>]]></description>
+      <author>吉田, 幸弘, 1970-,吉田幸弘 著</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034318438</guid>
+      <pubDate>Fri, 31 Oct 2025 22:42:51 +0900</pubDate>
+      <dc:title>リーダーシップはスライムに学べ : 多様な人材を活かしてチームで成果を出す最強のマネジメント術 : 転生したらスライムだった件</dc:title>
+      <dcndl:titleTranscription>リーダーシップ ワ スライム ニ マナベ : タヨウ ナ ジンザイ オ イカシテ チーム デ セイカ オ ダス サイキョウ ノ マネジメントジュツ : テンセイ シタラ スライム ダッタ ケン</dcndl:titleTranscription>
+      <dc:creator>吉田, 幸弘, 1970-</dc:creator>
+      <dcndl:creatorTranscription>ヨシダ, ユキヒロ, 1970-</dcndl:creatorTranscription>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.9</dcterms:issued>
+      <dcndl:price>1500円</dcndl:price>
+      <dc:extent>189p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-06-540267-2</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034318438</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24180723</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34788303</dc:identifier>
+      <dc:subject>管理者</dc:subject>
+      <dc:subject xsi:type="dcndl:NDLC">DH231</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">336.3</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description>文献あり</dc:description>
+      <rdfs:seeAlso rdf:resource="https://opac.lib.city.yokohama.lg.jp/winj/opac/switch-detail-iccap.do?bibid=1125035714"/>
+      <rdfs:seeAlso rdf:resource="https://opac.library.kochi.jp/winj/opac/switch-detail-iccap.do?bibid=1120901287"/>
+      <rdfs:seeAlso rdf:resource="https://opac.miraionlibrary.jp/licsxp-opac/WOpacMsgNewListToTifTilDetailAction.do?tilcod=1000003317196"/>
+      <rdfs:seeAlso rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000002-I034318438"/>
+      <rdfs:seeAlso rdf:resource="https://cir.nii.ac.jp/crid/1971432115477464325"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000947293T"/>
+      <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065402672"/>
+      <dc:description> 2025</dc:description>
+    </item>
+  </channel>
+</rss>
