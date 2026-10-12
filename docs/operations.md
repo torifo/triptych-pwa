@@ -8,41 +8,52 @@ collector は `backend/adapters/` 配下のソースごとに独立したアダ�
 
 | ソース | 用途 | レート制限 | キャッシュTTL | 備考 |
 |---|---|---|---|---|
-| AniList (`anilist.py`) | アニメメタデータ・relations（原作候補）・放送予定・検知 | 60 req/min（自主制限） | 検索1h / 詳細6h | GraphQL API |
-| なろう小説API (`narou.py`) | Web小説メタデータ・更新日 | 1 req/s | 検索1h / 詳細6h | 公式API |
-| openBD (`openbd.py`) | ISBN引きの書籍情報・発売日 | 2 req/s | 詳細6h | ISBN検索専用（タイトル検索は非対応） |
-| NDL Search (`ndl.py`) | シリーズ新刊の探索（→ISBNをopenBDで詳細化） | 1 req/s | 検索1h | 国会図書館サーチ OpenSearch API |
-| しょぼいカレンダー (`syoboi.py`) | 放送日詳細（AniList補完） | 1 req/s | 詳細6h | 公開API |
-| カクヨム (`kakuyomu.py`) | 話数・最終更新（API非提供のためスクレイピング） | 1 req/s + 同時実行1（`asyncio.Lock`） | 24h | robots.txt遵守。生HTMLは返さず正規化DTOのみ返す |
+| AniList (`anilist.py`) | アニメの放送予定・relations（原作→アニメ・続編）・原作エントリの解決・検知 | 25 req/min（実際の上限は 30/min。バースト4） | 検索1h / 詳細6h | GraphQL API。成人向け（isAdult）は除外。放送日は JST・朝5時区切り（`25:30` 表記） |
+| なろう小説API (`narou.py`) | Web小説の検索・話数・更新日・完結 | 1 req/s | 検索1h / 詳細6h | 公式API。検索は `title=1&type=re&order=hyoka`（タイトルのみ・連載のみ・評価順）。`end` は 0=完結/短編、1=連載中。R18 API は使わない |
+| openBD (`openbd.py`) | ISBN引きの書籍情報・発売日（まとめ取り可） | 2 req/s | 詳細6h | ISBN検索専用。大手版元は pubdate が空のことが多いので NDL の日付で補う |
+| NDL Search (`ndl.py`) | 紙の新刊・近刊の探索、書籍のシリーズ検索 | 1 req/s | 6h | 国会図書館サーチ OpenSearch API。`mediatype=books&from=<2年前>&cnt=500` を全件取得してから発行日順に並べる。近刊（出版予定）も入る。発行日は初版日に近く、書店の発売日と数日ずれることがある |
+| しょぼいカレンダー (`syoboi.py`) | 放送局・配信サービスの番組と配信開始 | **60秒に1回**（robots.txt の `Crawl-delay: 60`） | 結果24h / チャンネル表7日 / 見つからない6h | 専用キューで取得し、未取得の間は `queued` を返して次の同期で拾う。初回は3リクエストで約2分 |
+| カクヨム (`kakuyomu.py`) | 作品の検索・話数・最終更新・完結（API非提供のためスクレイピング） | 1 req/s + 同時実行1（`asyncio.Lock`） | 検索1h / 作品24h | robots.txt をパスごとに確認。生HTMLは返さず正規化DTOのみ返す。日付は UTC から JST に変換 |
+
+見送ったソース: 版元ドットコム（書誌の利用可否が不明）、楽天ブックス API（鍵が必要）、Google Books（鍵なしは日次枠0）、ハーメルン・ノベルアップ+（ボット拒否）、pixiv ノベル（規約でクローラー収集を禁止）。詳細は `specs/data-coverage/design.md`。
 
 共通ルール:
 
 - **User-Agent**: 全リクエストで `triptych/0.1 (personal tracker)` を明示します。
-- **robots.txt**: スクレイピング系（カクヨム）はアダプター初期化後の初回アクセス時に一度 `robots.txt` を取得・パースし、`can_fetch` が偽なら以降のリクエストを `SourceUnavailable` として拒否します（`backend/adapters/kakuyomu.py` の `_ensure_robots_allowed`）。
+- **robots.txt**: スクレイピング系（カクヨム）は `robots.txt` を取得・パースし、パスごと（`/search` と `/works/`）に `can_fetch` を確認します。偽なら `SourceUnavailable`。取得に失敗した時は締め出さず、次の呼び出しで取り直します。
+- **health**: 各ルーターは `SourceUnavailable` を捕まえると `backend/errors.py` の `record_adapter_error` で記録し、`/api/health` がソースごとの直近エラーを返します（回復後も時刻つきで残ります）。
 - **レート制御の実装**: `backend/ratelimit.py` の `TokenBucket`（`rate`/`capacity` トークンバケット）を各アダプターが1インスタンスずつ保持します。API系は `acquire()` でブロッキング待機、スクレイピング系はさらに `asyncio.Lock` で同時実行数を1に絞ります。
 - **キャッシュの実装**: `backend/cache.py` の `TTLCache`（SQLite backed）。`get()` は期限切れエントリを遅延削除し、ミス扱いにします。手動プル時のみ `?refresh=1` で強制更新できます（キャッシュを無視して再取得）。
-- **タイトル検索の分業**: openBDはISBN引き専用のため、シリーズ新刊のタイトル探索はNDL Searchが担い、得られたISBNをopenBDで詳細化する2段構成です（`GET /api/ndl/series?title=`）。
+- **紙の新刊の分業**: 探索は NDL Search が主役です（`GET /api/ndl/series?title=&kind=novel|manga&line=`）。翻訳（978-4 以外の ISBN）・電子書籍・アンソロジー・特装版などを除き、NDC 分類で小説（913.x）と漫画（726.x）を分け、叢書名で本編とジュニア文庫などの系統（line）を分けます。日付の精度が月・年しかない近い巻だけ、openBD をまとめ取り1回で照会して日付を補います。巻の同一性は ISBN で判定します。
 
 ## 同期の仕組み
 
 実装: `src/lib/sync/engine.ts`
 
-- **トリガー**: アプリ起動時、および Settings 等からの手動プル。
-- **1hスロットル**: 前回同期から `THROTTLE_MS = 1時間` 未満の場合、起動時の自動同期はスキップされます（`engine.ts` の `THROTTLE_MS` 定数）。手動プルは `force` フラグでスロットルを無視して実行できます。
-- **対象は追跡中Editionのみ**: `status ∈ {plan, active, paused}` の Edition だけが同期対象です。`done` / `dropped` は同期しません（全件同期による外部APIレート圧迫を避けるため）。
-- **アニメReleaseの粒度（次話ローリング）**: 全話をReleaseとして残すとカレンダーが毎週ノイズで埋まるため、放送済み話は残しません。AniListの `nextAiringEpisode` を毎回の同期で上書きする形で「次に来る話」だけを追跡します（season-start + 次話ローリングのみ）。
-- **日付変更の履歴**: Releaseの日付が変更（延期等）された場合は `dateHistory` に旧日付を追記して保持します。
-- **失敗時の扱い**: ソース単位で処理を握りつぶさず、Sync Engineはそのソースをスキップして他ソースの同期を続行します。エラーは `meta.lastSyncErrors` 相当としてアプリ内に記録され、Settings画面の「同期」セクションに非侵襲的に表示されます（後述）。
+- **トリガー**: アプリ起動時、および Home の「今すぐ同期」（手動）。手動同期は1hスロットルを無視し、しょぼかる以外の全エンドポイントに `refresh=1` を付けてキャッシュを取り直します。しょぼかるは `Crawl-delay: 60` のため、手動でも24時間キャッシュを使います。
+- **1hスロットル**: 前回同期から1時間未満なら、起動時の自動同期はスキップします。
+- **対象は追跡中Editionのみ**: `status ∈ {plan, active, paused}` の Edition だけが対象です。
+- **メディア種別ごとの振り分け**:
+  - **アニメ**: AniList の `media` でシーズン開始と次話、しょぼかるで配信サービスごとの配信開始（`stream-start`）を取ります。次話は1件だけのローリングで、放送が終わると消えます。毎週出るので新着にはせず、直近とカレンダーにだけ出します。しょぼかるが `queued` を返した時は黙ってスキップし、次の同期で拾います
+  - **文庫・漫画**: sourceRefs に関係なく、Work のタイトルで NDL の新刊を引きます（文庫は小説、漫画はコミックの分類）。採用した系統（本編・ジュニア文庫など）は `syncHints.ndlLine` に保存して次回も使います。巻は ISBN で照合します。AniList の sourceRef は検知用の ID としてだけ使い、Release は作りません
+  - **Web小説**: なろう・カクヨムから話数・最終更新・完結を取ります。`progress.total` だけを更新し、既読位置（current）と単位は変えません。最新話は1件のローリングで、話数が増えた時だけ新着にします
+- **日付と精度**: アニメは JST・朝5時区切り（深夜1:30は前日の `25:30`）。年だけ・年月だけの日付は精度つきで持ち、「2026年8月」のように表示します。
+- **延期の記録**: 日付が変わった時、新しい日付が旧日付の精度の範囲外に出た場合だけ `dateHistory` に記録します（「2026年8月」→「8/25」は精緻化なので記録しない）。
+- **新着の扱い**: 新しく見つけた Release のうち、日付が過去のもの（登録直後に取り込んだ既刊など）は最初から既読にします。手動で足した Release は同期で上書きも削除もしません。
+- **失敗時の扱い**: ソース単位でスキップして続行します。どのソースも成功せず失敗がある時は最終同期時刻を進めないので、次の起動で再試行されます。エラーは Home の同期状態と Settings の「同期」に出ます（検知のエラーは「検知」として表示）。
 
 ## 検知の仕組み（アニメ化検知）
 
 実装: `src/lib/sync/detect.ts`
 
-- **対象**: 追跡中の原作系Edition（web-novel / light-novel / manga）。
-- **24h/Workスロットル**: `DETECTION_THROTTLE_MS = 24時間`。Work単位で最後に検知を実行した時刻から24時間経っていない場合はスキップします。追跡作品数が増えても同期時間とAniListのレートを圧迫しない設計です。
-- **照合スコアの閾値**: `DETECTION_MATCH_THRESHOLD = 0.85`。AniListの `title.native`（日本語原題）とsynonymsを用いたタイトル照合スコアがこの閾値未満の候補は検知結果として採用しません（design.mdに数値の明記はなく、MVP初期値としてコード側で定数化しています）。
-- **却下（rejected）の除外**: 検知結果をユーザーが却下すると `DetectionEvent.state` が `rejected` になり、同一 `(workId, externalId)` の組は以降の照合から永続的に除外されます。誤検知を許容しつつ再提示を防ぐ仕組みです。
-- **accept時の挙動**: 検知を承認するとアニメEditionが自動生成され、放送日が確定していればReleaseとしてカレンダーに追加されます。
+- **対象**: 追跡中の Edition を持つ Work（原作系と、続編を探すためのアニメ）。
+- **3つの経路**（信頼度の高い順）:
+  1. **続編（sequel）**: 追跡中のアニメの AniList id から relations の SEQUEL を最大3段辿ります。放送済みの期は通り抜けて、その先の新期を探します
+  2. **原作から（relation）**: 原作の AniList NOVEL/MANGA id から relations の ADAPTATION（アニメ）を辿ります。id は sourceRefs の anilist → `syncHints.anilistSourceId` → `resolve-source`（タイトルから原作エントリを解決）の順で決め、解決した id は保存します
+  3. **タイトル一致（title）**: 上の2つで id が決まらない Work だけ、従来の `title.native` 照合（閾値 0.85）を使います
+- **提案しないもの**: 放送済み・中止の期（検知は「発表を知る」ため）、どの Work でも既に登録済みのアニメ、同じ組の検知が既にあるもの（却下・承認済みを含む）、MUSIC 形式、成人向け。
+- **24h/Workスロットル**: Work ごとに24時間に1回。その Work の照会が全部成功した時だけ記録するので、失敗した Work は次の同期で再試行されます。
+- **accept時の挙動**: 承認するとアニメ Edition が作られ、放送開始日があれば精度つきの Release として追加されます。
 
 ## トラブルシュート
 
