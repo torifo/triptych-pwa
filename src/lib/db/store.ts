@@ -4,16 +4,26 @@ import type {
   Work,
   Edition,
   EditionProgress,
+  EditionSyncHints,
+  SourceRef,
+  DatePrecision,
   Release,
-  ReleaseDateHistoryEntry,
   DetectionEvent,
   DetectionCandidate,
   Status,
 } from './schema';
 import { normalizeTitle } from '../normalize';
+import {
+  compareYmd,
+  isPastRelease,
+  isValidYmd,
+  precisionEnd,
+  precisionStart,
+  todayJst,
+} from '../dates';
 
-function nowISO(): string {
-  return new Date().toISOString();
+function nowISO(now: Date = new Date()): string {
+  return now.toISOString();
 }
 
 // ---------------------------------------------------------------------------
@@ -202,38 +212,168 @@ export async function updateEditionProgress(
   return { ...existing, ...patch };
 }
 
+/** 同じ source+externalId の sourceRef が既にあれば何もしない（重複を作らない）。 */
+export async function addSourceRef(
+  editionId: string,
+  ref: SourceRef,
+  database: TriptychDB = defaultDB,
+): Promise<Edition> {
+  return database.transaction('rw', database.editions, async () => {
+    const existing = await database.editions.get(editionId);
+    if (!existing) throw new Error(`Edition not found: ${editionId}`);
+    if (existing.sourceRefs.some((r) => sameSourceRef(r, ref))) return existing;
+    const patch: Partial<Edition> = {
+      sourceRefs: [...existing.sourceRefs, ref],
+      updatedAt: nowISO(),
+    };
+    await database.editions.update(editionId, patch);
+    return { ...existing, ...patch };
+  });
+}
+
+export async function removeSourceRef(
+  editionId: string,
+  ref: Pick<SourceRef, 'source' | 'externalId'>,
+  database: TriptychDB = defaultDB,
+): Promise<Edition> {
+  return database.transaction('rw', database.editions, async () => {
+    const existing = await database.editions.get(editionId);
+    if (!existing) throw new Error(`Edition not found: ${editionId}`);
+    const sourceRefs = existing.sourceRefs.filter((r) => !sameSourceRef(r, ref));
+    if (sourceRefs.length === existing.sourceRefs.length) return existing;
+    const patch: Partial<Edition> = { sourceRefs, updatedAt: nowISO() };
+    await database.editions.update(editionId, patch);
+    return { ...existing, ...patch };
+  });
+}
+
+function sameSourceRef(
+  a: Pick<SourceRef, 'source' | 'externalId'>,
+  b: Pick<SourceRef, 'source' | 'externalId'>,
+): boolean {
+  return a.source === b.source && a.externalId === b.externalId;
+}
+
+/** null は削除、undefined は変更なし。 */
+export type EditionSyncHintsPatch = { [K in keyof EditionSyncHints]?: EditionSyncHints[K] | null };
+
+export async function updateEditionSyncHints(
+  editionId: string,
+  hints: EditionSyncHintsPatch,
+  database: TriptychDB = defaultDB,
+): Promise<Edition> {
+  return database.transaction('rw', database.editions, async () => {
+    const existing = await database.editions.get(editionId);
+    if (!existing) throw new Error(`Edition not found: ${editionId}`);
+    const next: Record<string, string> = { ...existing.syncHints };
+    for (const [key, value] of Object.entries(hints)) {
+      if (value === null) delete next[key];
+      else if (value !== undefined) next[key] = value;
+    }
+    const syncHints = Object.keys(next).length > 0 ? (next as EditionSyncHints) : undefined;
+    if (JSON.stringify(syncHints) === JSON.stringify(existing.syncHints)) return existing;
+    const patch: Partial<Edition> = { syncHints, updatedAt: nowISO() };
+    await database.editions.update(editionId, patch);
+    return { ...existing, ...patch };
+  });
+}
+
+export async function setEditionCompleted(
+  editionId: string,
+  completed: boolean,
+  database: TriptychDB = defaultDB,
+): Promise<Edition> {
+  const existing = await database.editions.get(editionId);
+  if (!existing) throw new Error(`Edition not found: ${editionId}`);
+  if (existing.completed === completed) return existing;
+  const patch: Partial<Edition> = { completed, updatedAt: nowISO() };
+  await database.editions.update(editionId, patch);
+  return { ...existing, ...patch };
+}
+
 // ---------------------------------------------------------------------------
 // Release
 // ---------------------------------------------------------------------------
-
 export interface CreateReleaseInput {
   editionId: string;
   kind: Release['kind'];
   label: string;
   date: string;
+  precision?: DatePrecision;
+  time?: string;
+  externalId?: string;
+  origin?: Release['origin'];
   source: Release['source'];
   seenAt?: string;
 }
 
-export async function createRelease(
-  input: CreateReleaseInput,
-  database: TriptychDB = defaultDB,
-): Promise<Release> {
-  const ts = nowISO();
+/** month/year 精度の date は月初・年初に揃える。 */
+function canonicalDate(date: string, precision: DatePrecision): string {
+  return precision === 'day' || !isValidYmd(date) ? date : precisionStart(date, precision);
+}
+
+function assertValidDate(date: string): void {
+  if (!isValidYmd(date)) throw new RangeError(`Invalid release date (expected YYYY-MM-DD): ${date}`);
+}
+
+function buildRelease(input: CreateReleaseInput, ts: string): Release {
+  const precision = input.precision ?? 'day';
   const release: Release = {
     id: nanoid(),
     editionId: input.editionId,
     kind: input.kind,
     label: input.label,
-    date: input.date,
+    date: canonicalDate(input.date, precision),
+    precision,
+    origin: input.origin ?? (input.source === 'manual' ? 'manual' : 'sync'),
     dateHistory: [],
     source: input.source,
     seenAt: input.seenAt,
     createdAt: ts,
     updatedAt: ts,
   };
+  if (input.time !== undefined) release.time = input.time;
+  if (input.externalId !== undefined) release.externalId = input.externalId;
+  return release;
+}
+
+export async function createRelease(
+  input: CreateReleaseInput,
+  database: TriptychDB = defaultDB,
+): Promise<Release> {
+  const release = buildRelease(input, nowISO());
   await database.releases.add(release);
   return release;
+}
+
+export interface CreateManualReleaseInput {
+  editionId: string;
+  kind: Release['kind'];
+  label: string;
+  date: string;
+  precision?: DatePrecision;
+  time?: string;
+  externalId?: string;
+}
+
+/** 手動 Release（origin='manual'）。本人が足したものなので新着にはしない。 */
+export async function createManualRelease(
+  input: CreateManualReleaseInput,
+  database: TriptychDB = defaultDB,
+): Promise<Release> {
+  assertValidDate(input.date);
+  return database.transaction('rw', database.editions, database.releases, async () => {
+    if (!(await database.editions.get(input.editionId))) {
+      throw new Error(`Edition not found: ${input.editionId}`);
+    }
+    const ts = nowISO();
+    const release = buildRelease(
+      { ...input, source: 'manual', origin: 'manual', seenAt: ts },
+      ts,
+    );
+    await database.releases.add(release);
+    return release;
+  });
 }
 
 export async function getRelease(
@@ -255,19 +395,53 @@ export async function listReleasesByEdition(
 }
 
 export type UpdateReleaseInput = Partial<
-  Pick<Release, 'label' | 'date' | 'seenAt' | 'kind' | 'source'>
+  Pick<
+    Release,
+    'label' | 'date' | 'precision' | 'time' | 'externalId' | 'seenAt' | 'kind' | 'source' | 'origin'
+  >
 >;
 
+const CLEARABLE_RELEASE_KEYS = new Set(['time', 'externalId', 'seenAt']);
+
+/** 内容（label/date/precision/time/externalId/kind）が実際に変わると origin='manual' にする。seenAt だけなら変えない。 */
 export async function updateRelease(
   id: string,
   changes: UpdateReleaseInput,
   database: TriptychDB = defaultDB,
 ): Promise<Release> {
-  const existing = await database.releases.get(id);
-  if (!existing) throw new Error(`Release not found: ${id}`);
-  const patch: Partial<Release> = { ...changes, updatedAt: nowISO() };
-  await database.releases.update(id, patch);
-  return { ...existing, ...patch };
+  return database.transaction('rw', database.releases, async () => {
+    const existing = await database.releases.get(id);
+    if (!existing) throw new Error(`Release not found: ${id}`);
+
+    const patch: Partial<Release> = {};
+    for (const [key, value] of Object.entries(changes)) {
+      if (value !== undefined || CLEARABLE_RELEASE_KEYS.has(key)) {
+        (patch as Record<string, unknown>)[key] = value;
+      }
+    }
+
+    const precision = changes.precision ?? existing.precision ?? 'day';
+    if ('date' in patch || 'precision' in patch) {
+      const date = changes.date ?? existing.date;
+      assertValidDate(date);
+      patch.date = canonicalDate(date, precision);
+      patch.precision = precision;
+    }
+
+    const edited =
+      (patch.label !== undefined && patch.label !== existing.label) ||
+      (patch.kind !== undefined && patch.kind !== existing.kind) ||
+      (patch.date !== undefined && patch.date !== existing.date) ||
+      (patch.precision !== undefined && patch.precision !== (existing.precision ?? 'day')) ||
+      ('time' in patch && patch.time !== existing.time) ||
+      ('externalId' in patch && patch.externalId !== existing.externalId);
+    if (changes.origin) patch.origin = changes.origin;
+    else if (edited) patch.origin = 'manual';
+
+    patch.updatedAt = nowISO();
+    await database.releases.update(id, patch);
+    return { ...existing, ...patch };
+  });
 }
 
 export async function deleteRelease(id: string, database: TriptychDB = defaultDB): Promise<void> {
@@ -279,56 +453,92 @@ export interface ReleaseMergeInput {
   kind: Release['kind'];
   label: string;
   date: string;
+  precision?: DatePrecision;
+  time?: string;
+  externalId?: string;
   source: Release['source'];
 }
 
-/**
- * Release 差分マージ: 同一 Edition の同一 kind+label の Release が既にあれば、
- * date が変わっている場合のみ旧 date を dateHistory に追記して上書きする。
- * 一致する既存 Release が無ければ新規追加する。
- */
+export interface MergeReleaseOptions {
+  /** 新規作成する Release の日付が過去なら seenAt を作成時刻で埋める（既定 true）。 */
+  markPastSeen?: boolean;
+  /** 「今日」と作成時刻の基準（テスト用）。 */
+  now?: Date;
+}
+
+const PRECISION_RANK: Record<DatePrecision, number> = { day: 0, month: 1, year: 2 };
+
+interface DateWithPrecision {
+  date: string;
+  precision: DatePrecision;
+}
+
+/** 精度の細かい側の日付が、粗い側の期間の外に出たときだけ延期（精緻化・同範囲内の粗化は延期ではない）。 */
+function isPostponement(prev: DateWithPrecision, next: DateWithPrecision): boolean {
+  if (prev.precision === next.precision) return prev.date !== next.date;
+  const [fine, coarse] =
+    PRECISION_RANK[next.precision] < PRECISION_RANK[prev.precision] ? [next, prev] : [prev, next];
+  return (
+    compareYmd(fine.date, precisionStart(coarse.date, coarse.precision)) < 0 ||
+    compareYmd(fine.date, precisionEnd(coarse.date, coarse.precision)) > 0
+  );
+}
+
+/** externalId があれば (editionId, kind, externalId)、無ければ (editionId, kind, label) で照合。manual は触らない。 */
 export async function mergeRelease(
   input: ReleaseMergeInput,
   database: TriptychDB = defaultDB,
+  options: MergeReleaseOptions = {},
 ): Promise<Release> {
+  assertValidDate(input.date);
+  const precision = input.precision ?? 'day';
+  const date = canonicalDate(input.date, precision);
+  const now = options.now ?? new Date();
+
   return database.transaction('rw', database.releases, async () => {
-    const candidates = await database.releases
-      .where('editionId')
-      .equals(input.editionId)
-      .toArray();
-    const existing = candidates.find(
-      (r) => r.kind === input.kind && r.label === input.label,
-    );
+    const matches = input.externalId
+      ? await database.releases
+          .where('[editionId+kind+externalId]')
+          .equals([input.editionId, input.kind, input.externalId])
+          .toArray()
+      : (await database.releases.where('editionId').equals(input.editionId).toArray()).filter(
+          (r) => r.kind === input.kind && r.label === input.label,
+        );
 
+    const existing = matches.find((r) => r.origin !== 'manual');
     if (!existing) {
-      return createRelease(
-        {
-          editionId: input.editionId,
-          kind: input.kind,
-          label: input.label,
-          date: input.date,
-          source: input.source,
-        },
-        database,
+      if (matches.length > 0) return matches[0];
+      const ts = nowISO(now);
+      const seen =
+        options.markPastSeen !== false && isPastRelease({ date, precision }, todayJst(now));
+      const release = buildRelease(
+        { ...input, date, precision, seenAt: seen ? ts : undefined },
+        ts,
       );
+      await database.releases.add(release);
+      return release;
     }
 
-    if (existing.date === input.date) {
-      // 変化なし: そのまま返す
-      return existing;
-    }
+    const prev: DateWithPrecision = { date: existing.date, precision: existing.precision ?? 'day' };
+    const changed =
+      prev.date !== date ||
+      prev.precision !== precision ||
+      existing.time !== input.time ||
+      existing.label !== input.label;
+    if (!changed) return existing;
 
-    const ts = nowISO();
-    const historyEntry: ReleaseDateHistoryEntry = {
-      date: existing.date,
-      changedAt: ts,
-    };
+    const ts = nowISO(now);
     const patch: Partial<Release> = {
-      date: input.date,
-      dateHistory: [...existing.dateHistory, historyEntry],
+      label: input.label,
+      date,
+      precision,
+      time: input.time,
       source: input.source,
       updatedAt: ts,
     };
+    if (isPostponement(prev, { date, precision })) {
+      patch.dateHistory = [...existing.dateHistory, { date: existing.date, changedAt: ts }];
+    }
     await database.releases.update(existing.id, patch);
     return { ...existing, ...patch };
   });

@@ -137,7 +137,7 @@ export async function upgradeToV2(tx: Transaction): Promise<void> {
     .delete();
   await releases.toCollection().modify((r: Release) => {
     if (!r.precision) r.precision = 'day';
-    if (!r.origin) r.origin = 'sync';
+    if (!r.origin) r.origin = r.source === 'manual' ? 'manual' : 'sync';
   });
   await tx
     .table('detections')
