@@ -2,19 +2,29 @@
   import { onMount } from 'svelte';
   import { listReleases, listEditions, listWorks, updateRelease, listDetectionEvents } from '../lib/db/store';
   import type { Release, Edition, Work, DetectionEvent } from '../lib/db/schema';
+  import { formatReleaseDate, todayJst } from '../lib/dates';
   import { navigate } from '../lib/router.svelte';
   import { runSync } from '../lib/sync/engine';
   import { syncStatus, beginSync, completeSync, failSync } from '../lib/sync/status.svelte';
   import { acceptDetection, rejectDetection } from '../lib/sync/detect';
   import MediaBadge from '../lib/components/MediaBadge.svelte';
+  import ReleaseRow from '../lib/components/ReleaseRow.svelte';
+  import {
+    AIRING_STATUS_LABELS,
+    DETECTION_VIA_LABELS,
+    animeFormatLabel,
+    syncKeyLabel,
+  } from '../lib/components/labels';
+  import { unseenReleases, upcomingReleases } from '../lib/components/release-view';
 
-  const TRACKED_STATUSES: Edition['status'][] = ['plan', 'active', 'paused'];
   const UPCOMING_DAYS = 7;
 
   let releases = $state<Release[]>([]);
   let editions = $state<Edition[]>([]);
   let works = $state<Work[]>([]);
   let detections = $state<DetectionEvent[]>([]);
+  // 日付はすべて JST の暦日で扱う（toISOString は UTC になるので使わない）
+  let today = $state(todayJst());
 
   const editionMap = $derived(new Map(editions.map((e) => [e.id, e])));
   const workMap = $derived(new Map(works.map((w) => [w.id, w])));
@@ -22,52 +32,23 @@
   const pendingDetections = $derived(
     detections
       .filter((d) => d.state === 'pending')
-      .sort((a, b) => b.matchScore - a.matchScore),
+      // relation / sequel 由来を先に、同じ由来の中ではスコアの高い順
+      .sort((a, b) => {
+        const ra = (a.via ?? 'title') === 'title' ? 1 : 0;
+        const rb = (b.via ?? 'title') === 'title' ? 1 : 0;
+        return ra - rb || b.matchScore - a.matchScore;
+      }),
   );
 
-  const AIRING_STATUS_LABELS: Record<DetectionEvent['candidate']['airingStatus'], string> = {
-    NOT_YET_RELEASED: '放送前',
-    RELEASING: '放送中',
-    FINISHED: '放送済',
-    CANCELLED: '中止',
-    HIATUS: '休止中',
-  };
-
-  function todayStr(): string {
-    return new Date().toISOString().slice(0, 10);
-  }
-
-  function addDaysStr(base: string, days: number): string {
-    const d = new Date(`${base}T00:00:00`);
-    d.setDate(d.getDate() + days);
-    return d.toISOString().slice(0, 10);
-  }
-
-  const upcoming = $derived(
-    (() => {
-      const today = todayStr();
-      const limit = addDaysStr(today, UPCOMING_DAYS);
-      return releases
-        .filter((r) => {
-          const edition = editionMap.get(r.editionId);
-          if (!edition || !TRACKED_STATUSES.includes(edition.status)) return false;
-          return r.date >= today && r.date <= limit;
-        })
-        .sort((a, b) => a.date.localeCompare(b.date));
-    })(),
-  );
-
-  const fresh = $derived(
-    releases
-      .filter((r) => !r.seenAt)
-      .sort((a, b) => a.date.localeCompare(b.date)),
-  );
+  const upcoming = $derived(upcomingReleases(releases, editionMap, today, UPCOMING_DAYS));
+  const fresh = $derived(unseenReleases(releases, editionMap));
 
   async function refresh() {
     releases = await listReleases();
     editions = await listEditions();
     works = await listWorks();
     detections = await listDetectionEvents();
+    today = todayJst();
   }
 
   onMount(refresh);
@@ -112,15 +93,16 @@
     if (edition) navigate(`#/work/${edition.workId}`);
   }
 
-  function formatDate(date: string): string {
-    const [, m, d] = date.split('-');
-    return `${m}/${d}`;
-  }
-
   function formatSyncTime(iso: string | null): string {
     if (!iso) return '未実行';
     const d = new Date(iso);
     return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  }
+
+  /** 検知候補の放送開始日（精度に従う）。日付が無ければ null。 */
+  function candidateStart(detection: DetectionEvent): string | null {
+    const { startDate, startPrecision } = detection.candidate;
+    return startDate ? formatReleaseDate({ date: startDate, precision: startPrecision }) : null;
   }
 
   let syncing = $state(false);
@@ -140,7 +122,8 @@
     }
   }
 
-  const errorSources = $derived(Object.keys(syncStatus.errors));
+  // `detect`（アニメ化検知）もソースと同じ並びで「検知」と出す
+  const errorLabels = $derived(Object.keys(syncStatus.errors).map(syncKeyLabel));
 </script>
 
 <section class="flex flex-col gap-4 p-4">
@@ -151,9 +134,10 @@
     style="border: 1px solid var(--line); color: var(--muted);"
   >
     <span style="white-space: nowrap;">最終同期: {formatSyncTime(syncStatus.lastSyncAt)}</span>
-    {#if errorSources.length > 0}
-      <span style="white-space: nowrap; color: var(--fg);">
-        エラー: {errorSources.join(', ')}
+    {#if errorLabels.length > 0}
+      <span style="color: var(--fg);">
+        <span style="white-space: nowrap;">エラー:</span>
+        {errorLabels.join(', ')}
       </span>
     {/if}
     <button
@@ -179,6 +163,8 @@
       <div class="flex flex-col gap-1.5">
         {#each pendingDetections as detection (detection.id)}
           {@const w = workMap.get(detection.workId)}
+          {@const via = detection.via ?? 'title'}
+          {@const startLabel = candidateStart(detection)}
           <div
             class="flex flex-col gap-1.5 px-2 py-1.5"
             style="border: 1px solid var(--line); min-width: 0;"
@@ -188,15 +174,32 @@
               <span class="text-[11px]" style="color: var(--muted); white-space: nowrap;">
                 {AIRING_STATUS_LABELS[detection.candidate.airingStatus]}
               </span>
-              <span class="text-[11px]" style="color: var(--muted); white-space: nowrap;">
-                {Math.round(detection.matchScore * 100)}%
+            </div>
+            <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px]" style="color: var(--muted);">
+              <!-- relation / sequel は確度が高いので実線、タイトル一致は薄い罫線とスコアで区別する -->
+              <span
+                class="px-1 text-[10px] font-bold"
+                style={`white-space: nowrap; line-height: 1.5; border: 1px solid ${via === 'title' ? 'var(--line)' : 'var(--fg)'}; color: ${via === 'title' ? 'var(--muted)' : 'var(--fg)'};`}
+              >
+                {DETECTION_VIA_LABELS[via]}
               </span>
+              {#if detection.candidate.format}
+                <span class="type-label">{animeFormatLabel(detection.candidate.format)}</span>
+              {/if}
+              {#if via === 'title'}
+                <span style="white-space: nowrap;">{Math.round(detection.matchScore * 100)}%</span>
+              {/if}
+              {#if startLabel}
+                <span style="white-space: nowrap;">{startLabel}</span>
+              {/if}
             </div>
             <div class="flex items-center gap-2" style="min-width: 0;">
               {#if w}
                 <span class="min-w-0 flex-1 truncate text-[11px]" style="color: var(--muted);">
-                  原作: {w.title}
+                  {via === 'sequel' ? '作品' : '原作'}: {w.title}
                 </span>
+              {:else}
+                <span class="flex-1"></span>
               {/if}
               <button
                 type="button"
@@ -230,20 +233,13 @@
     {:else}
       <div class="flex flex-col" style="border-top: 1px solid var(--line);">
         {#each upcoming as release (release.id)}
-          {@const edition = editionMap.get(release.editionId)}
-          <button
-            type="button"
-            class="hi-bar row-hover flex items-center gap-2 py-2 pr-2 text-left"
-            style="border-bottom: 1px solid var(--line); min-width: 0;"
+          <ReleaseRow
+            {release}
+            edition={editionMap.get(release.editionId)}
+            workTitle={workTitleFor(release.editionId)}
+            accent
             onclick={() => openRelease(release, false)}
-          >
-            <span class="text-[11px] font-bold" style="white-space: nowrap; font-variant-numeric: tabular-nums;">{formatDate(release.date)}</span>
-            {#if edition}
-              <MediaBadge mediaType={edition.mediaType} />
-            {/if}
-            <span class="min-w-0 flex-1 truncate text-sm">{workTitleFor(release.editionId)}</span>
-            <span class="truncate text-[11px]" style="color: var(--muted); max-width: 30%;">{release.label}</span>
-          </button>
+          />
         {/each}
       </div>
     {/if}
@@ -256,20 +252,13 @@
     {:else}
       <div class="flex flex-col" style="border-top: 1px solid var(--line);">
         {#each fresh as release (release.id)}
-          {@const edition = editionMap.get(release.editionId)}
-          <button
-            type="button"
-            class="row-hover flex items-center gap-2 py-2 text-left"
-            style="border-bottom: 1px solid var(--line); min-width: 0;"
+          <ReleaseRow
+            {release}
+            edition={editionMap.get(release.editionId)}
+            workTitle={workTitleFor(release.editionId)}
+            emphasis={false}
             onclick={() => openRelease(release, true)}
-          >
-            <span class="text-[11px]" style="color: var(--muted); white-space: nowrap;">{formatDate(release.date)}</span>
-            {#if edition}
-              <MediaBadge mediaType={edition.mediaType} />
-            {/if}
-            <span class="min-w-0 flex-1 truncate text-sm">{workTitleFor(release.editionId)}</span>
-            <span class="truncate text-[11px]" style="color: var(--muted); max-width: 30%;">{release.label}</span>
-          </button>
+          />
         {/each}
       </div>
     {/if}

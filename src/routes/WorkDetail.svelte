@@ -104,7 +104,7 @@
       />
     </div>
 
-    <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+    <div class="grid grid-cols-1 gap-4">
       {#each columns as column (column.key)}
         <div class="flex flex-col gap-2" style="min-width: 0;">
           <div class="shou">
@@ -124,6 +124,7 @@
                 <select
                   class="px-1.5 py-1 text-xs"
                   style="border: 1px solid var(--line); background: var(--bg); color: var(--fg);"
+                  aria-label="メディア種別"
                   bind:value={addFormMediaType[column.key]}
                 >
                   {#each column.mediaTypes as mt (mt)}
@@ -135,6 +136,7 @@
                 class="px-1.5 py-1 text-sm"
                 style="border: 1px solid var(--line); background: var(--bg); color: var(--fg);"
                 placeholder="Edition タイトル"
+                aria-label="追加する Edition のタイトル"
                 bind:value={addFormTitle[column.key]}
                 onkeydown={(e) => {
                   if (e.key === 'Enter') onAddEdition(column);

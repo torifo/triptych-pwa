@@ -2,20 +2,31 @@
   import { onMount } from 'svelte';
   import { listReleases, listEditions, listWorks } from '../lib/db/store';
   import type { Release, Edition, Work } from '../lib/db/schema';
+  import { formatReleaseDate, todayJst } from '../lib/dates';
   import { navigate } from '../lib/router.svelte';
-  import MediaBadge from '../lib/components/MediaBadge.svelte';
+  import ReleaseRow from '../lib/components/ReleaseRow.svelte';
+  import {
+    groupByDate,
+    groupByMonth,
+    isPostponed,
+    monthlyUndecided,
+    splitByPrecision,
+    trackedReleases,
+    yearlyUndecided,
+  } from '../lib/components/release-view';
 
-  const TRACKED_STATUSES: Edition['status'][] = ['plan', 'active', 'paused'];
   const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
+  const GRID_ITEMS_PER_CELL = 2;
 
   let releases = $state<Release[]>([]);
   let editions = $state<Edition[]>([]);
   let works = $state<Work[]>([]);
   let view = $state<'month' | 'list'>('month');
 
-  const today = new Date();
-  let cursorYear = $state(today.getFullYear());
-  let cursorMonth = $state(today.getMonth()); // 0-11
+  // 「今日」は JST の暦日。端末のタイムゾーンに左右されない
+  let today = $state(todayJst());
+  let cursorYear = $state(Number(todayJst().slice(0, 4)));
+  let cursorMonth = $state(Number(todayJst().slice(5, 7)) - 1); // 0-11
 
   const editionMap = $derived(new Map(editions.map((e) => [e.id, e])));
   const workMap = $derived(new Map(works.map((w) => [w.id, w])));
@@ -24,18 +35,13 @@
     releases = await listReleases();
     editions = await listEditions();
     works = await listWorks();
+    today = todayJst();
   }
 
   onMount(refresh);
 
-  const trackedReleases = $derived(
-    releases
-      .filter((r) => {
-        const edition = editionMap.get(r.editionId);
-        return !!edition && TRACKED_STATUSES.includes(edition.status);
-      })
-      .sort((a, b) => a.date.localeCompare(b.date)),
-  );
+  const tracked = $derived(trackedReleases(releases, editionMap));
+  const split = $derived(splitByPrecision(tracked));
 
   function workTitleFor(editionId: string): string {
     const edition = editionMap.get(editionId);
@@ -59,10 +65,9 @@
 
   const monthGrid = $derived(
     (() => {
-      const first = new Date(cursorYear, cursorMonth, 1);
-      const startWeekday = first.getDay();
-      const daysInMonth = new Date(cursorYear, cursorMonth + 1, 0).getDate();
-      const todayKey = dateKey(today.getFullYear(), today.getMonth(), today.getDate());
+      // UTC で暦を計算する（端末のタイムゾーンで月初の曜日がずれないように）
+      const startWeekday = new Date(Date.UTC(cursorYear, cursorMonth, 1)).getUTCDay();
+      const daysInMonth = new Date(Date.UTC(cursorYear, cursorMonth + 1, 0)).getUTCDate();
 
       const cells: DayCell[] = [];
       for (let i = 0; i < startWeekday; i++) {
@@ -70,7 +75,7 @@
       }
       for (let d = 1; d <= daysInMonth; d++) {
         const key = dateKey(cursorYear, cursorMonth, d);
-        cells.push({ date: key, day: d, isToday: key === todayKey });
+        cells.push({ date: key, day: d, isToday: key === today });
       }
       while (cells.length % 7 !== 0) {
         cells.push({ date: null, day: null, isToday: false });
@@ -79,15 +84,31 @@
     })(),
   );
 
-  const releasesByDate = $derived(
+  // day 精度だけが日付セルに入る。month / year 精度は下の「未定」欄へ
+  const releasesByDate = $derived(groupByDate(split.days));
+  const monthUndecided = $derived(monthlyUndecided(split.months, cursorYear, cursorMonth + 1));
+  const yearUndecided = $derived(yearlyUndecided(split.years, today));
+
+  // リスト表示: day 精度は日付順、month 精度は月ごと、year 精度は時期未定
+  const monthGroups = $derived(groupByMonth(split.months));
+  const dayGroups = $derived(
     (() => {
-      const map = new Map<string, Release[]>();
-      for (const r of trackedReleases) {
-        const list = map.get(r.date) ?? [];
-        list.push(r);
-        map.set(r.date, list);
+      const groups: { key: string; year: number; month: number; releases: Release[] }[] = [];
+      for (const release of split.days) {
+        const key = release.date.slice(0, 7);
+        const last = groups[groups.length - 1];
+        if (last && last.key === key) {
+          last.releases.push(release);
+        } else {
+          groups.push({
+            key,
+            year: Number(key.slice(0, 4)),
+            month: Number(key.slice(5, 7)),
+            releases: [release],
+          });
+        }
       }
-      return map;
+      return groups;
     })(),
   );
 
@@ -109,20 +130,28 @@
     }
   }
 
-  function isPostponed(release: Release): boolean {
-    return release.dateHistory.length > 0;
-  }
-
   function goToWork(editionId: string) {
     const edition = editionMap.get(editionId);
     if (edition) navigate(`#/work/${edition.workId}`);
   }
 
-  function formatDate(date: string): string {
-    const [, m, d] = date.split('-');
-    return `${m}/${d}`;
+  function cellLabel(release: Release): string {
+    return `${workTitleFor(release.editionId)} ${release.label} ${formatReleaseDate(release)}`;
   }
 </script>
+
+{#snippet rows(list: Release[])}
+  <div class="flex flex-col" style="border-top: 1px solid var(--line);">
+    {#each list as release (release.id)}
+      <ReleaseRow
+        {release}
+        edition={editionMap.get(release.editionId)}
+        workTitle={workTitleFor(release.editionId)}
+        onclick={() => goToWork(release.editionId)}
+      />
+    {/each}
+  </div>
+{/snippet}
 
 <section class="flex flex-col gap-3 p-4">
   <div class="flex items-center justify-between gap-2">
@@ -131,7 +160,8 @@
       <button
         type="button"
         class="px-2 py-1 text-[11px]"
-        style={`white-space: nowrap; color: ${view === 'month' ? 'var(--bg)' : 'var(--fg)'}; background: ${view === 'month' ? 'var(--fg)' : 'transparent'};`}
+        style={`white-space: nowrap; color: ${view === 'month' ? 'var(--bg)' : 'var(--fg)'}; background: ${view === 'month' ? 'var(--fg)' : 'transparent'}; border-right: 1px solid var(--fg);`}
+        aria-pressed={view === 'month'}
         onclick={() => (view = 'month')}
       >
         月
@@ -139,7 +169,8 @@
       <button
         type="button"
         class="px-2 py-1 text-[11px]"
-        style={`white-space: nowrap; color: ${view === 'list' ? 'var(--bg)' : 'var(--fg)'}; background: ${view === 'list' ? 'var(--fg)' : 'transparent'}; border-left: 1px solid var(--fg);`}
+        style={`white-space: nowrap; color: ${view === 'list' ? 'var(--bg)' : 'var(--fg)'}; background: ${view === 'list' ? 'var(--fg)' : 'transparent'};`}
+        aria-pressed={view === 'list'}
         onclick={() => (view = 'list')}
       >
         リスト
@@ -153,6 +184,7 @@
         type="button"
         class="px-2 py-1 text-xs"
         style="border: 1px solid var(--line); color: var(--fg);"
+        aria-label="前の月"
         onclick={prevMonth}
       >
         ＜
@@ -162,71 +194,111 @@
         type="button"
         class="px-2 py-1 text-xs"
         style="border: 1px solid var(--line); color: var(--fg);"
+        aria-label="次の月"
         onclick={nextMonth}
       >
         ＞
       </button>
     </div>
 
-    <div class="grid grid-cols-7" style="border-top: 1px solid var(--line); border-left: 1px solid var(--line);">
+    <div
+      class="grid"
+      style="grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line);"
+    >
       {#each WEEKDAYS as w (w)}
-        <div
-          class="py-1 text-center text-[10px]"
-          style="border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); color: var(--muted);"
-        >
+        <div class="py-1 text-center text-[10px]" style="background: var(--bg); color: var(--muted);">
           {w}
         </div>
       {/each}
       {#each monthGrid as cell, i (i)}
+        {@const cellReleases = releasesByDate.get(cell.date ?? '') ?? []}
         <div
           class="flex flex-col gap-0.5 p-1"
-          style={`border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); min-height: 56px; min-width: 0; ${cell.isToday ? 'background: var(--hi-soft);' : ''}`}
+          style={`min-height: 56px; min-width: 0; background: ${cell.isToday ? 'var(--hi-soft)' : 'var(--bg)'};`}
+          aria-current={cell.isToday ? 'date' : undefined}
         >
           {#if cell.day !== null}
-            <span class="text-[10px]" style="color: var(--muted); white-space: nowrap;">{cell.day}</span>
-            {#each (releasesByDate.get(cell.date ?? '') ?? []).slice(0, 2) as release (release.id)}
+            <span class="text-[10px]" style={`white-space: nowrap; color: ${cell.isToday ? 'var(--fg)' : 'var(--muted)'}; ${cell.isToday ? 'font-weight: 700;' : ''}`}>{cell.day}</span>
+            {#each cellReleases.slice(0, GRID_ITEMS_PER_CELL) as release (release.id)}
               <button
                 type="button"
-                class="truncate px-0.5 text-left text-[9px]"
-                style="border: 1px solid var(--line); white-space: nowrap; min-width: 0;"
+                class="flex flex-col px-0.5 text-left text-[9px]"
+                style="border: 1px solid var(--line); min-width: 0; line-height: 1.35;"
+                aria-label={cellLabel(release)}
                 onclick={() => goToWork(release.editionId)}
               >
-                {workTitleFor(release.editionId)}{#if isPostponed(release)}<span style="color: var(--muted);">・延期</span>{/if}
+                <span class="truncate" style="white-space: nowrap;">
+                  {workTitleFor(release.editionId)}{#if isPostponed(release)}<span style="color: var(--muted);">・延期</span>{/if}
+                </span>
+                {#if release.time}
+                  <span style="color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums;">{release.time}</span>
+                {/if}
               </button>
             {/each}
-            {#if (releasesByDate.get(cell.date ?? '') ?? []).length > 2}
+            {#if cellReleases.length > GRID_ITEMS_PER_CELL}
               <span class="text-[9px]" style="color: var(--muted); white-space: nowrap;">
-                +{(releasesByDate.get(cell.date ?? '') ?? []).length - 2}
+                +{cellReleases.length - GRID_ITEMS_PER_CELL}
               </span>
             {/if}
           {/if}
         </div>
       {/each}
     </div>
+
+    {#if monthUndecided.length > 0}
+      <div class="flex flex-col gap-1.5">
+        <div class="shou" style="margin-bottom: 0;">
+          <h2>日付未定（{cursorMonth + 1}月中）</h2>
+          <span class="no">THIS MONTH</span>
+        </div>
+        {@render rows(monthUndecided)}
+      </div>
+    {/if}
+
+    {#if yearUndecided.length > 0}
+      <div class="flex flex-col gap-1.5">
+        <div class="shou" style="margin-bottom: 0;">
+          <h2>時期未定</h2>
+          <span class="no">TBA</span>
+        </div>
+        {@render rows(yearUndecided)}
+      </div>
+    {/if}
   {:else}
-    <div class="flex flex-col" style="border-top: 1px solid var(--line);">
-      {#if trackedReleases.length === 0}
-        <p class="py-6 text-center text-xs" style="color: var(--muted);">追跡中の Release はありません</p>
-      {/if}
-      {#each trackedReleases as release (release.id)}
-        {@const edition = editionMap.get(release.editionId)}
-        <button
-          type="button"
-          class="flex items-center gap-2 py-2 text-left"
-          style="border-bottom: 1px solid var(--line); min-width: 0;"
-          onclick={() => goToWork(release.editionId)}
-        >
-          <span class="text-[11px] font-bold" style="white-space: nowrap;">{formatDate(release.date)}</span>
-          {#if edition}
-            <MediaBadge mediaType={edition.mediaType} />
-          {/if}
-          <span class="min-w-0 flex-1 truncate text-sm">{workTitleFor(release.editionId)}</span>
-          <span class="truncate text-[11px]" style="color: var(--muted); max-width: 25%;">{release.label}</span>
-          {#if isPostponed(release)}
-            <span class="text-[10px]" style="color: var(--muted); white-space: nowrap;">延期</span>
-          {/if}
-        </button>
-      {/each}
-    </div>
+    {#if tracked.length === 0}
+      <p class="py-6 text-center text-xs" style="color: var(--muted);">追跡中の Release はありません</p>
+    {/if}
+
+    {#each dayGroups as group (group.key)}
+      <div class="flex flex-col gap-1">
+        <span class="type-label">{group.year}年{group.month}月</span>
+        {@render rows(group.releases)}
+      </div>
+    {/each}
+
+    {#if monthGroups.length > 0}
+      <div class="flex flex-col gap-1.5">
+        <div class="shou" style="margin-bottom: 0;">
+          <h2>日付未定</h2>
+          <span class="no">MONTH ONLY</span>
+        </div>
+        {#each monthGroups as group (group.key)}
+          <div class="flex flex-col gap-1">
+            <span class="type-label">{group.year}年{group.month}月中</span>
+            {@render rows(group.releases)}
+          </div>
+        {/each}
+      </div>
+    {/if}
+
+    {#if split.years.length > 0}
+      <div class="flex flex-col gap-1.5">
+        <div class="shou" style="margin-bottom: 0;">
+          <h2>時期未定</h2>
+          <span class="no">TBA</span>
+        </div>
+        {@render rows(split.years)}
+      </div>
+    {/if}
   {/if}
 </section>

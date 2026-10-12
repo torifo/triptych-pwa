@@ -2,10 +2,12 @@
   import { onMount } from 'svelte';
   import { apiGet, ApiError } from '../lib/api';
   import { normalizeTitle } from '../lib/normalize';
-  import { listWorks, createWork, createEdition } from '../lib/db/store';
-  import type { Work, MediaType, Source } from '../lib/db/schema';
+  import { listWorks, listEditions, createWork, createEdition } from '../lib/db/store';
+  import type { Work, Edition, MediaType, Source } from '../lib/db/schema';
   import { navigate } from '../lib/router.svelte';
   import MediaBadge from '../lib/components/MediaBadge.svelte';
+  import { SOURCE_LABELS } from '../lib/components/labels';
+  import { dedupeResults, registeredSourceKeys, sourceRefKey } from '../lib/components/release-view';
 
   // collector レスポンス型（backend/dto.py の SearchResult / backend/api/search.py の
   // SearchResponse・OriginCandidate に対応。api.ts 側には型を持たないため、ここで定義する）
@@ -16,6 +18,8 @@
     title: string;
     cover?: string | null;
     url: string;
+    subtitle?: string | null; // 作者・出版社・巻数など
+    direct?: boolean; // URL / ncode / ISBN から直接解決された結果
   }
   interface RemoteSearchError {
     source: string;
@@ -33,16 +37,6 @@
     url: string;
   }
 
-  const SOURCE_LABELS: Record<Source, string> = {
-    anilist: 'AniList',
-    narou: 'なろう',
-    openbd: 'openBD',
-    ndl: 'NDL',
-    syoboi: 'しょぼいカレンダー',
-    kakuyomu: 'カクヨム',
-    manual: '手動',
-  };
-
   let query = $state('');
   let loading = $state(false);
   let searched = $state(false);
@@ -51,7 +45,10 @@
   let requestError = $state<string | null>(null);
 
   let works = $state<Work[]>([]);
+  let editions = $state<Edition[]>([]);
   const workByNormalizedTitle = $derived(new Map(works.map((w) => [w.titleNormalized, w])));
+  // どれかの Edition の sourceRefs にある (source, externalId)。登録済みの結果は押せなくする
+  const registeredKeys = $derived(registeredSourceKeys(editions));
 
   // 登録処理中の result を externalId+source キーで管理（多重クリック防止）
   let registeringKey = $state<string | null>(null);
@@ -66,11 +63,16 @@
   let addingOriginKey = $state<string | null>(null);
 
   function resultKey(r: RemoteSearchResult): string {
-    return `${r.source}:${r.externalId}`;
+    return `${r.source}:${r.externalId}:${r.mediaType}`;
+  }
+
+  function isRegistered(r: RemoteSearchResult): boolean {
+    return registeredKeys.has(sourceRefKey(r.source, r.externalId));
   }
 
   async function refreshWorks() {
     works = await listWorks();
+    editions = await listEditions();
   }
 
   onMount(refreshWorks);
@@ -85,7 +87,7 @@
     originError = null;
     try {
       const data = await apiGet<SearchResponse>('/api/search', { q });
-      results = data.results;
+      results = dedupeResults(data.results);
       sourceErrors = data.errors;
       searched = true;
     } catch (err) {
@@ -104,7 +106,7 @@
 
   async function registerResult(result: RemoteSearchResult, targetWork?: Work) {
     const key = resultKey(result);
-    if (registeringKey) return;
+    if (registeringKey || isRegistered(result)) return;
     registeringKey = key;
     try {
       const work =
@@ -169,6 +171,7 @@
       originCandidates = originCandidates.filter(
         (c) => `${c.source}:${c.externalId}` !== key,
       );
+      await refreshWorks();
     } finally {
       addingOriginKey = null;
     }
@@ -186,8 +189,8 @@
     <input
       class="min-w-0 flex-1 px-0 py-1.5"
       style="border: 0; border-bottom: 1px solid var(--fg); background: var(--bg); color: var(--fg); font-size: 1.05rem; outline: none;"
-      placeholder="作品タイトルで検索"
-      aria-label="作品タイトルで検索"
+      placeholder="タイトル・URL・ncode・ISBN"
+      aria-label="作品タイトル・URL・ncode・ISBN で検索"
       bind:value={query}
       onkeydown={(e) => {
         if (e.key === 'Enter') runSearch();
@@ -280,47 +283,67 @@
     {/if}
     {#each results as result (resultKey(result))}
       {@const existing = existingWorkFor(result)}
+      {@const registered = isRegistered(result)}
+      {@const busy = registeringKey === resultKey(result)}
       <div
-        class="row-hover flex items-center gap-2 py-2"
+        class="row-hover flex items-start gap-2 py-2"
         style="border-bottom: 1px solid var(--line); min-width: 0;"
       >
-        <MediaBadge mediaType={result.mediaType} />
+        <span class="pt-0.5"><MediaBadge mediaType={result.mediaType} /></span>
         <div class="min-w-0 flex-1">
-          <p class="truncate text-sm">{result.title}</p>
-          <p class="text-[10px]" style="color: var(--muted); white-space: nowrap;">
-            {SOURCE_LABELS[result.source] ?? result.source}
+          <p class="text-sm" style="overflow-wrap: anywhere;">{result.title}</p>
+          {#if result.subtitle}
+            <p class="truncate text-[11px]" style="color: var(--muted);">{result.subtitle}</p>
+          {/if}
+          <p class="flex flex-wrap items-center gap-x-2 text-[10px]" style="color: var(--muted);">
+            <span style="white-space: nowrap;">{SOURCE_LABELS[result.source] ?? result.source}</span>
+            {#if result.direct}
+              <span class="type-label">URL から解決</span>
+            {/if}
           </p>
         </div>
-        {#if existing}
-          <button
-            type="button"
-            class="px-2 py-1 text-[11px]"
-            style="border: 1px solid var(--fg); color: var(--fg); white-space: nowrap;"
-            disabled={registeringKey === resultKey(result)}
-            onclick={() => registerResult(result, existing)}
-          >
-            既存作品に追加
-          </button>
-          <button
-            type="button"
-            class="px-2 py-1 text-[11px]"
-            style="border: 1px solid var(--line); color: var(--muted); white-space: nowrap;"
-            disabled={registeringKey === resultKey(result)}
-            onclick={() => registerResult(result)}
-          >
-            新規登録
-          </button>
-        {:else}
-          <button
-            type="button"
-            class="px-2 py-1 text-[11px]"
-            style="border: 1px solid var(--fg); color: var(--fg); white-space: nowrap;"
-            disabled={registeringKey === resultKey(result)}
-            onclick={() => registerResult(result)}
-          >
-            登録
-          </button>
-        {/if}
+        <div class="flex shrink-0 flex-col items-stretch gap-1">
+          {#if registered}
+            <button
+              type="button"
+              class="px-2 py-1 text-[11px]"
+              style="border: 1px solid var(--line); color: var(--muted); white-space: nowrap;"
+              disabled
+              aria-label={`${result.title} は登録済み`}
+            >
+              登録済み
+            </button>
+          {:else if existing}
+            <button
+              type="button"
+              class="px-2 py-1 text-[11px]"
+              style="border: 1px solid var(--fg); color: var(--fg); white-space: nowrap;"
+              disabled={busy}
+              onclick={() => registerResult(result, existing)}
+            >
+              既存作品に追加
+            </button>
+            <button
+              type="button"
+              class="px-2 py-1 text-[11px]"
+              style="border: 1px solid var(--line); color: var(--muted); white-space: nowrap;"
+              disabled={busy}
+              onclick={() => registerResult(result)}
+            >
+              新規登録
+            </button>
+          {:else}
+            <button
+              type="button"
+              class="px-2 py-1 text-[11px]"
+              style="border: 1px solid var(--fg); color: var(--fg); white-space: nowrap;"
+              disabled={busy}
+              onclick={() => registerResult(result)}
+            >
+              登録
+            </button>
+          {/if}
+        </div>
       </div>
     {/each}
   </div>

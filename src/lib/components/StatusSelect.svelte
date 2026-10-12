@@ -12,6 +12,7 @@
 </script>
 
 <select
+  aria-label="ステータス"
   class="px-1.5 py-1 text-xs"
   style="border: 1px solid var(--line); background: var(--bg); color: var(--fg); white-space: nowrap;"
   value={value}

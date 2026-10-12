@@ -8,8 +8,11 @@
     reassignEditionWork,
   } from '../db/store';
   import MediaBadge from './MediaBadge.svelte';
+  import CompletedBadge from './CompletedBadge.svelte';
   import StatusSelect from './StatusSelect.svelte';
   import ProgressFields from './ProgressFields.svelte';
+  import ReleaseList from './ReleaseList.svelte';
+  import SourceRefEditor from './SourceRefEditor.svelte';
   import { DEFAULT_PROGRESS_UNIT } from './labels';
 
   let {
@@ -73,7 +76,12 @@
 
 <div class="hover-line flex flex-col gap-2 p-2">
   <div class="flex items-center justify-between gap-2">
-    <MediaBadge mediaType={edition.mediaType} />
+    <div class="flex items-center gap-1.5" style="min-width: 0;">
+      <MediaBadge mediaType={edition.mediaType} />
+      {#if edition.completed}
+        <CompletedBadge />
+      {/if}
+    </div>
     <StatusSelect value={edition.status} onchange={onStatusChange} />
   </div>
 
@@ -89,6 +97,14 @@
   />
 
   <ProgressFields progress={edition.progress} {defaultUnit} onsave={onProgressSave} />
+
+  <div class="pt-2" style="border-top: 1px solid var(--line); min-width: 0;">
+    <ReleaseList {edition} />
+  </div>
+
+  <div class="pt-2" style="border-top: 1px solid var(--line); min-width: 0;">
+    <SourceRefEditor {edition} {onchange} />
+  </div>
 
   {#if otherWorks.length > 0}
     <div class="flex flex-wrap items-center gap-1 text-[11px]" style="color: var(--muted);">

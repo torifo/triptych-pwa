@@ -15,17 +15,7 @@
   import { exportAll, importAll, getLastExportAt, PortabilityError } from '../lib/db/portability';
   import { getApiBase, setApiBase, setApiToken } from '../lib/api';
   import { syncStatus } from '../lib/sync/status.svelte';
-  import type { Source } from '../lib/db/schema';
-
-  const SOURCE_LABELS: Record<Source, string> = {
-    anilist: 'AniList',
-    narou: 'なろう',
-    openbd: 'openBD',
-    ndl: 'NDL Search',
-    syoboi: 'しょぼかる',
-    kakuyomu: 'カクヨム',
-    manual: '手動',
-  };
+  import { syncKeyLabel } from '../lib/components/labels';
 
   const EXPORT_STALE_DAYS = 30;
   const TOKEN_KEY = 'triptych.apiToken';
@@ -49,8 +39,9 @@
     return elapsedMs > EXPORT_STALE_DAYS * 24 * 60 * 60 * 1000;
   });
 
+  // キーはソース名のほか、アニメ化検知の `detect`（「検知」と表示する）
   const syncErrorEntries = $derived(
-    Object.entries(syncStatus.errors) as [Source, { message: string; occurredAt: string }][],
+    Object.entries(syncStatus.errors) as [string, { message: string; occurredAt: string }][],
   );
 
   async function refreshLastExportAt() {
@@ -196,6 +187,7 @@
         bind:this={fileInput}
         type="file"
         accept="application/json"
+        aria-label="インポートする JSON ファイル"
         class="hidden"
         onchange={onFileSelected}
       />
@@ -249,8 +241,8 @@
     {#if syncErrorEntries.length > 0}
       <div class="flex flex-col gap-1">
         {#each syncErrorEntries as [source, error] (source)}
-          <p class="text-[11px]" style="border: 1px solid var(--line); padding: 4px 6px;">
-            <span class="font-bold">{SOURCE_LABELS[source]}</span>:
+          <p class="text-[11px]" style="border: 1px solid var(--line); padding: 4px 6px; overflow-wrap: anywhere;">
+            <span class="font-bold" style="white-space: nowrap;">{syncKeyLabel(source)}</span>:
             {error.message}
             <span style="color: var(--muted);"> ({formatDateTime(error.occurredAt)})</span>
           </p>
@@ -271,6 +263,7 @@
         class="px-1.5 py-1 text-sm"
         style="border: 1px solid var(--line); background: var(--bg); color: var(--fg);"
         placeholder="http://127.0.0.1:8000（空欄=同一オリジン）"
+        aria-label="collector の接続先 URL"
         bind:value={apiBase}
         onblur={onApiBaseBlur}
       />
@@ -281,6 +274,7 @@
       <div class="flex items-center gap-2">
         <input
           type="password"
+          aria-label="Bearer トークン"
           class="min-w-0 flex-1 px-1.5 py-1 text-sm"
           style="border: 1px solid var(--line); background: var(--bg); color: var(--fg);"
           placeholder={tokenConfigured ? '設定済み（変更する場合のみ入力）' : '未設定'}

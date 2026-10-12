@@ -31,6 +31,7 @@
 
 <div class="flex flex-wrap items-center gap-1 text-xs" style="color: var(--fg);">
   <select
+    aria-label="進捗の単位"
     class="px-1 py-1 text-xs"
     style="border: 1px solid var(--line); background: var(--bg); color: var(--fg); white-space: nowrap;"
     value={unit}
