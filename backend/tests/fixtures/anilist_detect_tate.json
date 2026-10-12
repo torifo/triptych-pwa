@@ -1,0 +1,104 @@
+{
+  "data": {
+    "Page": {
+      "media": [
+        {
+          "id": 99263,
+          "format": "TV",
+          "isAdult": false,
+          "title": {
+            "romaji": "Tate no Yuusha no Nariagari",
+            "english": "The Rising of the Shield Hero",
+            "native": "盾の勇者の成り上がり"
+          },
+          "synonyms": [
+            "盾之勇者成名录",
+            "ผู้กล้าโล่ผงาด",
+            "Восхождение героя щита"
+          ],
+          "status": "FINISHED",
+          "startDate": {
+            "year": 2019,
+            "month": 1,
+            "day": 9
+          }
+        },
+        {
+          "id": 199185,
+          "format": "TV",
+          "isAdult": false,
+          "title": {
+            "romaji": "Tate no Yuusha no Nariagari Season 5",
+            "english": null,
+            "native": "盾の勇者の成り上がり Season 5"
+          },
+          "synonyms": [
+            "The Rising of the Shield Hero Season 5"
+          ],
+          "status": "NOT_YET_RELEASED",
+          "startDate": {
+            "year": 2027,
+            "month": null,
+            "day": null
+          }
+        },
+        {
+          "id": 111321,
+          "format": "TV",
+          "isAdult": false,
+          "title": {
+            "romaji": "Tate no Yuusha no Nariagari Season 2",
+            "english": "The Rising of the Shield Hero Season 2",
+            "native": "盾の勇者の成り上がり Season 2"
+          },
+          "synonyms": [
+            "ผู้กล้าโล่ผงาด ภาค 2",
+            "Восхождение героя щита 2"
+          ],
+          "status": "FINISHED",
+          "startDate": {
+            "year": 2022,
+            "month": 4,
+            "day": 6
+          }
+        },
+        {
+          "id": 173780,
+          "format": "TV",
+          "isAdult": false,
+          "title": {
+            "romaji": "Tate no Yuusha no Nariagari Season 4",
+            "english": "The Rising of the Shield Hero Season 4",
+            "native": "盾の勇者の成り上がり Season 4"
+          },
+          "synonyms": [],
+          "status": "FINISHED",
+          "startDate": {
+            "year": 2025,
+            "month": 7,
+            "day": 9
+          }
+        },
+        {
+          "id": 111322,
+          "format": "TV",
+          "isAdult": false,
+          "title": {
+            "romaji": "Tate no Yuusha no Nariagari Season 3",
+            "english": "The Rising of the Shield Hero Season 3",
+            "native": "盾の勇者の成り上がり Season 3"
+          },
+          "synonyms": [
+            "ผู้กล้าโล่ผงาด ภาค 3"
+          ],
+          "status": "FINISHED",
+          "startDate": {
+            "year": 2023,
+            "month": 10,
+            "day": 6
+          }
+        }
+      ]
+    }
+  }
+}

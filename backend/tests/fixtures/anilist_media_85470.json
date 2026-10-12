@@ -1,0 +1,413 @@
+{
+  "data": {
+    "Media": {
+      "id": 85470,
+      "type": "MANGA",
+      "format": "NOVEL",
+      "status": "FINISHED",
+      "isAdult": false,
+      "title": {
+        "romaji": "Mushoku Tensei: Isekai Ittara Honki Dasu",
+        "english": "Mushoku Tensei: Jobless Reincarnation",
+        "native": "無職転生 ～異世界行ったら本気だす～"
+      },
+      "synonyms": [
+        "เกิดชาตินี้พี่ต้องเทพ",
+        "Mushoku Tensei: In dieser Welt mach ich alles anders"
+      ],
+      "coverImage": {
+        "large": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/nx85470-jt6BF9tDWB2X.jpg",
+        "medium": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/small/nx85470-jt6BF9tDWB2X.jpg"
+      },
+      "siteUrl": "https://anilist.co/manga/85470",
+      "startDate": {
+        "year": 2014,
+        "month": 1,
+        "day": 23
+      },
+      "nextAiringEpisode": null,
+      "relations": {
+        "edges": [
+          {
+            "relationType": "ADAPTATION",
+            "node": {
+              "id": 85564,
+              "type": "MANGA",
+              "format": "MANGA",
+              "status": "RELEASING",
+              "isAdult": false,
+              "title": {
+                "romaji": "Mushoku Tensei: Isekai Ittara Honki Dasu",
+                "english": "Mushoku Tensei: Jobless Reincarnation",
+                "native": "無職転生 ～異世界行ったら本気だす～"
+              },
+              "startDate": {
+                "year": 2014,
+                "month": 5,
+                "day": 2
+              },
+              "siteUrl": "https://anilist.co/manga/85564"
+            }
+          },
+          {
+            "relationType": "SPIN_OFF",
+            "node": {
+              "id": 104724,
+              "type": "MANGA",
+              "format": "MANGA",
+              "status": "FINISHED",
+              "isAdult": false,
+              "title": {
+                "romaji": "Mushoku Tensei: Roxy datte Honki desu",
+                "english": "Mushoku Tensei: Roxy Gets Serious",
+                "native": "無職転生 ~ロキシーだって本気です~"
+              },
+              "startDate": {
+                "year": 2017,
+                "month": 12,
+                "day": 21
+              },
+              "siteUrl": "https://anilist.co/manga/104724"
+            }
+          },
+          {
+            "relationType": "SPIN_OFF",
+            "node": {
+              "id": 104856,
+              "type": "MANGA",
+              "format": "MANGA",
+              "status": "FINISHED",
+              "isAdult": false,
+              "title": {
+                "romaji": "Mushoku Tensei: 4-koma ni Natte mo Honki Dasu",
+                "english": null,
+                "native": "無職転生 ～4コマになっても本気だす～"
+              },
+              "startDate": {
+                "year": 2018,
+                "month": 10,
+                "day": 25
+              },
+              "siteUrl": "https://anilist.co/manga/104856"
+            }
+          },
+          {
+            "relationType": "ADAPTATION",
+            "node": {
+              "id": 108465,
+              "type": "ANIME",
+              "format": "TV",
+              "status": "FINISHED",
+              "isAdult": false,
+              "title": {
+                "romaji": "Mushoku Tensei: Isekai Ittara Honki Dasu",
+                "english": "Mushoku Tensei: Jobless Reincarnation",
+                "native": "無職転生 ～異世界行ったら本気だす～"
+              },
+              "startDate": {
+                "year": 2021,
+                "month": 1,
+                "day": 11
+              },
+              "siteUrl": "https://anilist.co/anime/108465"
+            }
+          },
+          {
+            "relationType": "ADAPTATION",
+            "node": {
+              "id": 127720,
+              "type": "ANIME",
+              "format": "TV",
+              "status": "FINISHED",
+              "isAdult": false,
+              "title": {
+                "romaji": "Mushoku Tensei: Isekai Ittara Honki Dasu Part 2",
+                "english": "Mushoku Tensei: Jobless Reincarnation Cour 2",
+                "native": "無職転生 ～異世界行ったら本気だす～ 第2クール"
+              },
+              "startDate": {
+                "year": 2021,
+                "month": 10,
+                "day": 4
+              },
+              "siteUrl": "https://anilist.co/anime/127720"
+            }
+          },
+          {
+            "relationType": "ADAPTATION",
+            "node": {
+              "id": 141534,
+              "type": "ANIME",
+              "format": "SPECIAL",
+              "status": "FINISHED",
+              "isAdult": false,
+              "title": {
+                "romaji": "Mushoku Tensei: Isekai Ittara Honki Dasu Part 2 - Eris no Goblin Toubatsu",
+                "english": "Mushoku Tensei: Jobless Reincarnation Cour 2 - Eris the Goblin Slayer",
+                "native": "無職転生 ～異世界行ったら本気だす～ 第2クール エリスのゴブリン討伐"
+              },
+              "startDate": {
+                "year": 2022,
+                "month": 3,
+                "day": 16
+              },
+              "siteUrl": "https://anilist.co/anime/141534"
+            }
+          },
+          {
+            "relationType": "ADAPTATION",
+            "node": {
+              "id": 142989,
+              "type": "MANGA",
+              "format": "MANGA",
+              "status": "RELEASING",
+              "isAdult": false,
+              "title": {
+                "romaji": "Mushoku Tensei: Isekai Ittara Honki Dasu - Shitsui no Majutsushi-hen",
+                "english": null,
+                "native": "無職転生 ～異世界行ったら本気だす～ 失意の魔術師編"
+              },
+              "startDate": {
+                "year": 2021,
+                "month": 12,
+                "day": 20
+              },
+              "siteUrl": "https://anilist.co/manga/142989"
+            }
+          },
+          {
+            "relationType": "SPIN_OFF",
+            "node": {
+              "id": 145336,
+              "type": "MANGA",
+              "format": "MANGA",
+              "status": "FINISHED",
+              "isAdult": false,
+              "title": {
+                "romaji": "Mushoku Tensei: Isekai Ittara Honki Dasu - Anthology side: Roxy",
+                "english": null,
+                "native": "無職転生～異世界行ったら本気だす～アンソロジー　side:ロキシー"
+              },
+              "startDate": {
+                "year": 2019,
+                "month": 3,
+                "day": 22
+              },
+              "siteUrl": "https://anilist.co/manga/145336"
+            }
+          },
+          {
+            "relationType": "ADAPTATION",
+            "node": {
+              "id": 146065,
+              "type": "ANIME",
+              "format": "TV",
+              "status": "FINISHED",
+              "isAdult": false,
+              "title": {
+                "romaji": "Mushoku Tensei II: Isekai Ittara Honki Dasu",
+                "english": "Mushoku Tensei: Jobless Reincarnation Season 2",
+                "native": "無職転生Ⅱ ～異世界行ったら本気だす～"
+              },
+              "startDate": {
+                "year": 2023,
+                "month": 7,
+                "day": 3
+              },
+              "siteUrl": "https://anilist.co/anime/146065"
+            }
+          },
+          {
+            "relationType": "SPIN_OFF",
+            "node": {
+              "id": 146378,
+              "type": "MANGA",
+              "format": "MANGA",
+              "status": "FINISHED",
+              "isAdult": false,
+              "title": {
+                "romaji": "Mushoku Tensei: Eris wa Honki de Kiba wo Togu",
+                "english": "Mushoku Tensei: Jobless Reincarnation ~Eris Sharpens Her Fangs~",
+                "native": "無職転生～エリスは本気で牙を砥ぐ～"
+              },
+              "startDate": {
+                "year": 2022,
+                "month": 3,
+                "day": 15
+              },
+              "siteUrl": "https://anilist.co/manga/146378"
+            }
+          },
+          {
+            "relationType": "SPIN_OFF",
+            "node": {
+              "id": 146716,
+              "type": "MANGA",
+              "format": "MANGA",
+              "status": "FINISHED",
+              "isAdult": false,
+              "title": {
+                "romaji": "Mushoku Tensei: Isekai Ittara Honki Dasu - Anthology side: Eris",
+                "english": null,
+                "native": "無職転生～異世界行ったら本気だす～アンソロジー　side:エリス"
+              },
+              "startDate": {
+                "year": 2020,
+                "month": 12,
+                "day": 23
+              },
+              "siteUrl": "https://anilist.co/manga/146716"
+            }
+          },
+          {
+            "relationType": "SPIN_OFF",
+            "node": {
+              "id": 146717,
+              "type": "MANGA",
+              "format": "MANGA",
+              "status": "FINISHED",
+              "isAdult": false,
+              "title": {
+                "romaji": "Mushoku Tensei: Isekai Ittara Honki Dasu - Anthology side: Sylphy",
+                "english": null,
+                "native": "無職転生～異世界行ったら本気だす～アンソロジー　side:シルフィ"
+              },
+              "startDate": {
+                "year": 2020,
+                "month": 12,
+                "day": 23
+              },
+              "siteUrl": "https://anilist.co/manga/146717"
+            }
+          },
+          {
+            "relationType": "SIDE_STORY",
+            "node": {
+              "id": 165131,
+              "type": "MANGA",
+              "format": "NOVEL",
+              "status": "RELEASING",
+              "isAdult": false,
+              "title": {
+                "romaji": "Mushoku Tensei: Dasoku-hen",
+                "english": "Mushoku Tensei: Redundant Reincarnation",
+                "native": "無職転生 ～蛇足編～"
+              },
+              "startDate": {
+                "year": 2023,
+                "month": 6,
+                "day": 23
+              },
+              "siteUrl": "https://anilist.co/manga/165131"
+            }
+          },
+          {
+            "relationType": "ADAPTATION",
+            "node": {
+              "id": 166873,
+              "type": "ANIME",
+              "format": "TV",
+              "status": "FINISHED",
+              "isAdult": false,
+              "title": {
+                "romaji": "Mushoku Tensei II: Isekai Ittara Honki Dasu Part 2",
+                "english": "Mushoku Tensei: Jobless Reincarnation Season 2 Part 2",
+                "native": "無職転生Ⅱ ～異世界行ったら本気だす～ 第2クール"
+              },
+              "startDate": {
+                "year": 2024,
+                "month": 4,
+                "day": 8
+              },
+              "siteUrl": "https://anilist.co/anime/166873"
+            }
+          },
+          {
+            "relationType": "ADAPTATION",
+            "node": {
+              "id": 178789,
+              "type": "ANIME",
+              "format": "TV",
+              "status": "FINISHED",
+              "isAdult": false,
+              "title": {
+                "romaji": "Mushoku Tensei III: Isekai Ittara Honki Dasu",
+                "english": "Mushoku Tensei: Jobless Reincarnation Season 3",
+                "native": "無職転生Ⅲ ～異世界行ったら本気だす～"
+              },
+              "startDate": {
+                "year": 2026,
+                "month": 7,
+                "day": 4
+              },
+              "siteUrl": "https://anilist.co/anime/178789"
+            }
+          },
+          {
+            "relationType": "SIDE_STORY",
+            "node": {
+              "id": 182671,
+              "type": "MANGA",
+              "format": "NOVEL",
+              "status": "FINISHED",
+              "isAdult": false,
+              "title": {
+                "romaji": "Mushoku Tensei: Isekai Ittara Honki Dasu - Special Book",
+                "english": "Mushoku Tensei: Jobless Reincarnation – A Journey of Two Lifetimes",
+                "native": "無職転生 ～異世界行ったら本気だす～ スペシャルブック"
+              },
+              "startDate": {
+                "year": 2022,
+                "month": 11,
+                "day": 25
+              },
+              "siteUrl": "https://anilist.co/manga/182671"
+            }
+          },
+          {
+            "relationType": "SIDE_STORY",
+            "node": {
+              "id": 183686,
+              "type": "MANGA",
+              "format": "NOVEL",
+              "status": "FINISHED",
+              "isAdult": false,
+              "title": {
+                "romaji": "Mushoku Tensei: Isekai Ittara Honki Dasu, Recollection",
+                "english": "Mushoku Tensei: Jobless Reincarnation – Recollections",
+                "native": "無職転生 ～異世界行ったら本気だす～ リコレクション"
+              },
+              "startDate": {
+                "year": 2022,
+                "month": 3,
+                "day": 25
+              },
+              "siteUrl": "https://anilist.co/manga/183686"
+            }
+          },
+          {
+            "relationType": "ADAPTATION",
+            "node": {
+              "id": 217434,
+              "type": "ANIME",
+              "format": "TV",
+              "status": "NOT_YET_RELEASED",
+              "isAdult": false,
+              "title": {
+                "romaji": "Mushoku Tensei III: Isekai Ittara Honki Dasu Part 2",
+                "english": null,
+                "native": "無職転生Ⅲ ～異世界行ったら本気だす～ 第2クール"
+              },
+              "startDate": {
+                "year": 2027,
+                "month": null,
+                "day": null
+              },
+              "siteUrl": "https://anilist.co/anime/217434"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

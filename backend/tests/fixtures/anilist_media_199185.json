@@ -1,0 +1,97 @@
+{
+  "data": {
+    "Media": {
+      "id": 199185,
+      "type": "ANIME",
+      "format": "TV",
+      "status": "NOT_YET_RELEASED",
+      "isAdult": false,
+      "title": {
+        "romaji": "Tate no Yuusha no Nariagari Season 5",
+        "english": null,
+        "native": "盾の勇者の成り上がり Season 5"
+      },
+      "synonyms": [
+        "The Rising of the Shield Hero Season 5"
+      ],
+      "coverImage": {
+        "large": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx199185-1svTWhAN0Orh.jpg",
+        "medium": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/bx199185-1svTWhAN0Orh.jpg"
+      },
+      "siteUrl": "https://anilist.co/anime/199185",
+      "startDate": {
+        "year": 2027,
+        "month": null,
+        "day": null
+      },
+      "nextAiringEpisode": null,
+      "relations": {
+        "edges": [
+          {
+            "relationType": "PREQUEL",
+            "node": {
+              "id": 173780,
+              "type": "ANIME",
+              "format": "TV",
+              "status": "FINISHED",
+              "isAdult": false,
+              "title": {
+                "romaji": "Tate no Yuusha no Nariagari Season 4",
+                "english": "The Rising of the Shield Hero Season 4",
+                "native": "盾の勇者の成り上がり Season 4"
+              },
+              "startDate": {
+                "year": 2025,
+                "month": 7,
+                "day": 9
+              },
+              "siteUrl": "https://anilist.co/anime/173780"
+            }
+          },
+          {
+            "relationType": "ALTERNATIVE",
+            "node": {
+              "id": 85442,
+              "type": "MANGA",
+              "format": "MANGA",
+              "status": "RELEASING",
+              "isAdult": false,
+              "title": {
+                "romaji": "Tate no Yuusha no Nariagari",
+                "english": "The Rising of the Shield Hero",
+                "native": "盾の勇者の成り上がり"
+              },
+              "startDate": {
+                "year": 2014,
+                "month": 2,
+                "day": 5
+              },
+              "siteUrl": "https://anilist.co/manga/85442"
+            }
+          },
+          {
+            "relationType": "ADAPTATION",
+            "node": {
+              "id": 85743,
+              "type": "MANGA",
+              "format": "NOVEL",
+              "status": "RELEASING",
+              "isAdult": false,
+              "title": {
+                "romaji": "Tate no Yuusha no Nariagari",
+                "english": "The Rising of the Shield Hero",
+                "native": "盾の勇者の成り上がり"
+              },
+              "startDate": {
+                "year": 2013,
+                "month": 8,
+                "day": 23
+              },
+              "siteUrl": "https://anilist.co/manga/85743"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

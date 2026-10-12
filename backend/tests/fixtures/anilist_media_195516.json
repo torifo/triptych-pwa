@@ -1,0 +1,120 @@
+{
+  "data": {
+    "Media": {
+      "id": 195516,
+      "type": "ANIME",
+      "format": "TV",
+      "status": "RELEASING",
+      "isAdult": false,
+      "title": {
+        "romaji": "Kusuriya no Hitorigoto 3rd Season",
+        "english": "The Apothecary Diaries Season 3",
+        "native": "薬屋のひとりごと 第3期"
+      },
+      "synonyms": [],
+      "coverImage": {
+        "large": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx195516-MJpUZlOberqH.jpg",
+        "medium": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/bx195516-MJpUZlOberqH.jpg"
+      },
+      "siteUrl": "https://anilist.co/anime/195516",
+      "startDate": {
+        "year": 2026,
+        "month": 10,
+        "day": 2
+      },
+      "nextAiringEpisode": {
+        "episode": 3,
+        "airingAt": 1792159200,
+        "timeUntilAiring": 339791
+      },
+      "relations": {
+        "edges": [
+          {
+            "relationType": "ADAPTATION",
+            "node": {
+              "id": 99026,
+              "type": "MANGA",
+              "format": "NOVEL",
+              "status": "RELEASING",
+              "isAdult": false,
+              "title": {
+                "romaji": "Kusuriya no Hitorigoto",
+                "english": "The Apothecary Diaries",
+                "native": "薬屋のひとりごと"
+              },
+              "startDate": {
+                "year": 2014,
+                "month": 8,
+                "day": 29
+              },
+              "siteUrl": "https://anilist.co/manga/99026"
+            }
+          },
+          {
+            "relationType": "PREQUEL",
+            "node": {
+              "id": 176301,
+              "type": "ANIME",
+              "format": "TV",
+              "status": "FINISHED",
+              "isAdult": false,
+              "title": {
+                "romaji": "Kusuriya no Hitorigoto 2nd Season",
+                "english": "The Apothecary Diaries Season 2",
+                "native": "薬屋のひとりごと 第2期"
+              },
+              "startDate": {
+                "year": 2025,
+                "month": 1,
+                "day": 10
+              },
+              "siteUrl": "https://anilist.co/anime/176301"
+            }
+          },
+          {
+            "relationType": "SEQUEL",
+            "node": {
+              "id": 200927,
+              "type": "ANIME",
+              "format": "TV",
+              "status": "NOT_YET_RELEASED",
+              "isAdult": false,
+              "title": {
+                "romaji": "Kusuriya no Hitorigoto 3rd Season Part 2",
+                "english": null,
+                "native": "薬屋のひとりごと 第3期 第2クール"
+              },
+              "startDate": {
+                "year": 2027,
+                "month": 4,
+                "day": null
+              },
+              "siteUrl": "https://anilist.co/anime/200927"
+            }
+          },
+          {
+            "relationType": "SIDE_STORY",
+            "node": {
+              "id": 200929,
+              "type": "ANIME",
+              "format": "MOVIE",
+              "status": "NOT_YET_RELEASED",
+              "isAdult": false,
+              "title": {
+                "romaji": "Kusuriya no Hitorigoto: Bouhi no Hihou",
+                "english": "The Apothecary Diaries: The Late Lady’s Treasure",
+                "native": "薬屋のひとりごと 亡妃の秘宝"
+              },
+              "startDate": {
+                "year": 2026,
+                "month": 12,
+                "day": 11
+              },
+              "siteUrl": "https://anilist.co/anime/200929"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

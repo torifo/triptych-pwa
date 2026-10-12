@@ -1,0 +1,153 @@
+{
+  "data": {
+    "Media": {
+      "id": 161645,
+      "type": "ANIME",
+      "format": "TV",
+      "status": "FINISHED",
+      "isAdult": false,
+      "title": {
+        "romaji": "Kusuriya no Hitorigoto",
+        "english": "The Apothecary Diaries",
+        "native": "薬屋のひとりごと"
+      },
+      "synonyms": [
+        "Drugstore Soliloquy",
+        "Les Carnets de l'Apothicaire",
+        "Zapiski zielarki",
+        "Diários de uma Apotecária",
+        "Il monologo della Speziale",
+        "Los diarios de la boticaria",
+        "สืบคดีปริศนา หมอยาตำรับโคมแดง",
+        "Записки аптекаря",
+        "Die Tagebücher der Apothekerin",
+        "يوميات الصيدلانيّة",
+        "藥師少女的獨語",
+        "药屋少女的呢喃",
+        "Монолог фармацевта",
+        "약사의 혼잣말",
+        "Dược sư tự sự"
+      ],
+      "coverImage": {
+        "large": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx161645-QLbzHXiYRgV2.jpg",
+        "medium": "https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/bx161645-QLbzHXiYRgV2.jpg"
+      },
+      "siteUrl": "https://anilist.co/anime/161645",
+      "startDate": {
+        "year": 2023,
+        "month": 10,
+        "day": 22
+      },
+      "nextAiringEpisode": null,
+      "relations": {
+        "edges": [
+          {
+            "relationType": "ADAPTATION",
+            "node": {
+              "id": 99026,
+              "type": "MANGA",
+              "format": "NOVEL",
+              "status": "RELEASING",
+              "isAdult": false,
+              "title": {
+                "romaji": "Kusuriya no Hitorigoto",
+                "english": "The Apothecary Diaries",
+                "native": "薬屋のひとりごと"
+              },
+              "startDate": {
+                "year": 2014,
+                "month": 8,
+                "day": 29
+              },
+              "siteUrl": "https://anilist.co/manga/99026"
+            }
+          },
+          {
+            "relationType": "ALTERNATIVE",
+            "node": {
+              "id": 99022,
+              "type": "MANGA",
+              "format": "MANGA",
+              "status": "RELEASING",
+              "isAdult": false,
+              "title": {
+                "romaji": "Kusuriya no Hitorigoto",
+                "english": "The Apothecary Diaries",
+                "native": "薬屋のひとりごと"
+              },
+              "startDate": {
+                "year": 2017,
+                "month": 5,
+                "day": 25
+              },
+              "siteUrl": "https://anilist.co/manga/99022"
+            }
+          },
+          {
+            "relationType": "ALTERNATIVE",
+            "node": {
+              "id": 113322,
+              "type": "MANGA",
+              "format": "MANGA",
+              "status": "RELEASING",
+              "isAdult": false,
+              "title": {
+                "romaji": "Kusuriya no Hitorigoto: Maomao no Koukyuu Nazotoki Techou",
+                "english": "The Apothecary Diaries: Maomao's Notes from the Inner Palace",
+                "native": "薬屋のひとりごと 猫猫の後宮謎解き手帳"
+              },
+              "startDate": {
+                "year": 2017,
+                "month": 8,
+                "day": 19
+              },
+              "siteUrl": "https://anilist.co/manga/113322"
+            }
+          },
+          {
+            "relationType": "SIDE_STORY",
+            "node": {
+              "id": 170508,
+              "type": "ANIME",
+              "format": "ONA",
+              "status": "FINISHED",
+              "isAdult": false,
+              "title": {
+                "romaji": "Maomao no Hitorigoto",
+                "english": null,
+                "native": "猫猫のひとりごと"
+              },
+              "startDate": {
+                "year": 2023,
+                "month": 10,
+                "day": 23
+              },
+              "siteUrl": "https://anilist.co/anime/170508"
+            }
+          },
+          {
+            "relationType": "SEQUEL",
+            "node": {
+              "id": 176301,
+              "type": "ANIME",
+              "format": "TV",
+              "status": "FINISHED",
+              "isAdult": false,
+              "title": {
+                "romaji": "Kusuriya no Hitorigoto 2nd Season",
+                "english": "The Apothecary Diaries Season 2",
+                "native": "薬屋のひとりごと 第2期"
+              },
+              "startDate": {
+                "year": 2025,
+                "month": 1,
+                "day": 10
+              },
+              "siteUrl": "https://anilist.co/anime/176301"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

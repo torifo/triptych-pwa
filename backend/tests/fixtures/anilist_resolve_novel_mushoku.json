@@ -1,0 +1,83 @@
+{
+  "data": {
+    "Page": {
+      "media": [
+        {
+          "id": 165131,
+          "type": "MANGA",
+          "format": "NOVEL",
+          "isAdult": false,
+          "popularity": 3141,
+          "title": {
+            "romaji": "Mushoku Tensei: Dasoku-hen",
+            "english": "Mushoku Tensei: Redundant Reincarnation",
+            "native": "無職転生 ～蛇足編～"
+          },
+          "synonyms": [],
+          "coverImage": {
+            "large": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/bx165131-R4pedWdbZiAW.jpg",
+            "medium": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/small/bx165131-R4pedWdbZiAW.jpg"
+          },
+          "siteUrl": "https://anilist.co/manga/165131"
+        },
+        {
+          "id": 85470,
+          "type": "MANGA",
+          "format": "NOVEL",
+          "isAdult": false,
+          "popularity": 39067,
+          "title": {
+            "romaji": "Mushoku Tensei: Isekai Ittara Honki Dasu",
+            "english": "Mushoku Tensei: Jobless Reincarnation",
+            "native": "無職転生 ～異世界行ったら本気だす～"
+          },
+          "synonyms": [
+            "เกิดชาตินี้พี่ต้องเทพ",
+            "Mushoku Tensei: In dieser Welt mach ich alles anders"
+          ],
+          "coverImage": {
+            "large": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/nx85470-jt6BF9tDWB2X.jpg",
+            "medium": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/small/nx85470-jt6BF9tDWB2X.jpg"
+          },
+          "siteUrl": "https://anilist.co/manga/85470"
+        },
+        {
+          "id": 182671,
+          "type": "MANGA",
+          "format": "NOVEL",
+          "isAdult": false,
+          "popularity": 1211,
+          "title": {
+            "romaji": "Mushoku Tensei: Isekai Ittara Honki Dasu - Special Book",
+            "english": "Mushoku Tensei: Jobless Reincarnation – A Journey of Two Lifetimes",
+            "native": "無職転生 ～異世界行ったら本気だす～ スペシャルブック"
+          },
+          "synonyms": [],
+          "coverImage": {
+            "large": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/bx182671-U0JvZdhaxNX5.jpg",
+            "medium": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/small/bx182671-U0JvZdhaxNX5.jpg"
+          },
+          "siteUrl": "https://anilist.co/manga/182671"
+        },
+        {
+          "id": 183686,
+          "type": "MANGA",
+          "format": "NOVEL",
+          "isAdult": false,
+          "popularity": 546,
+          "title": {
+            "romaji": "Mushoku Tensei: Isekai Ittara Honki Dasu, Recollection",
+            "english": "Mushoku Tensei: Jobless Reincarnation – Recollections",
+            "native": "無職転生 ～異世界行ったら本気だす～ リコレクション"
+          },
+          "synonyms": [],
+          "coverImage": {
+            "large": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/bx183686-DFAe4ff5NjEP.jpg",
+            "medium": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/small/bx183686-DFAe4ff5NjEP.jpg"
+          },
+          "siteUrl": "https://anilist.co/manga/183686"
+        }
+      ]
+    }
+  }
+}

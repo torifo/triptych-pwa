@@ -1,0 +1,35 @@
+{
+  "data": {
+    "Page": {
+      "media": [
+        {
+          "id": 99026,
+          "type": "MANGA",
+          "format": "NOVEL",
+          "isAdult": false,
+          "popularity": 14136,
+          "title": {
+            "romaji": "Kusuriya no Hitorigoto",
+            "english": "The Apothecary Diaries",
+            "native": "薬屋のひとりごと"
+          },
+          "synonyms": [
+            "สืบคดีปริศนา หมอยาตำรับโคมแดง",
+            "Dược sư tự sự",
+            "Les Carnets de l'Apothicaire",
+            "藥師少女的獨語",
+            "Los diarios de la boticaria",
+            "I diari della speziale",
+            "Diários de uma Apotecária",
+            "Die Tagebücher der Apothekerin"
+          ],
+          "coverImage": {
+            "large": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/nx99026-5Eg650WAd9Rj.jpg",
+            "medium": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/small/nx99026-5Eg650WAd9Rj.jpg"
+          },
+          "siteUrl": "https://anilist.co/manga/99026"
+        }
+      ]
+    }
+  }
+}
