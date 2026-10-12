@@ -13,7 +13,10 @@ export interface SyncSourceError {
   occurredAt: string; // ISO 8601
 }
 
-export type SyncErrors = Partial<Record<Source, SyncSourceError>>;
+/** ソース名、または検知（'detect'）。 */
+export type SyncErrorKey = Source | 'detect';
+
+export type SyncErrors = Partial<Record<SyncErrorKey, SyncSourceError>>;
 
 export interface SyncStatusState {
   running: boolean;

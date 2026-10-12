@@ -1,6 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createDB, type TriptychDB } from '../db/schema';
-import { createWork, createEdition, listReleasesByEdition, getEdition } from '../db/store';
+import { createDB, type Edition, type TriptychDB } from '../db/schema';
+import {
+  createEdition,
+  createManualRelease,
+  createRelease,
+  createWork,
+  getEdition,
+  listReleasesByEdition,
+  updateEditionSyncHints,
+  type CreateEditionInput,
+} from '../db/store';
 import { runSync } from './engine';
 
 let db: TriptychDB;
@@ -17,296 +26,795 @@ afterEach(() => {
 });
 
 // ---------------------------------------------------------------------------
-// fetch mock helpers
+// fetch mock
 // ---------------------------------------------------------------------------
 
-interface MockResponses {
-  [urlPrefix: string]: () => { ok: boolean; status?: number; json: () => Promise<unknown> };
+class HttpFailure {
+  constructor(public status: number) {}
 }
 
-function installFetchMock(responses: MockResponses): ReturnType<typeof vi.fn> {
-  const calls: string[] = [];
-  const fetchMock = vi.fn(async (url: string) => {
-    calls.push(url);
-    const key = Object.keys(responses).find((prefix) => url.startsWith(prefix));
-    if (!key) {
-      throw new Error(`unexpected fetch: ${url}`);
-    }
-    const result = responses[key]();
-    return {
-      ok: result.ok,
-      status: result.status ?? (result.ok ? 200 : 500),
-      json: result.json,
-    } as Response;
-  });
-  vi.stubGlobal('fetch', fetchMock);
-  (fetchMock as unknown as { calls: string[] }).calls = calls;
-  return fetchMock;
+const fail = (status = 502) => new HttpFailure(status);
+
+type Handler = (url: URL) => unknown;
+
+/** 検知が同期のあとに走るので、検知の照会は既定で空を返す。 */
+const DEFAULT_ROUTES: Record<string, Handler> = {
+  '/api/anilist/relations/': () => ({ externalId: '0', type: 'ANIME', title: '', relations: [] }),
+  '/api/anilist/resolve-source': () => [],
+  '/api/anilist/detect': () => [],
+  '/api/syoboi/title': () => ({ status: 'queued' }),
+};
+
+function mockFetch(routes: Record<string, Handler>): URL[] {
+  const all = { ...DEFAULT_ROUTES, ...routes };
+  const calls: URL[] = [];
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (input: string) => {
+      const url = new URL(input, 'http://collector.test');
+      calls.push(url);
+      const key = Object.keys(all)
+        .filter((prefix) => url.pathname.startsWith(prefix))
+        .sort((a, b) => b.length - a.length)[0];
+      if (!key) throw new Error(`unexpected fetch: ${input}`);
+      const reply = all[key](url);
+      const status = reply instanceof HttpFailure ? reply.status : 200;
+      return { ok: status < 400, status, json: async () => reply } as Response;
+    }),
+  );
+  return calls;
 }
 
-function anilistDto(episode: number, opts?: { seasonDate?: string; episodeDate?: string }) {
+const callsTo = (calls: URL[], prefix: string) => calls.filter((u) => u.pathname.startsWith(prefix));
+
+// ---------------------------------------------------------------------------
+// fixtures
+// ---------------------------------------------------------------------------
+
+const NOW = new Date('2026-10-13T03:00:00.000Z'); // JST 2026-10-13 12:00
+const at = (iso: string) => () => new Date(iso);
+
+function mediaDto(
+  id: string,
+  opts: { seasonDate?: string; episode?: number; episodeDate?: string; time?: string } = {},
+) {
+  const releases: unknown[] = [
+    {
+      kind: 'season-start',
+      label: 'テストアニメ',
+      date: opts.seasonDate ?? '2026-10-02',
+      precision: 'day',
+      source: 'anilist',
+      externalId: id,
+    },
+  ];
+  if (opts.episode !== undefined) {
+    releases.push({
+      kind: 'episode',
+      label: `第${opts.episode}話`,
+      date: opts.episodeDate ?? '2026-10-16',
+      precision: 'day',
+      time: opts.time ?? '25:30',
+      source: 'anilist',
+      externalId: `${id}:${opts.episode}`,
+    });
+  }
   return {
     source: 'anilist',
-    externalId: '1',
+    externalId: id,
     mediaType: 'anime',
-    title: 'Test Anime',
-    url: 'https://anilist.co/anime/1',
-    releases: [
-      {
-        kind: 'season-start',
-        label: 'Test Anime',
-        date: opts?.seasonDate ?? '2026-01-01',
-        source: 'anilist',
-      },
-      {
-        kind: 'episode',
-        label: `第${episode}話`,
-        date: opts?.episodeDate ?? '2026-01-08',
-        source: 'anilist',
-      },
-    ],
+    title: 'テストアニメ',
+    url: `https://anilist.co/anime/${id}`,
+    releases,
   };
 }
 
-function narouDto(generalAllNo: number, generalLastup: string) {
+function volume(isbn: string, label: string, date: string, precision = 'day') {
+  return { kind: 'volume', label, date, precision, source: 'ndl', externalId: isbn };
+}
+
+function ndlDto(releases: unknown[], line = '') {
+  return { lines: [{ key: line, label: line || '本編', count: releases.length }], line, releases };
+}
+
+function webNovelDto(
+  source: 'narou' | 'kakuyomu',
+  id: string,
+  episodeCount: number,
+  lastUpdate: string | null,
+  completed = false,
+) {
   return {
-    source: 'narou',
-    ncode: 'n1234a',
-    title: 'Test Novel',
-    author: 'Author',
-    generalAllNo,
-    generalLastup,
-    completed: false,
-    url: 'https://ncode.syosetu.com/n1234a/',
+    source,
+    externalId: id,
+    title: 'テスト小説',
+    url: `https://example.test/${id}`,
+    episodeCount,
+    completed,
+    isShortStory: false,
+    lastUpdate,
   };
 }
 
+async function setup(
+  workTitle: string,
+  edition: Omit<CreateEditionInput, 'workId'>,
+): Promise<Edition> {
+  const work = await createWork({ title: workTitle }, db);
+  return createEdition({ status: 'active', ...edition, workId: work.id }, db);
+}
+
+const anilistRef = (id: string) => ({
+  source: 'anilist' as const,
+  externalId: id,
+  url: `https://anilist.co/anime/${id}`,
+});
+
 // ---------------------------------------------------------------------------
-// 1. 追跡中のみ対象
+// ルーティング
 // ---------------------------------------------------------------------------
 
-describe('runSync: target scope', () => {
-  it('only syncs editions with status in {plan, active, paused}', async () => {
-    const work = await createWork({ title: 'Work' }, db);
-    const tracked = await createEdition(
-      {
-        workId: work.id,
-        mediaType: 'anime',
-        title: 'Tracked',
-        status: 'active',
-        sourceRefs: [{ source: 'anilist', externalId: '1', url: 'https://anilist.co/anime/1' }],
-      },
-      db,
-    );
-    const done = await createEdition(
-      {
-        workId: work.id,
-        mediaType: 'anime',
-        title: 'Done',
-        status: 'done',
-        sourceRefs: [{ source: 'anilist', externalId: '2', url: 'https://anilist.co/anime/2' }],
-      },
-      db,
-    );
-    const dropped = await createEdition(
-      {
-        workId: work.id,
-        mediaType: 'anime',
-        title: 'Dropped',
-        status: 'dropped',
-        sourceRefs: [{ source: 'anilist', externalId: '3', url: 'https://anilist.co/anime/3' }],
-      },
-      db,
-    );
-
-    const fetchMock = installFetchMock({
-      '/api/anilist/media/1': () => ({ ok: true, json: async () => anilistDto(5) }),
+describe('runSync: mediaType ごとのルーティング', () => {
+  it('anime は AniList としょぼかる、文庫・漫画は Work タイトルで NDL、Web 小説はなろう・カクヨムを引く', async () => {
+    const anime = await setup('薬屋のひとりごと', {
+      mediaType: 'anime',
+      title: '薬屋のひとりごと 第3期',
+      sourceRefs: [anilistRef('195516')],
+    });
+    const ln = await setup('本好きの下剋上', {
+      mediaType: 'light-novel',
+      title: '本好きの下剋上（TOブックス）',
+      // 検索から登録した文庫は AniList の NOVEL id だけを持つ（監査 P2）
+      sourceRefs: [{ source: 'anilist', externalId: '86355', url: 'https://anilist.co/manga/86355' }],
+    });
+    const manga = await setup('転生したらスライムだった件', {
+      mediaType: 'manga',
+      title: '転スラ（漫画）',
+    });
+    await setup('なろう作品', {
+      mediaType: 'web-novel',
+      title: 'なろう版',
+      sourceRefs: [{ source: 'narou', externalId: 'n4830bu', url: 'https://ncode.syosetu.com/n4830bu/' }],
+    });
+    await setup('カクヨム作品', {
+      mediaType: 'web-novel',
+      title: 'カクヨム版',
+      sourceRefs: [{ source: 'kakuyomu', externalId: '1177354054880238351', url: 'https://kakuyomu.jp/works/1' }],
+    });
+    await setup('追跡外', {
+      mediaType: 'anime',
+      title: '見終わった',
+      status: 'done',
+      sourceRefs: [anilistRef('999')],
     });
 
-    const result = await runSync({ database: db });
+    const calls = mockFetch({
+      '/api/anilist/media/': () => mediaDto('195516'),
+      '/api/ndl/series': () => ndlDto([]),
+      '/api/narou/novel/': () => webNovelDto('narou', 'n4830bu', 10, '2026-10-01'),
+      '/api/kakuyomu/work/': () => webNovelDto('kakuyomu', '1177354054880238351', 5, '2026-10-01'),
+    });
+
+    const result = await runSync({ database: db, now: () => NOW });
 
     expect(result.ran).toBe(true);
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect((fetchMock as unknown as { calls: string[] }).calls[0]).toContain('/api/anilist/media/1');
+    expect(result.errors).toEqual({});
+    expect(callsTo(calls, '/api/anilist/media/').map((u) => u.pathname)).toEqual([
+      '/api/anilist/media/195516',
+    ]);
+    expect(callsTo(calls, '/api/syoboi/title')).toHaveLength(1);
+    expect(callsTo(calls, '/api/syoboi/title')[0].searchParams.get('title')).toBe('薬屋のひとりごと 第3期');
 
-    const trackedReleases = await listReleasesByEdition(tracked.id, db);
-    expect(trackedReleases.length).toBeGreaterThan(0);
-    const doneReleases = await listReleasesByEdition(done.id, db);
-    const droppedReleases = await listReleasesByEdition(dropped.id, db);
-    expect(doneReleases).toHaveLength(0);
-    expect(droppedReleases).toHaveLength(0);
+    const ndl = callsTo(calls, '/api/ndl/series').map((u) => Object.fromEntries(u.searchParams));
+    expect(ndl).toEqual(
+      expect.arrayContaining([
+        { title: '本好きの下剋上', kind: 'novel' },
+        { title: '転生したらスライムだった件', kind: 'manga' },
+      ]),
+    );
+    expect(ndl).toHaveLength(2);
+    expect(callsTo(calls, '/api/narou/novel/n4830bu')).toHaveLength(1);
+    expect(callsTo(calls, '/api/kakuyomu/work/1177354054880238351')).toHaveLength(1);
+
+    expect((await listReleasesByEdition(anime.id, db)).length).toBeGreaterThan(0);
+    // 文庫・漫画に AniList の Release は作らない
+    expect(await listReleasesByEdition(ln.id, db)).toHaveLength(0);
+    expect(await listReleasesByEdition(manga.id, db)).toHaveLength(0);
   });
 });
 
 // ---------------------------------------------------------------------------
-// 2. 1h スロットルと force
+// スロットル
 // ---------------------------------------------------------------------------
 
-describe('runSync: throttling', () => {
-  it('skips a second run within 1h unless force is passed', async () => {
-    const work = await createWork({ title: 'Work' }, db);
-    await createEdition(
-      {
-        workId: work.id,
-        mediaType: 'anime',
-        title: 'A',
-        status: 'active',
-        sourceRefs: [{ source: 'anilist', externalId: '1', url: 'https://anilist.co/anime/1' }],
-      },
-      db,
-    );
-
-    installFetchMock({
-      '/api/anilist/media/1': () => ({ ok: true, json: async () => anilistDto(5) }),
-    });
+describe('runSync: 1h スロットルと force', () => {
+  it('1h 以内の2回目は飛ばし、force なら実行する', async () => {
+    await setup('W', { mediaType: 'anime', title: 'A', sourceRefs: [anilistRef('1')] });
+    mockFetch({ '/api/anilist/media/': () => mediaDto('1') });
 
     let clock = new Date('2026-07-13T00:00:00.000Z');
     const now = () => clock;
 
-    const first = await runSync({ database: db, now });
-    expect(first.ran).toBe(true);
+    expect((await runSync({ database: db, now })).ran).toBe(true);
 
-    clock = new Date('2026-07-13T00:30:00.000Z'); // 30min later
+    clock = new Date('2026-07-13T00:30:00.000Z');
     const second = await runSync({ database: db, now });
-    expect(second.ran).toBe(false);
-    expect(second.skipped).toBe('throttled');
+    expect(second).toMatchObject({ ran: false, skipped: 'throttled' });
 
-    const forced = await runSync({ database: db, now, force: true });
-    expect(forced.ran).toBe(true);
+    expect((await runSync({ database: db, now, force: true })).ran).toBe(true);
 
-    clock = new Date('2026-07-13T02:00:00.000Z'); // >1h later
-    const third = await runSync({ database: db, now });
-    expect(third.ran).toBe(true);
+    clock = new Date('2026-07-13T02:00:00.000Z');
+    expect((await runSync({ database: db, now })).ran).toBe(true);
   });
-});
 
-// ---------------------------------------------------------------------------
-// 3. 次話ローリング（古い次話が置換される）
-// ---------------------------------------------------------------------------
-
-describe('runSync: anime rolling next-episode release', () => {
-  it('keeps exactly one episode release, replacing the previous one', async () => {
-    const work = await createWork({ title: 'Work' }, db);
-    const edition = await createEdition(
-      {
-        workId: work.id,
-        mediaType: 'anime',
-        title: 'A',
-        status: 'active',
-        sourceRefs: [{ source: 'anilist', externalId: '1', url: 'https://anilist.co/anime/1' }],
-      },
-      db,
-    );
-
-    let episode = 5;
-    installFetchMock({
-      '/api/anilist/media/1': () => ({ ok: true, json: async () => anilistDto(episode) }),
+  it('force（手動同期）では同期と検知の全エンドポイントに refresh=1 を付ける', async () => {
+    await setup('アニメ', { mediaType: 'anime', title: 'A', sourceRefs: [anilistRef('1')] });
+    await setup('文庫', { mediaType: 'light-novel', title: 'L' });
+    await setup('なろう', {
+      mediaType: 'web-novel',
+      title: 'N',
+      sourceRefs: [{ source: 'narou', externalId: 'n1', url: 'u' }],
+    });
+    await setup('カクヨム', {
+      mediaType: 'web-novel',
+      title: 'K',
+      sourceRefs: [{ source: 'kakuyomu', externalId: 'k1', url: 'u' }],
     });
 
-    await runSync({ database: db, force: true });
-    let releases = await listReleasesByEdition(edition.id, db);
-    let episodeReleases = releases.filter((r) => r.kind === 'episode');
-    expect(episodeReleases).toHaveLength(1);
-    expect(episodeReleases[0].label).toBe('第5話');
+    const calls = mockFetch({
+      '/api/anilist/media/': () => mediaDto('1'),
+      '/api/ndl/series': () => ndlDto([]),
+      '/api/narou/novel/': () => webNovelDto('narou', 'n1', 1, '2026-10-01'),
+      '/api/kakuyomu/work/': () => webNovelDto('kakuyomu', 'k1', 1, '2026-10-01'),
+    });
 
-    episode = 6;
-    await runSync({ database: db, force: true });
-    releases = await listReleasesByEdition(edition.id, db);
-    episodeReleases = releases.filter((r) => r.kind === 'episode');
-    expect(episodeReleases).toHaveLength(1);
-    expect(episodeReleases[0].label).toBe('第6話');
+    await runSync({ database: db, force: true, now: () => NOW });
+
+    const paths = new Set(calls.map((u) => u.pathname.replace(/\/[^/]+$/, '/')));
+    expect(paths).toEqual(
+      new Set([
+        '/api/anilist/media/',
+        '/api/syoboi/',
+        '/api/ndl/',
+        '/api/narou/novel/',
+        '/api/kakuyomu/work/',
+        '/api/anilist/relations/',
+        '/api/anilist/',
+      ]),
+    );
+    // しょぼかるだけは Crawl-delay 60 のため手動同期でも refresh を付けない（24h キャッシュを使う）
+    for (const url of calls) {
+      const expected = url.pathname.startsWith('/api/syoboi/') ? null : '1';
+      expect(url.searchParams.get('refresh'), url.href).toBe(expected);
+    }
+  });
+
+  it('自動同期では refresh を付けない', async () => {
+    await setup('アニメ', { mediaType: 'anime', title: 'A', sourceRefs: [anilistRef('1')] });
+    const calls = mockFetch({ '/api/anilist/media/': () => mediaDto('1') });
+
+    await runSync({ database: db, now: () => NOW });
+
+    expect(calls.length).toBeGreaterThan(0);
+    for (const url of calls) expect(url.searchParams.has('refresh')).toBe(false);
   });
 });
 
 // ---------------------------------------------------------------------------
-// 4. date 変更 → dateHistory 追記
+// NDL
 // ---------------------------------------------------------------------------
 
-describe('runSync: date change tracked as dateHistory', () => {
-  it('records the old date in dateHistory when a season-start date is postponed', async () => {
-    const work = await createWork({ title: 'Work' }, db);
-    const edition = await createEdition(
-      {
-        workId: work.id,
-        mediaType: 'anime',
-        title: 'A',
-        status: 'active',
-        sourceRefs: [{ source: 'anilist', externalId: '1', url: 'https://anilist.co/anime/1' }],
-      },
+describe('runSync: NDL（文庫・漫画）', () => {
+  it('ISBN でマージし、同じ巻ラベルの別 ISBN も別の巻として持ち、繰り返しても日付が往復しない', async () => {
+    const ln = await setup('本好きの下剋上', { mediaType: 'light-novel', title: '本好き' });
+    const releases = [
+      volume('9784867940228', '本好きの下剋上 第三部 領主の養女10', '2026-12-10'),
+      volume('9784867940211', '本好きの下剋上 第三部 領主の養女10', '2026-08-01', 'month'),
+      volume('9784864723428', '本好きの下剋上 第五部 女神の化身12', '2023-12-09'),
+    ];
+    mockFetch({ '/api/ndl/series': () => ndlDto(releases) });
+
+    for (let i = 0; i < 3; i += 1) await runSync({ database: db, force: true, now: () => NOW });
+
+    const rows = await listReleasesByEdition(ln.id, db);
+    expect(rows).toHaveLength(3);
+    const byIsbn = new Map(rows.map((r) => [r.externalId, r]));
+    expect(byIsbn.get('9784867940228')).toMatchObject({ date: '2026-12-10', precision: 'day', source: 'ndl' });
+    expect(byIsbn.get('9784867940211')).toMatchObject({ date: '2026-08-01', precision: 'month' });
+    for (const row of rows) expect(row.dateHistory).toEqual([]);
+    // 登録時点で過去の巻は既読、未来の巻は新着
+    expect(byIsbn.get('9784864723428')?.seenAt).toBeDefined();
+    expect(byIsbn.get('9784867940228')?.seenAt).toBeUndefined();
+  });
+
+  it('返ってきた line を syncHints に保存し、以後はその line で引く', async () => {
+    const ln = await setup('本好きの下剋上', { mediaType: 'light-novel', title: '本好き' });
+    const calls = mockFetch({ '/api/ndl/series': () => ndlDto([], '') });
+
+    await runSync({ database: db, force: true, now: () => NOW });
+    expect(callsTo(calls, '/api/ndl/series')[0].searchParams.has('line')).toBe(false);
+    expect((await getEdition(ln.id, db))?.syncHints?.ndlLine).toBe('');
+
+    await runSync({ database: db, force: true, now: () => NOW });
+    const second = callsTo(calls, '/api/ndl/series')[1];
+    expect(second.searchParams.get('line')).toBe('');
+  });
+
+  it('syncHints.ndlLine があればそれを渡し、上書きしない', async () => {
+    const ln = await setup('本好きの下剋上', { mediaType: 'light-novel', title: '本好き' });
+    await updateEditionSyncHints(ln.id, { ndlLine: 'TOジュニア文庫' }, db);
+    const calls = mockFetch({ '/api/ndl/series': () => ndlDto([], 'TOジュニア文庫') });
+
+    await runSync({ database: db, force: true, now: () => NOW });
+
+    expect(callsTo(calls, '/api/ndl/series')[0].searchParams.get('line')).toBe('TOジュニア文庫');
+    expect((await getEdition(ln.id, db))?.syncHints?.ndlLine).toBe('TOジュニア文庫');
+  });
+
+  it('検索で選んだ NDL シリーズの line（externalId の2番目）を初期値にする', async () => {
+    const ln = await setup('本好きの下剋上', {
+      mediaType: 'light-novel',
+      title: '本好き（ジュニア）',
+      sourceRefs: [{ source: 'ndl', externalId: 'novel:TOジュニア文庫:本好きの下剋上', url: 'u' }],
+    });
+    const calls = mockFetch({ '/api/ndl/series': () => ndlDto([], 'TOジュニア文庫') });
+
+    await runSync({ database: db, force: true, now: () => NOW });
+
+    expect(callsTo(calls, '/api/ndl/series')[0].searchParams.get('line')).toBe('TOジュニア文庫');
+    expect((await getEdition(ln.id, db))?.syncHints?.ndlLine).toBe('TOジュニア文庫');
+  });
+
+  it('本編（line が空）の NDL シリーズも line= として渡す', async () => {
+    await setup('本好きの下剋上', {
+      mediaType: 'light-novel',
+      title: '本好き',
+      sourceRefs: [{ source: 'ndl', externalId: 'novel::本好きの下剋上', url: 'u' }],
+    });
+    const calls = mockFetch({ '/api/ndl/series': () => ndlDto([], '') });
+
+    await runSync({ database: db, force: true, now: () => NOW });
+
+    expect(callsTo(calls, '/api/ndl/series')[0].searchParams.get('line')).toBe('');
+  });
+
+  it('何も見つからない時は line を保存しない', async () => {
+    const ln = await setup('新作', { mediaType: 'manga', title: '新作' });
+    mockFetch({ '/api/ndl/series': () => ({ lines: [], line: '', releases: [] }) });
+
+    await runSync({ database: db, force: true, now: () => NOW });
+
+    expect((await getEdition(ln.id, db))?.syncHints).toBeUndefined();
+  });
+
+  it('旧ラベル照合時代の行（externalId の無い同期 volume）を消し、手動の巻は残す', async () => {
+    const ln = await setup('本好きの下剋上', { mediaType: 'light-novel', title: '本好き' });
+    await createRelease(
+      { editionId: ln.id, kind: 'volume', label: '本好きの下剋上 10', date: '2026-08-25', source: 'ndl' },
       db,
     );
+    await createManualRelease(
+      { editionId: ln.id, kind: 'volume', label: '特装版', date: '2026-09-01' },
+      db,
+    );
+    mockFetch({
+      '/api/ndl/series': () => ndlDto([volume('9784867940228', '本好きの下剋上 10', '2026-12-10')]),
+    });
 
-    let seasonDate = '2026-01-01';
-    installFetchMock({
-      '/api/anilist/media/1': () => ({
-        ok: true,
-        json: async () => anilistDto(5, { seasonDate }),
+    await runSync({ database: db, force: true, now: () => NOW });
+
+    const rows = await listReleasesByEdition(ln.id, db);
+    expect(rows.map((r) => [r.label, r.externalId, r.origin]).sort()).toEqual(
+      [
+        ['本好きの下剋上 10', '9784867940228', 'sync'],
+        ['特装版', undefined, 'manual'],
+      ].sort(),
+    );
+  });
+
+  it('日付の不正な巻があっても、他の巻は取り込みエラーにもしない', async () => {
+    const ln = await setup('本好きの下剋上', { mediaType: 'light-novel', title: '本好き' });
+    mockFetch({
+      '/api/ndl/series': () =>
+        ndlDto([
+          volume('9784000000001', '壊れた日付', '2026-02-30'),
+          volume('9784867940228', '正しい巻', '2026-12-10'),
+        ]),
+    });
+
+    const result = await runSync({ database: db, force: true, now: () => NOW });
+
+    expect(result.errors.ndl).toBeUndefined();
+    const rows = await listReleasesByEdition(ln.id, db);
+    expect(rows.map((r) => r.label)).toEqual(['正しい巻']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// アニメの次話（ローリング）
+// ---------------------------------------------------------------------------
+
+describe('runSync: アニメの次話ローリング', () => {
+  it('次話は常に1件で、作成時から既読（season-start は未来なら新着）', async () => {
+    const anime = await setup('W', { mediaType: 'anime', title: 'A', sourceRefs: [anilistRef('1')] });
+    let episode = 2;
+    let episodeDate = '2026-10-16';
+    mockFetch({
+      '/api/anilist/media/': () =>
+        mediaDto('1', { seasonDate: '2026-10-30', episode, episodeDate, time: '25:30' }),
+    });
+
+    await runSync({ database: db, force: true, now: () => NOW });
+    let episodes = (await listReleasesByEdition(anime.id, db)).filter((r) => r.kind === 'episode');
+    expect(episodes).toHaveLength(1);
+    expect(episodes[0]).toMatchObject({
+      label: '第2話',
+      externalId: '1:2',
+      date: '2026-10-16',
+      time: '25:30',
+      origin: 'sync',
+    });
+    expect(episodes[0].seenAt).toBeDefined();
+
+    const seasonStart = (await listReleasesByEdition(anime.id, db)).find((r) => r.kind === 'season-start');
+    expect(seasonStart).toMatchObject({ externalId: '1', date: '2026-10-30' });
+    expect(seasonStart?.seenAt).toBeUndefined();
+
+    episode = 3;
+    episodeDate = '2026-10-23';
+    await runSync({ database: db, force: true, now: at('2026-10-17T03:00:00Z') });
+    episodes = (await listReleasesByEdition(anime.id, db)).filter((r) => r.kind === 'episode');
+    expect(episodes).toHaveLength(1);
+    expect(episodes[0]).toMatchObject({ label: '第3話', externalId: '1:3', date: '2026-10-23' });
+    expect(episodes[0].seenAt).toBeDefined();
+    expect(episodes[0].dateHistory).toEqual([]);
+  });
+
+  it('同じ話の放送日が変われば延期として記録する', async () => {
+    const anime = await setup('W', { mediaType: 'anime', title: 'A', sourceRefs: [anilistRef('1')] });
+    let episodeDate = '2026-10-16';
+    mockFetch({ '/api/anilist/media/': () => mediaDto('1', { episode: 2, episodeDate }) });
+
+    await runSync({ database: db, force: true, now: () => NOW });
+    episodeDate = '2026-10-23';
+    await runSync({ database: db, force: true, now: () => NOW });
+
+    const [ep] = (await listReleasesByEdition(anime.id, db)).filter((r) => r.kind === 'episode');
+    expect(ep.date).toBe('2026-10-23');
+    expect(ep.dateHistory).toEqual([expect.objectContaining({ date: '2026-10-16' })]);
+  });
+
+  it('放送終了（次話なし）で次話の Release を消し、手動の話と旧行は扱いを分ける', async () => {
+    const anime = await setup('W', { mediaType: 'anime', title: 'A', sourceRefs: [anilistRef('1')] });
+    // 旧エンジンの行（externalId なし）
+    await createRelease(
+      { editionId: anime.id, kind: 'episode', label: '第11話', date: '2026-10-09', source: 'anilist' },
+      db,
+    );
+    await createManualRelease(
+      { editionId: anime.id, kind: 'episode', label: '特別編', date: '2026-12-24' },
+      db,
+    );
+    let airing = true;
+    mockFetch({
+      '/api/anilist/media/': () => mediaDto('1', airing ? { episode: 12 } : {}),
+    });
+
+    await runSync({ database: db, force: true, now: () => NOW });
+    let episodes = (await listReleasesByEdition(anime.id, db)).filter((r) => r.kind === 'episode');
+    expect(episodes.map((r) => r.label).sort()).toEqual(['特別編', '第12話']);
+
+    airing = false;
+    await runSync({ database: db, force: true, now: () => NOW });
+    episodes = (await listReleasesByEdition(anime.id, db)).filter((r) => r.kind === 'episode');
+    expect(episodes.map((r) => r.label)).toEqual(['特別編']);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// しょぼいカレンダー
+// ---------------------------------------------------------------------------
+
+describe('runSync: しょぼいカレンダー', () => {
+  const streamStart = (date: string, chid = '232') => ({
+    kind: 'stream-start',
+    label: 'dアニメストア 配信',
+    date,
+    precision: 'day',
+    time: '24:00',
+    source: 'syoboi',
+    externalId: `7667:${chid}`,
+  });
+
+  it('queued（取得待ち）はエラーにせず黙って飛ばす', async () => {
+    const anime = await setup('薬屋のひとりごと', {
+      mediaType: 'anime',
+      title: '薬屋のひとりごと 第3期',
+      sourceRefs: [anilistRef('195516')],
+    });
+    mockFetch({
+      '/api/anilist/media/': () => mediaDto('195516'),
+      '/api/syoboi/title': () => ({ status: 'queued', tid: null, programs: [], streamStarts: [] }),
+    });
+
+    const result = await runSync({ database: db, force: true, now: () => NOW });
+
+    expect(result.errors).toEqual({});
+    const rows = await listReleasesByEdition(anime.id, db);
+    expect(rows.filter((r) => r.kind === 'stream-start')).toHaveLength(0);
+    expect((await getEdition(anime.id, db))?.syncHints).toBeUndefined();
+  });
+
+  it('ok なら配信開始を付け、TID を保存して次回は TID で引く', async () => {
+    const anime = await setup('薬屋のひとりごと', {
+      mediaType: 'anime',
+      title: '薬屋のひとりごと 第3期',
+      sourceRefs: [anilistRef('195516')],
+    });
+    const calls = mockFetch({
+      '/api/anilist/media/': () => mediaDto('195516'),
+      '/api/syoboi/title': () => ({
+        status: 'ok',
+        tid: '7667',
+        title: '薬屋のひとりごと 第3期',
+        programs: [],
+        streamStarts: [streamStart('2026-10-17')],
       }),
     });
 
-    await runSync({ database: db, force: true });
-    seasonDate = '2026-01-08'; // postponed
-    await runSync({ database: db, force: true });
+    await runSync({ database: db, force: true, now: () => NOW });
 
-    const releases = await listReleasesByEdition(edition.id, db);
-    const seasonStart = releases.find((r) => r.kind === 'season-start');
-    expect(seasonStart?.date).toBe('2026-01-08');
-    expect(seasonStart?.dateHistory).toEqual([
-      expect.objectContaining({ date: '2026-01-01' }),
-    ]);
+    const [stream] = (await listReleasesByEdition(anime.id, db)).filter((r) => r.kind === 'stream-start');
+    expect(stream).toMatchObject({
+      label: 'dアニメストア 配信',
+      date: '2026-10-17',
+      time: '24:00',
+      source: 'syoboi',
+      externalId: '7667:232',
+    });
+    expect((await getEdition(anime.id, db))?.syncHints?.syoboiTid).toBe('7667');
+
+    await runSync({ database: db, force: true, now: () => NOW });
+    const second = callsTo(calls, '/api/syoboi/title')[1];
+    expect(second.searchParams.get('tid')).toBe('7667');
+    expect(second.searchParams.has('title')).toBe(false);
+  });
+
+  it('配信が始まった後は、翌週の番組で配信開始の日付を動かさない', async () => {
+    const anime = await setup('W', { mediaType: 'anime', title: 'A', sourceRefs: [anilistRef('1')] });
+    let date = '2026-10-17';
+    mockFetch({
+      '/api/anilist/media/': () => mediaDto('1'),
+      '/api/syoboi/title': () => ({ status: 'ok', tid: '7667', streamStarts: [streamStart(date)] }),
+    });
+
+    await runSync({ database: db, force: true, now: () => NOW });
+    date = '2026-10-24';
+    await runSync({ database: db, force: true, now: at('2026-10-20T03:00:00Z') });
+
+    const [stream] = (await listReleasesByEdition(anime.id, db)).filter((r) => r.kind === 'stream-start');
+    expect(stream.date).toBe('2026-10-17');
+    expect(stream.dateHistory).toEqual([]);
+  });
+
+  it('しょぼかるの失敗は syoboi のエラーとして記録し、AniList 側は取り込む', async () => {
+    const anime = await setup('W', { mediaType: 'anime', title: 'A', sourceRefs: [anilistRef('1')] });
+    mockFetch({
+      '/api/anilist/media/': () => mediaDto('1', { episode: 2 }),
+      '/api/syoboi/title': () => fail(502),
+    });
+
+    const result = await runSync({ database: db, force: true, now: () => NOW });
+
+    expect(result.errors.syoboi?.message).toContain('/api/syoboi/title: 502');
+    expect(result.errors.anilist).toBeUndefined();
+    expect((await listReleasesByEdition(anime.id, db)).length).toBe(2);
   });
 });
 
 // ---------------------------------------------------------------------------
-// 5. ソース障害スキップ + エラー記録
+// Web 小説
 // ---------------------------------------------------------------------------
 
-describe('runSync: per-source failure isolation', () => {
-  it('skips the failing source only, and records the error', async () => {
-    const work = await createWork({ title: 'Work' }, db);
-    const animeEdition = await createEdition(
-      {
-        workId: work.id,
-        mediaType: 'anime',
-        title: 'Anime',
-        status: 'active',
-        sourceRefs: [{ source: 'anilist', externalId: '1', url: 'https://anilist.co/anime/1' }],
-      },
-      db,
-    );
-    const novelEdition = await createEdition(
-      {
-        workId: work.id,
-        mediaType: 'web-novel',
-        title: 'Novel',
-        status: 'active',
-        sourceRefs: [{ source: 'narou', externalId: 'n1234a', url: 'https://ncode.syosetu.com/n1234a/' }],
-      },
-      db,
-    );
+describe('runSync: Web 小説（なろう・カクヨム）', () => {
+  const narouRef = { source: 'narou' as const, externalId: 'n4830bu', url: 'https://ncode.syosetu.com/n4830bu/' };
 
-    installFetchMock({
-      '/api/anilist/media/1': () => ({ ok: false, status: 502, json: async () => ({ detail: 'boom' }) }),
-      '/api/narou/novel/n1234a': () => ({
-        ok: true,
-        json: async () => narouDto(10, '2026-07-01'),
-      }),
+  it('初回は current を変えずに progress を作り、最新話を既読の1件で持つ', async () => {
+    const novel = await setup('本好きの下剋上', { mediaType: 'web-novel', title: 'なろう版', sourceRefs: [narouRef] });
+    mockFetch({ '/api/narou/novel/': () => webNovelDto('narou', 'n4830bu', 677, '2026-10-12', true) });
+
+    await runSync({ database: db, force: true, now: () => NOW });
+
+    const edition = await getEdition(novel.id, db);
+    expect(edition?.progress).toEqual({ unit: 'part', current: 0, total: 677 });
+    expect(edition?.completed).toBe(true);
+    const rows = await listReleasesByEdition(novel.id, db);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      kind: 'episode',
+      label: '第677部分',
+      date: '2026-10-12',
+      externalId: 'narou:n4830bu:latest',
+      source: 'narou',
+    });
+    expect(rows[0].seenAt).toBeDefined();
+  });
+
+  it('話数が増えた時だけ、作り直して新着にする（延期として記録しない）', async () => {
+    const novel = await setup('W', { mediaType: 'web-novel', title: 'なろう版', sourceRefs: [narouRef] });
+    let count = 10;
+    let lastUpdate = '2026-10-01';
+    mockFetch({ '/api/narou/novel/': () => webNovelDto('narou', 'n4830bu', count, lastUpdate) });
+
+    await runSync({ database: db, force: true, now: () => NOW });
+    const first = (await listReleasesByEdition(novel.id, db))[0];
+
+    // 話数が同じで日付だけ変わった: 新着にも延期にもしない
+    lastUpdate = '2026-10-05';
+    await runSync({ database: db, force: true, now: () => NOW });
+    let rows = await listReleasesByEdition(novel.id, db);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ id: first.id, date: '2026-10-05', origin: 'sync', dateHistory: [] });
+    expect(rows[0].seenAt).toBeDefined();
+
+    count = 11;
+    lastUpdate = '2026-10-12';
+    await runSync({ database: db, force: true, now: () => NOW });
+    rows = await listReleasesByEdition(novel.id, db);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ label: '第11部分', date: '2026-10-12', dateHistory: [] });
+    expect(rows[0].seenAt).toBeUndefined();
+    expect(rows[0].id).not.toBe(first.id);
+  });
+
+  it('既存の current と unit は変えず、total だけ更新する', async () => {
+    const novel = await setup('W', {
+      mediaType: 'web-novel',
+      title: 'カクヨム版',
+      sourceRefs: [{ source: 'kakuyomu', externalId: '1177354054880238351', url: 'u' }],
+      progress: { unit: 'volume', current: 5, total: 10 },
+    });
+    mockFetch({
+      '/api/kakuyomu/work/': () => webNovelDto('kakuyomu', '1177354054880238351', 120, '2026-10-12'),
     });
 
-    const result = await runSync({ database: db, force: true });
+    await runSync({ database: db, force: true, now: () => NOW });
 
-    expect(result.ran).toBe(true);
-    expect(result.errors.anilist).toBeDefined();
+    expect((await getEdition(novel.id, db))?.progress).toEqual({ unit: 'volume', current: 5, total: 120 });
+    const [row] = await listReleasesByEdition(novel.id, db);
+    expect(row).toMatchObject({ label: '第120話', externalId: 'kakuyomu:1177354054880238351:latest' });
+    expect((await getEdition(novel.id, db))?.completed).toBe(false);
+  });
+
+  it('旧エンジンの `第N部分` 行は掃除し、話数が増えていれば新着の1件にまとめる', async () => {
+    const novel = await setup('W', {
+      mediaType: 'web-novel',
+      title: 'なろう版',
+      sourceRefs: [narouRef],
+      progress: { unit: 'part', current: 9, total: 9 },
+    });
+    for (const n of [8, 9]) {
+      await createRelease(
+        { editionId: novel.id, kind: 'episode', label: `第${n}部分`, date: '2026-09-0' + n, source: 'narou' },
+        db,
+      );
+    }
+    mockFetch({ '/api/narou/novel/': () => webNovelDto('narou', 'n4830bu', 10, '2026-10-10') });
+
+    await runSync({ database: db, force: true, now: () => NOW });
+
+    const rows = await listReleasesByEdition(novel.id, db);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ label: '第10部分', externalId: 'narou:n4830bu:latest' });
+    expect(rows[0].seenAt).toBeUndefined();
+    expect((await getEdition(novel.id, db))?.progress).toEqual({ unit: 'part', current: 9, total: 10 });
+  });
+
+  it('手動の話は触らない', async () => {
+    const novel = await setup('W', { mediaType: 'web-novel', title: 'なろう版', sourceRefs: [narouRef] });
+    await createManualRelease(
+      { editionId: novel.id, kind: 'episode', label: '書籍化記念SS', date: '2026-10-01' },
+      db,
+    );
+    mockFetch({ '/api/narou/novel/': () => webNovelDto('narou', 'n4830bu', 10, '2026-10-10') });
+
+    await runSync({ database: db, force: true, now: () => NOW });
+
+    const labels = (await listReleasesByEdition(novel.id, db)).map((r) => r.label).sort();
+    expect(labels).toEqual(['第10部分', '書籍化記念SS'].sort());
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 障害と再試行
+// ---------------------------------------------------------------------------
+
+describe('runSync: 障害と再試行', () => {
+  it('失敗したソースだけを飛ばして記録する', async () => {
+    const anime = await setup('W', { mediaType: 'anime', title: 'A', sourceRefs: [anilistRef('1')] });
+    const novel = await setup('N', {
+      mediaType: 'web-novel',
+      title: 'なろう版',
+      sourceRefs: [{ source: 'narou', externalId: 'n1', url: 'u' }],
+    });
+    mockFetch({
+      '/api/anilist/media/': () => fail(502),
+      '/api/narou/novel/': () => webNovelDto('narou', 'n1', 10, '2026-07-01'),
+    });
+
+    const result = await runSync({ database: db, force: true, now: () => NOW });
+
+    expect(result.errors.anilist?.message).toContain('/api/anilist/media/1: 502');
     expect(result.errors.narou).toBeUndefined();
+    expect(await listReleasesByEdition(anime.id, db)).toHaveLength(0);
+    expect(await listReleasesByEdition(novel.id, db)).toHaveLength(1);
+    expect(result.lastSyncAt).toBe(NOW.toISOString());
+  });
 
-    const animeReleases = await listReleasesByEdition(animeEdition.id, db);
-    expect(animeReleases).toHaveLength(0);
+  it('全ソースが失敗したら lastSyncAt を進めず、次の起動で再試行する', async () => {
+    await setup('W', { mediaType: 'anime', title: 'A', sourceRefs: [anilistRef('1')] });
+    await setup('L', { mediaType: 'light-novel', title: 'L' });
+    let down = false;
+    mockFetch({
+      '/api/anilist/media/': () => (down ? fail(503) : mediaDto('1')),
+      '/api/syoboi/title': () => (down ? fail(503) : { status: 'queued' }),
+      '/api/ndl/series': () => (down ? fail(503) : ndlDto([])),
+    });
 
-    const novelReleases = await listReleasesByEdition(novelEdition.id, db);
-    expect(novelReleases).toHaveLength(1);
-    expect(novelReleases[0].label).toBe('第10部分');
+    const t0 = '2026-10-13T00:00:00.000Z';
+    await runSync({ database: db, now: at(t0) });
 
-    const updatedNovel = await getEdition(novelEdition.id, db);
-    expect(updatedNovel?.progress?.total).toBe(10);
+    down = true;
+    const failed = await runSync({ database: db, now: at('2026-10-13T02:00:00.000Z') });
+    expect(failed.ran).toBe(true);
+    expect(failed.lastSyncAt).toBe(t0);
+    expect(Object.keys(failed.errors)).toEqual(expect.arrayContaining(['anilist', 'syoboi', 'ndl']));
+    const meta = (await db.meta.get('sync'))?.value as { lastSyncAt?: string; lastSyncErrors?: object };
+    expect(meta.lastSyncAt).toBe(t0);
+    expect(meta.lastSyncErrors).toEqual(failed.errors);
+
+    // スロットルに掛からず再試行される
+    down = false;
+    const retried = await runSync({ database: db, now: at('2026-10-13T02:10:00.000Z') });
+    expect(retried.ran).toBe(true);
+    expect(retried.lastSyncAt).toBe('2026-10-13T02:10:00.000Z');
+  });
+
+  it('検知のエラーを errors.detect に入れ、その Work の検知スロットルは進めない', async () => {
+    const ln = await setup('薬屋のひとりごと', { mediaType: 'light-novel', title: '薬屋' });
+    mockFetch({
+      '/api/ndl/series': () => ndlDto([]),
+      '/api/anilist/resolve-source': () => fail(502),
+    });
+
+    const result = await runSync({ database: db, force: true, now: () => NOW });
+
+    expect(result.errors.ndl).toBeUndefined();
+    expect(result.errors.detect?.message).toContain('薬屋のひとりごと');
+    expect(result.errors.detect?.message).toContain('502');
+    const throttle = (await db.meta.get('detectionThrottle'))?.value as Record<string, string>;
+    expect(throttle[ln.workId]).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 多重実行防止
+// ---------------------------------------------------------------------------
+
+describe('runSync: 多重実行防止', () => {
+  it('実行中に呼ばれたら同じ Promise を返し、照会は1回だけ', async () => {
+    await setup('W', { mediaType: 'anime', title: 'A', sourceRefs: [anilistRef('1')] });
+    const calls = mockFetch({ '/api/anilist/media/': () => mediaDto('1') });
+
+    const first = runSync({ database: db, force: true, now: () => NOW });
+    const second = runSync({ database: db, force: true, now: () => NOW });
+
+    expect(second).toBe(first);
+    await Promise.all([first, second]);
+    expect(callsTo(calls, '/api/anilist/media/')).toHaveLength(1);
+
+    // 終わった後は新しく実行できる
+    await runSync({ database: db, force: true, now: () => NOW });
+    expect(callsTo(calls, '/api/anilist/media/')).toHaveLength(2);
   });
 });

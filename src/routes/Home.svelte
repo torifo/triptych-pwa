@@ -113,7 +113,9 @@
     beginSync();
     try {
       const result = await runSync({ force: true });
-      completeSync(new Date().toISOString(), result.errors);
+      // 全ソース失敗時は lastSyncAt が前回のまま返る（未同期なら無い）
+      if (result.lastSyncAt) completeSync(result.lastSyncAt, result.errors);
+      else failSync(result.errors);
       await refresh();
     } catch (err) {
       failSync({});

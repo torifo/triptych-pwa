@@ -38,17 +38,16 @@
     beginSync()
     try {
       const result = await maybeAutoSync()
-      if (result.ran) {
-        completeSync(new Date().toISOString(), result.errors)
-      } else {
-        // スロットルによりスキップ: 直近の同期時刻を meta から読み直して表示する
+      // 全ソース失敗・スロットルでスキップした時も、result.lastSyncAt は前回の同期時刻のまま返る
+      let lastSyncAt = result.lastSyncAt
+      if (!lastSyncAt) {
         const metaEntry = await db.meta.get('sync')
-        const lastSyncAt = (metaEntry?.value as { lastSyncAt?: string } | undefined)?.lastSyncAt
-        if (lastSyncAt) {
-          completeSync(lastSyncAt, result.errors)
-        } else {
-          failSync(result.errors)
-        }
+        lastSyncAt = (metaEntry?.value as { lastSyncAt?: string } | undefined)?.lastSyncAt
+      }
+      if (lastSyncAt) {
+        completeSync(lastSyncAt, result.errors)
+      } else {
+        failSync(result.errors)
       }
     } catch {
       failSync({})

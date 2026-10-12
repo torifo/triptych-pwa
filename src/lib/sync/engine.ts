@@ -1,34 +1,34 @@
-// Sync Engine (FR-004, specs/mvp-core/design.md "Sync Engine" / "同期の対象と頻度").
-//
-// アプリ起動時(1h スロットル付き) + 手動プルで発火し、追跡中(status ∈
-// {plan, active, paused}) の Edition が持つ sourceRef を集めて collector を
-// 叩き、結果を Release/Edition.progress へマージする。ソース間は並列、
-// ソース内は直列。ソース障害は該当ソースのみスキップして続行し、
-// `meta.lastSyncErrors` に記録する（US-005）。
-//
-// UI 購読用の状態は `./status.ts` が Svelte 5 の $state で公開するが、この
-// モジュールからは意図的に import しない — vitest（本リポジトリの
-// vitest.config.ts）は svelte プラグインを通さないため `$state` のコンパイル
-// 変換が効かず、.svelte.ts を import すると `$state is not defined` で
-// 落ちる。engine.ts と status.ts を繋ぐ配線は、App.svelte の起動時フックを
-// 追加する後続タスクが担う（このタスクの制約: src/lib/sync/** のみ変更可）。
+// Sync Engine（仕様は specs/data-coverage/design.md「F2」）。
+// status.svelte.ts は import しない（vitest は svelte プラグインを通さず `$state` が未定義になる）。
 
-import { apiGet, ApiError } from '../api';
+import { apiGet } from '../api';
 import { db as defaultDB, type TriptychDB } from '../db/schema';
-import type { Edition, EditionProgress, Release, Source, SourceRef } from '../db/schema';
-import { listEditions, listReleasesByEdition, mergeRelease, updateEditionProgress, deleteRelease } from '../db/store';
+import type { DatePrecision, Edition, Release, Source, SourceRef, Work } from '../db/schema';
+import {
+  deleteRelease,
+  listEditions,
+  listReleasesByEdition,
+  listWorks,
+  mergeRelease,
+  setEditionCompleted,
+  updateEditionProgress,
+  updateEditionSyncHints,
+  updateRelease,
+  type ReleaseMergeInput,
+} from '../db/store';
+import { isPastRelease, isValidYmd, todayJst } from '../dates';
 import { runDetection } from './detect';
 
 // ---------------------------------------------------------------------------
-// Collector DTO shapes (mirrors backend/dto.py + backend/adapters/*.py).
-// Kept local since the collector is a separate Python process — no shared
-// type-generation pipeline exists yet.
+// Collector DTO（backend/dto.py の写し。型生成の仕組みは無いのでここに置く）
 // ---------------------------------------------------------------------------
 
 interface ReleaseDTO {
   kind: Release['kind'];
   label: string;
   date: string;
+  precision?: DatePrecision;
+  time?: string | null;
   source: Source;
   externalId?: string | null;
 }
@@ -43,26 +43,29 @@ interface MediaDetailDTO {
   releases: ReleaseDTO[];
 }
 
-interface NarouNovelDetail {
-  source: 'narou';
-  ncode: string;
-  title: string;
-  author: string;
-  generalAllNo: number;
-  generalLastup: string;
-  completed: boolean;
-  url: string;
+interface NdlSeriesDTO {
+  lines: Array<{ key: string; label: string; count: number }>;
+  line: string;
+  releases: ReleaseDTO[];
 }
 
-interface KakuyomuWorkDTO {
-  source: 'kakuyomu';
+interface SyoboiTitleDTO {
+  status: 'ok' | 'queued' | 'not_found';
+  tid?: string | null;
+  title?: string | null;
+  streamStarts?: ReleaseDTO[];
+}
+
+interface WebNovelDTO {
+  source: 'narou' | 'kakuyomu';
   externalId: string;
-  mediaType: 'web-novel';
   title: string;
   author?: string | null;
-  episodeCount?: number | null;
   url: string;
-  releases: ReleaseDTO[];
+  episodeCount: number;
+  completed: boolean;
+  isShortStory?: boolean;
+  lastUpdate?: string | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -70,16 +73,17 @@ interface KakuyomuWorkDTO {
 // ---------------------------------------------------------------------------
 
 const SYNC_META_KEY = 'sync';
-const THROTTLE_MS = 60 * 60 * 1000; // 1h (design.md 「同期の対象と頻度」)
+const THROTTLE_MS = 60 * 60 * 1000; // 1h
 const TRACKED_STATUSES: Edition['status'][] = ['plan', 'active', 'paused'];
-const HANDLED_SOURCES: Source[] = ['anilist', 'narou', 'kakuyomu', 'ndl'];
 
 export interface SyncSourceError {
   message: string;
   occurredAt: string; // ISO 8601
 }
 
-export type SyncErrors = Partial<Record<Source, SyncSourceError>>;
+/** ソース名、または検知（'detect'）ごとの直近エラー。 */
+export type SyncErrorKey = Source | 'detect';
+export type SyncErrors = Partial<Record<SyncErrorKey, SyncSourceError>>;
 
 interface SyncMeta {
   lastSyncAt?: string;
@@ -87,7 +91,7 @@ interface SyncMeta {
 }
 
 export interface SyncOptions {
-  /** 1h スロットルを無視して強制実行する（手動プル用）。collector 側の TTL キャッシュも `?refresh=1` で無視させる。 */
+  /** 1h スロットルを無視して実行する（手動同期）。collector のキャッシュも `?refresh=1` で使わせない。 */
   force?: boolean;
   database?: TriptychDB;
   /** テスト用の時刻注入フック。省略時は `new Date()`。 */
@@ -98,54 +102,84 @@ export interface SyncRunResult {
   ran: boolean;
   skipped?: 'throttled';
   errors: SyncErrors;
+  /** 実行後に meta に残っている最終同期時刻（全ソース失敗なら前回のまま）。 */
+  lastSyncAt?: string;
 }
 
 // ---------------------------------------------------------------------------
 // runSync
 // ---------------------------------------------------------------------------
 
-export async function runSync(opts: SyncOptions = {}): Promise<SyncRunResult> {
+const inflight = new WeakMap<TriptychDB, Promise<SyncRunResult>>();
+
+/** 実行中の同期があれば、新しい呼び出しはその Promise をそのまま返す（多重実行防止）。 */
+export function runSync(opts: SyncOptions = {}): Promise<SyncRunResult> {
   const database = opts.database ?? defaultDB;
+  const running = inflight.get(database);
+  if (running) return running;
+  const promise = runSyncOnce({ ...opts, database }).finally(() => {
+    inflight.delete(database);
+  });
+  inflight.set(database, promise);
+  return promise;
+}
+
+/** App 起動時フックから呼ぶ薄いラッパー（1h スロットル付き）。 */
+export async function maybeAutoSync(opts: SyncOptions = {}): Promise<SyncRunResult> {
+  return runSync({ ...opts, force: opts.force ?? false });
+}
+
+interface SyncContext {
+  database: TriptychDB;
+  force: boolean;
+  now: () => Date;
+}
+
+type SyncSource = 'anilist' | 'syoboi' | 'ndl' | 'narou' | 'kakuyomu';
+
+interface SyncTask {
+  label: string;
+  run: (ctx: SyncContext) => Promise<void>;
+}
+
+async function runSyncOnce(opts: SyncOptions & { database: TriptychDB }): Promise<SyncRunResult> {
+  const { database } = opts;
   const now = opts.now ?? (() => new Date());
-  const force = opts.force ?? false;
+  const ctx: SyncContext = { database, force: opts.force ?? false, now };
 
   const metaEntry = await database.meta.get(SYNC_META_KEY);
   const meta: SyncMeta = (metaEntry?.value as SyncMeta | undefined) ?? {};
 
-  if (!force && meta.lastSyncAt) {
+  if (!ctx.force && meta.lastSyncAt) {
     const elapsed = now().getTime() - new Date(meta.lastSyncAt).getTime();
     if (elapsed < THROTTLE_MS) {
-      return { ran: false, skipped: 'throttled', errors: meta.lastSyncErrors ?? {} };
+      return {
+        ran: false,
+        skipped: 'throttled',
+        errors: meta.lastSyncErrors ?? {},
+        lastSyncAt: meta.lastSyncAt,
+      };
     }
   }
 
-  const editions = (await listEditions(database)).filter((edition) =>
-    TRACKED_STATUSES.includes(edition.status),
-  );
-
-  const bySource = new Map<Source, Array<{ edition: Edition; ref: SourceRef }>>();
-  for (const edition of editions) {
-    for (const ref of edition.sourceRefs) {
-      if (!HANDLED_SOURCES.includes(ref.source)) continue;
-      const list = bySource.get(ref.source) ?? [];
-      list.push({ edition, ref });
-      bySource.set(ref.source, list);
-    }
-  }
+  const editions = (await listEditions(database)).filter((e) => TRACKED_STATUSES.includes(e.status));
+  const works = new Map((await listWorks(database)).map((w) => [w.id, w]));
+  const plan = planTasks(editions, works);
 
   const errors: SyncErrors = {};
+  let succeeded = 0;
+  let failed = 0;
 
-  // ソース間は並列、ソース内は直列（design.md 「同期の対象と頻度」）。
   await Promise.all(
-    Array.from(bySource.entries()).map(async ([source, items]) => {
-      const handler = SOURCE_HANDLERS[source as HandledSource];
-      for (const { edition, ref } of items) {
+    Array.from(plan.entries()).map(async ([source, tasks]) => {
+      for (const task of tasks) {
         try {
-          await handler(edition, ref, database, force);
+          await task.run(ctx);
+          succeeded += 1;
         } catch (err) {
-          // ソース障害はそのソースのみスキップして続行し、記録する（US-005）。
+          failed += 1;
           errors[source] = {
-            message: err instanceof ApiError ? err.message : errorMessage(err),
+            message: `${task.label}: ${errorMessage(err)}`,
             occurredAt: now().toISOString(),
           };
         }
@@ -153,224 +187,385 @@ export async function runSync(opts: SyncOptions = {}): Promise<SyncRunResult> {
     }),
   );
 
-  const nextMeta: SyncMeta = {
-    lastSyncAt: now().toISOString(),
-    lastSyncErrors: errors,
-  };
-  await database.meta.put({ key: SYNC_META_KEY, value: nextMeta });
+  const syncedAt = now().toISOString();
 
-  // アニメ化検知（FR-005）。24hスロットルは同期の force とは独立
-  // （design.md「検知スロットル」は Work 毎24h固定）。検知側の失敗
-  // (collector 障害等) で同期結果そのものを壊さないよう握りつぶす。
+  // 検知の 24h スロットルは force と独立。検知の失敗で同期結果を壊さない。
   try {
-    await runDetection({ database, now: opts.now });
-  } catch {
-    // 検知は補助機能。ここで投げ直すと runSync 全体が失敗扱いになるため無視する。
+    const detection = await runDetection({ database, now: opts.now, refresh: ctx.force });
+    const messages = Object.values(detection.errors);
+    if (messages.length > 0) {
+      errors.detect = {
+        message: messages.length === 1 ? messages[0] : `${messages[0]} ほか${messages.length - 1}件`,
+        occurredAt: now().toISOString(),
+      };
+    }
+  } catch (err) {
+    errors.detect = { message: errorMessage(err), occurredAt: now().toISOString() };
   }
 
-  return { ran: true, errors };
+  const allFailed = succeeded === 0 && failed > 0;
+  const lastSyncAt = allFailed ? meta.lastSyncAt : syncedAt;
+  const nextMeta: SyncMeta = { lastSyncAt, lastSyncErrors: errors };
+  await database.meta.put({ key: SYNC_META_KEY, value: nextMeta });
+
+  return { ran: true, errors, lastSyncAt };
 }
 
-/**
- * App 起動時フックから呼ばれることを想定した薄いラッパー。
- * 実際の配線（App.svelte への組み込み）は後続タスクが行う。
- */
-export async function maybeAutoSync(opts: SyncOptions = {}): Promise<SyncRunResult> {
-  return runSync({ ...opts, force: opts.force ?? false });
+/** mediaType 別に、ソースごとのタスク列を組み立てる。 */
+function planTasks(editions: Edition[], works: Map<string, Work>): Map<SyncSource, SyncTask[]> {
+  const plan = new Map<SyncSource, SyncTask[]>();
+  const push = (source: SyncSource, task: SyncTask) => {
+    const list = plan.get(source) ?? [];
+    list.push(task);
+    plan.set(source, list);
+  };
+
+  for (const edition of editions) {
+    const work = works.get(edition.workId);
+    switch (edition.mediaType) {
+      case 'anime': {
+        for (const ref of edition.sourceRefs) {
+          if (ref.source !== 'anilist') continue;
+          push('anilist', {
+            label: edition.title,
+            run: (ctx) => syncAnimeMedia(edition, ref, ctx),
+          });
+        }
+        push('syoboi', { label: edition.title, run: (ctx) => syncSyoboi(edition, work, ctx) });
+        break;
+      }
+      case 'light-novel':
+      case 'manga': {
+        // AniList の sourceRef は検知用の ID としてだけ使い、Release は作らない。
+        push('ndl', { label: edition.title, run: (ctx) => syncPaperBooks(edition, work, ctx) });
+        break;
+      }
+      case 'web-novel': {
+        let primary = true;
+        for (const ref of edition.sourceRefs) {
+          if (ref.source !== 'narou' && ref.source !== 'kakuyomu') continue;
+          const isPrimary = primary;
+          primary = false;
+          push(ref.source, {
+            label: edition.title,
+            run: (ctx) => syncWebNovel(edition, ref, isPrimary, ctx),
+          });
+        }
+        break;
+      }
+    }
+  }
+  return plan;
+}
+
+// ---------------------------------------------------------------------------
+// anime: AniList
+// ---------------------------------------------------------------------------
+
+/** 次話は AniList 1件ごとにローリング1件。毎週出るので新着にしない。 */
+async function syncAnimeMedia(edition: Edition, ref: SourceRef, ctx: SyncContext): Promise<void> {
+  const dto = await apiGet<MediaDetailDTO>(
+    `/api/anilist/media/${encodeURIComponent(ref.externalId)}`,
+    queryParams(ctx),
+  );
+
+  let nextEpisode: ReleaseDTO | undefined;
+  for (const release of dto.releases) {
+    if (release.kind === 'episode') {
+      nextEpisode ??= release;
+      continue;
+    }
+    await skipInvalidDate(() =>
+      mergeRelease(toMergeInput(edition.id, release, 'anilist'), ctx.database, { now: ctx.now() }),
+    );
+  }
+
+  await rollNextEpisode(edition, ref, nextEpisode, ctx);
+}
+
+async function rollNextEpisode(
+  edition: Edition,
+  ref: SourceRef,
+  next: ReleaseDTO | undefined,
+  ctx: SyncContext,
+): Promise<void> {
+  const { database } = ctx;
+  const nextId = next ? (next.externalId ?? `${ref.externalId}:${next.label}`) : undefined;
+  const anilistIds = new Set(
+    edition.sourceRefs.filter((r) => r.source === 'anilist').map((r) => r.externalId),
+  );
+
+  const rows = (await listReleasesByEdition(edition.id, database)).filter(
+    (r) => r.kind === 'episode' && r.origin !== 'manual',
+  );
+  for (const row of rows) {
+    if (nextId !== undefined && row.externalId === nextId) continue;
+    // 同じ Edition に紐づく別の AniList の次話は残す。
+    const owner = row.externalId ? episodeOwner(row.externalId) : undefined;
+    if (owner === undefined || owner === ref.externalId || !anilistIds.has(owner)) {
+      await deleteRelease(row.id, database);
+    }
+  }
+
+  if (!next || nextId === undefined) return;
+  const existed = rows.some((r) => r.externalId === nextId);
+  await skipInvalidDate(async () => {
+    const release = await mergeRelease(
+      { ...toMergeInput(edition.id, next, 'anilist'), externalId: nextId },
+      database,
+      { now: ctx.now() },
+    );
+    if (!existed && release.origin !== 'manual' && !release.seenAt) {
+      await updateRelease(release.id, { seenAt: ctx.now().toISOString() }, database);
+    }
+  });
+}
+
+function episodeOwner(externalId: string): string | undefined {
+  const i = externalId.lastIndexOf(':');
+  return i > 0 ? externalId.slice(0, i) : undefined;
+}
+
+// ---------------------------------------------------------------------------
+// anime: しょぼいカレンダー
+// ---------------------------------------------------------------------------
+
+async function syncSyoboi(edition: Edition, work: Work | undefined, ctx: SyncContext): Promise<void> {
+  const { database } = ctx;
+  const knownTid =
+    edition.syncHints?.syoboiTid ??
+    edition.sourceRefs.find((r) => r.source === 'syoboi')?.externalId;
+  const title = edition.title || work?.title || '';
+  if (!knownTid && !title) return;
+
+  // 手動同期でも refresh は付けない（Crawl-delay 60 のため取り直すと queued になり、その回はデータが入らない。24h キャッシュで十分）
+  const dto = await apiGet<SyoboiTitleDTO>('/api/syoboi/title', knownTid ? { tid: knownTid } : { title });
+  if (dto.status !== 'ok') return; // queued は次の同期で拾う
+
+  if (dto.tid && dto.tid !== edition.syncHints?.syoboiTid) {
+    await updateEditionSyncHints(edition.id, { syoboiTid: dto.tid }, database);
+  }
+
+  const today = todayJst(ctx.now());
+  const rows = (await listReleasesByEdition(edition.id, database)).filter(
+    (r) => r.kind === 'stream-start' && r.origin !== 'manual',
+  );
+  for (const release of dto.streamStarts ?? []) {
+    if (release.kind !== 'stream-start') continue;
+    // 始まった配信を、毎週の「今日以降の最初の番組」で延期扱いにしない。
+    const existing = release.externalId
+      ? rows.find((r) => r.externalId === release.externalId)
+      : undefined;
+    if (existing && isPastRelease(existing, today)) continue;
+    await skipInvalidDate(() =>
+      mergeRelease(toMergeInput(edition.id, release, 'syoboi'), database, { now: ctx.now() }),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// light-novel / manga: NDL
+// ---------------------------------------------------------------------------
+
+async function syncPaperBooks(edition: Edition, work: Work | undefined, ctx: SyncContext): Promise<void> {
+  const { database } = ctx;
+  const title = work?.title || edition.title;
+  const savedLine = edition.syncHints?.ndlLine;
+  const line = savedLine ?? ndlRefLine(edition);
+  const query: Record<string, string> = {
+    title,
+    kind: edition.mediaType === 'manga' ? 'manga' : 'novel',
+  };
+  if (line !== undefined) query.line = line;
+
+  const dto = await apiGet<NdlSeriesDTO>('/api/ndl/series', queryParams(ctx, query));
+
+  if (savedLine === undefined) {
+    if (line !== undefined) {
+      await updateEditionSyncHints(edition.id, { ndlLine: line }, database);
+    } else if (dto.lines.length > 0) {
+      // 何も見つからない時に本編へ固定しない。
+      await updateEditionSyncHints(edition.id, { ndlLine: dto.line ?? '' }, database);
+    }
+  }
+
+  // 移行措置: 旧ラベル照合時代の行（externalId の無い同期 volume）を消す。
+  for (const row of await listReleasesByEdition(edition.id, database)) {
+    if (row.kind === 'volume' && row.origin !== 'manual' && !row.externalId) {
+      await deleteRelease(row.id, database);
+    }
+  }
+
+  for (const release of dto.releases) {
+    if (!release.externalId) continue; // ISBN の無い巻は同一性を判定できない
+    await skipInvalidDate(() =>
+      mergeRelease(toMergeInput(edition.id, release, 'ndl'), database, { now: ctx.now() }),
+    );
+  }
+}
+
+/** 検索で選んだ NDL シリーズ（externalId "<kind>:<line>:<シリーズ名>"）の line。 */
+function ndlRefLine(edition: Edition): string | undefined {
+  for (const ref of edition.sourceRefs) {
+    if (ref.source !== 'ndl') continue;
+    const first = ref.externalId.indexOf(':');
+    const second = first < 0 ? -1 : ref.externalId.indexOf(':', first + 1);
+    if (second < 0) continue;
+    return ref.externalId.slice(first + 1, second);
+  }
+  return undefined;
+}
+
+// ---------------------------------------------------------------------------
+// web-novel: なろう / カクヨム
+// ---------------------------------------------------------------------------
+
+/** progress は total だけ更新する（current と unit は本人のもの）。 */
+async function syncWebNovel(
+  edition: Edition,
+  ref: SourceRef,
+  primary: boolean,
+  ctx: SyncContext,
+): Promise<void> {
+  const source = ref.source as 'narou' | 'kakuyomu';
+  const path =
+    source === 'narou'
+      ? `/api/narou/novel/${encodeURIComponent(ref.externalId)}`
+      : `/api/kakuyomu/work/${encodeURIComponent(ref.externalId)}`;
+  const dto = await apiGet<WebNovelDTO>(path, queryParams(ctx));
+
+  await rollLatestEpisode(edition, ref, source, dto, ctx);
+
+  // 1つの Edition に複数の Web 小説ソースがあっても、進捗と完結は先頭のソースだけで決める。
+  if (!primary) return;
+  const count = dto.episodeCount;
+  if (count > 0) {
+    const prev = edition.progress;
+    if (!prev) {
+      await updateEditionProgress(
+        edition.id,
+        { unit: source === 'narou' ? 'part' : 'episode', current: 0, total: count },
+        ctx.database,
+      );
+    } else if (prev.total !== count) {
+      await updateEditionProgress(edition.id, { ...prev, total: count }, ctx.database);
+    }
+  }
+  await setEditionCompleted(edition.id, dto.completed, ctx.database);
+}
+
+const EPISODE_COUNT_RE = /^第(\d+)(?:部分|話)/;
+
+async function rollLatestEpisode(
+  edition: Edition,
+  ref: SourceRef,
+  source: 'narou' | 'kakuyomu',
+  dto: WebNovelDTO,
+  ctx: SyncContext,
+): Promise<void> {
+  const { database } = ctx;
+  const count = dto.episodeCount;
+  const date = dto.lastUpdate;
+  if (count <= 0 || !date || !isValidYmd(date)) return; // 旧行を消す前に、作れることを確かめる
+
+  const key = `${source}:${ref.externalId}:latest`;
+  const label = source === 'narou' ? `第${count}部分` : `第${count}話`;
+
+  // 今回のキーの行と、externalId の無い旧行（更新ごとに増えていた `第N部分`）。
+  const rows = (await listReleasesByEdition(edition.id, database)).filter(
+    (r) =>
+      r.kind === 'episode' &&
+      r.origin !== 'manual' &&
+      r.source === source &&
+      (r.externalId === key || !r.externalId),
+  );
+
+  const create = async (seen: boolean) => {
+    await skipInvalidDate(async () => {
+      const release = await mergeRelease(
+        { editionId: edition.id, kind: 'episode', label, date, precision: 'day', externalId: key, source },
+        database,
+        { now: ctx.now(), markPastSeen: false },
+      );
+      if (seen && release.origin !== 'manual' && !release.seenAt) {
+        await updateRelease(release.id, { seenAt: ctx.now().toISOString() }, database);
+      }
+    });
+  };
+
+  if (rows.length === 0) {
+    await create(true); // 初回は既読で作る
+    return;
+  }
+
+  const prevCount = maxEpisodeCount(rows) ?? edition.progress?.total;
+  if (prevCount !== undefined && count > prevCount) {
+    // 話数が増えた: 延期として記録させず、作り直して新着にする。
+    for (const row of rows) await deleteRelease(row.id, database);
+    await create(false);
+    return;
+  }
+
+  const current = rows.find((r) => r.externalId === key);
+  for (const row of rows) {
+    if (row !== current) await deleteRelease(row.id, database);
+  }
+  if (!current) {
+    await create(true);
+    return;
+  }
+  if (current.label !== label || current.date !== date || (current.precision ?? 'day') !== 'day') {
+    // 話数が増えていない時の日付・ラベルの変化は延期ではないので、記録せずに直す。
+    await updateRelease(current.id, { label, date, precision: 'day', origin: 'sync' }, database);
+  }
+}
+
+function maxEpisodeCount(rows: Release[]): number | undefined {
+  let max: number | undefined;
+  for (const row of rows) {
+    const match = EPISODE_COUNT_RE.exec(row.label);
+    if (!match) continue;
+    const n = Number(match[1]);
+    if (max === undefined || n > max) max = n;
+  }
+  return max;
+}
+
+// ---------------------------------------------------------------------------
+// helpers
+// ---------------------------------------------------------------------------
+
+function queryParams(ctx: SyncContext, base: Record<string, string> = {}): Record<string, string> | undefined {
+  const params = { ...base };
+  if (ctx.force) params.refresh = '1';
+  return Object.keys(params).length > 0 ? params : undefined;
+}
+
+function toMergeInput(editionId: string, release: ReleaseDTO, fallbackSource: Source): ReleaseMergeInput {
+  const input: ReleaseMergeInput = {
+    editionId,
+    kind: release.kind,
+    label: release.label,
+    date: release.date,
+    precision: release.precision ?? 'day',
+    source: release.source ?? fallbackSource,
+  };
+  if (release.time) input.time = release.time;
+  if (release.externalId) input.externalId = release.externalId;
+  return input;
+}
+
+/** 1件の Release の日付が不正でも、そのソース全体は止めない。 */
+async function skipInvalidDate(fn: () => Promise<unknown>): Promise<void> {
+  try {
+    await fn();
+  } catch (err) {
+    if (err instanceof RangeError) return;
+    throw err;
+  }
 }
 
 function errorMessage(err: unknown): string {
   if (err instanceof Error) return err.message;
   return String(err);
-}
-
-// ---------------------------------------------------------------------------
-// Per-source handlers
-// ---------------------------------------------------------------------------
-
-type HandledSource = 'anilist' | 'narou' | 'kakuyomu' | 'ndl';
-
-type SourceHandler = (
-  edition: Edition,
-  ref: SourceRef,
-  database: TriptychDB,
-  force: boolean,
-) => Promise<void>;
-
-const SOURCE_HANDLERS: Record<HandledSource, SourceHandler> = {
-  anilist: syncAnilist,
-  narou: syncNarou,
-  kakuyomu: syncKakuyomu,
-  ndl: syncNdl,
-};
-
-/**
- * anime: season-start Release を通常マージし、AniList の nextAiringEpisode
- * (kind='episode') は「次話」のローリング更新として、同じ kind/source の
- * 既存 Release を常に1件に保つ（放送済み話は残さない）。
- */
-async function syncAnilist(
-  edition: Edition,
-  ref: SourceRef,
-  database: TriptychDB,
-): Promise<void> {
-  const dto = await apiGet<MediaDetailDTO>(`/api/anilist/media/${ref.externalId}`);
-
-  for (const release of dto.releases) {
-    if (release.kind === 'season-start') {
-      await mergeRelease(
-        {
-          editionId: edition.id,
-          kind: 'season-start',
-          label: release.label,
-          date: release.date,
-          source: 'anilist',
-        },
-        database,
-      );
-    } else if (release.kind === 'episode') {
-      await mergeRollingRelease(
-        edition.id,
-        'episode',
-        'anilist',
-        release.label,
-        release.date,
-        database,
-      );
-    }
-  }
-}
-
-/**
- * web-novel (なろう): 全部分数(generalAllNo)が Edition.progress.total と
- * 異なる場合のみ progress を更新し、最終掲載日を kind='episode'・
- * label='第N部分' の Release としてマージする。
- */
-async function syncNarou(
-  edition: Edition,
-  ref: SourceRef,
-  database: TriptychDB,
-  force: boolean,
-): Promise<void> {
-  const dto = await apiGet<NarouNovelDetail>(
-    `/api/narou/novel/${ref.externalId}`,
-    force ? { refresh: '1' } : undefined,
-  );
-
-  if (edition.progress?.total === dto.generalAllNo) return;
-
-  const nextProgress: EditionProgress = {
-    unit: 'part',
-    current: edition.progress?.current ?? dto.generalAllNo,
-    total: dto.generalAllNo,
-  };
-  await updateEditionProgress(edition.id, nextProgress, database);
-
-  await mergeRelease(
-    {
-      editionId: edition.id,
-      kind: 'episode',
-      label: `第${dto.generalAllNo}部分`,
-      date: dto.generalLastup,
-      source: 'narou',
-    },
-    database,
-  );
-}
-
-/**
- * web-novel (カクヨム): なろうと同様、episodeCount が progress.total と
- * 異なる場合のみ progress を更新し、adapter が返す最終更新 Release をマージする。
- */
-async function syncKakuyomu(
-  edition: Edition,
-  ref: SourceRef,
-  database: TriptychDB,
-): Promise<void> {
-  const dto = await apiGet<KakuyomuWorkDTO>(`/api/kakuyomu/work/${ref.externalId}`);
-
-  if (dto.episodeCount == null) return;
-  if (edition.progress?.total === dto.episodeCount) return;
-
-  const nextProgress: EditionProgress = {
-    unit: 'episode',
-    current: edition.progress?.current ?? dto.episodeCount,
-    total: dto.episodeCount,
-  };
-  await updateEditionProgress(edition.id, nextProgress, database);
-
-  const release = dto.releases[0];
-  if (release) {
-    await mergeRelease(
-      {
-        editionId: edition.id,
-        kind: release.kind,
-        label: release.label,
-        date: release.date,
-        source: 'kakuyomu',
-      },
-      database,
-    );
-  }
-}
-
-/**
- * light-novel (NDL/openBD 2段構え): シリーズ新刊 Release (kind='volume') を
- * mergeRelease でマージする。dateHistory の処理は mergeRelease 側に一任。
- */
-async function syncNdl(
-  edition: Edition,
-  ref: SourceRef,
-  database: TriptychDB,
-  force: boolean,
-): Promise<void> {
-  const title = ref.externalId || edition.title;
-  const releases = await apiGet<ReleaseDTO[]>(
-    '/api/ndl/series',
-    force ? { title, refresh: '1' } : { title },
-  );
-
-  for (const release of releases) {
-    if (!release.date) continue; // openBD が発売日を持たない候補はスキップ
-    await mergeRelease(
-      {
-        editionId: edition.id,
-        kind: release.kind,
-        label: release.label,
-        date: release.date,
-        source: 'ndl',
-      },
-      database,
-    );
-  }
-}
-
-/**
- * 「次話」のようなローリング Release（同一 kind/source につき常に1件だけを
- * 保持し、放送済み/既読分は残さない）を扱う共通ヘルパー。
- *
- * 同じ label（= 同じ話数）の既存 Release があれば mergeRelease に委譲して
- * dateHistory を保持したまま日付だけ更新する（延期検知）。label が変わった
- * (= 次の話に進んだ) 場合は古いローリング Release を削除してから新規作成する
- * — 放送済み話の履歴を残さないという仕様のため、この場合は dateHistory を
- * 引き継がない。
- */
-async function mergeRollingRelease(
-  editionId: string,
-  kind: Release['kind'],
-  source: Source,
-  label: string,
-  date: string,
-  database: TriptychDB,
-): Promise<void> {
-  const existing = (await listReleasesByEdition(editionId, database)).filter(
-    (r) => r.kind === kind && r.source === source,
-  );
-  const sameLabel = existing.some((r) => r.label === label);
-  if (!sameLabel) {
-    for (const stale of existing) {
-      await deleteRelease(stale.id, database);
-    }
-  }
-  await mergeRelease({ editionId, kind, label, date, source }, database);
 }
