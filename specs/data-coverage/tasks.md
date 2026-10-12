@@ -34,8 +34,8 @@
   - Depends on: F1（store API）, B3（検索の返り値）
 
 ### Wave 3（最終）
-- [ ] **V**: 統合検証（実 API で本好き・薬屋・転スラ・無職転生を登録→同期→検知、深夜放送の日付、ブラウザで全ビュー、テスト全 green）
+- [x] **V**: 統合検証（実 API で本好き・薬屋・転スラ・無職転生を登録→同期→検知、深夜放送の日付、ブラウザで全ビュー、テスト全 green）
   - Depends on: Wave 2
 
 ## Progress
-- Total: 9 tasks | Completed: 8 | In Progress: 1（V）
+- Total: 9 tasks | Completed: 9 | In Progress: 0
