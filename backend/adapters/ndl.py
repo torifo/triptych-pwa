@@ -72,6 +72,8 @@ NDL_API_URL = "https://ndlsearch.ndl.go.jp/api/opensearch"
 NDL_SEARCH_URL = "https://ndlsearch.ndl.go.jp/search"
 USER_AGENT = "triptych/0.1 (personal tracker)"
 REQUEST_HEADERS = {"User-Agent": USER_AGENT, "Accept-Encoding": "gzip"}
+# cnt=500 の全件取得は数秒かかることがあり、httpx 既定の 5 秒では初回に ReadTimeout になる
+REQUEST_TIMEOUT = httpx.Timeout(30.0, connect=10.0)
 
 BOOKS_TTL_SECONDS = 6 * 60 * 60  # 6h
 YEARS_BACK = 2  # from=<this year - 2>
@@ -788,7 +790,7 @@ async def series(
     cache = _resolve_cache(cache)
 
     owns_client = client is None
-    http = client or httpx.AsyncClient()
+    http = client or httpx.AsyncClient(timeout=REQUEST_TIMEOUT)
     try:
         xml_bytes = await _fetch_books_xml(
             title, client=http, cache=cache, refresh=refresh, today=today
@@ -865,7 +867,7 @@ async def search_books(
     cache = _resolve_cache(cache)
 
     owns_client = client is None
-    http = client or httpx.AsyncClient()
+    http = client or httpx.AsyncClient(timeout=REQUEST_TIMEOUT)
     try:
         xml_bytes = await _fetch_books_xml(
             q, client=http, cache=cache, refresh=refresh, today=today
