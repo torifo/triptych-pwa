@@ -64,6 +64,7 @@ class CatalogEntry(BaseModel):
     startDate: Optional[str] = None
     startPrecision: Optional[Literal["day", "month", "year"]] = None
     endDate: Optional[str] = None
+    endPrecision: Optional[Literal["day", "month", "year"]] = None
     season: Optional[str] = None
     seasonYear: Optional[int] = None
     episodes: Optional[int] = None

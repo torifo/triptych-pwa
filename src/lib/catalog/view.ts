@@ -134,17 +134,14 @@ export function formatEntryDate(date: string, precision: CatalogPrecision | null
   return date;
 }
 
-/**
- * 期間。終了日の精度は DTO に無いので開始日と同じ精度で出す。
- * 終了日が無く連載中なら「2019-04〜」、本（1冊）は発売日だけ。
- */
+/** 期間。終了日が無く連載中なら「2019-04〜」、本（1冊）は発売日だけ。 */
 export function formatEntryPeriod(
-  entry: Pick<CatalogEntry, 'kind' | 'status' | 'startDate' | 'startPrecision' | 'endDate'>,
+  entry: Pick<CatalogEntry, 'kind' | 'status' | 'startDate' | 'startPrecision' | 'endDate' | 'endPrecision'>,
 ): string | null {
   if (!entry.startDate) return null;
   const start = formatEntryDate(entry.startDate, entry.startPrecision);
   if (entry.kind === 'book') return start;
-  const end = entry.endDate ? formatEntryDate(entry.endDate, entry.startPrecision) : null;
+  const end = entry.endDate ? formatEntryDate(entry.endDate, entry.endPrecision ?? entry.startPrecision) : null;
   if (end && end !== start) return `${start}〜${end}`;
   if (!end && (entry.status === 'RELEASING' || entry.status === '連載中')) return `${start}〜`;
   return start;

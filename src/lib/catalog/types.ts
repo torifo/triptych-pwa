@@ -58,6 +58,7 @@ export interface CatalogEntry {
   startDate?: string | null;
   startPrecision?: CatalogPrecision | null;
   endDate?: string | null;
+  endPrecision?: CatalogPrecision | null;
   season?: string | null;
   seasonYear?: number | null;
   episodes?: number | null;
