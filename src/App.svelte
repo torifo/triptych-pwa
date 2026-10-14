@@ -7,6 +7,8 @@
   import Calendar from './routes/Calendar.svelte'
   import Settings from './routes/Settings.svelte'
   import Search from './routes/Search.svelte'
+  import Catalog from './routes/Catalog.svelte'
+  import CatalogDetail from './routes/CatalogDetail.svelte'
   import { maybeAutoSync } from './lib/sync/engine'
   import { beginSync, completeSync, failSync } from './lib/sync/status.svelte'
   import { db } from './lib/db/schema'
@@ -58,7 +60,7 @@
     { label: 'HOME', path: '#/', name: 'home' },
     { label: '検索', path: '#/search', name: 'search' },
     { label: 'LIBRARY', path: '#/library', name: 'library' },
-    { label: 'WORK', path: '#/work/', name: 'work' },
+    { label: 'CATALOG', path: '#/catalog', name: 'catalog' },
     { label: 'CALENDAR', path: '#/calendar', name: 'calendar' },
     { label: 'SETTINGS', path: '#/settings', name: 'settings' },
   ]
@@ -105,6 +107,12 @@
       <Settings />
     {:else if route.name === 'search'}
       <Search />
+    {:else if route.name === 'catalog'}
+      {#if route.params.id}
+        <CatalogDetail id={route.params.id} />
+      {:else}
+        <Catalog />
+      {/if}
     {/if}
   </main>
 

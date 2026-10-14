@@ -1,0 +1,267 @@
+import { describe, expect, it } from 'vitest';
+import type { Edition, Work } from '../db/schema';
+import { makeEntry } from './fixtures.test-util';
+import type { CatalogEntry } from './types';
+import {
+  defaultSelection,
+  entryMediaType,
+  findExistingWork,
+  isRegistered,
+  ndlSeriesExternalId,
+  registeredKeys,
+  toEditionInput,
+  uniqueByRef,
+} from './register';
+
+function edition(workId: string, sourceRefs: Edition['sourceRefs']): Pick<Edition, 'workId' | 'sourceRefs'> {
+  return { workId, sourceRefs };
+}
+
+function work(id: string, title: string, titleNormalized: string): Work {
+  return { id, title, titleNormalized, aliases: [], createdAt: '', updatedAt: '' };
+}
+
+const book = (externalId: string, over: Partial<CatalogEntry> = {}) =>
+  makeEntry({
+    source: 'ndl',
+    externalId,
+    kind: 'book',
+    title: `本好きの下剋上 ${externalId}`,
+    extra: { kindHint: 'novel', line: '', series: '本好きの下剋上' },
+    ...over,
+  });
+
+describe('entryMediaType', () => {
+  it('maps each kind', () => {
+    const k = (kind: CatalogEntry['kind'], extra = {}) =>
+      entryMediaType(makeEntry({ source: 'anilist', externalId: '1', kind, extra }));
+    expect(k('anime')).toBe('anime');
+    expect(k('manga')).toBe('manga');
+    expect(k('novel')).toBe('light-novel');
+    expect(k('web-novel')).toBe('web-novel');
+  });
+
+  it('maps a book by extra.kindHint (manga -> manga, otherwise light-novel)', () => {
+    expect(entryMediaType(book('1', { extra: { kindHint: 'manga' } }))).toBe('manga');
+    expect(entryMediaType(book('1', { extra: { kindHint: 'novel' } }))).toBe('light-novel');
+    expect(entryMediaType(book('1', { extra: {} }))).toBe('light-novel');
+    expect(entryMediaType(book('1', { extra: { kindHint: 'whatever' } }))).toBe('light-novel');
+  });
+});
+
+describe('toEditionInput', () => {
+  it('uses the AniList id and url for anime', () => {
+    const input = toEditionInput(
+      makeEntry({
+        source: 'anilist',
+        externalId: '101',
+        kind: 'anime',
+        title: '薬屋のひとりごと',
+        url: 'https://anilist.co/anime/101',
+        cover: 'https://img.example/c.jpg',
+      }),
+    );
+    expect(input).toEqual({
+      mediaType: 'anime',
+      title: '薬屋のひとりごと',
+      sourceRefs: [{ source: 'anilist', externalId: '101', url: 'https://anilist.co/anime/101' }],
+      coverUrl: 'https://img.example/c.jpg',
+      linkSource: 'manual',
+    });
+  });
+
+  it('uses the AniList id for manga and novels', () => {
+    const manga = toEditionInput(makeEntry({ source: 'anilist', externalId: '5', kind: 'manga', url: 'https://anilist.co/manga/5' }));
+    expect(manga.mediaType).toBe('manga');
+    expect(manga.sourceRefs).toEqual([{ source: 'anilist', externalId: '5', url: 'https://anilist.co/manga/5' }]);
+    const novel = toEditionInput(makeEntry({ source: 'anilist', externalId: '6', kind: 'novel', url: 'https://anilist.co/manga/6' }));
+    expect(novel.mediaType).toBe('light-novel');
+    expect(novel.sourceRefs[0]).toMatchObject({ source: 'anilist', externalId: '6' });
+  });
+
+  it('uses the Syoboi TID for syoboi rows', () => {
+    const input = toEditionInput(
+      makeEntry({ source: 'syoboi', externalId: '7653', kind: 'anime', url: 'https://cal.syoboi.jp/tid/7653' }),
+    );
+    expect(input.sourceRefs).toEqual([{ source: 'syoboi', externalId: '7653', url: 'https://cal.syoboi.jp/tid/7653' }]);
+  });
+
+  it('passes narou and kakuyomu through (narou ncode is lowercased like the search results)', () => {
+    const narou = toEditionInput(
+      makeEntry({ source: 'narou', externalId: 'N2267BE', kind: 'web-novel', url: 'https://ncode.syosetu.com/n2267be/' }),
+    );
+    expect(narou.mediaType).toBe('web-novel');
+    expect(narou.sourceRefs).toEqual([
+      { source: 'narou', externalId: 'n2267be', url: 'https://ncode.syosetu.com/n2267be/' },
+    ]);
+    const kaku = toEditionInput(
+      makeEntry({ source: 'kakuyomu', externalId: '1177354054', kind: 'web-novel', url: 'https://kakuyomu.jp/works/1177354054' }),
+    );
+    expect(kaku.sourceRefs).toEqual([
+      { source: 'kakuyomu', externalId: '1177354054', url: 'https://kakuyomu.jp/works/1177354054' },
+    ]);
+  });
+
+  it('falls back to a source url when the row has none or an unsafe one', () => {
+    const anilist = toEditionInput(makeEntry({ source: 'anilist', externalId: '9', kind: 'anime', url: null }));
+    expect(anilist.sourceRefs[0].url).toBe('https://anilist.co/anime/9');
+    const unsafe = toEditionInput(makeEntry({ source: 'anilist', externalId: '9', kind: 'manga', url: 'javascript:alert(1)' }));
+    expect(unsafe.sourceRefs[0].url).toBe('https://anilist.co/manga/9');
+    expect(toEditionInput(makeEntry({ source: 'syoboi', externalId: '1', kind: 'anime' })).sourceRefs[0].url).toBe(
+      'https://cal.syoboi.jp/tid/1',
+    );
+  });
+
+  it('drops covers that are not http(s)', () => {
+    const input = toEditionInput(makeEntry({ source: 'anilist', externalId: '1', kind: 'anime', cover: 'data:image/png;base64,AAAA' }));
+    expect(input.coverUrl).toBeUndefined();
+  });
+
+  it('uses the NDL series reference "<kind>:<line>:<series>" for a book', () => {
+    const input = toEditionInput(
+      book('9784867940228', { extra: { kindHint: 'novel', line: 'TOブックス', series: '本好きの下剋上' } }),
+    );
+    expect(input.mediaType).toBe('light-novel');
+    expect(input.title).toBe('本好きの下剋上');
+    expect(input.sourceRefs).toHaveLength(1);
+    expect(input.sourceRefs[0].source).toBe('ndl');
+    expect(input.sourceRefs[0].externalId).toBe('novel:TOブックス:本好きの下剋上');
+    expect(input.sourceRefs[0].url).toMatch(/^https:\/\/ndlsearch\.ndl\.go\.jp\/search\?cs=bib&keyword=/);
+  });
+
+  it('uses manga as the NDL kind when kindHint is manga, and an empty line for the main line', () => {
+    const entry = book('1', { extra: { kindHint: 'manga', line: '', series: '本好きの下剋上' } });
+    expect(ndlSeriesExternalId(entry)).toBe('manga::本好きの下剋上');
+    expect(toEditionInput(entry).mediaType).toBe('manga');
+  });
+
+  it('falls back to the title when extra.series / extra.line are missing', () => {
+    const entry = book('1', { title: 'ある本', extra: {} });
+    expect(ndlSeriesExternalId(entry)).toBe('novel::ある本');
+  });
+
+  it('keeps the series ref readable by the sync engine (line is the second field)', () => {
+    const ref = toEditionInput(book('1', { extra: { kindHint: 'novel', line: 'ジュニア文庫', series: 'A:B' } })).sourceRefs[0];
+    const first = ref.externalId.indexOf(':');
+    const second = ref.externalId.indexOf(':', first + 1);
+    expect(ref.externalId.slice(first + 1, second)).toBe('ジュニア文庫');
+  });
+});
+
+describe('registeredKeys / isRegistered', () => {
+  const editions = [
+    edition('w1', [{ source: 'anilist', externalId: '101', url: '' }]),
+    edition('w1', [
+      { source: 'narou', externalId: 'n2267be', url: '' },
+      { source: 'kakuyomu', externalId: '99', url: '' },
+    ]),
+    edition('w2', [{ source: 'ndl', externalId: 'novel::本好きの下剋上', url: '' }]),
+  ];
+
+  it('collects source:externalId from every edition', () => {
+    expect(registeredKeys(editions)).toEqual(
+      new Set(['anilist:101', 'narou:n2267be', 'kakuyomu:99', 'ndl:novel::本好きの下剋上']),
+    );
+  });
+
+  it('detects registered rows by (source, externalId)', () => {
+    const keys = registeredKeys(editions);
+    expect(isRegistered(makeEntry({ source: 'anilist', externalId: '101', kind: 'anime' }), keys)).toBe(true);
+    expect(isRegistered(makeEntry({ source: 'anilist', externalId: '102', kind: 'anime' }), keys)).toBe(false);
+    expect(isRegistered(makeEntry({ source: 'kakuyomu', externalId: '99', kind: 'web-novel' }), keys)).toBe(true);
+    // 同じ ID でもソースが違えば別物
+    expect(isRegistered(makeEntry({ source: 'syoboi', externalId: '101', kind: 'anime' }), keys)).toBe(false);
+  });
+
+  it('treats the narou ncode case-insensitively', () => {
+    const keys = registeredKeys(editions);
+    expect(isRegistered(makeEntry({ source: 'narou', externalId: 'N2267BE', kind: 'web-novel' }), keys)).toBe(true);
+  });
+
+  it('detects a book by its NDL series reference, whichever volume it is', () => {
+    const keys = registeredKeys(editions);
+    expect(isRegistered(book('9784867940228'), keys)).toBe(true);
+    expect(isRegistered(book('9784867940999'), keys)).toBe(true);
+    // 別の系統（line）や種別（manga）は別シリーズ
+    expect(isRegistered(book('1', { extra: { kindHint: 'novel', line: 'ジュニア文庫', series: '本好きの下剋上' } }), keys)).toBe(false);
+    expect(isRegistered(book('1', { extra: { kindHint: 'manga', line: '', series: '本好きの下剋上' } }), keys)).toBe(false);
+  });
+});
+
+describe('uniqueByRef', () => {
+  it('keeps one book per series but both lines', () => {
+    const a = book('1');
+    const b = book('2');
+    const c = book('3', { extra: { kindHint: 'novel', line: 'ジュニア文庫', series: '本好きの下剋上' } });
+    expect(uniqueByRef([a, b, c])).toEqual([a, c]);
+  });
+});
+
+describe('findExistingWork', () => {
+  const works = [work('w1', '薬屋のひとりごと', '薬屋のひとりごと'), work('w2', '別の作品', '別の作品')];
+
+  it('prefers the work that already holds a row of this catalog work', () => {
+    const entries = [makeEntry({ source: 'anilist', externalId: '101', kind: 'anime', title: '薬屋のひとりごと' })];
+    const editions = [edition('w2', [{ source: 'anilist', externalId: '101', url: '' }])];
+    expect(findExistingWork('薬屋のひとりごと', entries, works, editions)?.id).toBe('w2');
+  });
+
+  it('falls back to the work with the same normalized title', () => {
+    expect(findExistingWork('薬屋の ひとりごと！', [], works, [])?.id).toBe('w1');
+    expect(findExistingWork('知らない作品', [], works, [])).toBeUndefined();
+  });
+});
+
+describe('defaultSelection', () => {
+  const entries = [
+    makeEntry({ source: 'anilist', externalId: '1', kind: 'anime', popularity: 100 }),
+    makeEntry({ source: 'anilist', externalId: '2', kind: 'anime', popularity: 900 }),
+    makeEntry({ source: 'syoboi', externalId: '3', kind: 'anime', popularity: 5000 }),
+    makeEntry({ source: 'anilist', externalId: '4', kind: 'manga', popularity: 10 }),
+    makeEntry({ source: 'anilist', externalId: '5', kind: 'manga', popularity: 20 }),
+    makeEntry({ source: 'anilist', externalId: '6', kind: 'novel', popularity: 7 }),
+    makeEntry({ source: 'narou', externalId: 'n1', kind: 'web-novel', popularity: 3 }),
+    makeEntry({ source: 'kakuyomu', externalId: 'k1', kind: 'web-novel', popularity: 30 }),
+    book('b1', { startDate: '2025-01-10', volumes: 1 }),
+    book('b3', { startDate: '2026-11-10', volumes: 3 }),
+    book('b2', { startDate: '2025-06-10', volumes: 2 }),
+  ];
+
+  it('picks one representative per kind', () => {
+    const sel = defaultSelection({ entries });
+    expect(Object.keys(sel).sort()).toEqual(['anime', 'book', 'manga', 'novel', 'web-novel']);
+    // anime / 原作は AniList の人気最大（しょぼかるの値は見ない）
+    expect(sel.anime?.id).toBe('anilist:2');
+    expect(sel.manga?.id).toBe('anilist:5');
+    expect(sel.novel?.id).toBe('anilist:6');
+    // web-novel は人気最大（ソースを問わない）
+    expect(sel['web-novel']?.id).toBe('kakuyomu:k1');
+    // book は最新の巻
+    expect(sel.book?.id).toBe('ndl:b3');
+  });
+
+  it('omits kinds with no rows', () => {
+    const sel = defaultSelection({ entries: [entries[0]] });
+    expect(Object.keys(sel)).toEqual(['anime']);
+    expect(defaultSelection({ entries: [] })).toEqual({});
+  });
+
+  it('falls back to the other sources when a kind has no AniList row', () => {
+    const only = [makeEntry({ source: 'syoboi', externalId: '3', kind: 'anime', popularity: null })];
+    expect(defaultSelection({ entries: only }).anime?.id).toBe('syoboi:3');
+  });
+
+  it('breaks popularity ties by order and treats a missing popularity as lowest', () => {
+    const tie = [
+      makeEntry({ source: 'anilist', externalId: 'a', kind: 'anime', popularity: null }),
+      makeEntry({ source: 'anilist', externalId: 'b', kind: 'anime', popularity: 0 }),
+      makeEntry({ source: 'anilist', externalId: 'c', kind: 'anime', popularity: 0 }),
+    ];
+    expect(defaultSelection({ entries: tie }).anime?.id).toBe('anilist:b');
+  });
+
+  it('chooses the later volume number when two books share a release date', () => {
+    const same = [book('v1', { startDate: '2026-01-01', volumes: 1 }), book('v2', { startDate: '2026-01-01', volumes: 2 })];
+    expect(defaultSelection({ entries: same }).book?.id).toBe('ndl:v2');
+  });
+});
