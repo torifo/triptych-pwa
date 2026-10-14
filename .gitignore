@@ -28,3 +28,6 @@ __pycache__/
 *.njsproj
 *.sln
 *.sw?
+backend/catalog.db
+backend/catalog.db-wal
+backend/catalog.db-shm
