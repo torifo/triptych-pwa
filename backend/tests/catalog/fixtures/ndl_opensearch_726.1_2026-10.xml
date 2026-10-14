@@ -1,0 +1,975 @@
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:openSearch="http://a9.com/-/spec/opensearchrss/1.0/" xmlns:dcndl="http://ndl.go.jp/dcndl/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" version="2.0">
+  <channel>
+    <title>726.1 books 2026-10 2026-10 - 国立国会図書館サーチ OpenSearch</title>
+    <link>https://ios-v2-prod-eks-alb.ndlsearch.ndl.go.jp/api/opensearch?ndc=726.1&amp;mediatype=books&amp;from=2026-10&amp;until=2026-10&amp;cnt=30&amp;idx=1</link>
+    <description>Search results for ndc=726.1 mediatype=books from=2026-10 until=2026-10 cnt=30 idx=1</description>
+    <language>ja</language>
+    <openSearch:totalResults>234</openSearch:totalResults>
+    <openSearch:startIndex>1</openSearch:startIndex>
+    <openSearch:itemsPerPage>30</openSearch:itemsPerPage>
+    <item>
+      <title>愛は序曲に始まって</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034936532</link>
+      <description><![CDATA[<p>ハーパーコリンズ・ジャパン,2026,978-4-302-12460-2<p><ul><li>タイトル：愛は序曲に始まって</li><li>タイトル（読み）：アイ ワ ジョキョク ニ ハジマッテ</li><li>責任表示：津谷さとみ 著,ジェシカ・スティール 原作</li><li>シリーズ名：ハーレクインコミックス・パール ; ツ1-23</li><li>シリーズ名（読み）：ハーレクイン コミックス パール ; ツ-1-23</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>津谷, さとみ,Steele, Jessica, -2020,津谷さとみ 著,ジェシカ・スティール 原作</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034936532</guid>
+      <pubDate>Fri, 2 Oct 2026 23:18:04 +0900</pubDate>
+      <dc:title>愛は序曲に始まって</dc:title>
+      <dcndl:titleTranscription>アイ ワ ジョキョク ニ ハジマッテ</dcndl:titleTranscription>
+      <dc:creator>津谷, さとみ</dc:creator>
+      <dc:creator>Steele, Jessica, -2020</dc:creator>
+      <dcndl:creatorTranscription>ツヤ, サトミ</dcndl:creatorTranscription>
+      <dcndl:seriesTitle>ハーレクインコミックス・パール ; ツ1-23</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>ハーレクイン コミックス パール ; ツ-1-23</dcndl:seriesTitleTranscription>
+      <dc:publisher>ハーパーコリンズ・ジャパン</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>664円</dcndl:price>
+      <dc:extent>122p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-302-12460-2</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034936532</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24305112</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34911501</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>アオバ自転車店といこうよ!</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034948051</link>
+      <description><![CDATA[<p>17,少年画報社,2026,978-4-7859-8294-2<p><ul><li>タイトル：アオバ自転車店といこうよ!</li><li>タイトル（読み）：アオバ ジテンシャテン ト イコウヨ</li><li>責任表示：宮尾岳 著</li><li>シリーズ名：YKコミックス</li><li>シリーズ名（読み）：ワイケー コミックス</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>宮尾, 岳,宮尾岳 著</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034948051</guid>
+      <pubDate>Wed, 14 Oct 2026 00:15:11 +0900</pubDate>
+      <dc:title>アオバ自転車店といこうよ!</dc:title>
+      <dcndl:titleTranscription>アオバ ジテンシャテン ト イコウヨ</dcndl:titleTranscription>
+      <dc:creator>宮尾, 岳</dc:creator>
+      <dcndl:volume>17</dcndl:volume>
+      <dcndl:seriesTitle>YKコミックス</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>ワイケー コミックス</dcndl:seriesTitleTranscription>
+      <dc:publisher>少年画報社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>780円</dcndl:price>
+      <dc:extent>153p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-7859-8294-2</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034948051</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07572834</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>悪女は楽で最高ですが?</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034934082</link>
+      <description><![CDATA[<p>2,一迅社,2026,978-4-8251-0126-5<p><ul><li>タイトル：悪女は楽で最高ですが?</li><li>タイトル（読み）：アクジョ ワ ラク デ サイコウ デスガ ?</li><li>責任表示：Yoteh 作画,Mindo 文,Mango Kim 原作</li><li>シリーズ名：IDコミックス. カラフルハピネス</li><li>シリーズ名（読み）：ID コミックス. カラフル ハピネス</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>Yoteh,Mindo,Kim, Mango,Yoteh 作画,Mindo 文,Mango Kim 原作</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034934082</guid>
+      <pubDate>Thu, 1 Oct 2026 19:23:43 +0900</pubDate>
+      <dc:title>悪女は楽で最高ですが?</dc:title>
+      <dcndl:titleTranscription>アクジョ ワ ラク デ サイコウ デスガ ?</dcndl:titleTranscription>
+      <dc:creator>Yoteh</dc:creator>
+      <dc:creator>Mindo</dc:creator>
+      <dc:creator>Kim, Mango</dc:creator>
+      <dcndl:volume>2</dcndl:volume>
+      <dcndl:seriesTitle>IDコミックス. カラフルハピネス</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>ID コミックス. カラフル ハピネス</dcndl:seriesTitleTranscription>
+      <dc:publisher>一迅社</dc:publisher>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>990円</dcndl:price>
+      <dc:extent>158 p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-8251-0126-5</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034934082</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24304228</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description>頒布</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>悪魔と俺と</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034950100</link>
+      <description><![CDATA[<p>1,双葉社,2026,978-4-575-44131-4<p><ul><li>タイトル：悪魔と俺と</li><li>タイトル（読み）：アクマ ト オレ ト</li><li>責任表示：黒江S介 著</li><li>シリーズ名：ACTION COMICS</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>黒江, S介,黒江S介 著</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034950100</guid>
+      <pubDate>Tue, 13 Oct 2026 23:51:54 +0900</pubDate>
+      <dc:title>悪魔と俺と</dc:title>
+      <dcndl:titleTranscription>アクマ ト オレ ト</dcndl:titleTranscription>
+      <dc:creator>黒江, S介</dc:creator>
+      <dcndl:volume>1</dcndl:volume>
+      <dcndl:seriesTitle>ACTION COMICS</dcndl:seriesTitle>
+      <dc:publisher>双葉社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>740円</dcndl:price>
+      <dc:extent>180p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-575-44131-4</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034950100</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34914845</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>悪役のご令息のどうにかしたい日常</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034948063</link>
+      <description><![CDATA[<p>8,一迅社,2026,978-4-8251-0145-6<p><ul><li>タイトル：悪役のご令息のどうにかしたい日常</li><li>タイトル（読み）：アクヤク ノ ゴレイソク ノ ドウニカ シタイ ニチジョウ</li><li>責任表示：ふわいにむ コミック,馬のこえが聞こえる 原作</li><li>シリーズ名：IDコミックス. Zero-sum comics</li><li>シリーズ名（読み）：ID コミックス. Zero-sum comics</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>ふわい, にむ,馬のこえが聞こえる,ふわいにむ コミック,馬のこえが聞こえる 原作</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034948063</guid>
+      <pubDate>Wed, 7 Oct 2026 20:50:50 +0900</pubDate>
+      <dc:title>悪役のご令息のどうにかしたい日常</dc:title>
+      <dcndl:titleTranscription>アクヤク ノ ゴレイソク ノ ドウニカ シタイ ニチジョウ</dcndl:titleTranscription>
+      <dc:creator>ふわい, にむ</dc:creator>
+      <dc:creator>馬のこえが聞こえる</dc:creator>
+      <dcndl:creatorTranscription>フワイ, ニム</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>ウマ ノ コエ ガ キコエル</dcndl:creatorTranscription>
+      <dcndl:volume>8</dcndl:volume>
+      <dcndl:seriesTitle>IDコミックス. Zero-sum comics</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>ID コミックス. Zero-sum comics</dcndl:seriesTitleTranscription>
+      <dc:publisher>一迅社</dc:publisher>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>740円</dcndl:price>
+      <dc:extent>167 p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-8251-0145-6</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034948063</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24306689</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description>頒布</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>悪役令嬢が婚約破棄されたので、いまから俺が幸せにします。 : アンソロジーコミック</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034948064</link>
+      <description><![CDATA[<p>5,一迅社,2026,978-4-8251-0146-3<p><ul><li>タイトル：悪役令嬢が婚約破棄されたので、いまから俺が幸せにします。 : アンソロジーコミック</li><li>タイトル（読み）：アクヤク レイジョウ ガ コンヤク ハキ サレタノデ 、 イマ カラ オレ ガ シアワセ ニ シマス 。 : アンソロジー コミック</li><li>シリーズ名：IDコミックス. Zero-sum comics</li><li>シリーズ名（読み）：ID コミックス. Zero-sum comics</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author/>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034948064</guid>
+      <pubDate>Wed, 7 Oct 2026 20:51:31 +0900</pubDate>
+      <dc:title>悪役令嬢が婚約破棄されたので、いまから俺が幸せにします。 : アンソロジーコミック</dc:title>
+      <dcndl:titleTranscription>アクヤク レイジョウ ガ コンヤク ハキ サレタノデ 、 イマ カラ オレ ガ シアワセ ニ シマス 。 : アンソロジー コミック</dcndl:titleTranscription>
+      <dcndl:volume>5</dcndl:volume>
+      <dcndl:seriesTitle>IDコミックス. Zero-sum comics</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>ID コミックス. Zero-sum comics</dcndl:seriesTitleTranscription>
+      <dc:publisher>一迅社</dc:publisher>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>800円</dcndl:price>
+      <dc:extent>94 p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-8251-0146-3</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034948064</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24306691</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description>頒布</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>悪役令嬢の成り上がり : 隣国で宝石の聖女と呼ばれるまで</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034951945</link>
+      <description><![CDATA[<p>3,双葉社,2026,978-4-575-42515-4<p><ul><li>タイトル：悪役令嬢の成り上がり : 隣国で宝石の聖女と呼ばれるまで</li><li>タイトル（読み）：アクヤク レイジョウ ノ ナリアガリ : リンゴク デ ホウセキ ノ セイジョ ト ヨバレル マデ</li><li>責任表示：笹塚だい 漫画,三萩せんや 原作,夢子 キャラクター原案</li><li>シリーズ名：モンスターコミックスf</li><li>シリーズ名（読み）：モンスター コミックス エフ</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>笹塚, だい,三萩, せんや,夢子, イラストレーター,笹塚だい 漫画,三萩せんや 原作,夢子 キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034951945</guid>
+      <pubDate>Sat, 10 Oct 2026 00:20:13 +0900</pubDate>
+      <dc:title>悪役令嬢の成り上がり : 隣国で宝石の聖女と呼ばれるまで</dc:title>
+      <dcndl:titleTranscription>アクヤク レイジョウ ノ ナリアガリ : リンゴク デ ホウセキ ノ セイジョ ト ヨバレル マデ</dcndl:titleTranscription>
+      <dc:creator>笹塚, だい</dc:creator>
+      <dc:creator>三萩, せんや</dc:creator>
+      <dc:creator>夢子, イラストレーター</dc:creator>
+      <dcndl:volume>3</dcndl:volume>
+      <dcndl:seriesTitle>モンスターコミックスf</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>モンスター コミックス エフ</dcndl:seriesTitleTranscription>
+      <dc:publisher>双葉社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>740円</dcndl:price>
+      <dc:extent>1冊(ページ付なし)</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-575-42515-4</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034951945</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34915186</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>あさドラ! : 連続漫画小説</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034948125</link>
+      <description><![CDATA[<p>volume10,小学館,2026,978-4-09-864133-8<p><ul><li>タイトル：あさドラ! : 連続漫画小説</li><li>タイトル（読み）：アサドラ : レンゾク マンガ ショウセツ</li><li>責任表示：浦沢直樹 著</li><li>シリーズ名：ビッグスピリッツコミックススペシャル</li><li>シリーズ名（読み）：ビッグ スピリッツ コミックス スペシャル</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>浦沢, 直樹, 1960-,浦沢直樹 著</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034948125</guid>
+      <pubDate>Fri, 9 Oct 2026 22:33:17 +0900</pubDate>
+      <dc:title>あさドラ! : 連続漫画小説</dc:title>
+      <dcndl:titleTranscription>アサドラ : レンゾク マンガ ショウセツ</dcndl:titleTranscription>
+      <dc:creator>浦沢, 直樹, 1960-</dc:creator>
+      <dcndl:creatorTranscription>ウラサワ, ナオキ, 1960-</dcndl:creatorTranscription>
+      <dcndl:volume>volume10</dcndl:volume>
+      <dcndl:seriesTitle>ビッグスピリッツコミックススペシャル</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>ビッグ スピリッツ コミックス スペシャル</dcndl:seriesTitleTranscription>
+      <dc:publisher>小学館</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>900円</dcndl:price>
+      <dc:extent>173p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-09-864133-8</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034948125</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24307792</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07573913</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>あたらよのほし</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034939068</link>
+      <description><![CDATA[<p>ジーオーティー,2026,978-4-8236-1140-7<p><ul><li>タイトル：あたらよのほし</li><li>タイトル（読み）：アタラヨ ノ ホシ</li><li>責任表示：灰音 著</li><li>シリーズ名：Bivy comic</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>灰音,灰音 著</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034939068</guid>
+      <pubDate>Thu, 1 Oct 2026 00:47:10 +0900</pubDate>
+      <dc:title>あたらよのほし</dc:title>
+      <dcndl:titleTranscription>アタラヨ ノ ホシ</dcndl:titleTranscription>
+      <dc:creator>灰音</dc:creator>
+      <dcndl:creatorTranscription>ハイネ</dcndl:creatorTranscription>
+      <dcndl:seriesTitle>Bivy comic</dcndl:seriesTitle>
+      <dc:publisher>ジーオーティー</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>850円</dcndl:price>
+      <dc:extent>1冊(ページ付なし)</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-8236-1140-7</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034939068</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24304078</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34912751</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>あなたを殺す旅SS</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034939410</link>
+      <description><![CDATA[<p>徳間書店,2026,978-4-19-961096-7<p><ul><li>タイトル：あなたを殺す旅SS</li><li>タイトル（読み）：アナタ オ コロス タビ SS</li><li>責任表示：浅井西 著</li><li>シリーズ名：Chara comics</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>浅井, 西,浅井西 著</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034939410</guid>
+      <pubDate>Wed, 7 Oct 2026 19:23:44 +0900</pubDate>
+      <dc:title>あなたを殺す旅SS</dc:title>
+      <dcndl:titleTranscription>アナタ オ コロス タビ SS</dcndl:titleTranscription>
+      <dc:creator>浅井, 西</dc:creator>
+      <dcndl:creatorTranscription>アサイ, サイ</dcndl:creatorTranscription>
+      <dcndl:seriesTitle>Chara comics</dcndl:seriesTitle>
+      <dc:publisher>徳間書店</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>820円</dcndl:price>
+      <dc:extent>175 p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-19-961096-7</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034939410</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24306609</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>あのこのスカートのなか</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034950324</link>
+      <description><![CDATA[<p>大洋図書,2026,978-4-8130-3494-0<p><ul><li>タイトル：あのこのスカートのなか</li><li>タイトル（読み）：アノ コノ スカート ノ ナカ</li><li>責任表示：Kano Sayuri [著]</li><li>シリーズ名：H & C comics. Ihertz series ; 66</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>かの, さゆり,Kano Sayuri [著]</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034950324</guid>
+      <pubDate>Wed, 14 Oct 2026 00:36:08 +0900</pubDate>
+      <dc:title>あのこのスカートのなか</dc:title>
+      <dcndl:titleTranscription>アノ コノ スカート ノ ナカ</dcndl:titleTranscription>
+      <dc:creator>かの, さゆり</dc:creator>
+      <dcndl:seriesTitle>H &amp; C comics. Ihertz series ; 66</dcndl:seriesTitle>
+      <dc:publisher>大洋図書</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>810円</dcndl:price>
+      <dc:extent>112 p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-8130-3494-0</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034950324</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>あのとき私たちは、「仕事選び」の答えを、まだ知らなかった。</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034912829</link>
+      <description><![CDATA[<p>Gakken,2026,978-4-05-407119-3<p><ul><li>タイトル：あのとき私たちは、「仕事選び」の答えを、まだ知らなかった。</li><li>タイトル（読み）：アノ トキ ワタクシタチ ワ シゴトエラビ ノ コタエ オ マダ シラナカッタ</li><li>責任表示：各務展夫 原作,糸貫律 マンガ</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>各務, 展生, 1960-,糸貫, 律,各務展夫 原作,糸貫律 マンガ</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034912829</guid>
+      <pubDate>Tue, 6 Oct 2026 23:59:04 +0900</pubDate>
+      <dc:title>あのとき私たちは、「仕事選び」の答えを、まだ知らなかった。</dc:title>
+      <dcndl:titleTranscription>アノ トキ ワタクシタチ ワ シゴトエラビ ノ コタエ オ マダ シラナカッタ</dcndl:titleTranscription>
+      <dc:creator>各務, 展生, 1960-</dc:creator>
+      <dc:creator>糸貫, 律</dc:creator>
+      <dcndl:creatorTranscription>カガミ, ノブオ, 1960-</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>イトヌキ, リツ</dcndl:creatorTranscription>
+      <dc:publisher>Gakken</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>1600円</dcndl:price>
+      <dc:extent>1冊(ページ付なし)</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-05-407119-3</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034912829</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24306313</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34908653</dc:identifier>
+      <dc:subject>就職活動</dc:subject>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>アフター・ミッドナイト・スキン</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034941466</link>
+      <description><![CDATA[<p>8,白泉社,2026,978-4-592-72190-1<p><ul><li>タイトル：アフター・ミッドナイト・スキン</li><li>タイトル（読み）：アフター ミッドナイト スキン</li><li>責任表示：にむまひろ 著</li><li>シリーズ名：HANAMARU COMICS PREMIUM</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>にむまひろ,にむまひろ 著</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034941466</guid>
+      <pubDate>Wed, 7 Oct 2026 20:41:59 +0900</pubDate>
+      <dc:title>アフター・ミッドナイト・スキン</dc:title>
+      <dcndl:titleTranscription>アフター ミッドナイト スキン</dcndl:titleTranscription>
+      <dc:creator>にむまひろ</dc:creator>
+      <dcndl:creatorTranscription>ニムマヒロ</dcndl:creatorTranscription>
+      <dcndl:volume>8</dcndl:volume>
+      <dcndl:seriesTitle>HANAMARU COMICS PREMIUM</dcndl:seriesTitle>
+      <dc:publisher>白泉社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>165p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-592-72190-1</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034941466</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24306677</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34911911</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>アプリで出会った酔っぱらい年下女子がグイグイ迫ってくるアンソロジーコミック</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034943743</link>
+      <description><![CDATA[<p>一迅社,2026,978-4-8251-0093-0<p><ul><li>タイトル：アプリで出会った酔っぱらい年下女子がグイグイ迫ってくるアンソロジーコミック</li><li>タイトル（読み）：アプリ デ デアッタ ヨッパライ トシシタ ジョシ ガ グイグイ セマッテクル アンソロジー コミック</li><li>シリーズ名：IDコミックス. Rex comics</li><li>シリーズ名（読み）：ID コミックス. Rex comics</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author/>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034943743</guid>
+      <pubDate>Thu, 8 Oct 2026 17:35:11 +0900</pubDate>
+      <dc:title>アプリで出会った酔っぱらい年下女子がグイグイ迫ってくるアンソロジーコミック</dc:title>
+      <dcndl:titleTranscription>アプリ デ デアッタ ヨッパライ トシシタ ジョシ ガ グイグイ セマッテクル アンソロジー コミック</dcndl:titleTranscription>
+      <dcndl:seriesTitle>IDコミックス. Rex comics</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>ID コミックス. Rex comics</dcndl:seriesTitleTranscription>
+      <dc:publisher>一迅社</dc:publisher>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>815円</dcndl:price>
+      <dc:extent>115 p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-8251-0093-0</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034943743</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24306959</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description>頒布</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>蟻の帝国</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034928293</link>
+      <description><![CDATA[<p>5,新書館,2026,978-4-403-62414-8<p><ul><li>タイトル：蟻の帝国</li><li>タイトル（読み）：アリ ノ テイコク</li><li>責任表示：文善やよひ 著</li><li>シリーズ名：WINGS COMICS</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>文善, やよひ,文善やよひ 著</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034928293</guid>
+      <pubDate>Fri, 2 Oct 2026 22:39:16 +0900</pubDate>
+      <dc:title>蟻の帝国</dc:title>
+      <dcndl:titleTranscription>アリ ノ テイコク</dcndl:titleTranscription>
+      <dc:creator>文善, やよひ</dc:creator>
+      <dcndl:creatorTranscription>モンゼン, ヤヨイ</dcndl:creatorTranscription>
+      <dcndl:volume>5</dcndl:volume>
+      <dcndl:seriesTitle>WINGS COMICS</dcndl:seriesTitle>
+      <dc:publisher>新書館</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>1400円</dcndl:price>
+      <dc:extent>235p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-403-62414-8</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034928293</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24305066</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34910598</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>あんたの相棒はオレなんで!</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034939405</link>
+      <description><![CDATA[<p>3,秋水社,2026,978-4-86778-268-2<p><ul><li>タイトル：あんたの相棒はオレなんで!</li><li>タイトル（読み）：アンタ ノ アイボウ ワ オレ ナンデ !</li><li>責任表示：いけがみ小5</li><li>シリーズ名：Shusui digital comics BLシリーズ</li><li>シリーズ名（読み）：Shusui digital comics BL シリーズ</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>いけがみ小5,いけがみ小5</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034939405</guid>
+      <pubDate>Fri, 2 Oct 2026 20:25:47 +0900</pubDate>
+      <dc:title>あんたの相棒はオレなんで!</dc:title>
+      <dcndl:titleTranscription>アンタ ノ アイボウ ワ オレ ナンデ !</dcndl:titleTranscription>
+      <dc:creator>いけがみ小5</dc:creator>
+      <dcndl:creatorTranscription>イケガミ ショウゴ</dcndl:creatorTranscription>
+      <dcndl:volume>3</dcndl:volume>
+      <dcndl:seriesTitle>Shusui digital comics BLシリーズ</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>Shusui digital comics BL シリーズ</dcndl:seriesTitleTranscription>
+      <dc:publisher>秋水社</dc:publisher>
+      <dc:publisher>青泉社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>850円</dcndl:price>
+      <dc:extent>1冊 (ページ付なし)</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86778-268-2</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034939405</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24304965</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description>頒布</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>アンダーカバーラブドッグ</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034918717</link>
+      <description><![CDATA[<p>東京漫画社,2026,978-4-86442-569-8<p><ul><li>タイトル：アンダーカバーラブドッグ</li><li>タイトル（読み）：アンダー カバー ラブ ドッグ</li><li>責任表示：雲井ナツメ 著</li><li>シリーズ名：MARBLE COMICS</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>雲井, ナツメ,雲井ナツメ 著</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034918717</guid>
+      <pubDate>Wed, 30 Sep 2026 02:04:26 +0900</pubDate>
+      <dc:title>アンダーカバーラブドッグ</dc:title>
+      <dcndl:titleTranscription>アンダー カバー ラブ ドッグ</dcndl:titleTranscription>
+      <dc:creator>雲井, ナツメ</dc:creator>
+      <dcndl:creatorTranscription>クモイ, ナツメ</dcndl:creatorTranscription>
+      <dcndl:seriesTitle>MARBLE COMICS</dcndl:seriesTitle>
+      <dc:publisher>東京漫画社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>760円</dcndl:price>
+      <dc:extent>1冊(ページ付なし)</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86442-569-8</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034918717</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24303457</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34909447</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>意地悪姉と呼ばれた令嬢、実はとても優れた魔法使いでした。@COMIC</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034936684</link>
+      <description><![CDATA[<p>第1巻,TOブックス,2026,978-4-86854-139-4<p><ul><li>タイトル：意地悪姉と呼ばれた令嬢、実はとても優れた魔法使いでした。@COMIC</li><li>タイトル（読み）：イジワルアネ ト ヨバレタ レイジョウ ジツ ワ トテモ スグレタ マホウツカイ デシタ アットマーク コミック</li><li>責任表示：桐井 漫画,光子 原作,緑川明 キャラクター原案</li><li>シリーズ名：Celicaコミックス</li><li>シリーズ名（読み）：セリカ コミックス</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>桐井,光子,桐井 漫画,光子 原作,緑川明 キャラクター原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034936684</guid>
+      <pubDate>Thu, 1 Oct 2026 00:25:10 +0900</pubDate>
+      <dc:title>意地悪姉と呼ばれた令嬢、実はとても優れた魔法使いでした。@COMIC</dc:title>
+      <dcndl:titleTranscription>イジワルアネ ト ヨバレタ レイジョウ ジツ ワ トテモ スグレタ マホウツカイ デシタ アットマーク コミック</dcndl:titleTranscription>
+      <dc:creator>桐井</dc:creator>
+      <dc:creator>光子</dc:creator>
+      <dcndl:creatorTranscription>キリイ</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>ヒカリコ</dcndl:creatorTranscription>
+      <dcndl:volume>第1巻</dcndl:volume>
+      <dcndl:seriesTitle>Celicaコミックス</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>セリカ コミックス</dcndl:seriesTitleTranscription>
+      <dc:publisher>TOブックス</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>690円</dcndl:price>
+      <dc:extent>185p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86854-139-4</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034936684</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24304038</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34912113</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>いちばん可愛いところ</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034938978</link>
+      <description><![CDATA[<p>ワニマガジン社,2026,978-4-86812-128-2<p><ul><li>タイトル：いちばん可愛いところ</li><li>タイトル（読み）：イチバン カワイイ トコロ</li><li>責任表示：れつりこ大盛り 著</li><li>シリーズ名：WANIMAGAZINE COMICS SPECIAL</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>れつりこ大盛り 著</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034938978</guid>
+      <pubDate>Fri, 9 Oct 2026 22:48:24 +0900</pubDate>
+      <dc:title>いちばん可愛いところ</dc:title>
+      <dcndl:titleTranscription>イチバン カワイイ トコロ</dcndl:titleTranscription>
+      <dcndl:seriesTitle>WANIMAGAZINE COMICS SPECIAL</dcndl:seriesTitle>
+      <dc:publisher>ワニマガジン社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>1300円</dcndl:price>
+      <dc:extent>1冊(ページ付なし)</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86812-128-2</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034938978</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24307812</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34912486</dc:identifier>
+      <dc:subject xsi:type="dcndl:NDLC">Y85</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>一石二寵 : 後宮の不遇姫はおしりが光る皇帝に寵愛される</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034921554</link>
+      <description><![CDATA[<p>1,一迅社,2026,978-4-8251-0133-3<p><ul><li>タイトル：一石二寵 : 後宮の不遇姫はおしりが光る皇帝に寵愛される</li><li>タイトル（読み）：イッセキ ニチョウ : コウキュウ ノ フグウヒメ ワ オシリ ガ ヒカル コウテイ ニ チョウアイ サレル</li><li>責任表示：西根羽南 原作,米谷たかね 漫画</li><li>シリーズ名：LAKE</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>西根, 羽南,米谷, たかね,西根羽南 原作,米谷たかね 漫画</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034921554</guid>
+      <pubDate>Thu, 1 Oct 2026 00:12:16 +0900</pubDate>
+      <dc:title>一石二寵 : 後宮の不遇姫はおしりが光る皇帝に寵愛される</dc:title>
+      <dcndl:titleTranscription>イッセキ ニチョウ : コウキュウ ノ フグウヒメ ワ オシリ ガ ヒカル コウテイ ニ チョウアイ サレル</dcndl:titleTranscription>
+      <dc:creator>西根, 羽南</dc:creator>
+      <dc:creator>米谷, たかね</dc:creator>
+      <dcndl:creatorTranscription>ニシネ, ハナミ</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>ヨネタニ, タカネ</dcndl:creatorTranscription>
+      <dcndl:volume>1</dcndl:volume>
+      <dcndl:seriesTitle>LAKE</dcndl:seriesTitle>
+      <dc:publisher>一迅社</dc:publisher>
+      <dc:publisher>講談社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>780円</dcndl:price>
+      <dc:extent>174p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-8251-0133-3</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034921554</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24304018</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34909683</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description>頒布</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>愛し恋しき夏の花</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034884234</link>
+      <description><![CDATA[<p>笠倉出版社,2026,978-4-7730-6641-8<p><ul><li>タイトル：愛し恋しき夏の花</li><li>タイトル（読み）：イトシ コイシキ ナツ ノ ハナ</li><li>責任表示：比谷 著</li><li>シリーズ名：Cult comics. Equal collection</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>比谷,比谷 著</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034884234</guid>
+      <pubDate>Thu, 8 Oct 2026 17:48:55 +0900</pubDate>
+      <dc:title>愛し恋しき夏の花</dc:title>
+      <dcndl:titleTranscription>イトシ コイシキ ナツ ノ ハナ</dcndl:titleTranscription>
+      <dc:creator>比谷</dc:creator>
+      <dcndl:creatorTranscription>ヒヤ</dcndl:creatorTranscription>
+      <dcndl:seriesTitle>Cult comics. Equal collection</dcndl:seriesTitle>
+      <dc:publisher>笠倉出版社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>800円</dcndl:price>
+      <dc:extent>201 p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-7730-6641-8</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034884234</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24306966</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>INOZ : 55歳から歩いて作る日本地図</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034948117</link>
+      <description><![CDATA[<p>3,小学館,2026,978-4-09-864119-2<p><ul><li>タイトル：INOZ : 55歳から歩いて作る日本地図</li><li>タイトル（読み）：イノウズ</li><li>責任表示：こやす珠世 著</li><li>シリーズ名：ビッグコミックス</li><li>シリーズ名（読み）：ビッグ コミックス</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>小安, 珠世,こやす珠世 著</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034948117</guid>
+      <pubDate>Tue, 13 Oct 2026 23:30:07 +0900</pubDate>
+      <dc:title>INOZ : 55歳から歩いて作る日本地図</dc:title>
+      <dcndl:titleTranscription>イノウズ</dcndl:titleTranscription>
+      <dc:creator>小安, 珠世</dc:creator>
+      <dcndl:volume>3</dcndl:volume>
+      <dcndl:seriesTitle>ビッグコミックス</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>ビッグ コミックス</dcndl:seriesTitleTranscription>
+      <dc:publisher>小学館</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>700円</dcndl:price>
+      <dc:extent>194p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-09-864119-2</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034948117</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07573546</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>命分けの冒険者 : 不幸少女を救ったら全力で崇拝されたので責任取らざるを得ない</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034951875</link>
+      <description><![CDATA[<p>2,キルタイムコミュニケーション,2026,978-4-7992-2223-2<p><ul><li>タイトル：命分けの冒険者 : 不幸少女を救ったら全力で崇拝されたので責任取らざるを得ない</li><li>タイトル（読み）：イノチワケ ノ ボウケンシャ : フコウ ショウジョ オ スクッタラ ゼンリョク デ スウハイ サレタ ノデ セキニン トラザル オ エナイ</li><li>責任表示：白樺まさら 漫画,こう 原作</li><li>シリーズ名：ヴァルキリーコミックス</li><li>シリーズ名（読み）：ヴァルキリー コミックス</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>白樺, まさら,こう, 小説,白樺まさら 漫画,こう 原作</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034951875</guid>
+      <pubDate>Sat, 10 Oct 2026 00:27:24 +0900</pubDate>
+      <dc:title>命分けの冒険者 : 不幸少女を救ったら全力で崇拝されたので責任取らざるを得ない</dc:title>
+      <dcndl:titleTranscription>イノチワケ ノ ボウケンシャ : フコウ ショウジョ オ スクッタラ ゼンリョク デ スウハイ サレタ ノデ セキニン トラザル オ エナイ</dcndl:titleTranscription>
+      <dc:creator>白樺, まさら</dc:creator>
+      <dc:creator>こう, 小説</dc:creator>
+      <dcndl:volume>2</dcndl:volume>
+      <dcndl:seriesTitle>ヴァルキリーコミックス</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>ヴァルキリー コミックス</dcndl:seriesTitleTranscription>
+      <dc:publisher>キルタイムコミュニケーション</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>1冊(ページ付なし)</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-7992-2223-2</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034951875</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34912873</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>嘘つきスウィートマリッジ</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034943699</link>
+      <description><![CDATA[<p>1,ハーパーコリンズ・ジャパン,2026,978-4-302-61254-3<p><ul><li>タイトル：嘘つきスウィートマリッジ</li><li>タイトル（読み）：ウソツキ スウィート マリッジ</li><li>責任表示：井伊イチノ 著</li><li>シリーズ名：Gelato Comics</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>井伊, イチノ,井伊イチノ 著</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034943699</guid>
+      <pubDate>Thu, 8 Oct 2026 21:52:51 +0900</pubDate>
+      <dc:title>嘘つきスウィートマリッジ</dc:title>
+      <dcndl:titleTranscription>ウソツキ スウィート マリッジ</dcndl:titleTranscription>
+      <dc:creator>井伊, イチノ</dc:creator>
+      <dcndl:creatorTranscription>イイ, イチノ</dcndl:creatorTranscription>
+      <dcndl:volume>1</dcndl:volume>
+      <dcndl:seriesTitle>Gelato Comics</dcndl:seriesTitle>
+      <dc:publisher>ハーパーコリンズ・ジャパン</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>790円</dcndl:price>
+      <dc:extent>1冊(ページ付なし)</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-302-61254-3</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034943699</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24307196</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34913593</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>嘘つきスウィートマリッジ</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034943700</link>
+      <description><![CDATA[<p>2,ハーパーコリンズ・ジャパン,2026,978-4-302-61255-0<p><ul><li>タイトル：嘘つきスウィートマリッジ</li><li>タイトル（読み）：ウソツキ スウィート マリッジ</li><li>責任表示：井伊イチノ 著</li><li>シリーズ名：Gelato Comics</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>井伊, イチノ,井伊イチノ 著</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034943700</guid>
+      <pubDate>Thu, 8 Oct 2026 21:54:21 +0900</pubDate>
+      <dc:title>嘘つきスウィートマリッジ</dc:title>
+      <dcndl:titleTranscription>ウソツキ スウィート マリッジ</dcndl:titleTranscription>
+      <dc:creator>井伊, イチノ</dc:creator>
+      <dcndl:creatorTranscription>イイ, イチノ</dcndl:creatorTranscription>
+      <dcndl:volume>2</dcndl:volume>
+      <dcndl:seriesTitle>Gelato Comics</dcndl:seriesTitle>
+      <dc:publisher>ハーパーコリンズ・ジャパン</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>780円</dcndl:price>
+      <dc:extent>1冊(ページ付なし)</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-302-61255-0</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034943700</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24307197</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34913594</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>ウチから何キロメートル?</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034943771</link>
+      <description><![CDATA[<p>1,芳文社,2026,978-4-8322-9754-8<p><ul><li>タイトル：ウチから何キロメートル?</li><li>タイトル（読み）：ウチ カラ ナン キロメートル ?</li><li>責任表示：蚕二号 著</li><li>シリーズ名：Manga time KR comics. Kirara menu ; 2204</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>蚕二号,蚕二号 著</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034943771</guid>
+      <pubDate>Tue, 13 Oct 2026 19:38:36 +0900</pubDate>
+      <dc:title>ウチから何キロメートル?</dc:title>
+      <dcndl:titleTranscription>ウチ カラ ナン キロメートル ?</dcndl:titleTranscription>
+      <dc:creator>蚕二号</dc:creator>
+      <dcndl:creatorTranscription>カイコ ニゴウ</dcndl:creatorTranscription>
+      <dcndl:volume>1</dcndl:volume>
+      <dcndl:seriesTitle>Manga time KR comics. Kirara menu ; 2204</dcndl:seriesTitle>
+      <dc:publisher>芳文社</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>1000円</dcndl:price>
+      <dc:extent>118 p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-8322-9754-8</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034943771</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24308107</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>うちがキングダム</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034948111</link>
+      <description><![CDATA[<p>3,小学館,2026,978-4-09-864110-9<p><ul><li>タイトル：うちがキングダム</li><li>タイトル（読み）：ウチ ガ キングダム</li><li>責任表示：森巡る, 砂糖野しおん 著</li><li>シリーズ名：ビッグコミックス</li><li>シリーズ名（読み）：ビッグ コミックス</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>森, 巡る,砂糖野, しおん,森巡る, 砂糖野しおん 著</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034948111</guid>
+      <pubDate>Wed, 7 Oct 2026 20:25:06 +0900</pubDate>
+      <dc:title>うちがキングダム</dc:title>
+      <dcndl:titleTranscription>ウチ ガ キングダム</dcndl:titleTranscription>
+      <dc:creator>森, 巡る</dc:creator>
+      <dc:creator>砂糖野, しおん</dc:creator>
+      <dcndl:creatorTranscription>モリ, メグル</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>サトウノ, シオン</dcndl:creatorTranscription>
+      <dcndl:volume>3</dcndl:volume>
+      <dcndl:seriesTitle>ビッグコミックス</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>ビッグ コミックス</dcndl:seriesTitleTranscription>
+      <dc:publisher>小学館</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>221p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-09-864110-9</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034948111</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24306658</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07573710</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>うちのちいさな女中さん</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034927875</link>
+      <description><![CDATA[<p>7,コアミックス,2026,978-4-86720-919-6<p><ul><li>タイトル：うちのちいさな女中さん</li><li>タイトル（読み）：ウチ ノ チイサナ ジョチュウサン</li><li>責任表示：長田佳奈</li><li>シリーズ名：ゼノンコミックス</li><li>シリーズ名（読み）：ゼノン コミックス</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>長田, 佳奈,長田佳奈</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034927875</guid>
+      <pubDate>Thu, 24 Sep 2026 20:07:07 +0900</pubDate>
+      <dc:title>うちのちいさな女中さん</dc:title>
+      <dcndl:titleTranscription>ウチ ノ チイサナ ジョチュウサン</dcndl:titleTranscription>
+      <dc:creator>長田, 佳奈</dc:creator>
+      <dcndl:creatorTranscription>オサダ, カナ</dcndl:creatorTranscription>
+      <dcndl:volume>7</dcndl:volume>
+      <dcndl:seriesTitle>ゼノンコミックス</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>ゼノン コミックス</dcndl:seriesTitleTranscription>
+      <dc:publisher>コアミックス</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>720円</dcndl:price>
+      <dc:extent>137 p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86720-919-6</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034927875</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24301424</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>うちの文鳥はカワイイの2乗</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034928433</link>
+      <description><![CDATA[<p>オレンジページ,2026,978-4-86593-851-7<p><ul><li>タイトル：うちの文鳥はカワイイの2乗</li><li>タイトル（読み）：ウチ ノ ブンチョウ ワ カワイイ ノ ニジョウ</li><li>責任表示：こむぎ 著,伊藤美代子 監修</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>こむぎ, pub. 2026.10,伊藤, 美代子, 1963-,こむぎ 著,伊藤美代子 監修</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034928433</guid>
+      <pubDate>Wed, 7 Oct 2026 22:53:14 +0900</pubDate>
+      <dc:title>うちの文鳥はカワイイの2乗</dc:title>
+      <dcndl:titleTranscription>ウチ ノ ブンチョウ ワ カワイイ ノ ニジョウ</dcndl:titleTranscription>
+      <dc:creator>こむぎ, pub. 2026.10</dc:creator>
+      <dc:creator>伊藤, 美代子, 1963-</dc:creator>
+      <dcndl:creatorTranscription>コムギ, pub. 2026.10</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>イトウ, ミヨコ, 1963-</dcndl:creatorTranscription>
+      <dc:publisher>オレンジページ</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>1500円</dcndl:price>
+      <dc:extent>111p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86593-851-7</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034928433</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24306750</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34910805</dc:identifier>
+      <dc:subject>文鳥</dc:subject>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>宇宙人はいらない</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034948106</link>
+      <description><![CDATA[<p>#1,小学館,2026,978-4-09-864104-8<p><ul><li>タイトル：宇宙人はいらない</li><li>タイトル（読み）：ウチュウジン ワ イラナイ</li><li>責任表示：渡邊ダイスケ 著</li><li>シリーズ名：ビッグコミックス</li><li>シリーズ名（読み）：ビッグ コミックス</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>渡邊, ダイスケ,渡邊ダイスケ 著</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034948106</guid>
+      <pubDate>Fri, 9 Oct 2026 22:09:42 +0900</pubDate>
+      <dc:title>宇宙人はいらない</dc:title>
+      <dcndl:titleTranscription>ウチュウジン ワ イラナイ</dcndl:titleTranscription>
+      <dc:creator>渡邊, ダイスケ</dc:creator>
+      <dcndl:creatorTranscription>ワタナベ, ダイスケ</dcndl:creatorTranscription>
+      <dcndl:volume>#1</dcndl:volume>
+      <dcndl:seriesTitle>ビッグコミックス</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>ビッグ コミックス</dcndl:seriesTitleTranscription>
+      <dc:publisher>小学館</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>700円</dcndl:price>
+      <dc:extent>202p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-09-864104-8</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034948106</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24307751</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">07573709</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,463 @@
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:openSearch="http://a9.com/-/spec/opensearchrss/1.0/" xmlns:dcndl="http://ndl.go.jp/dcndl/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" version="2.0">
+  <channel>
+    <title>本好きの下剋上 books 2025-10 - 国立国会図書館サーチ OpenSearch</title>
+    <link>https://ios-v2-prod-eks-alb.ndlsearch.ndl.go.jp/api/opensearch?title=%E6%9C%AC%E5%A5%BD%E3%81%8D%E3%81%AE%E4%B8%8B%E5%89%8B%E4%B8%8A&amp;mediatype=books&amp;from=2025-10&amp;cnt=60</link>
+    <description>Search results for title=本好きの下剋上 mediatype=books from=2025-10 cnt=60</description>
+    <language>ja</language>
+    <openSearch:totalResults>14</openSearch:totalResults>
+    <openSearch:startIndex>1</openSearch:startIndex>
+    <openSearch:itemsPerPage>60</openSearch:itemsPerPage>
+    <item>
+      <title>本好きの下剋上 : 司書になるためには手段を選んでいられません</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034279111</link>
+      <description><![CDATA[<p>第2部[13],TOブックス,2025,978-4-86794-698-5<p><ul><li>タイトル：本好きの下剋上 : 司書になるためには手段を選んでいられません</li><li>タイトル（読み）：ホンズキ ノ ゲコクジョウ : シショ ニ ナル タメ ニワ シュダン オ エランデ イラレマセン</li><li>責任表示：香月美夜 原作,椎名優 イラスト原案</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>香月, 美夜,鈴華,香月美夜 原作,椎名優 イラスト原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034279111</guid>
+      <pubDate>Mon, 10 Aug 2026 18:12:00 +0900</pubDate>
+      <dc:title>本好きの下剋上 : 司書になるためには手段を選んでいられません</dc:title>
+      <dcndl:titleTranscription>ホンズキ ノ ゲコクジョウ : シショ ニ ナル タメ ニワ シュダン オ エランデ イラレマセン</dcndl:titleTranscription>
+      <dc:creator>香月, 美夜</dc:creator>
+      <dc:creator>鈴華</dc:creator>
+      <dcndl:creatorTranscription>カズキ, ミヤ</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>スズカ</dcndl:creatorTranscription>
+      <dcndl:volume>第2部[13]</dcndl:volume>
+      <dc:publisher>TOブックス</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.10</dcterms:issued>
+      <dcndl:price>600円</dcndl:price>
+      <dc:extent>172p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86794-698-5</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034279111</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24168308</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34780652</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>本好きの下剋上 : 司書になるためには手段を選んでいられません</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034392329</link>
+      <description><![CDATA[<p>第4部[11],TOブックス,2025,978-4-86794-770-8<p><ul><li>タイトル：本好きの下剋上 : 司書になるためには手段を選んでいられません</li><li>タイトル（読み）：ホンズキ ノ ゲコクジョウ : シショ ニ ナル タメ ニワ シュダン オ エランデ イラレマセン</li><li>責任表示：香月美夜 原作,椎名優 イラスト原案</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>香月, 美夜,勝木, 光,香月美夜 原作,椎名優 イラスト原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034392329</guid>
+      <pubDate>Mon, 10 Aug 2026 18:12:00 +0900</pubDate>
+      <dc:title>本好きの下剋上 : 司書になるためには手段を選んでいられません</dc:title>
+      <dcndl:titleTranscription>ホンズキ ノ ゲコクジョウ : シショ ニ ナル タメ ニワ シュダン オ エランデ イラレマセン</dcndl:titleTranscription>
+      <dc:creator>香月, 美夜</dc:creator>
+      <dc:creator>勝木, 光</dc:creator>
+      <dcndl:creatorTranscription>カズキ, ミヤ</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>カツキ, ヒカル</dcndl:creatorTranscription>
+      <dcndl:volume>第4部[11]</dcndl:volume>
+      <dc:publisher>TOブックス</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.12</dcterms:issued>
+      <dcndl:price>600円</dcndl:price>
+      <dc:extent>166p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86794-770-8</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034392329</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24189369</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34803330</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>本好きの下剋上 : 司書になるためには手段を選んでいられません</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034639967</link>
+      <description><![CDATA[<p>第4部[12],TOブックス,2026,978-4-86794-944-3<p><ul><li>タイトル：本好きの下剋上 : 司書になるためには手段を選んでいられません</li><li>タイトル（読み）：ホンズキ ノ ゲコクジョウ : シショ ニ ナル タメ ニワ シュダン オ エランデ イラレマセン</li><li>責任表示：香月美夜 原作,椎名優 イラスト原案</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>香月, 美夜,勝木, 光,香月美夜 原作,椎名優 イラスト原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034639967</guid>
+      <pubDate>Mon, 10 Aug 2026 18:11:59 +0900</pubDate>
+      <dc:title>本好きの下剋上 : 司書になるためには手段を選んでいられません</dc:title>
+      <dcndl:titleTranscription>ホンズキ ノ ゲコクジョウ : シショ ニ ナル タメ ニワ シュダン オ エランデ イラレマセン</dcndl:titleTranscription>
+      <dc:creator>香月, 美夜</dc:creator>
+      <dc:creator>勝木, 光</dc:creator>
+      <dcndl:creatorTranscription>カズキ, ミヤ</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>カツキ, ヒカル</dcndl:creatorTranscription>
+      <dcndl:volume>第4部[12]</dcndl:volume>
+      <dc:publisher>TOブックス</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.5</dcterms:issued>
+      <dcndl:price>650円</dcndl:price>
+      <dc:extent>161p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86794-944-3</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034639967</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24246470</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34854918</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>本好きの下剋上 : 司書になるためには手段を選んでいられません</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034639968</link>
+      <description><![CDATA[<p>第5部[1],TOブックス,2026,978-4-86794-946-7<p><ul><li>タイトル：本好きの下剋上 : 司書になるためには手段を選んでいられません</li><li>タイトル（読み）：ホンズキ ノ ゲコクジョウ : シショ ニ ナル タメ ニワ シュダン オ エランデ イラレマセン</li><li>責任表示：香月美夜 原作,椎名優 イラスト原案</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>香月, 美夜,鈴華,香月美夜 原作,椎名優 イラスト原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034639968</guid>
+      <pubDate>Mon, 10 Aug 2026 18:11:59 +0900</pubDate>
+      <dc:title>本好きの下剋上 : 司書になるためには手段を選んでいられません</dc:title>
+      <dcndl:titleTranscription>ホンズキ ノ ゲコクジョウ : シショ ニ ナル タメ ニワ シュダン オ エランデ イラレマセン</dcndl:titleTranscription>
+      <dc:creator>香月, 美夜</dc:creator>
+      <dc:creator>鈴華</dc:creator>
+      <dcndl:creatorTranscription>カズキ, ミヤ</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>スズカ</dcndl:creatorTranscription>
+      <dcndl:volume>第5部[1]</dcndl:volume>
+      <dc:publisher>TOブックス</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.5</dcterms:issued>
+      <dcndl:price>650円</dcndl:price>
+      <dc:extent>161p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86794-946-7</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034639968</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24246530</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34854919</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>本好きの下剋上～司書になるためには手段を選んでいられません～フェルディナンドの館にて</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034799620</link>
+      <description><![CDATA[<p>第1巻,TOブックス,2026,978-4-86854-070-0<p><ul><li>タイトル：本好きの下剋上～司書になるためには手段を選んでいられません～フェルディナンドの館にて</li><li>タイトル（読み）：ホンズキ ノ ゲコクジョウ シショ ニ ナル タメ ニワ シュダン オ エランデ イラレマセン フェルディナンド ノ ヤカタ ニテ</li><li>責任表示：千仮 漫画,こーだ 構成,香月美夜 原作,椎名優 イラスト原案</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>千仮,こーだ, pub. 2026,香月, 美夜,千仮 漫画,こーだ 構成,香月美夜 原作,椎名優 イラスト原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034799620</guid>
+      <pubDate>Mon, 10 Aug 2026 18:11:58 +0900</pubDate>
+      <dc:title>本好きの下剋上～司書になるためには手段を選んでいられません～フェルディナンドの館にて</dc:title>
+      <dcndl:titleTranscription>ホンズキ ノ ゲコクジョウ シショ ニ ナル タメ ニワ シュダン オ エランデ イラレマセン フェルディナンド ノ ヤカタ ニテ</dcndl:titleTranscription>
+      <dc:creator>千仮</dc:creator>
+      <dc:creator>こーだ, pub. 2026</dc:creator>
+      <dc:creator>香月, 美夜</dc:creator>
+      <dcndl:creatorTranscription>チカリ</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>コーダ, pub. 2026</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>カズキ, ミヤ</dcndl:creatorTranscription>
+      <dcndl:volume>第1巻</dcndl:volume>
+      <dc:publisher>TOブックス</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.8</dcterms:issued>
+      <dcndl:price>650円</dcndl:price>
+      <dc:extent>180p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86854-070-0</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034799620</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24280079</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34883496</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>本好きの下剋上 : 司書になるためには手段を選んでいられません</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034799621</link>
+      <description><![CDATA[<p>第3部[10],TOブックス,2026,978-4-86794-945-0<p><ul><li>タイトル：本好きの下剋上 : 司書になるためには手段を選んでいられません</li><li>タイトル（読み）：ホンズキ ノ ゲコクジョウ : シショ ニ ナル タメ ニワ シュダン オ エランデ イラレマセン</li><li>責任表示：香月美夜 原作,椎名優 イラスト原案</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>香月, 美夜,波野, 涼,香月美夜 原作,椎名優 イラスト原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034799621</guid>
+      <pubDate>Mon, 10 Aug 2026 18:11:58 +0900</pubDate>
+      <dc:title>本好きの下剋上 : 司書になるためには手段を選んでいられません</dc:title>
+      <dcndl:titleTranscription>ホンズキ ノ ゲコクジョウ : シショ ニ ナル タメ ニワ シュダン オ エランデ イラレマセン</dcndl:titleTranscription>
+      <dc:creator>香月, 美夜</dc:creator>
+      <dc:creator>波野, 涼</dc:creator>
+      <dcndl:creatorTranscription>カズキ, ミヤ</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>ナミノ, リョウ</dcndl:creatorTranscription>
+      <dcndl:volume>第3部[10]</dcndl:volume>
+      <dc:publisher>TOブックス</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.8</dcterms:issued>
+      <dcndl:price>650円</dcndl:price>
+      <dc:extent>157p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86794-945-0</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034799621</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24279590</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34883497</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>本好きの下剋上～司書になるためには手段を選んでいられません～第四部「貴族院の図書館を救いたい！13」</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000137-I9784868542186</link>
+      <description><![CDATA[<p>4-13,ＴＯブックス,2026-12-10,9784868542186<p><ul><li>タイトル：本好きの下剋上～司書になるためには手段を選んでいられません～第四部「貴族院の図書館を救いたい！13」</li><li>タイトル（読み）：ホンズキノゲコクジョウシショニナルタメニハシュダンヲエランデイラレマセンダイヨンブキゾクインノトショカンヲスクイタイジュウサン</li><li>責任表示：勝木光 イラスト</li></ul>]]></description>
+      <author>勝木光,勝木光 イラスト</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000137-I9784868542186</guid>
+      <pubDate>Fri, 25 Sep 2026 00:36:00 +0900</pubDate>
+      <dc:title>本好きの下剋上～司書になるためには手段を選んでいられません～第四部「貴族院の図書館を救いたい！13」</dc:title>
+      <dcndl:titleTranscription>ホンズキノゲコクジョウシショニナルタメニハシュダンヲエランデイラレマセンダイヨンブキゾクインノトショカンヲスクイタイジュウサン</dcndl:titleTranscription>
+      <dc:creator>勝木光</dc:creator>
+      <dcndl:creatorTranscription>カツキヒカル</dcndl:creatorTranscription>
+      <dcndl:volume>4-13</dcndl:volume>
+      <dc:publisher>ＴＯブックス</dc:publisher>
+      <dc:publisher>ＴＯブックス</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026-12-10</dc:date>
+      <dcterms:issued>2026-12-10</dcterms:issued>
+      <dcndl:price>650</dcndl:price>
+      <dc:identifier xsi:type="dcndl:ISBN">9784868542186</dc:identifier>
+      <dc:identifier xsi:type="dcndl:ISBN13">9784868542186</dc:identifier>
+      <dc:description>発売</dc:description>
+      <dc:description> 2026-12-10</dc:description>
+    </item>
+    <item>
+      <title>本好きの下剋上～ハンネローレの貴族院五年生～恋してみたいお姫様</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034432966</link>
+      <description><![CDATA[<p>1,TOブックス,2026,978-4-86794-782-1<p><ul><li>タイトル：本好きの下剋上～ハンネローレの貴族院五年生～恋してみたいお姫様</li><li>タイトル（読み）：ホンズキ ノ ゲコクジョウ ハンネローレ ノ キゾクイン ゴネンセイ コイシテ ミタイ オヒメサマ</li><li>責任表示：草壁レイ 著,香月美夜 原作,椎名優 イラスト原案</li><li>NDC(10)：726.1</li></ul>]]></description>
+      <author>草壁, レイ,香月, 美夜,草壁レイ 著,香月美夜 原作,椎名優 イラスト原案</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034432966</guid>
+      <pubDate>Mon, 10 Aug 2026 18:11:59 +0900</pubDate>
+      <dc:title>本好きの下剋上～ハンネローレの貴族院五年生～恋してみたいお姫様</dc:title>
+      <dcndl:titleTranscription>ホンズキ ノ ゲコクジョウ ハンネローレ ノ キゾクイン ゴネンセイ コイシテ ミタイ オヒメサマ</dcndl:titleTranscription>
+      <dc:creator>草壁, レイ</dc:creator>
+      <dc:creator>香月, 美夜</dc:creator>
+      <dcndl:creatorTranscription>クサカベ, レイ</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>カズキ, ミヤ</dcndl:creatorTranscription>
+      <dcndl:volume>1</dcndl:volume>
+      <dc:publisher>TOブックス</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.1</dcterms:issued>
+      <dcndl:price>600円</dcndl:price>
+      <dc:extent>156p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86794-782-1</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034432966</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24200821</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34812560</dc:identifier>
+      <dcndl:genre>漫画</dcndl:genre>
+      <dcndl:genreTranscription>マンガ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y84</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">726.1</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>本好きの下剋上 : ハンネローレの貴族院五年生</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034632974</link>
+      <description><![CDATA[<p>3,TOブックス,2026,978-4-86794-926-9<p><ul><li>タイトル：本好きの下剋上 : ハンネローレの貴族院五年生</li><li>タイトル（読み）：ホンズキ ノ ゲコクジョウ : ハンネローレ ノ キゾクイン ゴネンセイ</li><li>責任表示：香月美夜 著</li><li>NDC(10)：913.6</li></ul>]]></description>
+      <author>香月, 美夜,香月美夜 著</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034632974</guid>
+      <pubDate>Mon, 10 Aug 2026 18:11:59 +0900</pubDate>
+      <dc:title>本好きの下剋上 : ハンネローレの貴族院五年生</dc:title>
+      <dcndl:titleTranscription>ホンズキ ノ ゲコクジョウ : ハンネローレ ノ キゾクイン ゴネンセイ</dcndl:titleTranscription>
+      <dc:creator>香月, 美夜</dc:creator>
+      <dcndl:creatorTranscription>カズキ, ミヤ</dcndl:creatorTranscription>
+      <dcndl:volume>3</dcndl:volume>
+      <dc:publisher>TOブックス</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.5</dcterms:issued>
+      <dcndl:price>1200円</dcndl:price>
+      <dc:extent>367p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86794-926-9</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034632974</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24245819</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34853735</dc:identifier>
+      <dc:subject xsi:type="dcndl:NDLC">KH971</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">913.6</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>本好きの下剋上 ～ハンネローレの貴族院五年生～ 「恋してみたいお姫様 2」</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000137-I9784868541653</link>
+      <description><![CDATA[<p>2,ＴＯブックス,2026-10-15,9784868541653<p><ul><li>タイトル：本好きの下剋上 ～ハンネローレの貴族院五年生～ 「恋してみたいお姫様 2」</li><li>タイトル（読み）：ホンズキノゲコクジョウハンネローレノキゾクインゴネンセイコイシテミタイオヒメサマニ</li><li>責任表示：草壁レイ イラスト</li></ul>]]></description>
+      <author>草壁レイ,草壁レイ イラスト</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000137-I9784868541653</guid>
+      <pubDate>Thu, 6 Aug 2026 19:00:00 +0900</pubDate>
+      <dc:title>本好きの下剋上 ～ハンネローレの貴族院五年生～ 「恋してみたいお姫様 2」</dc:title>
+      <dcndl:titleTranscription>ホンズキノゲコクジョウハンネローレノキゾクインゴネンセイコイシテミタイオヒメサマニ</dcndl:titleTranscription>
+      <dc:creator>草壁レイ</dc:creator>
+      <dcndl:creatorTranscription>クサカベレイ</dcndl:creatorTranscription>
+      <dcndl:volume>2</dcndl:volume>
+      <dc:publisher>ＴＯブックス</dc:publisher>
+      <dc:publisher>ＴＯブックス</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026-10-15</dc:date>
+      <dcterms:issued>2026-10-15</dcterms:issued>
+      <dcndl:price>650</dcndl:price>
+      <dc:identifier xsi:type="dcndl:ISBN">9784868541653</dc:identifier>
+      <dc:identifier xsi:type="dcndl:ISBN13">9784868541653</dc:identifier>
+      <dc:description>発売</dc:description>
+      <dc:description> 2026-10-15</dc:description>
+    </item>
+    <item>
+      <title>本好きの下剋上</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034936689</link>
+      <description><![CDATA[<p>第3部[10],TOブックス,2026,978-4-86854-123-3<p><ul><li>タイトル：本好きの下剋上</li><li>タイトル（読み）：ホンズキ ノ ゲコクジョウ</li><li>責任表示：香月美夜 作,椎名優 絵</li><li>シリーズ名：TOジュニア文庫 ; か-1-25</li><li>シリーズ名（読み）：ティーオー ジュニア ブンコ ; カ-1-25</li><li>NDC(10)：913.6</li></ul>]]></description>
+      <author>香月, 美夜,椎名, 優,香月美夜 作,椎名優 絵</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034936689</guid>
+      <pubDate>Tue, 13 Oct 2026 22:57:52 +0900</pubDate>
+      <dc:title>本好きの下剋上</dc:title>
+      <dcndl:titleTranscription>ホンズキ ノ ゲコクジョウ</dcndl:titleTranscription>
+      <dc:creator>香月, 美夜</dc:creator>
+      <dc:creator>椎名, 優</dc:creator>
+      <dcndl:volume>第3部[10]</dcndl:volume>
+      <dcndl:seriesTitle>TOジュニア文庫 ; か-1-25</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>ティーオー ジュニア ブンコ ; カ-1-25</dcndl:seriesTitleTranscription>
+      <dc:publisher>TOブックス</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.10</dcterms:issued>
+      <dcndl:price>600円</dcndl:price>
+      <dc:extent>277p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86854-123-3</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034936689</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34912119</dc:identifier>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDC10">913.6</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description>通巻第25巻</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>本好きの下剋上</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034417057</link>
+      <description><![CDATA[<p>第3部[7],TOブックス,2025,978-4-86794-796-8<p><ul><li>タイトル：本好きの下剋上</li><li>タイトル（読み）：ホンズキ ノ ゲコクジョウ</li><li>責任表示：香月美夜 作,椎名優 絵</li><li>シリーズ名：TOジュニア文庫 ; か-1-22</li><li>シリーズ名（読み）：ティーオー ジュニア ブンコ ; カ-1-22</li><li>NDC(10)：913.6</li></ul>]]></description>
+      <author>香月, 美夜,椎名, 優,香月美夜 作,椎名優 絵</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034417057</guid>
+      <pubDate>Mon, 10 Aug 2026 18:11:59 +0900</pubDate>
+      <dc:title>本好きの下剋上</dc:title>
+      <dcndl:titleTranscription>ホンズキ ノ ゲコクジョウ</dcndl:titleTranscription>
+      <dc:creator>香月, 美夜</dc:creator>
+      <dc:creator>椎名, 優</dc:creator>
+      <dcndl:creatorTranscription>カズキ, ミヤ</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>シイナ, ユウ</dcndl:creatorTranscription>
+      <dcndl:volume>第3部[7]</dcndl:volume>
+      <dcndl:seriesTitle>TOジュニア文庫 ; か-1-22</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>ティーオー ジュニア ブンコ ; カ-1-22</dcndl:seriesTitleTranscription>
+      <dc:publisher>TOブックス</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2025</dc:date>
+      <dcterms:issued>2025.12</dcterms:issued>
+      <dcndl:price>600円</dcndl:price>
+      <dc:extent>251p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86794-796-8</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034417057</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24198235</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34809661</dc:identifier>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y7</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">913.6</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description>通巻第22巻</dc:description>
+      <dc:description> 2025</dc:description>
+    </item>
+    <item>
+      <title>本好きの下剋上</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034619023</link>
+      <description><![CDATA[<p>第3部[8],TOブックス,2026,978-4-86794-947-4<p><ul><li>タイトル：本好きの下剋上</li><li>タイトル（読み）：ホンズキ ノ ゲコクジョウ</li><li>責任表示：香月美夜 作,椎名優 絵</li><li>シリーズ名：TOジュニア文庫 ; か-1-23</li><li>シリーズ名（読み）：ティーオー ジュニア ブンコ ; カ-1-23</li><li>NDC(10)：913.6</li></ul>]]></description>
+      <author>香月, 美夜,椎名, 優,香月美夜 作,椎名優 絵</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034619023</guid>
+      <pubDate>Mon, 10 Aug 2026 18:11:59 +0900</pubDate>
+      <dc:title>本好きの下剋上</dc:title>
+      <dcndl:titleTranscription>ホンズキ ノ ゲコクジョウ</dcndl:titleTranscription>
+      <dc:creator>香月, 美夜</dc:creator>
+      <dc:creator>椎名, 優</dc:creator>
+      <dcndl:creatorTranscription>カズキ, ミヤ</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>シイナ, ユウ</dcndl:creatorTranscription>
+      <dcndl:volume>第3部[8]</dcndl:volume>
+      <dcndl:seriesTitle>TOジュニア文庫 ; か-1-23</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>ティーオー ジュニア ブンコ ; カ-1-23</dcndl:seriesTitleTranscription>
+      <dc:publisher>TOブックス</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.4</dcterms:issued>
+      <dcndl:price>600円</dcndl:price>
+      <dc:extent>256p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86794-947-4</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034619023</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24242612</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34850691</dc:identifier>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y7</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">913.6</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description>通巻第23巻</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+    <item>
+      <title>本好きの下剋上</title>
+      <link>https://ndlsearch.ndl.go.jp/books/R100000002-I034778590</link>
+      <description><![CDATA[<p>第3部[9],TOブックス,2026,978-4-86854-036-6<p><ul><li>タイトル：本好きの下剋上</li><li>タイトル（読み）：ホンズキ ノ ゲコクジョウ</li><li>責任表示：香月美夜 作,椎名優 絵</li><li>シリーズ名：TOジュニア文庫 ; か-1-24</li><li>シリーズ名（読み）：ティーオー ジュニア ブンコ ; カ-1-24</li><li>NDC(10)：913.6</li></ul>]]></description>
+      <author>香月, 美夜,椎名, 優,香月美夜 作,椎名優 絵</author>
+      <category>図書</category>
+      <category>紙</category>
+      <guid isPermaLink="true">https://ndlsearch.ndl.go.jp/books/R100000002-I034778590</guid>
+      <pubDate>Mon, 10 Aug 2026 18:11:58 +0900</pubDate>
+      <dc:title>本好きの下剋上</dc:title>
+      <dcndl:titleTranscription>ホンズキ ノ ゲコクジョウ</dcndl:titleTranscription>
+      <dc:creator>香月, 美夜</dc:creator>
+      <dc:creator>椎名, 優</dc:creator>
+      <dcndl:creatorTranscription>カズキ, ミヤ</dcndl:creatorTranscription>
+      <dcndl:creatorTranscription>シイナ, ユウ</dcndl:creatorTranscription>
+      <dcndl:volume>第3部[9]</dcndl:volume>
+      <dcndl:seriesTitle>TOジュニア文庫 ; か-1-24</dcndl:seriesTitle>
+      <dcndl:seriesTitleTranscription>ティーオー ジュニア ブンコ ; カ-1-24</dcndl:seriesTitleTranscription>
+      <dc:publisher>TOブックス</dc:publisher>
+      <dcndl:publicationPlace>JP</dcndl:publicationPlace>
+      <dc:date xsi:type="dcterms:W3CDTF">2026</dc:date>
+      <dcterms:issued>2026.7</dcterms:issued>
+      <dcndl:price>600円</dcndl:price>
+      <dc:extent>257p</dc:extent>
+      <dc:identifier xsi:type="dcndl:ISBN">978-4-86854-036-6</dc:identifier>
+      <dc:identifier xsi:type="dcndl:NDLBibID">034778590</dc:identifier>
+      <dc:identifier xsi:type="dcndl:JPNO">24275444</dc:identifier>
+      <dc:identifier xsi:type="dcndl:TOHANMARCNO">34879155</dc:identifier>
+      <dcndl:genre>児童図書</dcndl:genre>
+      <dcndl:genreTranscription>ジドウ トショ</dcndl:genreTranscription>
+      <dc:subject xsi:type="dcndl:NDLC">Y7</dc:subject>
+      <dc:subject xsi:type="dcndl:NDC10">913.6</dc:subject>
+      <dc:description>出版</dc:description>
+      <dc:description>通巻第24巻</dc:description>
+      <dc:description> 2026</dc:description>
+    </item>
+  </channel>
+</rss>
