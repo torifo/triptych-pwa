@@ -411,8 +411,8 @@ async def test_server_errors_are_retried_with_backoff_then_the_slice_errors(conn
     fake.route("ANIME", like="2024%", respond=lambda page: httpx.Response(503, text="down"))
     result = await run(conn, fake, clock)
     assert len(fake.requests) == 4  # 1 try + 3 retries
-    # backoff 2, 4, 8, 16 s (after each failed try); 1.0 is the pacer topping up to 3 s between tries
-    assert clock.sleeps == [2.0, 1.0, 4.0, 8.0, 16.0]
+    # backoff 2, 4, 8 s between tries (none after the last one); 1.0 is the pacer topping up to 3 s
+    assert clock.sleeps == [2.0, 1.0, 4.0, 8.0]
     assert result.slices_error == 1
     state = db.slice_status(conn, "anilist", "ANIME:2024")
     assert (state["status"], state["cursor"]) == ("error", "1")

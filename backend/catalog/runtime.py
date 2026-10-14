@@ -103,12 +103,14 @@ async def request_with_retry(
         except (httpx.TimeoutException, httpx.TransportError) as exc:
             last_error = exc
             log(f"  retry {attempt + 1}/{retries}: {type(exc).__name__} {url}")
-            await clock.sleep(backoff * (2**attempt))
+            if attempt < retries:  # 最後の試行の後は待たずに諦める
+                await clock.sleep(backoff * (2**attempt))
             continue
         if response.status_code == 429:
             wait = _retry_after_seconds(response, 60.0)
             log(f"  429 rate limited, waiting {wait:.0f}s")
-            await clock.sleep(wait)
+            if attempt < retries:
+                await clock.sleep(wait)
             last_error = httpx.HTTPStatusError("429", request=response.request, response=response)
             continue
         if response.status_code >= 500:
@@ -116,7 +118,8 @@ async def request_with_retry(
                 str(response.status_code), request=response.request, response=response
             )
             log(f"  retry {attempt + 1}/{retries}: HTTP {response.status_code} {url}")
-            await clock.sleep(backoff * (2**attempt))
+            if attempt < retries:
+                await clock.sleep(backoff * (2**attempt))
             continue
         return response
     assert last_error is not None
