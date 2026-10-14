@@ -55,6 +55,17 @@ collector は `backend/adapters/` 配下のソースごとに独立したアダ�
 - **24h/Workスロットル**: Work ごとに24時間に1回。その Work の照会が全部成功した時だけ記録するので、失敗した Work は次の同期で再試行されます。
 - **accept時の挙動**: 承認するとアニメ Edition が作られ、放送開始日があれば精度つきの Release として追加されます。
 
+## カタログ（大量収集データ）
+
+あなたの追跡データ（端末の IndexedDB）とは別に、collector 側の `backend/catalog.db`（SQLite・git 対象外）に作品カタログを持ちます。実装: `backend/catalog/`、仕様: `specs/catalog/`。
+
+- **作る・更新する**: `.venv/bin/python -m backend.catalog build`（全ソース→紐付けまで。初回は AniList が約1時間半、他は並行して1時間前後）。取り終えた区切りは飛ばすので、途中で止めても同じコマンドで続きから再開します。データを新しくするには `build --fresh`（週1回程度）
+- **一部だけ**: `build --source anilist,ndl --no-link` のあと `link`。試運転は `--limit 200`
+- **書き出し**: `python -m backend.catalog export`（`local/catalog/catalog-YYYYMMDD.csv` と `.json`）。画面の CATALOG タブからもダウンロードできます。CSV は Excel で文字化けしないよう BOM 付きで、`=` などで始まる題名は数式にならないよう `'` を付けます
+- **件数を見る**: `python -m backend.catalog stats`
+- **収集マナー**: AniList 20 req/min（応答の残数を見て待つ）、なろう・カクヨム・NDL 1 req/s、しょぼかるは collector と同じ記録を見て 60 秒に1回（全番組を1回で取る）
+- **取れないもの**: なろう・カクヨムは上位だけ（全件ではない）、NDL は目録前の近刊（Library に入れた作品の近刊は同期が拾う）、成人向け
+
 ## トラブルシュート
 
 ### collector が未起動のとき
