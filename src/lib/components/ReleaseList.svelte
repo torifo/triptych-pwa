@@ -12,6 +12,8 @@
     buildEditionReleaseView,
     isStreamStarted,
     laterReleases,
+    nextVolumeBand,
+    volumeCountdown,
     nextEpisodeBand,
     releaseDayFor,
     upcomingBroadcastSlots,
@@ -44,7 +46,9 @@
     edition.mediaType === 'anime' ? upcomingBroadcastSlots(edition.syncHints?.broadcasts, now) : [],
   );
   const streamRows = $derived(view.streams.map((s) => s.release));
-  const later = $derived(laterReleases(view));
+  // 本の「次の巻」は帯に上げ、予定の一覧からは外す（同じ巻を2度出さない）
+  const volumeBand = $derived(nextVolumeBand(view.upcoming, edition.mediaType, today));
+  const later = $derived(laterReleases(view).filter((r) => r.id !== volumeBand?.release.id));
   const hasWatch = $derived(!!band || casts.length > 0 || streamRows.length > 0);
   const isEmpty = $derived(
     view.nextEpisodes.length + view.streams.length + view.upcoming.length + view.recent.length === 0,
@@ -300,9 +304,48 @@
     </div>
   {/if}
 
+  {#if volumeBand}
+    {@const countdown = volumeCountdown(volumeBand.daysLeft)}
+    <div class="group">
+      <span class="type-label">次の巻</span>
+      {#if editingId === volumeBand.release.id}
+        <div class="editing">
+          <ReleaseForm
+            mediaType={edition.mediaType}
+            release={volumeBand.release}
+            onsubmit={(value) => saveEdit(volumeBand.release, value)}
+            oncancel={() => (editingId = null)}
+          />
+        </div>
+      {:else}
+        <div class="band" class:live={volumeBand.daysLeft === 0}>
+          <div class="band-top">
+            <span class="band-dot" aria-hidden="true"></span>
+            <span class="mono band-kicker">NEXT</span>
+            {#if countdown}
+              <span class="mono band-count">{countdown}</span>
+            {/if}
+            {#if isPostponed(volumeBand.release)}
+              <span class="band-tag">延期</span>
+            {/if}
+            {#if volumeBand.release.origin === 'manual'}
+              <span class="band-tag">手動</span>
+            {/if}
+            <span class="row-actions band-actions">{@render rowActions(volumeBand.release)}</span>
+          </div>
+          <div class="band-main">
+            <span class="band-label">{displayReleaseLabel(volumeBand.release)}</span>
+            <span class="mono band-when">{formatReleaseDate(volumeBand.release)}</span>
+          </div>
+        </div>
+        {@render syncNote(volumeBand.release)}
+      {/if}
+    </div>
+  {/if}
+
   {#if later.length > 0}
     <div class="group">
-      {#if hasWatch || view.recent.length > 0}
+      {#if hasWatch || view.recent.length > 0 || volumeBand}
         <span class="type-label">予定</span>
       {/if}
       {@render rows(later)}

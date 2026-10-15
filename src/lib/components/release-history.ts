@@ -1,7 +1,7 @@
 // WorkDetail の Release 一覧の補助（30 日より前の展開・次話と配信先の組み立て）。純関数で vitest 固定。
 
 import type { BroadcastHint, Edition, Release } from '../db/schema';
-import { isPastRelease, isValidYmd, todayJst } from '../dates';
+import { diffDaysYmd, isPastRelease, isValidYmd, todayJst } from '../dates';
 import { airingInstant, broadcastDayJst, countdownLabel } from './onair';
 import { compareReleases, groupEditionReleases, PAST_DAYS_SHOWN, precisionOf, timeMinutes } from './release-view';
 
@@ -132,6 +132,33 @@ export function nextEpisodeBand(
     onAirToday: precisionOf(release) === 'day' && release.date === today,
     countdown: countdownLabel(release, now),
   };
+}
+
+export interface NextVolumeBand {
+  release: Release;
+  /** 発売日まで（日精度の時だけ。今日なら 0） */
+  daysLeft?: number;
+}
+
+/** 本の「次の巻」の帯: 予定の先頭の巻。アニメは次話の帯を使うので出さない。 */
+export function nextVolumeBand(
+  upcoming: readonly Release[],
+  mediaType: Edition['mediaType'],
+  today: string,
+): NextVolumeBand | undefined {
+  if (mediaType === 'anime') return undefined;
+  const release = upcoming.find((r) => r.kind === 'volume');
+  if (!release) return undefined;
+  const daysLeft = precisionOf(release) === 'day' ? diffDaysYmd(release.date, today) : undefined;
+  return { release, daysLeft };
+}
+
+/** '今日発売'・'あす発売'・'あと 12 日'。日が分からなければ undefined。 */
+export function volumeCountdown(daysLeft: number | undefined): string | undefined {
+  if (daysLeft === undefined || daysLeft < 0) return undefined;
+  if (daysLeft === 0) return '今日発売';
+  if (daysLeft === 1) return 'あす発売';
+  return `あと ${daysLeft} 日`;
 }
 
 /** 帯の後ろの「予定」: 帯に出した次話より後の放送と、それ以外の今日以降を日付順に。 */

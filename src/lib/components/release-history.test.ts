@@ -12,6 +12,8 @@ import {
   streamServiceName,
   upcomingBroadcasts,
   upcomingBroadcastSlots,
+  nextVolumeBand,
+  volumeCountdown,
 } from './release-history';
 import { groupEditionReleases } from './release-view';
 
@@ -333,5 +335,29 @@ describe('upcomingBroadcastSlots', () => {
       hint({ channel: 'BS11', date, time: '24:00' }),
     ]);
     expect(upcomingBroadcastSlots(many, now).map((s) => s.date)).toEqual(['2026-10-16', '2026-10-17', '2026-10-18']);
+  });
+});
+
+describe('nextVolumeBand / volumeCountdown', () => {
+  const vol = (id: string, date: string, precision: 'day' | 'month' = 'day') =>
+    release({ id, date, precision, kind: 'volume', label: id });
+
+  it('本は予定の先頭の巻を帯にし、日が分かれば残り日数を持つ', () => {
+    const band = nextVolumeBand([vol('3', '2026-10-20'), vol('4', '2027-01-20')], 'manga', '2026-10-15');
+    expect(band?.release.id).toBe('3');
+    expect(band?.daysLeft).toBe(5);
+  });
+
+  it('月精度の巻は残り日数を持たず、アニメと巻の無い予定には帯を出さない', () => {
+    expect(nextVolumeBand([vol('3', '2026-11-01', 'month')], 'light-novel', '2026-10-15')?.daysLeft).toBeUndefined();
+    expect(nextVolumeBand([vol('3', '2026-10-20')], 'anime', '2026-10-15')).toBeUndefined();
+    expect(nextVolumeBand([], 'manga', '2026-10-15')).toBeUndefined();
+  });
+
+  it('残り日数の言い方', () => {
+    expect(volumeCountdown(0)).toBe('今日発売');
+    expect(volumeCountdown(1)).toBe('あす発売');
+    expect(volumeCountdown(12)).toBe('あと 12 日');
+    expect(volumeCountdown(undefined)).toBeUndefined();
   });
 });
