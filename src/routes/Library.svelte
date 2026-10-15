@@ -1,13 +1,19 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { listEditions, listWorks, createWork } from '../lib/db/store';
-  import type { Edition, Work, MediaType, Status } from '../lib/db/schema';
+  import { listEditions, listReleases, listWorks, createWork } from '../lib/db/store';
+  import type { Edition, Release, Work, MediaType, Status } from '../lib/db/schema';
   import { navigate } from '../lib/router.svelte';
   import MediaBadge from '../lib/components/MediaBadge.svelte';
   import { MEDIA_TYPE_LABELS, MEDIA_TYPES, STATUS_LABELS, STATUSES, PROGRESS_UNIT_LABELS } from '../lib/components/labels';
+  import {
+    editionDisambiguators,
+    seasonStartByEdition,
+    sortLibraryEditions,
+  } from '../lib/components/library-view';
 
   let editions = $state<Edition[]>([]);
   let works = $state<Work[]>([]);
+  let releases = $state<Release[]>([]);
   let statusFilter = $state<Status | 'all'>('all');
   let mediaTypeFilter = $state<MediaType | 'all'>('all');
   let showCreate = $state(false);
@@ -15,21 +21,26 @@
   let creating = $state(false);
 
   const workMap = $derived(new Map(works.map((w) => [w.id, w])));
+  const workTitleOf = (workId: string) => workMap.get(workId)?.title ?? '';
+
+  // 同じ Work・同じ媒体の Edition を見分ける副題は、絞り込み前の全 Edition で決める（絞り込みで表示が変わらないように）
+  const seasonStarts = $derived(seasonStartByEdition(releases));
+  const subtitles = $derived(editionDisambiguators(editions, workTitleOf, seasonStarts));
 
   const filtered = $derived(
-    editions
-      .filter((e) => statusFilter === 'all' || e.status === statusFilter)
-      .filter((e) => mediaTypeFilter === 'all' || e.mediaType === mediaTypeFilter)
-      .sort((a, b) => {
-        const wa = workMap.get(a.workId)?.title ?? '';
-        const wb = workMap.get(b.workId)?.title ?? '';
-        return wa.localeCompare(wb, 'ja');
-      }),
+    sortLibraryEditions(
+      editions
+        .filter((e) => statusFilter === 'all' || e.status === statusFilter)
+        .filter((e) => mediaTypeFilter === 'all' || e.mediaType === mediaTypeFilter),
+      workTitleOf,
+      seasonStarts,
+    ),
   );
 
   async function refresh() {
     editions = await listEditions();
     works = await listWorks();
+    releases = await listReleases();
   }
 
   onMount(refresh);
@@ -142,8 +153,13 @@
         onclick={() => navigate(`#/work/${edition.workId}`)}
       >
         <MediaBadge mediaType={edition.mediaType} />
-        <span class="min-w-0 flex-1 truncate text-sm">
-          {workMap.get(edition.workId)?.title ?? '(不明な作品)'}
+        <span class="flex min-w-0 flex-1 flex-col">
+          <span class="truncate text-sm">
+            {workMap.get(edition.workId)?.title ?? '(不明な作品)'}
+          </span>
+          {#if subtitles.get(edition.id)}
+            <span class="truncate text-[11px]" style="color: var(--muted);">{subtitles.get(edition.id)}</span>
+          {/if}
         </span>
         <span class="text-[11px]" style="color: var(--muted); white-space: nowrap;">
           {STATUS_LABELS[edition.status]}
