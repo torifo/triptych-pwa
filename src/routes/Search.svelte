@@ -5,6 +5,7 @@
   import { listWorks, listEditions, createWork, createEdition } from '../lib/db/store';
   import type { Work, Edition, MediaType, Source } from '../lib/db/schema';
   import { navigate } from '../lib/router.svelte';
+  import Cover from '../lib/components/Cover.svelte';
   import MediaBadge from '../lib/components/MediaBadge.svelte';
   import { SOURCE_LABELS } from '../lib/components/labels';
   import { dedupeResults, registeredSourceKeys, sourceRefKey } from '../lib/components/release-view';
@@ -286,16 +287,17 @@
       {@const registered = isRegistered(result)}
       {@const busy = registeringKey === resultKey(result)}
       <div
-        class="row-hover flex items-start gap-2 py-2"
+        class="row-hover flex items-start gap-3 py-2.5"
         style="border-bottom: 1px solid var(--line); min-width: 0;"
       >
-        <span class="pt-0.5"><MediaBadge mediaType={result.mediaType} /></span>
+        <Cover src={result.cover} title={result.title} mediaType={result.mediaType} size="s" />
         <div class="min-w-0 flex-1">
           <p class="text-sm" style="overflow-wrap: anywhere;">{result.title}</p>
           {#if result.subtitle}
             <p class="truncate text-[11px]" style="color: var(--muted);">{result.subtitle}</p>
           {/if}
-          <p class="flex flex-wrap items-center gap-x-2 text-[10px]" style="color: var(--muted);">
+          <p class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px]" style="color: var(--muted);">
+            <MediaBadge mediaType={result.mediaType} />
             <span style="white-space: nowrap;">{SOURCE_LABELS[result.source] ?? result.source}</span>
             {#if result.direct}
               <span class="type-label">URL から解決</span>

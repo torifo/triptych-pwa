@@ -1,12 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { makeEntry } from './fixtures.test-util';
 import {
+  activeFilterLabels,
   animeStatusLabel,
   entryCounts,
   formatEntryPeriod,
   formatJstDateTime,
   formatLabel,
   formatNext,
+  isAiringNow,
+  isAnimeAiring,
   latestHarvestAt,
   linkBadge,
   namesLine,
@@ -128,5 +131,33 @@ describe('formatJstDateTime / latestHarvestAt', () => {
       }),
     ).toBe('2026-10-14T00:00:00+00:00');
     expect(latestHarvestAt({ sources: [] })).toBeNull();
+  });
+});
+
+describe('isAnimeAiring / isAiringNow', () => {
+  it('treats only RELEASING as on air', () => {
+    expect(isAnimeAiring('RELEASING')).toBe(true);
+    expect(isAnimeAiring('FINISHED')).toBe(false);
+    expect(isAnimeAiring('NOT_YET_RELEASED')).toBe(false);
+    expect(isAnimeAiring(null)).toBe(false);
+    expect(isAnimeAiring(undefined)).toBe(false);
+  });
+  it('looks only at anime rows', () => {
+    expect(isAiringNow([{ kind: 'anime', status: 'RELEASING' }])).toBe(true);
+    expect(isAiringNow([{ kind: 'manga', status: 'RELEASING' }, { kind: 'anime', status: 'FINISHED' }])).toBe(false);
+    expect(isAiringNow([])).toBe(false);
+  });
+});
+
+describe('activeFilterLabels', () => {
+  it('is empty without filters and ignores query text, sort and page', () => {
+    expect(activeFilterLabels({})).toEqual([]);
+    expect(activeFilterLabels({ q: 'ゼロ', sort: 'recent', page: 3 })).toEqual([]);
+  });
+  it('lists the active filters in a stable order', () => {
+    expect(
+      activeFilterLabels({ kind: 'novel', has: ['anime'], status: 'RELEASING', year: 2026, season: 'FALL' }),
+    ).toEqual(['原作小説', 'アニメ化あり', '放送中', '2026年', '秋']);
+    expect(activeFilterLabels({ has: ['manga', 'anime'] })).toEqual(['漫画あり', 'アニメ化あり']);
   });
 });

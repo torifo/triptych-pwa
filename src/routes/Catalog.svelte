@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { ChevronDown, ChevronLeft, ChevronRight, Download, Search, SlidersHorizontal } from '@lucide/svelte';
   import { onDestroy, onMount, untrack } from 'svelte';
   import { ApiError } from '../lib/api';
   import {
@@ -25,14 +26,19 @@
     SEASON_FILTERS,
     SORT_OPTIONS,
     STATUS_FILTERS,
+    activeFilterLabels,
     animeStatusLabel,
     formatJstDateTime,
     formatNext,
+    isAnimeAiring,
     latestHarvestAt,
     yearRange,
   } from '../lib/catalog/view';
+  import { summaryMediaType } from '../lib/components/catalog-cover';
   import CatalogKindBadge from '../lib/components/CatalogKindBadge.svelte';
+  import Cover from '../lib/components/Cover.svelte';
   import FilterChip from '../lib/components/FilterChip.svelte';
+  import MonoTime from '../lib/components/MonoTime.svelte';
   import { replaceQuery, route } from '../lib/router.svelte';
 
   const EXPORT_FORMATS: ExportFormat[] = ['csv', 'json'];
@@ -51,6 +57,8 @@
 
   let qText = $state('');
   let yearText = $state('');
+  // 絞り込みの塊は既定で畳む（一覧を早く見せる）。条件は要約の行に出る。
+  let filterOpen = $state(false);
   let listTop = $state<HTMLElement | undefined>(undefined);
 
   const searchDebouncer = createDebouncer(SEARCH_DEBOUNCE_MS);
@@ -64,6 +72,7 @@
   const harvestedAt = $derived(stats?.ready ? latestHarvestAt(stats) : null);
   const pages = $derived(result ? Math.max(1, Math.ceil(result.total / Math.max(1, result.per))) : 1);
   const filtered = $derived(hasActiveFilter(query));
+  const filterLabels = $derived(activeFilterLabels(query));
   const hasAnime = $derived(query.has?.includes('anime') ?? false);
 
   function update(patch: Partial<CatalogQuery>) {
@@ -188,6 +197,8 @@
   function count(n: number): string {
     return n.toLocaleString('ja-JP');
   }
+
+  const SKELETON_ROWS = [0, 1, 2, 3, 4, 5];
 </script>
 
 <section class="flex flex-col gap-3 p-4">
@@ -209,10 +220,10 @@
     <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5">
       <p class="text-[11px]" style="color: var(--muted);">
         {#if stats?.ready}
-          <span style="white-space: nowrap;">{count(stats.works)} 作品</span>
-          <span style="white-space: nowrap;"> · {count(stats.entries)} 件</span>
+          <span style="white-space: nowrap;"><span class="mono">{count(stats.works)}</span> 作品</span>
+          <span style="white-space: nowrap;"> · <span class="mono">{count(stats.entries)}</span> 件</span>
           {#if harvestedAt}
-            <span style="white-space: nowrap;"> · 最終収集 {formatJstDateTime(harvestedAt)}</span>
+            <span style="white-space: nowrap;"> · 最終収集 <span class="mono">{formatJstDateTime(harvestedAt)}</span></span>
           {/if}
         {:else if statsError}
           <span role="status">件数を取得できませんでした</span>
@@ -222,12 +233,13 @@
         {#each EXPORT_FORMATS as format (format)}
           <button
             type="button"
-            class="px-2 py-1 text-[11px] disabled:opacity-40"
+            class="inline-flex items-center gap-1 px-2 py-1 text-[11px] disabled:opacity-40"
             style="border: 1px solid var(--fg); color: var(--fg); white-space: nowrap; letter-spacing: 0.06em;"
             disabled={exporting !== null}
             aria-label={`カタログ全件を ${format.toUpperCase()} でダウンロード`}
             onclick={() => exportAs(format)}
           >
+            <Download size={12} aria-hidden="true" />
             {exporting === format ? '書き出し中…' : format.toUpperCase()}
           </button>
         {/each}
@@ -237,76 +249,40 @@
       <p class="text-[11px]" style="color: var(--muted);" role="status">{exportError}</p>
     {/if}
 
-    <input
-      class="w-full px-0 py-1.5"
-      style="border: 0; border-bottom: 1px solid var(--fg); background: var(--bg); color: var(--fg); font-size: 1.05rem; outline: none; min-width: 0;"
-      type="search"
-      placeholder="題名・別名・読み"
-      aria-label="作品を題名・別名・読みで検索"
-      value={qText}
-      oninput={(e) => onSearchInput(e.currentTarget.value)}
-      onkeydown={(e) => {
-        if (e.key === 'Enter' && !e.isComposing) searchDebouncer.flush();
-      }}
-    />
+    <div class="search-field">
+      <span class="search-icon" aria-hidden="true"><Search size={16} /></span>
+      <input
+        class="w-full py-1.5"
+        style="border: 0; border-bottom: 1px solid var(--fg); background: var(--bg); color: var(--fg); font-size: 1.05rem; outline: none; min-width: 0; padding-left: 1.6rem; padding-right: 0;"
+        type="search"
+        placeholder="題名・別名・読み"
+        aria-label="作品を題名・別名・読みで検索"
+        value={qText}
+        oninput={(e) => onSearchInput(e.currentTarget.value)}
+        onkeydown={(e) => {
+          if (e.key === 'Enter' && !e.isComposing) searchDebouncer.flush();
+        }}
+      />
+    </div>
 
-    <div class="flex flex-col gap-2">
-      <div class="flex items-start gap-2">
-        <span class="type-label shrink-0 pt-2" style="width: 3.2rem;">種別</span>
-        <div class="flex min-w-0 flex-1 flex-wrap gap-1">
-          {#each KIND_ORDER as kind (kind)}
-            <FilterChip
-              active={query.kind === kind}
-              onclick={() => update({ kind: query.kind === kind ? undefined : kind })}
-            >
-              {KIND_LABELS[kind]}
-            </FilterChip>
-          {/each}
-          <FilterChip active={hasAnime} onclick={toggleHasAnime}>アニメ化あり</FilterChip>
-        </div>
-      </div>
-
-      <div class="flex items-start gap-2">
-        <span class="type-label shrink-0 pt-2" style="width: 3.2rem;">状態</span>
-        <div class="flex min-w-0 flex-1 flex-wrap gap-1">
-          {#each STATUS_FILTERS as s (s.value)}
-            <FilterChip
-              active={query.status === s.value}
-              onclick={() => update({ status: query.status === s.value ? undefined : s.value })}
-            >
-              {s.label}
-            </FilterChip>
-          {/each}
-        </div>
-      </div>
-
-      <div class="flex items-start gap-2">
-        <span class="type-label shrink-0 pt-2" style="width: 3.2rem;">年・季</span>
-        <div class="flex min-w-0 flex-1 flex-wrap items-center gap-1">
-          <input
-            class="px-1.5 py-1 text-xs"
-            style="border: 1px solid var(--line); background: var(--bg); color: var(--fg); width: 4.5rem;"
-            type="text"
-            inputmode="numeric"
-            maxlength="4"
-            placeholder="2026"
-            aria-label="開始年（4桁）"
-            value={yearText}
-            oninput={(e) => onYearInput(e.currentTarget.value)}
-          />
-          {#each SEASON_FILTERS as s (s.value)}
-            <FilterChip
-              active={query.season === s.value}
-              onclick={() => update({ season: query.season === s.value ? undefined : s.value })}
-            >
-              {s.label}
-            </FilterChip>
-          {/each}
-        </div>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <span class="type-label shrink-0" style="width: 3.2rem;">並び</span>
+    <div class="toolbar">
+      <button
+        type="button"
+        class="filter-toggle"
+        class:on={filterOpen || filterLabels.length > 0}
+        aria-expanded={filterOpen}
+        aria-controls="catalog-filters"
+        onclick={() => (filterOpen = !filterOpen)}
+      >
+        <SlidersHorizontal size={14} aria-hidden="true" />
+        <span>絞り込み</span>
+        {#if filterLabels.length > 0}
+          <span class="mono filter-count">{filterLabels.length}</span>
+        {/if}
+        <span class="chev" class:open={filterOpen} aria-hidden="true"><ChevronDown size={14} /></span>
+      </button>
+      <div class="sort">
+        <span class="type-label">並び</span>
         <select
           class="min-w-0 px-1.5 py-1 text-xs"
           style="border: 1px solid var(--line); background: var(--bg); color: var(--fg);"
@@ -318,18 +294,86 @@
             <option value={o.value}>{o.label}</option>
           {/each}
         </select>
-        {#if filtered}
-          <button
-            type="button"
-            class="ml-auto px-2 py-1 text-[11px]"
-            style="border: 1px solid var(--line); color: var(--muted); white-space: nowrap;"
-            onclick={clearFilters}
-          >
-            絞り込みを解除
-          </button>
-        {/if}
       </div>
     </div>
+
+    {#if filtered}
+      <div class="summary">
+        <p class="summary-text">
+          {#each filterLabels as label (label)}
+            <span class="summary-item">{label}</span>
+          {:else}
+            <span>検索語のみ</span>
+          {/each}
+        </p>
+        <button
+          type="button"
+          class="shrink-0 px-2 py-1 text-[11px]"
+          style="border: 1px solid var(--line); color: var(--muted); white-space: nowrap;"
+          onclick={clearFilters}
+        >
+          絞り込みを解除
+        </button>
+      </div>
+    {/if}
+
+    {#if filterOpen}
+      <div id="catalog-filters" class="panel flex flex-col gap-2">
+        <div class="flex items-start gap-2">
+          <span class="type-label shrink-0 pt-2" style="width: 3.2rem;">種別</span>
+          <div class="flex min-w-0 flex-1 flex-wrap gap-1">
+            {#each KIND_ORDER as kind (kind)}
+              <FilterChip
+                active={query.kind === kind}
+                onclick={() => update({ kind: query.kind === kind ? undefined : kind })}
+              >
+                {KIND_LABELS[kind]}
+              </FilterChip>
+            {/each}
+            <FilterChip active={hasAnime} onclick={toggleHasAnime}>アニメ化あり</FilterChip>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-2">
+          <span class="type-label shrink-0 pt-2" style="width: 3.2rem;">状態</span>
+          <div class="flex min-w-0 flex-1 flex-wrap gap-1">
+            {#each STATUS_FILTERS as s (s.value)}
+              <FilterChip
+                active={query.status === s.value}
+                onclick={() => update({ status: query.status === s.value ? undefined : s.value })}
+              >
+                {s.label}
+              </FilterChip>
+            {/each}
+          </div>
+        </div>
+
+        <div class="flex items-start gap-2">
+          <span class="type-label shrink-0 pt-2" style="width: 3.2rem;">年・季</span>
+          <div class="flex min-w-0 flex-1 flex-wrap items-center gap-1">
+            <input
+              class="mono px-1.5 py-1 text-xs"
+              style="border: 1px solid var(--line); background: var(--bg); color: var(--fg); width: 4.5rem;"
+              type="text"
+              inputmode="numeric"
+              maxlength="4"
+              placeholder="2026"
+              aria-label="開始年（4桁）"
+              value={yearText}
+              oninput={(e) => onYearInput(e.currentTarget.value)}
+            />
+            {#each SEASON_FILTERS as s (s.value)}
+              <FilterChip
+                active={query.season === s.value}
+                onclick={() => update({ season: query.season === s.value ? undefined : s.value })}
+              >
+                {s.label}
+              </FilterChip>
+            {/each}
+          </div>
+        </div>
+      </div>
+    {/if}
 
     <div bind:this={listTop} style="scroll-margin-top: 3.5rem;"></div>
 
@@ -350,9 +394,9 @@
     {#if result}
       {@const current = result.page}
       <p class="text-[11px]" style="color: var(--muted);" aria-live="polite">
-        <span style="white-space: nowrap;">{count(result.total)} 件</span>
+        <span style="white-space: nowrap;"><span class="mono">{count(result.total)}</span> 件</span>
         {#if pages > 1}
-          <span style="white-space: nowrap;"> · {current} / {pages} ページ</span>
+          <span style="white-space: nowrap;"> · <span class="mono">{current} / {pages}</span> ページ</span>
         {/if}
         {#if loading}
           <span style="white-space: nowrap;"> · 読み込み中…</span>
@@ -371,32 +415,37 @@
           {@const next = formatNext(item)}
           {@const years = yearRange(item.firstYear, item.lastYear)}
           {@const status = animeStatusLabel(item.animeStatus)}
-          <a
-            href={`#/catalog/${encodeURIComponent(item.id)}`}
-            class="row-hover block py-2.5"
-            style="border-bottom: 1px solid var(--line); min-width: 0;"
-          >
-            <div class="flex items-baseline justify-between gap-2">
-              <span class="min-w-0 flex-1 text-sm font-medium" style="overflow-wrap: anywhere;">{item.title}</span>
-              {#if years}
-                <span class="shrink-0 text-[11px]" style="color: var(--muted); white-space: nowrap;">{years}</span>
-              {/if}
-            </div>
-            <div class="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1">
-              {#each KIND_ORDER.filter((k) => item.kinds.includes(k)) as kind (kind)}
-                <CatalogKindBadge {kind} />
-              {/each}
-              {#if status}
-                <span class="text-[11px]" style="color: var(--muted); white-space: nowrap;">{status}</span>
-              {/if}
-              {#if next}
-                <span class="text-[11px]" style="white-space: nowrap;">
-                  <span class="type-label" style="margin-right: 0.4em;">NEXT</span>{next.date}
-                </span>
-                {#if next.label}
-                  <span class="text-[11px]" style="color: var(--muted);">{next.label}</span>
+          <a href={`#/catalog/${encodeURIComponent(item.id)}`} class="row-hover catalog-row">
+            <Cover
+              src={item.cover}
+              title={item.title}
+              mediaType={summaryMediaType(item.kinds)}
+              size="s"
+              onAir={isAnimeAiring(item.animeStatus)}
+            />
+            <div class="catalog-body">
+              <div class="flex items-baseline justify-between gap-2">
+                <span class="min-w-0 flex-1 text-sm font-medium" style="overflow-wrap: anywhere;">{item.title}</span>
+                {#if years}
+                  <MonoTime text={years} muted />
                 {/if}
-              {/if}
+              </div>
+              <div class="catalog-meta flex flex-wrap items-center gap-x-1.5 gap-y-1">
+                {#each KIND_ORDER.filter((k) => item.kinds.includes(k)) as kind (kind)}
+                  <CatalogKindBadge {kind} />
+                {/each}
+                {#if status}
+                  <span class="text-[11px]" style="color: var(--muted); white-space: nowrap;">{status}</span>
+                {/if}
+                {#if next}
+                  <span class="text-[11px]" style="white-space: nowrap;">
+                    <span class="type-label" style="margin-right: 0.4em;">NEXT</span><MonoTime text={next.date} strong />
+                  </span>
+                  {#if next.label}
+                    <span class="text-[11px]" style="color: var(--muted);">{next.label}</span>
+                  {/if}
+                {/if}
+              </div>
             </div>
           </a>
         {/each}
@@ -417,27 +466,160 @@
         <nav class="flex items-center justify-between gap-2 pt-1" aria-label="ページ送り">
           <button
             type="button"
-            class="px-3 py-1.5 text-xs disabled:opacity-40"
+            class="inline-flex items-center gap-1 px-3 py-1.5 text-xs disabled:opacity-40"
             style="border: 1px solid var(--fg); color: var(--fg); white-space: nowrap;"
             disabled={current <= 1 || loading}
             onclick={() => goPage(current - 1)}
           >
-            ‹ 前へ
+            <ChevronLeft size={14} aria-hidden="true" />前へ
           </button>
-          <span class="text-[11px]" style="color: var(--muted); white-space: nowrap;">{current} / {pages}</span>
+          <span class="mono text-[11px]" style="color: var(--muted); white-space: nowrap;">{current} / {pages}</span>
           <button
             type="button"
-            class="px-3 py-1.5 text-xs disabled:opacity-40"
+            class="inline-flex items-center gap-1 px-3 py-1.5 text-xs disabled:opacity-40"
             style="border: 1px solid var(--fg); color: var(--fg); white-space: nowrap;"
             disabled={current >= pages || loading}
             onclick={() => goPage(current + 1)}
           >
-            次へ ›
+            次へ<ChevronRight size={14} aria-hidden="true" />
           </button>
         </nav>
       {/if}
     {:else if loading}
-      <p class="py-6 text-center text-xs" style="color: var(--muted);">読み込み中…</p>
+      <p class="py-2 text-center text-xs" style="color: var(--muted);" role="status">読み込み中…</p>
+      <div class="flex flex-col" style="border-top: 1px solid var(--line);" aria-hidden="true">
+        {#each SKELETON_ROWS as n (n)}
+          <div class="catalog-row">
+            <div class="sk-cover"></div>
+            <div class="catalog-body">
+              <div class="sk-bar" style="width: 70%;"></div>
+              <div class="sk-bar catalog-meta" style="width: 40%;"></div>
+            </div>
+          </div>
+        {/each}
+      </div>
     {/if}
   {/if}
 </section>
+
+<style>
+  .search-field {
+    position: relative;
+  }
+  .search-icon {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    color: var(--muted);
+    pointer-events: none;
+  }
+
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 0.75rem;
+  }
+  .filter-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.55rem;
+    font-size: 11px;
+    border: 1px solid var(--line);
+    color: var(--fg);
+    background: transparent;
+    white-space: nowrap;
+    transition: border-color 0.25s ease;
+  }
+  .filter-toggle.on {
+    border-color: var(--fg);
+  }
+  .filter-count {
+    min-width: 1.15rem;
+    padding: 0 0.3rem;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.35rem;
+    text-align: center;
+    background: var(--fg);
+    color: var(--bg);
+  }
+  .chev {
+    display: inline-flex;
+    color: var(--muted);
+    transition: transform 0.2s ease;
+  }
+  .chev.open {
+    transform: rotate(180deg);
+  }
+  .sort {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  .summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  .summary-text {
+    display: flex;
+    flex-wrap: wrap;
+    flex: 1;
+    gap: 0.1rem 0.7rem;
+    min-width: 0;
+    margin: 0;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .summary-item {
+    white-space: nowrap;
+  }
+
+  .panel {
+    padding: 0.75rem 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .catalog-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid var(--line);
+    min-width: 0;
+  }
+  /* 表紙 s（幅 48px・高さ 72px）に高さを合わせ、題名は上、媒体・状態・NEXT は下に揃える */
+  .catalog-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    flex: 1;
+    min-width: 0;
+    min-height: 72px;
+  }
+  .catalog-meta {
+    margin-top: auto;
+  }
+
+  .sk-cover {
+    width: 48px;
+    height: 72px;
+    flex-shrink: 0;
+    border-radius: 2px;
+    background: var(--cover-ph);
+  }
+  .sk-bar {
+    height: 0.8rem;
+    border-radius: 2px;
+    background: var(--cover-ph);
+  }
+</style>

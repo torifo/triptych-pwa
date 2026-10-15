@@ -227,3 +227,28 @@ export function linkBadge(
   const label = method === null ? '照合' : (LINK_METHOD_LABELS[method] ?? method);
   return confidence === null ? label : `${label} ${Math.round(confidence * 100)}%`;
 }
+
+// ---------------------------------------------------------------------------
+// 放送中・絞り込みの要約
+// ---------------------------------------------------------------------------
+
+/** 一覧のアニメの状態が「放送中」か（表紙に ON AIR のランプを付ける）。 */
+export function isAnimeAiring(status: string | null | undefined): boolean {
+  return status === 'RELEASING';
+}
+
+/** 詳細: アニメの行のどれかが放送中か。 */
+export function isAiringNow(entries: readonly Pick<CatalogEntry, 'kind' | 'status'>[]): boolean {
+  return entries.some((e) => e.kind === 'anime' && isAnimeAiring(e.status));
+}
+
+/** 絞り込みの要約（種別・アニメ化あり・状態・年・季の順）。検索語と並び順は数えない。 */
+export function activeFilterLabels(q: CatalogQuery): string[] {
+  const out: string[] = [];
+  if (q.kind) out.push(KIND_LABELS[q.kind]);
+  for (const kind of q.has ?? []) out.push(kind === 'anime' ? 'アニメ化あり' : `${KIND_LABELS[kind]}あり`);
+  if (q.status) out.push(STATUS_FILTERS.find((s) => s.value === q.status)?.label ?? q.status);
+  if (q.year !== undefined) out.push(`${q.year}年`);
+  if (q.season) out.push(SEASON_FILTERS.find((s) => s.value === q.season)?.label ?? q.season);
+  return out;
+}

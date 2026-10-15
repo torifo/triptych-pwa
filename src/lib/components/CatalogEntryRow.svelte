@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { ExternalLink } from '@lucide/svelte';
   import type { Source } from '../db/schema';
   import type { CatalogEntry } from '../catalog/types';
   import {
@@ -11,7 +12,10 @@
   } from '../catalog/view';
   import { SOURCE_LABELS } from './labels';
   import { isSafeHttpUrl } from './release-view';
+  import { entryCover } from './catalog-cover';
   import CatalogKindBadge from './CatalogKindBadge.svelte';
+  import Cover from './Cover.svelte';
+  import MonoTime from './MonoTime.svelte';
 
   let {
     entry,
@@ -30,18 +34,18 @@
 
   const sourceLabel = $derived(SOURCE_LABELS[entry.source as Source] ?? entry.source);
   const period = $derived(formatEntryPeriod(entry));
-  const meta = $derived(
-    [formatLabel(entry), entryStatusLabel(entry), period, ...entryCounts(entry)].filter(
-      (v): v is string => !!v,
-    ),
-  );
+  // 形式・状態は文字、期間と話数・巻数は等幅
+  const meta = $derived([formatLabel(entry), entryStatusLabel(entry)].filter((v): v is string => !!v));
+  const figures = $derived([period, ...entryCounts(entry)].filter((v): v is string => !!v));
+  const cover = $derived(entryCover(entry));
   const link = $derived(linkBadge(entry));
   const href = $derived(entry.url && isSafeHttpUrl(entry.url) ? entry.url : null);
   const creators = $derived(namesLine(entry.creators));
   const studios = $derived(namesLine(entry.studios));
 </script>
 
-<div class="row-hover flex items-start gap-2 py-2.5" style="border-bottom: 1px solid var(--line); min-width: 0;">
+<div class="row-hover flex items-start gap-2.5 py-2.5" style="border-bottom: 1px solid var(--line); min-width: 0;">
+  <Cover src={cover.url} title={cover.title} mediaType={cover.mediaType} size="xs" />
   <div class="min-w-0 flex-1">
     <p class="text-sm" style="overflow-wrap: anywhere;">{entry.title}</p>
 
@@ -52,6 +56,9 @@
       <span style="white-space: nowrap;">{sourceLabel}</span>
       {#each meta as item}
         <span style="white-space: nowrap;">{item}</span>
+      {/each}
+      {#each figures as item}
+        <MonoTime text={item} />
       {/each}
     </p>
 
@@ -69,9 +76,10 @@
             {href}
             target="_blank"
             rel="noopener noreferrer"
-            class="underline"
+            class="inline-flex items-center gap-1 underline"
             style="white-space: nowrap; color: var(--fg);"
-            aria-label={`${entry.title} を ${sourceLabel} で開く`}>{sourceLabel} で開く ↗</a
+            aria-label={`${entry.title} を ${sourceLabel} で開く`}
+            >{sourceLabel} で開く<ExternalLink size={11} aria-hidden="true" /></a
           >
         {/if}
         {#if link}
