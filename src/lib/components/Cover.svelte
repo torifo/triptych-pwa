@@ -2,7 +2,7 @@
   // 表紙。比率 2:3。画像が無い・読み込めない時は題名を縦に組んだ「文字の表紙」に代える。
   import type { Snippet } from 'svelte';
   import type { MediaType } from '../db/schema';
-  import { COVER_WIDTH, fallbackCoverText, type CoverSize } from './cover';
+  import { COVER_WIDTH, fallbackCoverText, sizedCoverUrl, type CoverSize } from './cover';
   import OnAirLamp from './OnAirLamp.svelte';
   import { isSafeHttpUrl } from './release-view';
 
@@ -26,7 +26,8 @@
 
   let failedSrc = $state<string | undefined>();
 
-  const url = $derived(src && isSafeHttpUrl(src) && failedSrc !== src ? src : undefined);
+  const safe = $derived(src && isSafeHttpUrl(src) ? sizedCoverUrl(src, size) : undefined);
+  const url = $derived(safe && failedSrc !== safe ? safe : undefined);
   const text = $derived(fallbackCoverText(title, mediaType));
   const width = $derived(size === 'fill' ? '100%' : `${COVER_WIDTH[size]}px`);
 </script>

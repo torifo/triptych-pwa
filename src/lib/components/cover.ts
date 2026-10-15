@@ -16,6 +16,17 @@ export interface CoverSource {
 
 export const COVER_WIDTH: Record<Exclude<CoverSize, 'fill'>, number> = { xs: 28, s: 48, m: 64, l: 112 };
 
+// AniList の表紙は small 100px / medium 230px / large 460px の3版。表示の大きさ（2倍密度）に足りる版を選ぶ。
+const ANILIST_COVER_RE = /^(https:\/\/s4\.anilist\.co\/file\/anilistcdn\/media\/(?:anime|manga)\/cover\/)(small|medium|large)(\/.+)$/;
+const ANILIST_VARIANT: Record<CoverSize, 'small' | 'medium'> = { xs: 'small', s: 'small', m: 'medium', l: 'medium', fill: 'medium' };
+
+/** 表示の大きさに合う解像度の URL。AniList 以外はそのまま。 */
+export function sizedCoverUrl(url: string, size: CoverSize): string {
+  const match = ANILIST_COVER_RE.exec(url);
+  if (!match) return url;
+  return `${match[1]}${ANILIST_VARIANT[size]}${match[3]}`;
+}
+
 /** 代表表紙に選ぶ媒体の順（色の強い・確実に表紙があるものから）。 */
 const COVER_MEDIA_ORDER: MediaType[] = ['anime', 'manga', 'light-novel', 'web-novel'];
 

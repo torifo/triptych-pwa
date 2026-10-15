@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { coverUrlOf, editionCover, fallbackCoverText, workCover } from './cover';
+import { coverUrlOf, editionCover, fallbackCoverText, sizedCoverUrl, workCover } from './cover';
 
 describe('coverUrlOf', () => {
   it('http(s) の URL だけを表紙にする', () => {
@@ -66,5 +66,24 @@ describe('fallbackCoverText', () => {
 
   it('空の題名でも何か出す', () => {
     expect(fallbackCoverText('  ', 'anime')).toEqual({ title: '—', media: 'ANIME' });
+  });
+});
+
+describe('sizedCoverUrl', () => {
+  const base = 'https://s4.anilist.co/file/anilistcdn/media/anime/cover/';
+
+  it('行の大きさは small、横並び・棚・詳細は medium にする', () => {
+    expect(sizedCoverUrl(`${base}small/bx1-a.jpg`, 'xs')).toBe(`${base}small/bx1-a.jpg`);
+    expect(sizedCoverUrl(`${base}large/bx1-a.jpg`, 's')).toBe(`${base}small/bx1-a.jpg`);
+    expect(sizedCoverUrl(`${base}small/bx1-a.jpg`, 'm')).toBe(`${base}medium/bx1-a.jpg`);
+    expect(sizedCoverUrl(`${base}small/bx1-a.jpg`, 'l')).toBe(`${base}medium/bx1-a.jpg`);
+    expect(sizedCoverUrl(`${base}small/bx1-a.jpg`, 'fill')).toBe(`${base}medium/bx1-a.jpg`);
+    expect(sizedCoverUrl('https://s4.anilist.co/file/anilistcdn/media/manga/cover/small/bx2-b.png', 'l')).toBe(
+      'https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/bx2-b.png',
+    );
+  });
+
+  it('AniList 以外はそのまま', () => {
+    expect(sizedCoverUrl('https://example.com/cover/small/a.jpg', 'l')).toBe('https://example.com/cover/small/a.jpg');
   });
 });
