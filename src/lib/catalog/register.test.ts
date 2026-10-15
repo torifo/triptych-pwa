@@ -338,6 +338,31 @@ describe('defaultSelection', () => {
     expect(sel.book?.id).toBe('ndl:b3');
   });
 
+  it('prefers the airing anime season over a more popular finished one', () => {
+    const seasons = [
+      makeEntry({ source: 'anilist', externalId: '1', kind: 'anime', popularity: 900, status: 'FINISHED', format: 'TV' }),
+      makeEntry({ source: 'anilist', externalId: '2', kind: 'anime', popularity: 300, status: 'RELEASING', format: 'TV' }),
+      makeEntry({ source: 'anilist', externalId: '3', kind: 'anime', popularity: 50, status: 'NOT_YET_RELEASED', format: 'TV' }),
+    ];
+    expect(defaultSelection({ entries: seasons }).anime?.id).toBe('anilist:2');
+  });
+
+  it('among airing anime, prefers a TV season over a more popular short or ONA', () => {
+    const airing = [
+      makeEntry({ source: 'anilist', externalId: '1', kind: 'anime', popularity: 900, status: 'RELEASING', format: 'ONA' }),
+      makeEntry({ source: 'anilist', externalId: '2', kind: 'anime', popularity: 100, status: 'RELEASING', format: 'TV' }),
+    ];
+    expect(defaultSelection({ entries: airing }).anime?.id).toBe('anilist:2');
+  });
+
+  it('keeps the most popular anime when nothing is airing', () => {
+    const finished = [
+      makeEntry({ source: 'anilist', externalId: '1', kind: 'anime', popularity: 900, status: 'FINISHED' }),
+      makeEntry({ source: 'anilist', externalId: '3', kind: 'anime', popularity: 50, status: 'NOT_YET_RELEASED' }),
+    ];
+    expect(defaultSelection({ entries: finished }).anime?.id).toBe('anilist:1');
+  });
+
   it('omits kinds with no rows', () => {
     const sel = defaultSelection({ entries: [entries[0]] });
     expect(Object.keys(sel)).toEqual(['anime']);

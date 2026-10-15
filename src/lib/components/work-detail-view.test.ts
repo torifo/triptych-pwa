@@ -40,7 +40,7 @@ function release(over: Partial<Release> & Pick<Release, 'id' | 'editionId' | 'da
 }
 
 describe('orderWorkEditions', () => {
-  it('媒体（WEB → 文庫 → 漫画 → ANIME）→ 開始日 → 登録順に並べる', () => {
+  it('媒体（ANIME → 漫画 → 文庫 → WEB）→ 新しい期から → 登録順に並べる', () => {
     const editions = [
       edition('anime-late'),
       edition('manga', { mediaType: 'manga' }),
@@ -52,11 +52,24 @@ describe('orderWorkEditions', () => {
       ['anime-early', { date: '2020-10-03', precision: 'day' as const }],
     ]);
     expect(orderWorkEditions(editions, starts).map((e) => e.id)).toEqual([
-      'web',
-      'manga',
-      'anime-early',
       'anime-late',
+      'anime-early',
+      'manga',
+      'web',
     ]);
+  });
+
+  it('開始日の無い期は同じ媒体の後ろ、同じ開始日は登録順', () => {
+    const editions = [
+      edition('b', { createdAt: '2026-10-02T00:00:00.000Z' }),
+      edition('unknown'),
+      edition('a', { createdAt: '2026-10-01T00:00:00.000Z' }),
+    ];
+    const starts = new Map([
+      ['a', { date: '2026-10-04', precision: 'day' as const }],
+      ['b', { date: '2026-10-04', precision: 'day' as const }],
+    ]);
+    expect(orderWorkEditions(editions, starts).map((e) => e.id)).toEqual(['a', 'b', 'unknown']);
   });
 });
 
@@ -93,7 +106,7 @@ describe('initialEditionId', () => {
 describe('workMediaTypes / suggestedMediaType', () => {
   it('作品にある媒体を決まった順に重複なしで返す', () => {
     const editions = [{ mediaType: 'anime' as const }, { mediaType: 'web-novel' as const }, { mediaType: 'anime' as const }];
-    expect(workMediaTypes(editions)).toEqual(['web-novel', 'anime']);
+    expect(workMediaTypes(editions)).toEqual(['anime', 'web-novel']);
     expect(workMediaTypes([])).toEqual([]);
   });
 

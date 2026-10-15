@@ -252,9 +252,18 @@ function latestBook(entries: readonly CatalogEntry[]): CatalogEntry | undefined 
   return best;
 }
 
+/** 放送中の期（TV を優先し、その中で人気最大）。放送中が無ければ undefined。 */
+function airingSeason(entries: readonly CatalogEntry[]): CatalogEntry | undefined {
+  const airing = entries.filter((e) => e.status === 'RELEASING');
+  if (airing.length === 0) return undefined;
+  const tv = airing.filter((e) => e.format === 'TV');
+  return mostPopular(tv.length > 0 ? tv : airing);
+}
+
 /**
  * 各面から代表1件。
- * anime・漫画・原作小説は AniList の人気最大（AniList の行が無い面は全体から）、
+ * anime・漫画・原作小説は AniList の人気最大（AniList の行が無い面は全体から）。
+ * ただし anime は放送中の期があればそれ（人気は第1期が高く、追いかけたいのは今の期なので）。
  * Web 小説は人気最大、本は最新の巻。行が無い面は含めない。
  */
 export function defaultSelection(
@@ -271,7 +280,8 @@ export function defaultSelection(
       pick = mostPopular(members);
     } else {
       const anilist = members.filter((e) => e.source === 'anilist');
-      pick = mostPopular(anilist.length > 0 ? anilist : members);
+      const pool = anilist.length > 0 ? anilist : members;
+      pick = (kind === 'anime' ? airingSeason(pool) : undefined) ?? mostPopular(pool);
     }
     if (pick) out[kind] = pick;
   }
