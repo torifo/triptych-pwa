@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Edition, Release } from '../db/schema';
 import {
+  groupShelfByWork,
   editionDisambiguators,
   editionSubtitle,
   LIBRARY_LAYOUT_KEY,
@@ -241,5 +242,50 @@ describe('progressRatio / progressText', () => {
     expect(progressText({ unit: 'volume', current: 5 })).toBe('5巻');
     expect(progressText({ unit: 'part', current: 0, total: 0 })).toBe('0部分');
     expect(progressText(undefined)).toBe('');
+  });
+});
+
+describe('groupShelfByWork', () => {
+  const ed = (id: string, workId: string, status: Edition['status'] = 'plan', mediaType: Edition['mediaType'] = 'anime') => ({
+    id,
+    workId,
+    status,
+    mediaType,
+  });
+
+  it('作品ごとに1枚にまとめ、並びは最初に出てきた順', () => {
+    const groups = groupShelfByWork([ed('a1', 'A'), ed('b1', 'B'), ed('a2', 'A', 'plan', 'manga')], new Set());
+    expect(groups.map((g) => [g.workId, g.editions.map((e) => e.id)])).toEqual([
+      ['A', ['a1', 'a2']],
+      ['B', ['b1']],
+    ]);
+  });
+
+  it('開く Edition は今日放送のあるもの、無ければ先頭', () => {
+    const [group] = groupShelfByWork([ed('a1', 'A'), ed('a2', 'A')], new Set(['a2']));
+    expect(group.lead.id).toBe('a2');
+    expect(group.onAir).toBe(true);
+    const [plain] = groupShelfByWork([ed('a1', 'A'), ed('a2', 'A')], new Set());
+    expect(plain.lead.id).toBe('a1');
+    expect(plain.onAir).toBe(false);
+  });
+
+  it('媒体は重複なしで ANIME → 漫画 → 文庫 → WEB の順に、数も持つ', () => {
+    const [group] = groupShelfByWork(
+      [ed('w', 'A', 'plan', 'web-novel'), ed('a1', 'A'), ed('m', 'A', 'plan', 'manga'), ed('a2', 'A')],
+      new Set(),
+    );
+    expect(group.media).toEqual([
+      { mediaType: 'anime', count: 2 },
+      { mediaType: 'manga', count: 1 },
+      { mediaType: 'web-novel', count: 1 },
+    ]);
+  });
+
+  it('状態はいちばん動いているもの（進行中 → 中断 → 積み → 完了 → 切り）', () => {
+    const [group] = groupShelfByWork([ed('a', 'A', 'done'), ed('b', 'A', 'paused'), ed('c', 'A', 'plan')], new Set());
+    expect(group.status).toBe('paused');
+    const [active] = groupShelfByWork([ed('a', 'A', 'dropped'), ed('b', 'A', 'active')], new Set());
+    expect(active.status).toBe('active');
   });
 });

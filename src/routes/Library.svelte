@@ -9,6 +9,7 @@
   import { MEDIA_TYPE_LABELS, MEDIA_TYPES, STATUS_LABELS, STATUSES } from '../lib/components/labels';
   import {
     editionDisambiguators,
+    groupShelfByWork,
     libraryCover,
     loadLibraryLayout,
     progressRatio,
@@ -19,6 +20,7 @@
     type LibraryLayout,
   } from '../lib/components/library-view';
   import { broadcastDayJst, onAirEditionIds } from '../lib/components/onair';
+  import { workCover } from '../lib/components/cover';
 
   let editions = $state<Edition[]>([]);
   let works = $state<Work[]>([]);
@@ -63,6 +65,11 @@
     ),
   );
 
+  // 棚は作品ごとに1枚（同じ作品の Edition が並ばないように）。一覧は Edition ごとの詳しい表示
+  const shelf = $derived(groupShelfByWork(filtered, onAirIds));
+  const countNum = $derived(layout === 'shelf' ? shelf.length : filtered.length);
+  const countTotal = $derived(layout === 'shelf' ? editionsByWork.size : editions.length);
+
   async function refresh() {
     const [nextEditions, nextWorks, nextReleases] = await Promise.all([listEditions(), listWorks(), listReleases()]);
     editions = nextEditions;
@@ -81,6 +88,18 @@
 
   function coverOf(edition: Edition) {
     return libraryCover(edition, workMap.get(edition.workId), editionsByWork.get(edition.workId) ?? []);
+  }
+
+  /** 棚の表紙: 作品の代表表紙（coverEditionId → 表紙のある Edition）。作品が見つからなければ Edition の表紙 */
+  function shelfCoverOf(lead: Edition) {
+    const work = workMap.get(lead.workId);
+    const workEditions = editionsByWork.get(lead.workId) ?? [];
+    return work ? workCover(work, workEditions) : libraryCover(lead, work, workEditions);
+  }
+
+  /** 'ANIME 2 · 漫画 · 文庫' */
+  function mediaLine(media: { mediaType: MediaType; count: number }[]): string {
+    return media.map((m) => (m.count > 1 ? `${MEDIA_TYPE_LABELS[m.mediaType]} ${m.count}` : MEDIA_TYPE_LABELS[m.mediaType])).join(' · ');
   }
 
   function titleOf(edition: Edition): string {
@@ -164,11 +183,11 @@
 
   <div class="shou toolbar">
     <p class="count" aria-live="polite">
-      <span class="mono count-num">{filtered.length}</span>
-      {#if filtered.length !== editions.length}
-        <span class="mono count-total">/ {editions.length}</span>
+      <span class="mono count-num">{countNum}</span>
+      {#if countNum !== countTotal}
+        <span class="mono count-total">/ {countTotal}</span>
       {/if}
-      <span class="no">EDITIONS</span>
+      <span class="no">{layout === 'shelf' ? 'WORKS' : 'EDITIONS'}</span>
     </p>
     <button type="button" class="btn btn-main" aria-expanded={showCreate} onclick={() => (showCreate = !showCreate)}>
       <Plus size={14} />新規作品
@@ -203,33 +222,23 @@
     <p class="empty">該当する Edition がありません</p>
   {:else if layout === 'shelf'}
     <ul class="shelf">
-      {#each filtered as edition (edition.id)}
-        {@const cover = coverOf(edition)}
-        {@const ratio = progressRatio(edition.progress)}
-        {@const subtitle = subtitles.get(edition.id)}
+      {#each shelf as group (group.workId)}
+        {@const cover = shelfCoverOf(group.lead)}
+        {@const ratio = progressRatio(group.lead.progress)}
         <li class="shelf-cell">
-          <a class="shelf-item" href={workHref(edition)}>
+          <a class="shelf-item" href={workHref(group.lead)}>
             <span class="shelf-cover" aria-hidden="true">
-              <Cover
-                src={cover.url}
-                title={cover.title}
-                mediaType={cover.mediaType}
-                size="fill"
-                onAir={onAirIds.has(edition.id)}
-              />
+              <Cover src={cover.url} title={cover.title} mediaType={cover.mediaType} size="fill" onAir={group.onAir} />
               {#if ratio !== undefined}
                 <span class="progress"><span class="progress-fill" style:width={`${ratio * 100}%`}></span></span>
               {/if}
             </span>
-            <span class="shelf-title">{titleOf(edition)}</span>
-            {#if subtitle}
-              <span class="shelf-sub">{subtitle}</span>
-            {/if}
+            <span class="shelf-title">{titleOf(group.lead)}</span>
             <span class="meta">
-              <span>{STATUS_LABELS[edition.status]}</span>
-              <span class="mono">{MEDIA_TYPE_LABELS[edition.mediaType]}</span>
+              <span>{STATUS_LABELS[group.status]}</span>
+              <span class="mono">{mediaLine(group.media)}</span>
             </span>
-            {#if onAirIds.has(edition.id)}
+            {#if group.onAir}
               <span class="sr-only">今日放送</span>
             {/if}
           </a>
@@ -447,7 +456,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .shelf-sub,
   .list-sub {
     font-size: 0.625rem;
     color: var(--muted);
@@ -462,6 +470,12 @@
     color: var(--muted);
     overflow: hidden;
     white-space: nowrap;
+  }
+  /* 棚は列が細いので、状態と媒体の並び（'ANIME 2 · 漫画 · 文庫'）を折り返す */
+  .shelf-item .meta {
+    flex-wrap: wrap;
+    row-gap: 0.05rem;
+    white-space: normal;
   }
 
   /* ─── 一覧（表紙 xs 付きの行） ─── */

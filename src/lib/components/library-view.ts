@@ -1,6 +1,6 @@
 // Library の一覧用。同じ Work・同じ媒体の Edition を見分ける副題と並び順、棚の表紙と表示の保存。
 
-import type { Edition, EditionProgress, Release, Work } from '../db/schema';
+import type { Edition, EditionProgress, MediaType, Release, Status, Work } from '../db/schema';
 import { formatReleaseDate, isValidYmd, todayJst } from '../dates';
 import { normalizeTitle } from '../normalize';
 import { editionCover, workCover, type CoverSource } from './cover';
@@ -171,4 +171,52 @@ export function progressText(progress: EditionProgress | undefined): string {
   if (!progress) return '';
   const total = progress.total ? `/${progress.total}` : '';
   return `${progress.current}${total}${PROGRESS_UNIT_LABELS[progress.unit]}`;
+}
+
+// ---------------------------------------------------------------------------
+// 棚は作品ごとに1枚
+// ---------------------------------------------------------------------------
+
+/** 棚に出す媒体の順（表紙の色が強いアニメから。Work 詳細のタブと同じ）。 */
+const SHELF_MEDIA_ORDER: MediaType[] = ['anime', 'manga', 'light-novel', 'web-novel'];
+/** 作品の状態として出す順（いちばん動いているもの）。 */
+const SHELF_STATUS_ORDER: Status[] = ['active', 'paused', 'plan', 'done', 'dropped'];
+
+type ShelfEdition = Pick<Edition, 'id' | 'workId' | 'status' | 'mediaType'>;
+
+export interface WorkShelfItem<E extends ShelfEdition> {
+  workId: string;
+  /** 絞り込みを通ったこの作品の Edition（渡された順のまま） */
+  editions: E[];
+  /** 押した時に開く Edition（今日放送のあるもの → 先頭） */
+  lead: E;
+  onAir: boolean;
+  media: { mediaType: MediaType; count: number }[];
+  status: Status;
+}
+
+/** 絞り込み済みの Edition を作品ごとにまとめる。並びは各作品の最初の Edition が出てきた順（作品名順を保つ）。 */
+export function groupShelfByWork<E extends ShelfEdition>(
+  editions: readonly E[],
+  onAir: ReadonlySet<string>,
+): WorkShelfItem<E>[] {
+  const byWork = new Map<string, E[]>();
+  for (const edition of editions) {
+    const list = byWork.get(edition.workId);
+    if (list) list.push(edition);
+    else byWork.set(edition.workId, [edition]);
+  }
+  return [...byWork.entries()].map(([workId, list]) => {
+    const counts = new Map<MediaType, number>();
+    for (const e of list) counts.set(e.mediaType, (counts.get(e.mediaType) ?? 0) + 1);
+    const statuses = new Set(list.map((e) => e.status));
+    return {
+      workId,
+      editions: list,
+      lead: list.find((e) => onAir.has(e.id)) ?? list[0],
+      onAir: list.some((e) => onAir.has(e.id)),
+      media: SHELF_MEDIA_ORDER.filter((m) => counts.has(m)).map((mediaType) => ({ mediaType, count: counts.get(mediaType) ?? 0 })),
+      status: SHELF_STATUS_ORDER.find((s) => statuses.has(s)) ?? list[0].status,
+    };
+  });
 }
