@@ -214,6 +214,7 @@ export const LINK_METHOD_LABELS: Record<string, string> = {
   synonym: '別名一致',
   'title-prefix': '題名前方一致',
   series: 'シリーズ名一致',
+  'base-title': '題名の本体一致',
 };
 
 /** 非 AniList の行の結び付き（`題名一致 85%`）。AniList の行や情報の無い行は null。 */
