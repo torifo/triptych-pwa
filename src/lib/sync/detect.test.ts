@@ -6,6 +6,7 @@ import {
   createWork,
   getEdition,
   listDetectionEventsByWork,
+  listRejectedDetections,
   listReleasesByEdition,
   updateDetectionEventState,
   updateEditionSyncHints,
@@ -824,5 +825,23 @@ describe('rejectDetection', () => {
     );
 
     expect((await rejectDetection(event.id, db)).state).toBe('rejected');
+  });
+
+  it('設定画面に出す却下日を残す', async () => {
+    const work = await createWork({ title: 'W' }, db);
+    const event = await createDetectionEvent(
+      {
+        workId: work.id,
+        candidate: { source: 'anilist', externalId: '301', title: 'B', airingStatus: 'FINISHED' },
+        matchScore: 1,
+      },
+      db,
+    );
+
+    await rejectDetection(event.id, db);
+
+    const [rejected] = await listRejectedDetections(db);
+    expect(rejected.id).toBe(event.id);
+    expect(Number.isNaN(Date.parse(rejected.rejectedAt ?? ''))).toBe(false);
   });
 });

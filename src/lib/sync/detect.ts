@@ -20,6 +20,7 @@ import {
   listDetectionEventsByWork,
   listEditions,
   listWorks,
+  rejectDetectionEvent,
   updateDetectionEventState,
   updateEditionSyncHints,
 } from '../db/store';
@@ -546,13 +547,13 @@ export async function acceptDetection(
   return { event: updated, edition };
 }
 
-/** 検知を却下する。rejected は残り続け、以降の再検知から除外される。 */
+/** 検知を却下する。rejected は残り続け、以降の再検知から除外される（設定画面に出す却下日も残す）。 */
 export async function rejectDetection(
   id: string,
   database: TriptychDB = defaultDB,
 ): Promise<DetectionEvent> {
   await getDetectionEventOrThrow(id, database);
-  return updateDetectionEventState(id, 'rejected', database);
+  return rejectDetectionEvent(id, database);
 }
 
 async function getDetectionEventOrThrow(id: string, database: TriptychDB): Promise<DetectionEvent> {

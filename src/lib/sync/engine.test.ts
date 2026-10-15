@@ -1319,6 +1319,118 @@ describe('runSync: しょぼかるの番組表', () => {
 // 多重実行防止
 // ---------------------------------------------------------------------------
 
+describe('runSync: 同期するソースと検知の設定', () => {
+  /** アニメ・文庫・なろう・カクヨムを1件ずつ。 */
+  async function setupAll() {
+    await setup('アニメ', { mediaType: 'anime', title: 'A', sourceRefs: [anilistRef('1')] });
+    await setup('文庫', { mediaType: 'light-novel', title: 'L' });
+    await setup('なろう', {
+      mediaType: 'web-novel',
+      title: 'N',
+      sourceRefs: [{ source: 'narou', externalId: 'n1', url: 'u' }],
+    });
+    await setup('カクヨム', {
+      mediaType: 'web-novel',
+      title: 'K',
+      sourceRefs: [{ source: 'kakuyomu', externalId: 'k1', url: 'u' }],
+    });
+    return mockFetch({
+      '/api/anilist/media/': () => mediaDto('1'),
+      '/api/ndl/series': () => ndlDto([]),
+      '/api/narou/novel/': () => webNovelDto('narou', 'n1', 1, '2026-10-01'),
+      '/api/kakuyomu/work/': () => webNovelDto('kakuyomu', 'k1', 1, '2026-10-01'),
+    });
+  }
+
+  it('OFF のソースは照会せず、エラーにもしない。ON のソースは今までどおり', async () => {
+    const calls = await setupAll();
+
+    const result = await runSync({
+      database: db,
+      now: () => NOW,
+      sources: { syoboi: false, ndl: false, kakuyomu: false },
+    });
+
+    expect(result.ran).toBe(true);
+    expect(result.errors).toEqual({});
+    expect(result.lastSyncAt).toBe(NOW.toISOString());
+    expect(callsTo(calls, '/api/anilist/media/')).toHaveLength(1);
+    expect(callsTo(calls, '/api/narou/novel/')).toHaveLength(1);
+    expect(callsTo(calls, '/api/syoboi/')).toHaveLength(0);
+    expect(callsTo(calls, '/api/ndl/')).toHaveLength(0);
+    expect(callsTo(calls, '/api/kakuyomu/')).toHaveLength(0);
+  });
+
+  it('指定が無ければ、保存した設定（triptych.pref.syncSources）に従う', async () => {
+    localStorage.setItem('triptych.pref.syncSources', JSON.stringify({ anilist: false, narou: false }));
+    const calls = await setupAll();
+
+    await runSync({ database: db, now: () => NOW });
+
+    expect(callsTo(calls, '/api/anilist/media/')).toHaveLength(0);
+    expect(callsTo(calls, '/api/narou/')).toHaveLength(0);
+    // AniList を止めても、しょぼかるは放送状態が分からないものとして照会する
+    expect(callsTo(calls, '/api/syoboi/title')).toHaveLength(1);
+    expect(callsTo(calls, '/api/ndl/series')).toHaveLength(1);
+    expect(callsTo(calls, '/api/kakuyomu/work/')).toHaveLength(1);
+  });
+
+  it('全部 OFF でもエラーにせず、同期した時刻を進める', async () => {
+    const calls = await setupAll();
+    const off = { anilist: false, syoboi: false, ndl: false, narou: false, kakuyomu: false };
+
+    const result = await runSync({ database: db, now: () => NOW, sources: off, detect: false });
+
+    expect(calls).toHaveLength(0);
+    expect(result).toMatchObject({ ran: true, errors: {}, lastSyncAt: NOW.toISOString() });
+  });
+
+  it('先頭の Web 小説ソースが OFF なら、次の ON のソースで進捗と完結を決める', async () => {
+    const edition = await setup('両方', {
+      mediaType: 'web-novel',
+      title: 'W',
+      sourceRefs: [
+        { source: 'narou', externalId: 'n1', url: 'u' },
+        { source: 'kakuyomu', externalId: 'k1', url: 'u' },
+      ],
+    });
+    mockFetch({ '/api/kakuyomu/work/': () => webNovelDto('kakuyomu', 'k1', 7, '2026-10-01', true) });
+
+    await runSync({ database: db, now: () => NOW, sources: { narou: false } });
+
+    const after = await getEdition(edition.id, db);
+    expect(after?.progress).toEqual({ unit: 'episode', current: 0, total: 7 });
+    expect(after?.completed).toBe(true);
+  });
+
+  it('検知が OFF なら検知の照会をせず、検知のエラーも出ない', async () => {
+    await setup('薬屋のひとりごと', { mediaType: 'light-novel', title: '薬屋' });
+    const calls = mockFetch({
+      '/api/ndl/series': () => ndlDto([]),
+      '/api/anilist/resolve-source': () => fail(502),
+    });
+
+    const result = await runSync({ database: db, force: true, now: () => NOW, detect: false });
+
+    expect(result.errors.detect).toBeUndefined();
+    expect(callsTo(calls, '/api/anilist/')).toHaveLength(0);
+    expect(await db.meta.get('detectionThrottle')).toBeUndefined();
+  });
+
+  it('検知の指定が無ければ、保存した設定（triptych.pref.detection）に従う', async () => {
+    await setup('薬屋のひとりごと', { mediaType: 'light-novel', title: '薬屋' });
+    const calls = mockFetch({ '/api/ndl/series': () => ndlDto([]) });
+
+    localStorage.setItem('triptych.pref.detection', 'false');
+    await runSync({ database: db, force: true, now: () => NOW });
+    expect(callsTo(calls, '/api/anilist/')).toHaveLength(0);
+
+    localStorage.setItem('triptych.pref.detection', 'true');
+    await runSync({ database: db, force: true, now: () => NOW });
+    expect(callsTo(calls, '/api/anilist/').length).toBeGreaterThan(0);
+  });
+});
+
 describe('runSync: 多重実行防止', () => {
   it('実行中に呼ばれたら同じ Promise を返し、照会は1回だけ', async () => {
     await setup('W', { mediaType: 'anime', title: 'A', sourceRefs: [anilistRef('1')] });

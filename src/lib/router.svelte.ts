@@ -59,8 +59,10 @@ function currentHash(): string {
 
 export const route = $state<RouteMatch>(parseHash(currentHash()))
 
-export function initRouter() {
+/** redirect: URL にハッシュが無い起動の時に開く画面のハッシュ（preferences の startRedirect で決める）。履歴は増やさない。 */
+export function initRouter(redirect?: string | null) {
   if (typeof window === 'undefined') return
+  if (redirect) window.history.replaceState(window.history.state, '', redirect)
   const sync = () => {
     const next = parseHash(currentHash())
     route.name = next.name

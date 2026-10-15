@@ -47,3 +47,10 @@ export function failSync(errors: SyncErrors): void {
   syncStatus.running = false;
   syncStatus.errors = errors;
 }
+
+/** 同期せずに、保存されていた前回の結果だけを出す（自動同期が手動のみの時）。実行中の同期の表示は触らない。 */
+export function restoreSync(lastSyncAt: string | null, errors: SyncErrors): void {
+  if (syncStatus.running) return;
+  syncStatus.lastSyncAt = lastSyncAt;
+  syncStatus.errors = errors;
+}

@@ -18,15 +18,17 @@
   import Search from './routes/Search.svelte'
   import Catalog from './routes/Catalog.svelte'
   import CatalogDetail from './routes/CatalogDetail.svelte'
-  import { maybeAutoSync } from './lib/sync/engine'
-  import { beginSync, completeSync, failSync, syncStatus } from './lib/sync/status.svelte'
+  import { maybeAutoSync, type SyncErrors } from './lib/sync/engine'
+  import { beginSync, completeSync, failSync, restoreSync, syncStatus } from './lib/sync/status.svelte'
+  import { autoSyncPlan, isAutoSyncDue, preferences, startRedirect, type AutoSyncMode } from './lib/preferences'
   import { db, type Edition, type Release } from './lib/db/schema'
   import { listEditions, listReleases } from './lib/db/store'
   import { onAirCount } from './lib/components/home-view'
   import OnAirLamp from './lib/components/OnAirLamp.svelte'
   import { initStoragePersistence, shouldPromptAddToHomeScreen } from './lib/pwa'
 
-  initRouter()
+  // ハッシュの無い起動（ホーム画面のアイコンなど）だけ、設定の「起動時に開く画面」へ
+  initRouter(startRedirect(window.location.hash, preferences.get('startScreen')))
 
   const A2HS_DISMISSED_KEY = 'triptych:a2hs-dismissed'
   let showA2HSBanner = $state(false)
@@ -49,6 +51,16 @@
       // ストレージ判定に失敗してもアプリ本体は継続動作させる
     }
 
+    if (autoSyncPlan(preferences.get('autoSync')).onLaunch) await autoSync()
+    else await restoreLastSync()
+  })
+
+  // 自動同期を最後に試みた時刻。全ソース失敗で最終同期が進まなくても、1時間ごとより頻繁には試さない
+  let lastAutoAttempt: number | null = null
+
+  async function autoSync() {
+    if (syncStatus.running) return
+    lastAutoAttempt = Date.now()
     beginSync()
     try {
       const result = await maybeAutoSync()
@@ -65,6 +77,39 @@
       }
     } catch {
       failSync({})
+    }
+  }
+
+  /** 手動のみの時: 同期はせず、前回の同期の時刻とエラーだけを出す。 */
+  async function restoreLastSync() {
+    try {
+      const value = (await db.meta.get('sync'))?.value as { lastSyncAt?: string; lastSyncErrors?: SyncErrors } | undefined
+      restoreSync(value?.lastSyncAt ?? null, value?.lastSyncErrors ?? {})
+    } catch {
+      // 表示だけなので、読めなくても本体は動かす
+    }
+  }
+
+  // 「1時間ごと」: 開いている間（画面が見えている時）だけ、1分ごとに期限を見て同期する。設定の変更はその場で効かせる
+  const AUTO_SYNC_CHECK_MS = 60_000
+  let autoSyncMode = $state<AutoSyncMode>(preferences.get('autoSync'))
+  onMount(() => preferences.subscribe((prefs) => (autoSyncMode = prefs.autoSync)))
+
+  $effect(() => {
+    const { repeatMs } = autoSyncPlan(autoSyncMode)
+    if (repeatMs === null) return
+    const check = () => {
+      if (document.visibilityState === 'hidden') return
+      const now = Date.now()
+      if (!isAutoSyncDue(syncStatus.lastSyncAt, now, repeatMs)) return
+      if (lastAutoAttempt !== null && now - lastAutoAttempt < repeatMs) return
+      void autoSync()
+    }
+    const id = setInterval(check, AUTO_SYNC_CHECK_MS)
+    document.addEventListener('visibilitychange', check)
+    return () => {
+      clearInterval(id)
+      document.removeEventListener('visibilitychange', check)
     }
   })
 

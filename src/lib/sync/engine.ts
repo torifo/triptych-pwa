@@ -31,6 +31,7 @@ import {
   type ReleaseMergeInput,
 } from '../db/store';
 import { isPastRelease, isValidYmd, todayJst } from '../dates';
+import { preferences } from '../preferences';
 import { runDetection } from './detect';
 
 // ---------------------------------------------------------------------------
@@ -133,6 +134,10 @@ export interface SyncOptions {
   database?: TriptychDB;
   /** テスト用の時刻注入フック。省略時は `new Date()`。 */
   now?: () => Date;
+  /** ソースごとの ON/OFF。OFF のソースは照会せず、エラーにもしない。省略したソースは設定に従う。 */
+  sources?: Partial<Record<SyncSource, boolean>>;
+  /** 同期のあとにアニメ化検知を走らせるか。省略時は設定に従う。 */
+  detect?: boolean;
 }
 
 export interface SyncRunResult {
@@ -201,9 +206,11 @@ async function runSyncOnce(opts: SyncOptions & { database: TriptychDB }): Promis
     }
   }
 
+  const prefs = preferences.all();
+  const sources = { ...prefs.syncSources, ...opts.sources };
   const editions = (await listEditions(database)).filter((e) => TRACKED_STATUSES.includes(e.status));
   const works = new Map((await listWorks(database)).map((w) => [w.id, w]));
-  const plan = planTasks(editions, works);
+  const plan = planTasks(editions, works, (source) => sources[source] !== false);
 
   const errors: SyncErrors = {};
   let succeeded = 0;
@@ -231,17 +238,19 @@ async function runSyncOnce(opts: SyncOptions & { database: TriptychDB }): Promis
   const syncedAt = now().toISOString();
 
   // 検知の 24h スロットルは force と独立。検知の失敗で同期結果を壊さない。
-  try {
-    const detection = await runDetection({ database, now: opts.now, refresh: ctx.force });
-    const messages = Object.values(detection.errors);
-    if (messages.length > 0) {
-      errors.detect = {
-        message: messages.length === 1 ? messages[0] : `${messages[0]} ほか${messages.length - 1}件`,
-        occurredAt: now().toISOString(),
-      };
+  if (opts.detect ?? prefs.detection) {
+    try {
+      const detection = await runDetection({ database, now: opts.now, refresh: ctx.force });
+      const messages = Object.values(detection.errors);
+      if (messages.length > 0) {
+        errors.detect = {
+          message: messages.length === 1 ? messages[0] : `${messages[0]} ほか${messages.length - 1}件`,
+          occurredAt: now().toISOString(),
+        };
+      }
+    } catch (err) {
+      errors.detect = { message: errorMessage(err), occurredAt: now().toISOString() };
     }
-  } catch (err) {
-    errors.detect = { message: errorMessage(err), occurredAt: now().toISOString() };
   }
 
   const allFailed = succeeded === 0 && failed > 0;
@@ -252,10 +261,15 @@ async function runSyncOnce(opts: SyncOptions & { database: TriptychDB }): Promis
   return { ran: true, errors, lastSyncAt };
 }
 
-/** mediaType 別に、ソースごとのタスク列を組み立てる。 */
-function planTasks(editions: Edition[], works: Map<string, Work>): Map<SyncSource, SyncTask[]> {
+/** mediaType 別に、ソースごとのタスク列を組み立てる。OFF のソース（enabled が false）は積まない。 */
+function planTasks(
+  editions: Edition[],
+  works: Map<string, Work>,
+  enabled: (source: SyncSource) => boolean,
+): Map<SyncSource, SyncTask[]> {
   const plan = new Map<SyncSource, SyncTask[]>();
   const push = (source: SyncSource, task: SyncTask) => {
+    if (!enabled(source)) return;
     const list = plan.get(source) ?? [];
     list.push(task);
     plan.set(source, list);
@@ -285,6 +299,8 @@ function planTasks(editions: Edition[], works: Map<string, Work>): Map<SyncSourc
         let primary = true;
         for (const ref of edition.sourceRefs) {
           if (ref.source !== 'narou' && ref.source !== 'kakuyomu') continue;
+          // OFF のソースは先頭にしない（ON のソースで進捗と完結を決める）
+          if (!enabled(ref.source)) continue;
           const isPrimary = primary;
           primary = false;
           push(ref.source, {

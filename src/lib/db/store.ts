@@ -611,3 +611,93 @@ export async function deleteDetectionEvent(
 ): Promise<void> {
   await database.detections.delete(id);
 }
+
+// ---------------------------------------------------------------------------
+// 設定画面: 新着をまとめて既読に・却下した検知・Library を空に
+// ---------------------------------------------------------------------------
+
+/** まだ見ていない Release だけに seenAt を入れる（本人の編集ではないので origin は変えない）。入れた件数を返す。 */
+export async function markReleasesSeen(
+  ids: readonly string[],
+  database: TriptychDB = defaultDB,
+  now: Date = new Date(),
+): Promise<number> {
+  if (ids.length === 0) return 0;
+  const ts = nowISO(now);
+  return database.transaction('rw', database.releases, async () => {
+    let marked = 0;
+    for (const release of await database.releases.bulkGet([...ids])) {
+      if (!release || release.seenAt) continue;
+      await database.releases.update(release.id, { seenAt: ts, updatedAt: ts });
+      marked += 1;
+    }
+    return marked;
+  });
+}
+
+/** 却下した時刻（rejectedAt）付きの検知。この項目ができる前に却下したものには無い。 */
+export type RejectedDetection = DetectionEvent & { rejectedAt?: string };
+
+/** 検知を却下し、却下した時刻を残す。 */
+export async function rejectDetectionEvent(
+  id: string,
+  database: TriptychDB = defaultDB,
+  now: Date = new Date(),
+): Promise<RejectedDetection> {
+  const existing = await database.detections.get(id);
+  if (!existing) throw new Error(`DetectionEvent not found: ${id}`);
+  const patch = { state: 'rejected' as const, rejectedAt: nowISO(now) };
+  await database.detections.update(id, patch as Partial<DetectionEvent>);
+  return { ...existing, ...patch };
+}
+
+/** 却下した検知を、新しく却下した順に（時刻の無い古い却下は検知日で比べる）。 */
+export async function listRejectedDetections(database: TriptychDB = defaultDB): Promise<RejectedDetection[]> {
+  const rows = (await database.detections.where('state').equals('rejected').toArray()) as RejectedDetection[];
+  const at = (d: RejectedDetection) => d.rejectedAt ?? d.createdAt;
+  return rows.sort((a, b) => at(b).localeCompare(at(a)));
+}
+
+/** 却下を取り消して保留中（候補）に戻す。再検知は同じ候補を作り直さないので、戻せば Home にまた出る。 */
+export async function reopenDetectionEvent(
+  id: string,
+  database: TriptychDB = defaultDB,
+): Promise<RejectedDetection> {
+  return database.transaction('rw', database.detections, async () => {
+    const existing = (await database.detections.get(id)) as RejectedDetection | undefined;
+    if (!existing) throw new Error(`DetectionEvent not found: ${id}`);
+    if (existing.state !== 'rejected') throw new Error(`DetectionEvent is not rejected: ${id}`);
+    const { rejectedAt: _dropped, ...rest } = existing;
+    const reopened: DetectionEvent = { ...rest, state: 'pending' };
+    await database.detections.put(reopened);
+    return reopened;
+  });
+}
+
+export interface ClearedLibrary {
+  works: number;
+  editions: number;
+  releases: number;
+  detections: number;
+}
+
+/** 作品・版・Release・検知を全部消す。最終エクスポートと同期の記録は残し、作品ごとの検知の間隔だけ消す。 */
+export async function clearLibrary(database: TriptychDB = defaultDB): Promise<ClearedLibrary> {
+  const tables = [database.works, database.editions, database.releases, database.detections, database.meta];
+  return database.transaction('rw', tables, async () => {
+    const counts: ClearedLibrary = {
+      works: await database.works.count(),
+      editions: await database.editions.count(),
+      releases: await database.releases.count(),
+      detections: await database.detections.count(),
+    };
+    await Promise.all([
+      database.works.clear(),
+      database.editions.clear(),
+      database.releases.clear(),
+      database.detections.clear(),
+      database.meta.delete('detectionThrottle'),
+    ]);
+    return counts;
+  });
+}
