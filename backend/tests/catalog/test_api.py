@@ -533,7 +533,8 @@ def upcoming_on(client: TestClient, monkeypatch, day: str, **params: Any) -> lis
 def test_upcoming_keeps_a_month_precision_date_until_the_month_ends(built, client, monkeypatch):
     # next_date is the 1st of the month: "sometime in October 2026" must still count on the 14th and the 31st
     set_next(built, anilist_400=("2026-10-01", "month"), anilist_500=("2026-09-01", "month"))
-    assert upcoming_on(client, monkeypatch, "2026-10-14") == [A400, A300, A100, B1]  # A500 (September) is over
+    # 期間の終わりで並ぶ: A300 (10/14) → A100 (10/20) → A400 (10月中) → B1 (12月中)。A500 (9月中) は過ぎた
+    assert upcoming_on(client, monkeypatch, "2026-10-14") == [A300, A100, A400, B1]
     assert upcoming_on(client, monkeypatch, "2026-10-31") == [A400, B1]
     assert upcoming_on(client, monkeypatch, "2026-11-01") == [B1]
     # B1 is "2026-12-01 (month)"
@@ -543,7 +544,8 @@ def test_upcoming_keeps_a_month_precision_date_until_the_month_ends(built, clien
 
 def test_upcoming_keeps_a_year_precision_date_until_the_year_ends(built, client, monkeypatch):
     set_next(built, anilist_200=("2026-01-01", "year"), anilist_700=("2025-01-01", "year"))
-    assert upcoming_on(client, monkeypatch, "2026-10-14") == [A200, A300, A100, B1, A400]  # A700 (2025) is over
+    # A200 (2026年中) は年末扱いで B1 (12月中) と並び、同じ終わりなら始まりの早い A200 が先。A700 (2025年) は過ぎた
+    assert upcoming_on(client, monkeypatch, "2026-10-14") == [A300, A100, A200, B1, A400]
     assert upcoming_on(client, monkeypatch, "2026-12-31") == [A200, B1, A400]
     assert upcoming_on(client, monkeypatch, "2027-01-01") == [A400]
 
@@ -564,10 +566,10 @@ def test_upcoming_day_and_unknown_precision_are_compared_as_they_are(built, clie
     assert upcoming_on(client, monkeypatch, "2026-10-15") == [A100, B1]
 
 
-def test_upcoming_is_still_ordered_by_next_date(built, client, monkeypatch):
-    # a month-precision date of this month sorts by its first day, ahead of a later day
+def test_upcoming_is_ordered_by_the_end_of_the_period(built, client, monkeypatch):
+    # 「10月中」は月末扱いなので、確定日の 10/14 より後に並ぶ
     set_next(built, anilist_100=("2026-10-01", "month"))
-    assert upcoming_on(client, monkeypatch, "2026-10-14") == [A100, A300, B1, A400]
+    assert upcoming_on(client, monkeypatch, "2026-10-14") == [A300, A100, B1, A400]
 
 
 def test_upcoming_total_counts_the_precision_aware_matches(built, client, monkeypatch):

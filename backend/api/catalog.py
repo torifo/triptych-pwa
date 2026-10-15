@@ -221,7 +221,8 @@ _PERIOD_END = (
 _ORDER_BY: dict[str, str] = {
     "popularity": "cs.popularity DESC, cs.title, cs.cluster_id",
     "recent": "cs.last_year DESC, cs.popularity DESC, cs.title, cs.cluster_id",
-    "upcoming": "cs.next_date ASC, cs.popularity DESC, cs.title, cs.cluster_id",
+    # 期間の終わりで並べる（確定日 → その月中 → その年中）。月初・年初で並べると「2026年中」が先頭に来る
+    "upcoming": f"{_PERIOD_END} ASC, cs.next_date ASC, cs.popularity DESC, cs.title, cs.cluster_id",
     "title": "cs.title_norm, cs.title, cs.cluster_id",
 }
 

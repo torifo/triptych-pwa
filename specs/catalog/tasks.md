@@ -21,8 +21,8 @@
   - Files: `src/routes/{Catalog,CatalogDetail}.svelte`, `src/lib/catalog/*`（types.ts を除く）, `src/lib/router.svelte.ts`, `src/App.svelte`, `src/lib/components/*`（新規のみ）
 
 ### Wave 2
-- [ ] **R**（実行中）: 初回の全件収集（バックグラウンド）→ 紐付け → 書き出し
-- [ ] **V**: 統合検証（件数・代表作品のまとまり・画面からの追加・375px/ダーク）
+- [x] **R**: 初回の全件収集（バックグラウンド）→ 紐付け → 書き出し
+- [x] **V**: 統合検証（件数・代表作品のまとまり・画面からの追加・375px/ダーク）
 
 ## Progress
-- Total: 9 tasks | Completed: 7 | In Progress: 1（R）
+- Total: 9 tasks | Completed: 9 | In Progress: 0
