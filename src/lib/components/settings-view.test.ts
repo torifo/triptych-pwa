@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
+  AUTO_SYNC_LABELS,
+  DATA_SOURCES,
   EXPORT_STALE_DAYS,
+  START_SCREEN_LABELS,
+  SYNC_SOURCE_LABELS,
+  buildInfo,
+  canClearLibrary,
+  catalogSourceLabel,
+  catalogSourceRows,
   formatBytes,
   formatUsage,
   hasStorageApi,
@@ -8,6 +16,7 @@ import {
   readStorageInfo,
   requestPersistent,
 } from './settings-view';
+import { AUTO_SYNC_MODES, START_SCREENS, SYNC_SOURCES } from '../preferences';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const NOW = Date.parse('2026-10-15T00:00:00Z');
@@ -164,5 +173,72 @@ describe('requestPersistent', () => {
         },
       }),
     ).toBeNull();
+  });
+});
+
+describe('設定の選択肢の名前', () => {
+  it('自動同期・ソース・起動時の画面に、どれも名前がある', () => {
+    for (const mode of AUTO_SYNC_MODES) expect(AUTO_SYNC_LABELS[mode]).toBeTruthy();
+    for (const source of SYNC_SOURCES) expect(SYNC_SOURCE_LABELS[source].name).toBeTruthy();
+    for (const screen of START_SCREENS) expect(START_SCREEN_LABELS[screen]).toBeTruthy();
+    expect(AUTO_SYNC_LABELS).toEqual({ launch: '起動時', hourly: '1時間ごと', manual: '手動のみ' });
+  });
+});
+
+describe('canClearLibrary', () => {
+  it('作品数をそのまま打てば消せる（前後の空白・全角数字も可）', () => {
+    expect(canClearLibrary('12', 12)).toBe(true);
+    expect(canClearLibrary(' 12 ', 12)).toBe(true);
+    expect(canClearLibrary('１２', 12)).toBe(true);
+  });
+
+  it('違う数・空・作品が無い時は消せない', () => {
+    expect(canClearLibrary('', 12)).toBe(false);
+    expect(canClearLibrary('11', 12)).toBe(false);
+    expect(canClearLibrary('012', 12)).toBe(false);
+    expect(canClearLibrary('12作品', 12)).toBe(false);
+    expect(canClearLibrary('0', 0)).toBe(false);
+  });
+});
+
+describe('カタログのソース', () => {
+  it('ソース名を画面の言葉に。知らないソースはそのまま', () => {
+    expect(catalogSourceLabel('anilist')).toBe('AniList');
+    expect(catalogSourceLabel('syoboi')).toBe('しょぼかる');
+    expect(catalogSourceLabel('ndl')).toBe('NDL Search');
+    expect(catalogSourceLabel('jpro')).toBe('JPRO 近刊');
+    expect(catalogSourceLabel('narou')).toBe('なろう');
+    expect(catalogSourceLabel('kakuyomu')).toBe('カクヨム');
+    expect(catalogSourceLabel('other')).toBe('other');
+  });
+
+  it('行は collector の並びのまま、件数を桁区切りに、収集時刻を JST に', () => {
+    const rows = catalogSourceRows([
+      { source: 'anilist', entries: 23456, lastHarvestAt: '2026-10-14T12:30:00.123456+00:00', errorSlices: 0 },
+      { source: 'jpro', entries: 0, lastHarvestAt: null, errorSlices: 3 },
+    ]);
+    expect(rows).toEqual([
+      { source: 'anilist', label: 'AniList', entries: '23,456', harvestedAt: '2026-10-14 21:30', errorSlices: 0 },
+      { source: 'jpro', label: 'JPRO 近刊', entries: '0', harvestedAt: null, errorSlices: 3 },
+    ]);
+  });
+});
+
+describe('この app について', () => {
+  it('データの出典はどれも https のリンクを持つ', () => {
+    expect(DATA_SOURCES.map((s) => s.name)).toEqual([
+      'AniList',
+      'しょぼいカレンダー',
+      '国立国会図書館サーチ（NDL Search）',
+      '小説家になろう',
+      'カクヨム',
+      'openBD',
+    ]);
+    for (const s of DATA_SOURCES) expect(s.url).toMatch(/^https:\/\//);
+    expect(DATA_SOURCES[2].note).toContain('JPRO');
+  });
+
+  it('版はビルド時に埋めた値。テスト（埋めていない）では dev', () => {
+    expect(buildInfo()).toEqual({ version: 'dev', builtAt: null });
   });
 });

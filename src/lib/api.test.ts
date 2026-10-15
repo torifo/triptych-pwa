@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ApiError, TOKEN_KEY, apiGet, readErrorDetail, setApiToken } from './api';
+import { ApiError, TOKEN_KEY, apiGet, apiPost, readErrorDetail, setApiToken } from './api';
 
 describe('ApiError', () => {
   it('still works with a status and a message only', () => {
@@ -66,5 +66,44 @@ describe('apiGet', () => {
     fetchMock.mockResolvedValue(new Response(JSON.stringify({ ok: true })));
     expect(await apiGet('/api/x')).toEqual({ ok: true });
     expect(fetchMock).toHaveBeenCalledWith('/api/x', { headers: { Authorization: 'Bearer secret' } });
+  });
+});
+
+describe('apiPost', () => {
+  const fetchMock = vi.fn();
+
+  beforeEach(() => {
+    localStorage.clear();
+    fetchMock.mockReset();
+    vi.stubGlobal('fetch', fetchMock);
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('POSTs without a body and returns the JSON reply', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ job: { id: 'j1' } }), { status: 202 }));
+    expect(await apiPost('/api/catalog/jobs/recent')).toEqual({ job: { id: 'j1' } });
+    expect(fetchMock).toHaveBeenCalledWith('/api/catalog/jobs/recent', { method: 'POST', headers: {} });
+  });
+
+  it('sends a JSON body and the bearer token', async () => {
+    setApiToken('secret');
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ ok: true })));
+    await apiPost('/api/x', { a: 1 });
+    expect(fetchMock).toHaveBeenCalledWith('/api/x', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer secret', 'Content-Type': 'application/json' },
+      body: '{"a":1}',
+    });
+  });
+
+  it('puts the status and the server detail on the ApiError', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ detail: 'already running' }), { status: 409 }));
+    await expect(apiPost('/api/catalog/jobs/recent')).rejects.toMatchObject({
+      status: 409,
+      message: '/api/catalog/jobs/recent: 409',
+      detail: 'already running',
+    });
   });
 });

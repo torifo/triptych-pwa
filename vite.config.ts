@@ -1,10 +1,24 @@
+import { execSync } from 'node:child_process'
 import { defineConfig } from 'vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
+// 設定画面の「版」。git が無い・リポジトリでない環境では dev
+function gitShortHash(): string {
+  try {
+    return execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim() || 'dev'
+  } catch {
+    return 'dev'
+  }
+}
+
 // https://vite.dev/config/
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(gitShortHash()),
+    __APP_BUILT_AT__: JSON.stringify(new Date().toISOString()),
+  },
   plugins: [
     tailwindcss(),
     svelte(),

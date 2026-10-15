@@ -47,3 +47,18 @@ export async function apiGet<T>(path: string, params?: Record<string, string>): 
   if (!res.ok) throw new ApiError(res.status, `${path}: ${res.status}`, await readErrorDetail(res));
   return (await res.json()) as T;
 }
+
+/** POST（本文があれば JSON で送る）。失敗の扱いは apiGet と同じ。 */
+export async function apiPost<T>(path: string, body?: unknown): Promise<T> {
+  const headers: Record<string, string> = {};
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const init: RequestInit = { method: 'POST', headers };
+  if (body !== undefined) {
+    headers['Content-Type'] = 'application/json';
+    init.body = JSON.stringify(body);
+  }
+  const res = await fetch(`${getApiBase()}${path}`, init);
+  if (!res.ok) throw new ApiError(res.status, `${path}: ${res.status}`, await readErrorDetail(res));
+  return (await res.json()) as T;
+}

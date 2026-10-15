@@ -1,4 +1,12 @@
-// 設定画面用。最終エクスポートの古さ、ブラウザのストレージ（永続化と使用量）の読み出しと表示。
+// 設定画面用。最終エクスポートの古さ、ストレージ、設定の選択肢の名前、カタログの件数、この app の出典と版。
+
+import type { CatalogSourceCount } from '../catalog/types';
+import { formatJstDateTime } from '../catalog/view';
+import type { AutoSyncMode, StartScreen, SyncSourceName } from '../preferences';
+
+// vite.config.ts の define がビルド時に埋める（テストでは未定義）
+declare const __APP_VERSION__: string | undefined;
+declare const __APP_BUILT_AT__: string | undefined;
 
 export const EXPORT_STALE_DAYS = 30;
 
@@ -110,4 +118,119 @@ export async function requestPersistent(storage: StorageLike | null | undefined)
   } catch {
     return null;
   }
+}
+
+// ---------------------------------------------------------------------------
+// 設定の選択肢の名前
+// ---------------------------------------------------------------------------
+
+export const AUTO_SYNC_LABELS: Record<AutoSyncMode, string> = {
+  launch: '起動時',
+  hourly: '1時間ごと',
+  manual: '手動のみ',
+};
+
+export const AUTO_SYNC_NOTES: Record<AutoSyncMode, string> = {
+  launch: 'アプリを開いた時に同期します（前回から1時間以内なら飛ばします）。',
+  hourly: '開いた時と、開いている間は1時間ごとに同期します。',
+  manual: '自動では同期しません。「今すぐ同期」で取りに行きます。',
+};
+
+/** 同期するソース。what は何を取りに行くか。 */
+export const SYNC_SOURCE_LABELS: Record<SyncSourceName, { name: string; what: string }> = {
+  anilist: { name: 'AniList', what: 'アニメの次話・新期・表紙' },
+  syoboi: { name: 'しょぼかる', what: '放送局・配信開始' },
+  ndl: { name: 'NDL Search', what: '文庫・漫画の新刊' },
+  narou: { name: 'なろう', what: 'Web 小説の更新' },
+  kakuyomu: { name: 'カクヨム', what: 'Web 小説の更新' },
+};
+
+export const START_SCREEN_LABELS: Record<StartScreen, string> = {
+  home: 'Home',
+  library: 'Library',
+  calendar: 'カレンダー',
+  catalog: 'カタログ',
+};
+
+// ---------------------------------------------------------------------------
+// Library を空にする
+// ---------------------------------------------------------------------------
+
+/** 確かめの入力が作品数そのものか（全角数字・前後の空白は許す）。作品が無ければ消せない。 */
+export function canClearLibrary(typed: string, works: number): boolean {
+  if (works <= 0) return false;
+  const half = typed.trim().replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0));
+  return half === String(works);
+}
+
+// ---------------------------------------------------------------------------
+// カタログ
+// ---------------------------------------------------------------------------
+
+const CATALOG_SOURCE_LABELS: Record<string, string> = {
+  anilist: 'AniList',
+  syoboi: 'しょぼかる',
+  narou: 'なろう',
+  kakuyomu: 'カクヨム',
+  ndl: 'NDL Search',
+  jpro: 'JPRO 近刊',
+};
+
+export function catalogSourceLabel(source: string): string {
+  return CATALOG_SOURCE_LABELS[source] ?? source;
+}
+
+export function formatCount(n: number): string {
+  return n.toLocaleString('ja-JP');
+}
+
+export interface CatalogSourceRow {
+  source: string;
+  label: string;
+  entries: string;
+  /** JST の `2026-10-14 21:30`。収集したことが無ければ null。 */
+  harvestedAt: string | null;
+  errorSlices: number;
+}
+
+/** ソースごとの件数・最終収集の行（並びは collector のまま）。 */
+export function catalogSourceRows(sources: readonly CatalogSourceCount[]): CatalogSourceRow[] {
+  return sources.map((s) => ({
+    source: s.source,
+    label: catalogSourceLabel(s.source),
+    entries: formatCount(s.entries),
+    harvestedAt: s.lastHarvestAt ? formatJstDateTime(s.lastHarvestAt) : null,
+    errorSlices: s.errorSlices,
+  }));
+}
+
+// ---------------------------------------------------------------------------
+// この app について
+// ---------------------------------------------------------------------------
+
+export interface DataSource {
+  name: string;
+  url: string;
+  /** 何に使っているか。 */
+  note: string;
+}
+
+export const DATA_SOURCES: readonly DataSource[] = [
+  { name: 'AniList', url: 'https://anilist.co/', note: 'アニメ・原作の作品情報、放送予定、アニメ化検知' },
+  { name: 'しょぼいカレンダー', url: 'https://cal.syoboi.jp/', note: '放送局・配信の予定' },
+  {
+    name: '国立国会図書館サーチ（NDL Search）',
+    url: 'https://ndlsearch.ndl.go.jp/',
+    note: '文庫・漫画の刊行情報（出版情報登録センター JPRO の近刊情報を含む）',
+  },
+  { name: '小説家になろう', url: 'https://syosetu.com/', note: 'Web 小説の更新' },
+  { name: 'カクヨム', url: 'https://kakuyomu.jp/', note: 'Web 小説の更新' },
+  { name: 'openBD', url: 'https://openbd.jp/', note: '書誌情報' },
+];
+
+/** ビルド時に埋めた版（git の短いハッシュ。git が無い・埋めていなければ dev）とビルドした時刻。 */
+export function buildInfo(): { version: string; builtAt: string | null } {
+  const version = typeof __APP_VERSION__ === 'string' && __APP_VERSION__ ? __APP_VERSION__ : 'dev';
+  const builtAt = typeof __APP_BUILT_AT__ === 'string' && __APP_BUILT_AT__ ? __APP_BUILT_AT__ : null;
+  return { version, builtAt };
 }
