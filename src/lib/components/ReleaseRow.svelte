@@ -17,6 +17,7 @@
     streaming = [],
     cover,
     isNew = false,
+    timeOnly = false,
   }: {
     release: Release;
     edition: Edition | undefined;
@@ -32,19 +33,32 @@
     cover?: CoverSource;
     /** まだ見ていない（新着）。直近の行に NEW の印を付ける */
     isNew?: boolean;
+    /** 日の一覧など、見出しに日付がある所では日付を省いて時刻（無ければ種類の言葉）だけ出す */
+    timeOnly?: boolean;
   } = $props();
 
   // 日付と時刻を分け、時刻を日付の下に等幅で揃える（番組表の組み方）
   const day = $derived(formatReleaseDate({ date: release.date, precision: release.precision }));
   const postponed = $derived(isPostponed(release));
   const services = $derived(release.kind === 'episode' ? streaming.join('・') : '');
+  // 時刻の無い行に出す種類の言葉（timeOnly の時）
+  const KIND_WORDS: Record<Release['kind'], string> = {
+    volume: '発売',
+    episode: '放送',
+    'season-start': '放送開始',
+    'stream-start': '配信',
+  };
 </script>
 
 <button type="button" class="release-row row-hover" class:accent {onclick}>
   <span class="when mono" class:muted={!emphasis}>
-    <span class="day">{day}</span>
-    {#if release.time}
-      <span class="time">{release.time}</span>
+    {#if timeOnly}
+      <span class="day">{release.time ?? KIND_WORDS[release.kind]}</span>
+    {:else}
+      <span class="day">{day}</span>
+      {#if release.time}
+        <span class="time">{release.time}</span>
+      {/if}
     {/if}
   </span>
   {#if cover}

@@ -153,7 +153,7 @@
 
 </script>
 
-{#snippet rows(list: Release[])}
+{#snippet rows(list: Release[], timeOnly = false)}
   <div class="flex flex-col" style="border-top: 1px solid var(--line);">
     {#each list as release (release.id)}
       <ReleaseRow
@@ -162,6 +162,7 @@
         workTitle={workTitleFor(release.editionId)}
         streaming={streaming.get(release.editionId)}
         cover={covers.get(release.editionId)}
+        {timeOnly}
         onclick={() => goToWork(release.editionId)}
       />
     {/each}
@@ -264,7 +265,7 @@
           <span class="no">{shownDay === today ? 'TODAY' : 'DAY'}</span>
         </div>
         {#if shownDayReleases.length > 0}
-          {@render rows(shownDayReleases)}
+          {@render rows(shownDayReleases, true)}
         {:else}
           <p class="text-xs" style="color: var(--muted);">この日の予定はありません</p>
         {/if}
