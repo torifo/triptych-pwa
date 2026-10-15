@@ -16,6 +16,7 @@
     emphasis = true,
     streaming = [],
     cover,
+    isNew = false,
   }: {
     release: Release;
     edition: Edition | undefined;
@@ -29,6 +30,8 @@
     streaming?: readonly string[];
     /** 行の左に出す表紙（xs） */
     cover?: CoverSource;
+    /** まだ見ていない（新着）。直近の行に NEW の印を付ける */
+    isNew?: boolean;
   } = $props();
 
   // 日付と時刻を分け、時刻を日付の下に等幅で揃える（番組表の組み方）
@@ -53,6 +56,9 @@
   <span class="body">
     <span class="head">
       <span class="title">{workTitle}</span>
+      {#if isNew}
+        <span class="new mono">NEW</span>
+      {/if}
       {#if edition}
         <MediaBadge mediaType={edition.mediaType} />
       {/if}
@@ -72,6 +78,17 @@
 </button>
 
 <style>
+  /* 新着の印: 黒地に白（ダークでは反転）。媒体の箱（枠線）と見分ける */
+  .new {
+    flex-shrink: 0;
+    padding: 0 4px;
+    background: var(--fg);
+    color: var(--bg);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    line-height: 1.6;
+  }
   .release-row {
     display: flex;
     align-items: center;

@@ -19,6 +19,7 @@
     datelineLabel,
     todayItems,
     withoutToday,
+    freshOutsideLists,
     type TodayItem,
   } from '../lib/components/home-view';
   import {
@@ -62,7 +63,9 @@
   const todays = $derived(todayItems(releases, editionMap, now));
   // 今日の分は上の横並びに出したので、直近からは外す
   const upcoming = $derived(withoutToday(upcomingReleases(releases, editionMap, today, UPCOMING_DAYS), todays));
-  const fresh = $derived(unseenReleases(releases, editionMap));
+  // 直近・「今日」に出ている新着はそちらに NEW の印で出し、新着の欄では繰り返さない
+  const freshSplit = $derived(freshOutsideLists(unseenReleases(releases, editionMap), upcoming, todays));
+  const fresh = $derived(freshSplit.list);
   const streaming = $derived(startedStreamServices(releases, today));
   const libraryEmpty = $derived(loaded && works.length === 0);
 
@@ -378,7 +381,8 @@
               streaming={streaming.get(release.editionId)}
               cover={covers.get(release.editionId)}
               accent
-              onclick={() => openRelease(release, false)}
+              isNew={!release.seenAt}
+              onclick={() => openRelease(release, !release.seenAt)}
             />
           {/each}
         </div>
@@ -388,7 +392,9 @@
     <div class="flex flex-col">
       <div class="shou"><h2>新着</h2><span class="no">UNSEEN</span></div>
       {#if fresh.length === 0}
-        <p class="text-xs" style="color: var(--muted);">新着はありません</p>
+        <p class="text-xs" style="color: var(--muted);">
+          {freshSplit.inline > 0 ? `新しく入った ${freshSplit.inline} 件は、上の一覧に NEW の印で出しています` : '新着はありません'}
+        </p>
       {:else}
         <div class="flex flex-col" style="border-top: 1px solid var(--line);">
           {#each fresh as release (release.id)}

@@ -10,6 +10,7 @@ import {
   todayItems,
   todaySubLabel,
   withoutToday,
+  freshOutsideLists,
 } from './home-view';
 
 function release(over: Partial<Release> & Pick<Release, 'id' | 'editionId' | 'date'>): Release {
@@ -214,5 +215,21 @@ describe('currentSeason', () => {
     expect(currentSeason('2026-09-30')).toEqual({ year: 2026, season: 'SUMMER' });
     expect(currentSeason('2026-10-15')).toEqual({ year: 2026, season: 'FALL' });
     expect(currentSeason('2026-12-31')).toEqual({ year: 2026, season: 'FALL' });
+  });
+});
+
+describe('freshOutsideLists', () => {
+  it('直近や「今日」に出ている新着は新着の欄から外し、外した数を返す', () => {
+    const a = release({ id: 'a', editionId: 'e1', date: '2026-10-16' });
+    const b = release({ id: 'b', editionId: 'e2', date: '2026-10-15' });
+    const c = release({ id: 'c', editionId: 'e3', date: '2026-10-01' });
+    const result = freshOutsideLists([a, b, c], [a], [{ releaseIds: ['b'] }]);
+    expect(result.list.map((r) => r.id)).toEqual(['c']);
+    expect(result.inline).toBe(2);
+  });
+
+  it('どこにも出ていなければそのまま', () => {
+    const c = release({ id: 'c', editionId: 'e3', date: '2026-10-01' });
+    expect(freshOutsideLists([c], [], [])).toEqual({ list: [c], inline: 0 });
   });
 });

@@ -168,6 +168,20 @@ export function withoutToday(releases: readonly Release[], items: readonly Today
   return releases.filter((r) => !shown.has(r.id));
 }
 
+/**
+ * 新着の欄に出す Release。直近や「今日」にすでに出ているものは、そちらに NEW の印で出すので外す（同じ行が2回並ばないように）。
+ * inline は外した数（「上に NEW で出しています」の案内に使う）。
+ */
+export function freshOutsideLists(
+  unseen: readonly Release[],
+  upcoming: readonly Pick<Release, 'id'>[],
+  todays: readonly Pick<TodayItem, 'releaseIds'>[],
+): { list: Release[]; inline: number } {
+  const shown = new Set([...upcoming.map((r) => r.id), ...todays.flatMap((item) => item.releaseIds)]);
+  const list = unseen.filter((r) => !shown.has(r.id));
+  return { list, inline: unseen.length - list.length };
+}
+
 // ---------------------------------------------------------------------------
 // ヘッダー
 // ---------------------------------------------------------------------------
