@@ -265,7 +265,7 @@ export async function updateEditionSyncHints(
   return database.transaction('rw', database.editions, async () => {
     const existing = await database.editions.get(editionId);
     if (!existing) throw new Error(`Edition not found: ${editionId}`);
-    const next: Record<string, string> = { ...existing.syncHints };
+    const next: Record<string, unknown> = { ...existing.syncHints };
     for (const [key, value] of Object.entries(hints)) {
       if (value === null) delete next[key];
       else if (value !== undefined) next[key] = value;

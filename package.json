@@ -27,7 +27,9 @@
     "vitest": "^4.1.10"
   },
   "dependencies": {
+    "@fontsource/dm-mono": "^5.3.0",
     "@fontsource/dm-sans": "^5.2.8",
+    "@lucide/svelte": "^1.57.0",
     "dexie": "^4.4.4",
     "nanoid": "^6.0.0"
   }

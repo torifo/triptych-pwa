@@ -2,6 +2,8 @@
 @import '@fontsource/dm-sans/400.css';
 @import '@fontsource/dm-sans/500.css';
 @import '@fontsource/dm-sans/700.css';
+@import '@fontsource/dm-mono/400.css';
+@import '@fontsource/dm-mono/500.css';
 
 :root {
   --bg: #ffffff;
@@ -11,6 +13,15 @@
   --hi: #eaff00;
   --hi-soft: #fffbd1;
   --font: 'DM Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic', Meiryo, sans-serif;
+  /* 等幅は時刻・日付・話数だけ。日本語は本文と同じゴシックに落とす */
+  --mono: 'DM Mono', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', ui-monospace, Menlo, monospace;
+  /* 色は表紙が持つ。UI 側で足す色は ON AIR の赤だけ */
+  --onair: #e5322d;
+  --cover-ph: #ececec;
+  --cover-edge: rgba(0, 0, 0, 0.08);
+  /* 文字の表紙（生成り） */
+  --paper: #f3eee2;
+  --paper-ink: #2b2a26;
 }
 
 .dark {
@@ -20,6 +31,11 @@
   --line: #2a2a2a;
   --hi: #eaff00;
   --hi-soft: #3a3800;
+  --onair: #ff4d47;
+  --cover-ph: #1d1d1d;
+  --cover-edge: rgba(255, 255, 255, 0.08);
+  --paper: #25231e;
+  --paper-ink: #e7e1d2;
 }
 
 * {
@@ -44,6 +60,13 @@ body {
 
 #app {
   min-height: 100svh;
+}
+
+/* 時刻・日付・カウントダウン・話数（放送局の要素） */
+.mono {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
 }
 
 /* ─── mono 由来の共通パターン ─── */

@@ -49,6 +49,16 @@ export interface EditionSyncHints {
   ndlLine?: string; // 採用した NDL の line キー（'' = 本編）
   anilistSourceId?: string; // 検知用に解決した AniList NOVEL/MANGA の id
   syoboiTid?: string; // しょぼいカレンダーの TID
+  broadcasts?: BroadcastHint[]; // しょぼかるの今日以降の番組（最大 8・日時順）。局名を次話に添える
+  coverFrom?: 'anilist' | 'catalog'; // 自動で入れた表紙の出どころ。未設定で coverUrl がある＝手で設定（同期で上書きしない）
+}
+
+export interface BroadcastHint {
+  channel: string; // 局名・配信サービス名
+  date: string; // YYYY-MM-DD（朝5時区切り）
+  time: string; // '25:30'
+  isStreaming: boolean;
+  episode?: number; // しょぼかるの通算話数
 }
 
 export interface ReleaseDateHistoryEntry {
