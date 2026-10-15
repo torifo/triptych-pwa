@@ -1,0 +1,1162 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<OAI-PMH xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.openarchives.org/OAI/2.0/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/ http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+  <responseDate>2026-10-15T17:53:07Z</responseDate>
+  <request verb="ListRecords" metadataPrefix="dcndl" from="2026-10-14" until="2026-10-14" set="jpro">https://ndlsearch.ndl.go.jp/api/oaipmh</request>
+  <ListRecords>
+    <record>
+      <header>
+        <identifier>oai:ndlsearch.ndl.go.jp:R100000137-I9784065448236</identifier>
+        <datestamp>2026-10-14T15:49:26Z</datestamp>
+        <setSpec>book</setSpec>
+        <setSpec>jpro</setSpec>
+        <setSpec>jpro-book</setSpec>
+      </header>
+      <metadata>
+        <rdf:RDF xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcndl="http://ndl.go.jp/dcndl/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+          <dcndl:BibAdminResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784065448236">
+            <dcterms:description>type : book</dcterms:description>
+            <dcndl:bibRecordCategory>R100000137</dcndl:bibRecordCategory>
+            <dcndl:record rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000137-I9784065448236#material"/>
+          </dcndl:BibAdminResource>
+          <dcndl:BibResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784065448236#material">
+            <rdfs:seeAlso rdf:resource="http://id.ndl.go.jp/jpno/24306965"/>
+            <dcterms:identifier rdf:datatype="http://ndl.go.jp/dcndl/terms/JPNO">24306965</dcterms:identifier>
+            <rdfs:seeAlso rdf:resource="http://iss.ndl.go.jp/isbn/9784065448236"/>
+            <dcterms:identifier rdf:datatype="http://ndl.go.jp/dcndl/terms/ISBN">9784065448236</dcterms:identifier>
+            <dcterms:title>MADE　IN　YAMATO（1）</dcterms:title>
+            <dc:title>
+              <rdf:Description>
+                <rdf:value>MADE　IN　YAMATO（1）</rdf:value>
+                <dcndl:transcription>メイドイン ヤマト1</dcndl:transcription>
+              </rdf:Description>
+            </dc:title>
+            <dcndl:seriesTitle>
+              <rdf:Description>
+                <rdf:value>ヤンマガKCスペシャル</rdf:value>
+                <dcndl:transcription>ヤンマガKCスペシャルヤングマガジンコミックス</dcndl:transcription>
+              </rdf:Description>
+            </dcndl:seriesTitle>
+            <dcterms:creator>
+              <foaf:Agent>
+                <foaf:name>卯月 まさゆき</foaf:name>
+                <dcndl:transcription>ウヅキ マサユキ</dcndl:transcription>
+              </foaf:Agent>
+            </dcterms:creator>
+            <dc:creator>卯月 まさゆき 著・文・その他</dc:creator>
+            <dcterms:publisher>
+              <foaf:Agent>
+                <foaf:name>講談社</foaf:name>
+              </foaf:Agent>
+            </dcterms:publisher>
+            <dcndl:publicationPlace rdf:datatype="http://purl.org/dc/terms/ISO3166">JP</dcndl:publicationPlace>
+            <dcterms:date>2026-09-17</dcterms:date>
+            <dcterms:issued rdf:datatype="http://purl.org/dc/terms/W3CDTF">2026-09-17</dcterms:issued>
+            <dcterms:abstract>私はこのジムに死にに来てるんです！　ヤンマガ史上最高ＰＶを大更新！！　筋肉馬鹿女子×その被害者の筋肉讃歌コメディ！！</dcterms:abstract>
+            <dcterms:description>装丁 : B6</dcterms:description>
+            <dcterms:description>雑誌扱いコミックスおよびムック</dcterms:description>
+            <dcterms:description>コミックス</dcterms:description>
+            <dcterms:description>コミックス・劇画</dcterms:description>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>男性にもオススメ</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>女性にもオススメ</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>スポーツ</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>ギャグ・コメディ</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>その他</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>筋トレ</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>トレーニー</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>ジム</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>美容</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>健康</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>筋肉</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject rdf:resource="http://id.ndl.go.jp/class/ndc10/726.1"/>
+            <dcterms:language rdf:datatype="http://purl.org/dc/terms/ISO639-2">jpn</dcterms:language>
+            <dcndl:price>720</dcndl:price>
+            <dcterms:extent>192p</dcterms:extent>
+            <dcndl:materialType rdf:resource="http://ndl.go.jp/ndltype/Book" rdfs:label="図書"/>
+            <dcterms:audience>一般</dcterms:audience>
+            <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065448236"/>
+            <foaf:thumbnail rdf:resource="https://ndlsearch.ndl.go.jp/thumbnail/9784065448236.jpg"/>
+          </dcndl:BibResource>
+          <dcndl:BibResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784065448236#material">
+            <dcndl:record rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000137-I9784065448236#item"/>
+          </dcndl:BibResource>
+          <dcndl:Item rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784065448236#item">
+            <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065448236"/>
+            <dcterms:identifier rdf:datatype="http://ndl.go.jp/dcndl/terms/JPNO">24306965</dcterms:identifier>
+          </dcndl:Item>
+        </rdf:RDF>
+      </metadata>
+    </record>
+    <record>
+      <header>
+        <identifier>oai:ndlsearch.ndl.go.jp:R100000137-I9784065449813</identifier>
+        <datestamp>2026-10-14T15:50:07Z</datestamp>
+        <setSpec>book</setSpec>
+        <setSpec>jpro</setSpec>
+        <setSpec>jpro-book</setSpec>
+      </header>
+      <metadata>
+        <rdf:RDF xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcndl="http://ndl.go.jp/dcndl/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+          <dcndl:BibAdminResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784065449813">
+            <dcterms:description>type : book</dcterms:description>
+            <dcndl:bibRecordCategory>R100000137</dcndl:bibRecordCategory>
+            <dcndl:record rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000137-I9784065449813#material"/>
+          </dcndl:BibAdminResource>
+          <dcndl:BibResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784065449813#material">
+            <rdfs:seeAlso rdf:resource="http://iss.ndl.go.jp/isbn/9784065449813"/>
+            <dcterms:identifier rdf:datatype="http://ndl.go.jp/dcndl/terms/ISBN">9784065449813</dcterms:identifier>
+            <dcterms:title>金田一パパの事件簿（5）</dcterms:title>
+            <dc:title>
+              <rdf:Description>
+                <rdf:value>金田一パパの事件簿（5）</rdf:value>
+                <dcndl:transcription>キンダイチパパノジケンボ5</dcndl:transcription>
+              </rdf:Description>
+            </dc:title>
+            <dcndl:seriesTitle>
+              <rdf:Description>
+                <rdf:value>モーニング　KC</rdf:value>
+                <dcndl:transcription>モーニングKCコミックス</dcndl:transcription>
+              </rdf:Description>
+            </dcndl:seriesTitle>
+            <dcterms:creator>
+              <foaf:Agent>
+                <foaf:name>天樹 征丸</foaf:name>
+                <dcndl:transcription>アマギ セイマル</dcndl:transcription>
+              </foaf:Agent>
+            </dcterms:creator>
+            <dcterms:creator>
+              <foaf:Agent>
+                <foaf:name>さとう ふみや</foaf:name>
+                <dcndl:transcription>サトウ フミヤ</dcndl:transcription>
+              </foaf:Agent>
+            </dcterms:creator>
+            <dc:creator>天樹 征丸 原著</dc:creator>
+            <dc:creator>さとう ふみや 著・文・その他</dc:creator>
+            <dcterms:publisher>
+              <foaf:Agent>
+                <foaf:name>講談社</foaf:name>
+              </foaf:Agent>
+            </dcterms:publisher>
+            <dcndl:publicationPlace rdf:datatype="http://purl.org/dc/terms/ISO3166">JP</dcndl:publicationPlace>
+            <dcterms:date>2026-10-14</dcterms:date>
+            <dcterms:issued rdf:datatype="http://purl.org/dc/terms/W3CDTF">2026-10-14</dcterms:issued>
+            <dcterms:abstract>“あの天才高校生”が、“パパ”になった！　原作・天樹征丸、漫画・さとうふみやの本家本元コンビが描く、新境地の金田一シリーズ！</dcterms:abstract>
+            <dcterms:description>装丁 : B6</dcterms:description>
+            <dcterms:description>雑誌扱いコミックスおよびムック</dcterms:description>
+            <dcterms:description>コミックス</dcterms:description>
+            <dcterms:description>コミックス・劇画</dcterms:description>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>ミステリー・サスぺンス</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>男性にもオススメ</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>女性にもオススメ</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>ヒューマンドラマ</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>金田一少年の事件簿</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>なにわ男子</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>コミックＤＡＹＳ</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>堂本剛</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>週刊少年マガジン</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>１億部</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>道枝駿佑</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>イブニング</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>モーニング</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:language rdf:datatype="http://purl.org/dc/terms/ISO639-2">jpn</dcterms:language>
+            <dcndl:price>720</dcndl:price>
+            <dcterms:extent>176p</dcterms:extent>
+            <dcndl:materialType rdf:resource="http://ndl.go.jp/ndltype/Book" rdfs:label="図書"/>
+            <dcterms:audience>一般</dcterms:audience>
+            <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065449813"/>
+            <foaf:thumbnail rdf:resource="https://ndlsearch.ndl.go.jp/thumbnail/9784065449813.jpg"/>
+          </dcndl:BibResource>
+          <dcndl:BibResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784065449813#material">
+            <dcndl:record rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000137-I9784065449813#item"/>
+          </dcndl:BibResource>
+          <dcndl:Item rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784065449813#item">
+            <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065449813"/>
+          </dcndl:Item>
+        </rdf:RDF>
+      </metadata>
+    </record>
+    <record>
+      <header>
+        <identifier>oai:ndlsearch.ndl.go.jp:R100000137-I9784434386619</identifier>
+        <datestamp>2026-10-14T15:49:36Z</datestamp>
+        <setSpec>book</setSpec>
+        <setSpec>jpro</setSpec>
+        <setSpec>jpro-book</setSpec>
+      </header>
+      <metadata>
+        <rdf:RDF xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcndl="http://ndl.go.jp/dcndl/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+          <dcndl:BibAdminResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784434386619">
+            <dcterms:description>type : book</dcterms:description>
+            <dcndl:bibRecordCategory>R100000137</dcndl:bibRecordCategory>
+            <dcndl:record rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000137-I9784434386619#material"/>
+          </dcndl:BibAdminResource>
+          <dcndl:BibResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784434386619#material">
+            <rdfs:seeAlso rdf:resource="http://iss.ndl.go.jp/isbn/9784434386619"/>
+            <dcterms:identifier rdf:datatype="http://ndl.go.jp/dcndl/terms/ISBN">9784434386619</dcterms:identifier>
+            <dcterms:title>うさひな -5年付き合ってる大学生カップルの話-</dcterms:title>
+            <dc:title>
+              <rdf:Description>
+                <rdf:value>うさひな -5年付き合ってる大学生カップルの話-</rdf:value>
+                <dcndl:transcription>ウサヒナゴネンツキアッテルダイガクセイカップルノハナシ</dcndl:transcription>
+              </rdf:Description>
+            </dc:title>
+            <dcndl:volume>
+              <rdf:Description>
+                <rdf:value>2</rdf:value>
+              </rdf:Description>
+            </dcndl:volume>
+            <dcndl:seriesTitle>
+              <rdf:Description>
+                <rdf:value>Letter Comics</rdf:value>
+              </rdf:Description>
+            </dcndl:seriesTitle>
+            <dcterms:creator>
+              <foaf:Agent>
+                <foaf:name>猪狩そよ子</foaf:name>
+                <dcndl:transcription>イガリソヨコ</dcndl:transcription>
+              </foaf:Agent>
+            </dcterms:creator>
+            <dc:creator>猪狩そよ子 著・文・その他</dc:creator>
+            <dcterms:publisher>
+              <foaf:Agent>
+                <foaf:name>ナンバーナイン</foaf:name>
+              </foaf:Agent>
+            </dcterms:publisher>
+            <dcterms:publisher>
+              <foaf:Agent>
+                <foaf:name>星雲社</foaf:name>
+              </foaf:Agent>
+            </dcterms:publisher>
+            <dcndl:publicationPlace rdf:datatype="http://purl.org/dc/terms/ISO3166">JP</dcndl:publicationPlace>
+            <dcterms:date>2026-11-01</dcterms:date>
+            <dcterms:issued rdf:datatype="http://purl.org/dc/terms/W3CDTF">2026-11-01</dcterms:issued>
+            <dcterms:abstract>付き合って5年の大学生カップル、羽田 ひなこと宇佐美 遙。遠距離を越えて再会した2人の甘い日常を全編フルカラーで描く。</dcterms:abstract>
+            <dcterms:description>装丁 : B6</dcterms:description>
+            <dcterms:description>一般</dcterms:description>
+            <dcterms:description>コミックス</dcterms:description>
+            <dcterms:description>コミックス・劇画</dcterms:description>
+            <dcterms:description>コミックス（書籍）</dcterms:description>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>うさひな</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>フルカラー</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>大学生</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>スパダリ</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>少女</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>猪狩そよ子</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>年下男子</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>溺愛</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>甘々</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>うさひな -5年付き合ってる大学生カップルの話-【単行本版】</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:language rdf:datatype="http://purl.org/dc/terms/ISO639-2">jpn</dcterms:language>
+            <dcndl:price>1200</dcndl:price>
+            <dcterms:extent>182×128mm</dcterms:extent>
+            <dcterms:extent>192p</dcterms:extent>
+            <dcndl:materialType rdf:resource="http://ndl.go.jp/ndltype/Book" rdfs:label="図書"/>
+            <dcterms:audience>一般</dcterms:audience>
+            <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784434386619"/>
+            <foaf:thumbnail rdf:resource="https://ndlsearch.ndl.go.jp/thumbnail/9784434386619.jpg"/>
+          </dcndl:BibResource>
+          <dcndl:BibResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784434386619#material">
+            <dcndl:record rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000137-I9784434386619#item"/>
+          </dcndl:BibResource>
+          <dcndl:Item rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784434386619#item">
+            <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784434386619"/>
+          </dcndl:Item>
+        </rdf:RDF>
+      </metadata>
+    </record>
+    <record>
+      <header>
+        <identifier>oai:ndlsearch.ndl.go.jp:R100000137-I9784825102354</identifier>
+        <datestamp>2026-10-14T15:58:19Z</datestamp>
+        <setSpec>book</setSpec>
+        <setSpec>jpro</setSpec>
+        <setSpec>jpro-book</setSpec>
+      </header>
+      <metadata>
+        <rdf:RDF xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcndl="http://ndl.go.jp/dcndl/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+          <dcndl:BibAdminResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784825102354">
+            <dcterms:description>type : book</dcterms:description>
+            <dcndl:bibRecordCategory>R100000137</dcndl:bibRecordCategory>
+            <dcndl:record rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000137-I9784825102354#material"/>
+          </dcndl:BibAdminResource>
+          <dcndl:BibResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784825102354#material">
+            <rdfs:seeAlso rdf:resource="http://iss.ndl.go.jp/isbn/9784825102354"/>
+            <dcterms:identifier rdf:datatype="http://ndl.go.jp/dcndl/terms/ISBN">9784825102354</dcterms:identifier>
+            <dcterms:title>悲劇の元凶となる最強外道ラスボス女王は民の為に尽くします。１４</dcterms:title>
+            <dc:title>
+              <rdf:Description>
+                <rdf:value>悲劇の元凶となる最強外道ラスボス女王は民の為に尽くします。１４</rdf:value>
+                <dcndl:transcription>ヒゲキノゲンキョウトナルサイキョウゲドウラスボスジョオウハタミノタメニツクシマス</dcndl:transcription>
+              </rdf:Description>
+            </dc:title>
+            <dcndl:volume>
+              <rdf:Description>
+                <rdf:value>14</rdf:value>
+              </rdf:Description>
+            </dcndl:volume>
+            <dcndl:seriesTitle>
+              <rdf:Description>
+                <rdf:value>アイリスＮＥＯ</rdf:value>
+                <dcndl:transcription>アイリスネオ</dcndl:transcription>
+              </rdf:Description>
+            </dcndl:seriesTitle>
+            <dcterms:creator>
+              <foaf:Agent>
+                <foaf:name>天壱</foaf:name>
+                <dcndl:transcription>テンイチ</dcndl:transcription>
+              </foaf:Agent>
+            </dcterms:creator>
+            <dcterms:creator>
+              <foaf:Agent>
+                <foaf:name>鈴ノ助</foaf:name>
+                <dcndl:transcription>スズノスケ</dcndl:transcription>
+              </foaf:Agent>
+            </dcterms:creator>
+            <dc:creator>天壱　 著・文・その他</dc:creator>
+            <dc:creator>鈴ノ助 イラスト</dc:creator>
+            <dcterms:publisher>
+              <foaf:Agent>
+                <foaf:name>一迅社</foaf:name>
+              </foaf:Agent>
+            </dcterms:publisher>
+            <dcndl:publicationPlace rdf:datatype="http://purl.org/dc/terms/ISO3166">JP</dcndl:publicationPlace>
+            <dcterms:date>2026-12-02</dcterms:date>
+            <dcterms:issued rdf:datatype="http://purl.org/dc/terms/W3CDTF">2026-12-02</dcterms:issued>
+            <dcterms:description>装丁 : 46</dcterms:description>
+            <dcterms:description>一般</dcterms:description>
+            <dcterms:description>新書</dcterms:description>
+            <dcterms:description>日本文学小説・物語</dcterms:description>
+            <dcterms:description>文芸</dcterms:description>
+            <dcterms:language rdf:datatype="http://purl.org/dc/terms/ISO639-2">jpn</dcterms:language>
+            <dcndl:price>1400</dcndl:price>
+            <dcndl:materialType rdf:resource="http://ndl.go.jp/ndltype/Book" rdfs:label="図書"/>
+            <dcterms:audience>一般</dcterms:audience>
+            <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784825102354"/>
+          </dcndl:BibResource>
+          <dcndl:BibResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784825102354#material">
+            <dcndl:record rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000137-I9784825102354#item"/>
+          </dcndl:BibResource>
+          <dcndl:Item rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784825102354#item">
+            <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784825102354"/>
+          </dcndl:Item>
+        </rdf:RDF>
+      </metadata>
+    </record>
+    <record>
+      <header>
+        <identifier>oai:ndlsearch.ndl.go.jp:R100000137-I9784825102347</identifier>
+        <datestamp>2026-10-14T16:02:51Z</datestamp>
+        <setSpec>book</setSpec>
+        <setSpec>jpro</setSpec>
+        <setSpec>jpro-book</setSpec>
+      </header>
+      <metadata>
+        <rdf:RDF xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcndl="http://ndl.go.jp/dcndl/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+          <dcndl:BibAdminResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784825102347">
+            <dcterms:description>type : book</dcterms:description>
+            <dcndl:bibRecordCategory>R100000137</dcndl:bibRecordCategory>
+            <dcndl:record rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000137-I9784825102347#material"/>
+          </dcndl:BibAdminResource>
+          <dcndl:BibResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784825102347#material">
+            <rdfs:seeAlso rdf:resource="http://iss.ndl.go.jp/isbn/9784825102347"/>
+            <dcterms:identifier rdf:datatype="http://ndl.go.jp/dcndl/terms/ISBN">9784825102347</dcterms:identifier>
+            <dcterms:title>虫かぶり姫８（仮）</dcterms:title>
+            <dc:title>
+              <rdf:Description>
+                <rdf:value>虫かぶり姫８（仮）</rdf:value>
+                <dcndl:transcription>ムシカブリヒメカリ</dcndl:transcription>
+              </rdf:Description>
+            </dc:title>
+            <dcndl:volume>
+              <rdf:Description>
+                <rdf:value>8</rdf:value>
+              </rdf:Description>
+            </dcndl:volume>
+            <dcndl:seriesTitle>
+              <rdf:Description>
+                <rdf:value>アイリスＮＥＯ</rdf:value>
+                <dcndl:transcription>アイリスネオ</dcndl:transcription>
+              </rdf:Description>
+            </dcndl:seriesTitle>
+            <dcterms:creator>
+              <foaf:Agent>
+                <foaf:name>由唯</foaf:name>
+                <dcndl:transcription>ユイ</dcndl:transcription>
+              </foaf:Agent>
+            </dcterms:creator>
+            <dcterms:creator>
+              <foaf:Agent>
+                <foaf:name>椎名 咲月</foaf:name>
+                <dcndl:transcription>シイナサツキ</dcndl:transcription>
+              </foaf:Agent>
+            </dcterms:creator>
+            <dc:creator>由唯　 著・文・その他</dc:creator>
+            <dc:creator>椎名 咲月 イラスト</dc:creator>
+            <dcterms:publisher>
+              <foaf:Agent>
+                <foaf:name>一迅社</foaf:name>
+              </foaf:Agent>
+            </dcterms:publisher>
+            <dcndl:publicationPlace rdf:datatype="http://purl.org/dc/terms/ISO3166">JP</dcndl:publicationPlace>
+            <dcterms:date>2026-12-02</dcterms:date>
+            <dcterms:issued rdf:datatype="http://purl.org/dc/terms/W3CDTF">2026-12-02</dcterms:issued>
+            <dcterms:description>装丁 : 46</dcterms:description>
+            <dcterms:description>一般</dcterms:description>
+            <dcterms:description>新書</dcterms:description>
+            <dcterms:description>日本文学小説・物語</dcterms:description>
+            <dcterms:description>文芸</dcterms:description>
+            <dcterms:language rdf:datatype="http://purl.org/dc/terms/ISO639-2">jpn</dcterms:language>
+            <dcndl:price>1400</dcndl:price>
+            <dcndl:materialType rdf:resource="http://ndl.go.jp/ndltype/Book" rdfs:label="図書"/>
+            <dcterms:audience>一般</dcterms:audience>
+            <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784825102347"/>
+          </dcndl:BibResource>
+          <dcndl:BibResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784825102347#material">
+            <dcndl:record rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000137-I9784825102347#item"/>
+          </dcndl:BibResource>
+          <dcndl:Item rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784825102347#item">
+            <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784825102347"/>
+          </dcndl:Item>
+        </rdf:RDF>
+      </metadata>
+    </record>
+    <record>
+      <header>
+        <identifier>oai:ndlsearch.ndl.go.jp:R100000137-I9784824305466</identifier>
+        <datestamp>2026-10-14T15:49:34Z</datestamp>
+        <setSpec>book</setSpec>
+        <setSpec>jpro</setSpec>
+        <setSpec>jpro-book</setSpec>
+      </header>
+      <metadata>
+        <rdf:RDF xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcndl="http://ndl.go.jp/dcndl/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+          <dcndl:BibAdminResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784824305466">
+            <dcterms:description>type : book</dcterms:description>
+            <dcndl:bibRecordCategory>R100000137</dcndl:bibRecordCategory>
+            <dcndl:record rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000137-I9784824305466#material"/>
+          </dcndl:BibAdminResource>
+          <dcndl:BibResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784824305466#material">
+            <rdfs:seeAlso rdf:resource="http://iss.ndl.go.jp/isbn/9784824305466"/>
+            <dcterms:identifier rdf:datatype="http://ndl.go.jp/dcndl/terms/ISBN">9784824305466</dcterms:identifier>
+            <dcterms:title>ケアマネジャー試験　過去問解説集２０２７</dcterms:title>
+            <dc:title>
+              <rdf:Description>
+                <rdf:value>ケアマネジャー試験　過去問解説集２０２７</rdf:value>
+                <dcndl:transcription>ケアマネジャーシケンカコモンカイセツシュウニセンニジュウナナ</dcndl:transcription>
+              </rdf:Description>
+            </dc:title>
+            <dcterms:creator>
+              <foaf:Agent>
+                <foaf:name>中央法規ケアマネジャー受験対策研究会</foaf:name>
+                <dcndl:transcription>チュウオウホウキケアマネジャージュケンタイサクケンキュウカイ</dcndl:transcription>
+              </foaf:Agent>
+            </dcterms:creator>
+            <dc:creator>中央法規ケアマネジャー受験対策研究会 編集</dc:creator>
+            <dcterms:publisher>
+              <foaf:Agent>
+                <foaf:name>中央法規出版</foaf:name>
+              </foaf:Agent>
+            </dcterms:publisher>
+            <dcterms:publisher>
+              <foaf:Agent>
+                <foaf:name>中央法規出版</foaf:name>
+              </foaf:Agent>
+            </dcterms:publisher>
+            <dcndl:publicationPlace rdf:datatype="http://purl.org/dc/terms/ISO3166">JP</dcndl:publicationPlace>
+            <dcterms:date>2026-12-25</dcterms:date>
+            <dcterms:issued rdf:datatype="http://purl.org/dc/terms/W3CDTF">2026-12-25</dcterms:issued>
+            <dcterms:abstract>★★「一番売れてる」中央法規の受験対策シリーズで合格をつかもう！！★★★★5回分の過去問&amp;徹底解説!!実践力が超身につく！！★★★★2026年10月(第29回)の試験内容を反映した最新版！！★★★★介護保険制度改正に完全対応！！★★・過去5回分のケアマネジャー試験を全問収載し、選択肢ごとに解説。・出題傾向を把握しやすいように全問題について同じテーマで過去に出題された問題番号と押さえておきたいキーワードを「ポイント」として紹介する。・得点アップにつながる「ときテク」も充実。赤シート付き。</dcterms:abstract>
+            <dcterms:description>装丁 : B5</dcterms:description>
+            <dcterms:description>専門</dcterms:description>
+            <dcterms:description>単行本</dcterms:description>
+            <dcterms:description>社会</dcterms:description>
+            <dcterms:description>資格・試験</dcterms:description>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>ケアマネジャー</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>介護支援専門員</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>中央法規</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>ケアマネジャー試験</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>介護支援専門員実務研修受講試験</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:language rdf:datatype="http://purl.org/dc/terms/ISO639-2">jpn</dcterms:language>
+            <dcndl:price>3000</dcndl:price>
+            <dcndl:materialType rdf:resource="http://ndl.go.jp/ndltype/Book" rdfs:label="図書"/>
+            <dcterms:audience>一般</dcterms:audience>
+            <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784824305466"/>
+            <foaf:thumbnail rdf:resource="https://ndlsearch.ndl.go.jp/thumbnail/9784824305466.jpg"/>
+          </dcndl:BibResource>
+          <dcndl:BibResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784824305466#material">
+            <dcndl:record rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000137-I9784824305466#item"/>
+          </dcndl:BibResource>
+          <dcndl:Item rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784824305466#item">
+            <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784824305466"/>
+          </dcndl:Item>
+        </rdf:RDF>
+      </metadata>
+    </record>
+    <record>
+      <header>
+        <identifier>oai:ndlsearch.ndl.go.jp:R100000137-I9784791153497</identifier>
+        <datestamp>2026-10-14T15:50:18Z</datestamp>
+        <setSpec>book</setSpec>
+        <setSpec>jpro</setSpec>
+        <setSpec>jpro-book</setSpec>
+      </header>
+      <metadata>
+        <rdf:RDF xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcndl="http://ndl.go.jp/dcndl/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+          <dcndl:BibAdminResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784791153497">
+            <dcterms:description>type : book</dcterms:description>
+            <dcndl:bibRecordCategory>R100000137</dcndl:bibRecordCategory>
+            <dcndl:record rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000137-I9784791153497#material"/>
+          </dcndl:BibAdminResource>
+          <dcndl:BibResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784791153497#material">
+            <rdfs:seeAlso rdf:resource="http://iss.ndl.go.jp/isbn/9784791153497"/>
+            <dcterms:identifier rdf:datatype="http://ndl.go.jp/dcndl/terms/ISBN">9784791153497</dcterms:identifier>
+            <dcterms:title>臨床精神薬理 29巻11号〈特集〉新しい不眠症治療薬／オレキシン受容体拮抗薬 vornorexant</dcterms:title>
+            <dc:title>
+              <rdf:Description>
+                <rdf:value>臨床精神薬理 29巻11号〈特集〉新しい不眠症治療薬／オレキシン受容体拮抗薬 vornorexant</rdf:value>
+                <dcndl:transcription>リンショウセイシンヤクリ</dcndl:transcription>
+              </rdf:Description>
+            </dc:title>
+            <dcterms:creator>
+              <foaf:Agent>
+                <foaf:name>臨床精神薬理編集委員会</foaf:name>
+                <dcndl:transcription>リンショウセイシンヤクリヘンシュウイインカイ</dcndl:transcription>
+              </foaf:Agent>
+            </dcterms:creator>
+            <dc:creator>臨床精神薬理編集委員会 編集</dc:creator>
+            <dcterms:publisher>
+              <foaf:Agent>
+                <foaf:name>星和書店</foaf:name>
+              </foaf:Agent>
+            </dcterms:publisher>
+            <dcterms:publisher>
+              <foaf:Agent>
+                <foaf:name>星和書店</foaf:name>
+              </foaf:Agent>
+            </dcterms:publisher>
+            <dcndl:publicationPlace rdf:datatype="http://purl.org/dc/terms/ISO3166">JP</dcndl:publicationPlace>
+            <dcterms:date>2026-10-26</dcterms:date>
+            <dcterms:issued rdf:datatype="http://purl.org/dc/terms/W3CDTF">2026-10-26</dcterms:issued>
+            <dcterms:abstract>〈特集〉新しい不眠症治療薬／オレキシン受容体拮抗薬 vornorexant</dcterms:abstract>
+            <dcterms:description>装丁 : B5</dcterms:description>
+            <dcterms:description>専門</dcterms:description>
+            <dcterms:description>単行本</dcterms:description>
+            <dcterms:description>医学・歯学・薬学</dcterms:description>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>精神医学</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>精神科薬物療法</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>薬学</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>抗精神病薬</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>精神科臨床</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:language rdf:datatype="http://purl.org/dc/terms/ISO639-2">jpn</dcterms:language>
+            <dcndl:price>3300</dcndl:price>
+            <dcterms:extent>110p</dcterms:extent>
+            <dcndl:materialType rdf:resource="http://ndl.go.jp/ndltype/Book" rdfs:label="図書"/>
+            <dcterms:audience>一般</dcterms:audience>
+            <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784791153497"/>
+            <foaf:thumbnail rdf:resource="https://ndlsearch.ndl.go.jp/thumbnail/9784791153497.jpg"/>
+          </dcndl:BibResource>
+          <dcndl:BibResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784791153497#material">
+            <dcndl:record rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000137-I9784791153497#item"/>
+          </dcndl:BibResource>
+          <dcndl:Item rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784791153497#item">
+            <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784791153497"/>
+          </dcndl:Item>
+        </rdf:RDF>
+      </metadata>
+    </record>
+    <record>
+      <header>
+        <identifier>oai:ndlsearch.ndl.go.jp:R100000137-I9784434386664</identifier>
+        <datestamp>2026-10-14T15:55:20Z</datestamp>
+        <setSpec>book</setSpec>
+        <setSpec>jpro</setSpec>
+        <setSpec>jpro-book</setSpec>
+      </header>
+      <metadata>
+        <rdf:RDF xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcndl="http://ndl.go.jp/dcndl/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+          <dcndl:BibAdminResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784434386664">
+            <dcterms:description>type : book</dcterms:description>
+            <dcndl:bibRecordCategory>R100000137</dcndl:bibRecordCategory>
+            <dcndl:record rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000137-I9784434386664#material"/>
+          </dcndl:BibAdminResource>
+          <dcndl:BibResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784434386664#material">
+            <rdfs:seeAlso rdf:resource="http://iss.ndl.go.jp/isbn/9784434386664"/>
+            <dcterms:identifier rdf:datatype="http://ndl.go.jp/dcndl/terms/ISBN">9784434386664</dcterms:identifier>
+            <dcterms:title>狂愛プリズン</dcterms:title>
+            <dc:title>
+              <rdf:Description>
+                <rdf:value>狂愛プリズン</rdf:value>
+                <dcndl:transcription>キョウアイプリズン</dcndl:transcription>
+              </rdf:Description>
+            </dc:title>
+            <dcndl:seriesTitle>
+              <rdf:Description>
+                <rdf:value>GATE Comics</rdf:value>
+              </rdf:Description>
+            </dcndl:seriesTitle>
+            <dcterms:creator>
+              <foaf:Agent>
+                <foaf:name>きただりょうま</foaf:name>
+                <dcndl:transcription>キタダリョウマ</dcndl:transcription>
+              </foaf:Agent>
+            </dcterms:creator>
+            <dc:creator>きただりょうま 著・文・その他</dc:creator>
+            <dcterms:publisher>
+              <foaf:Agent>
+                <foaf:name>ナンバーナイン</foaf:name>
+              </foaf:Agent>
+            </dcterms:publisher>
+            <dcterms:publisher>
+              <foaf:Agent>
+                <foaf:name>星雲社</foaf:name>
+              </foaf:Agent>
+            </dcterms:publisher>
+            <dcndl:publicationPlace rdf:datatype="http://purl.org/dc/terms/ISO3166">JP</dcndl:publicationPlace>
+            <dcterms:date>2026-11-01</dcterms:date>
+            <dcterms:issued rdf:datatype="http://purl.org/dc/terms/W3CDTF">2026-11-01</dcterms:issued>
+            <dcterms:abstract>病的な執着の中で歪に深まっていく、狂愛の監禁ラブ。</dcterms:abstract>
+            <dcterms:description>装丁 : A5</dcterms:description>
+            <dcterms:description>Content warning (sex) 【成人向け（性）】</dcterms:description>
+            <dcterms:description>一般</dcterms:description>
+            <dcterms:description>コミックス</dcterms:description>
+            <dcterms:description>コミックス・劇画</dcterms:description>
+            <dcterms:description>コミックス（書籍）</dcterms:description>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>制服</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>ハーレム</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>痴女</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>中出し</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>巨乳</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>純愛</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>淫乱</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>３P</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>学生</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>成人向け</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:language rdf:datatype="http://purl.org/dc/terms/ISO639-2">jpn</dcterms:language>
+            <dcndl:price>1400</dcndl:price>
+            <dcterms:extent>210×148mm</dcterms:extent>
+            <dcterms:extent>194p</dcterms:extent>
+            <dcndl:materialType rdf:resource="http://ndl.go.jp/ndltype/Book" rdfs:label="図書"/>
+            <dcterms:audience>一般</dcterms:audience>
+            <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784434386664"/>
+            <foaf:thumbnail rdf:resource="https://ndlsearch.ndl.go.jp/thumbnail/9784434386664.jpg"/>
+          </dcndl:BibResource>
+          <dcndl:BibResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784434386664#material">
+            <dcndl:record rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000137-I9784434386664#item"/>
+          </dcndl:BibResource>
+          <dcndl:Item rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784434386664#item">
+            <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784434386664"/>
+          </dcndl:Item>
+        </rdf:RDF>
+      </metadata>
+    </record>
+    <record>
+      <header>
+        <identifier>oai:ndlsearch.ndl.go.jp:R100000137-I9784065381557</identifier>
+        <datestamp>2026-10-14T15:49:41Z</datestamp>
+        <setSpec>jpro</setSpec>
+        <setSpec>jpro-book</setSpec>
+      </header>
+      <metadata>
+        <rdf:RDF xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcndl="http://ndl.go.jp/dcndl/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+          <dcndl:BibAdminResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784065381557">
+            <dcterms:description>type : book</dcterms:description>
+            <dcndl:bibRecordCategory>R100000137</dcndl:bibRecordCategory>
+            <dcndl:record rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000137-I9784065381557#material"/>
+          </dcndl:BibAdminResource>
+          <dcndl:BibResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784065381557#material">
+            <rdfs:seeAlso rdf:resource="http://id.ndl.go.jp/jpno/24091680"/>
+            <dcterms:identifier rdf:datatype="http://ndl.go.jp/dcndl/terms/JPNO">24091680</dcterms:identifier>
+            <rdfs:seeAlso rdf:resource="http://iss.ndl.go.jp/isbn/9784065381557"/>
+            <dcterms:identifier rdf:datatype="http://ndl.go.jp/dcndl/terms/ISBN">9784065381557</dcterms:identifier>
+            <dcterms:title>だいすきちいかわ　シェイプブックミニ　しあわせだね！　くりまんじゅう</dcterms:title>
+            <dc:title>
+              <rdf:Description>
+                <rdf:value>だいすきちいかわ　シェイプブックミニ　しあわせだね！　くりまんじゅう</rdf:value>
+                <dcndl:transcription>ダイスキチイカワ シェイプブックミニ シアワセダネ! クリマンジュウ</dcndl:transcription>
+              </rdf:Description>
+            </dc:title>
+            <dcterms:creator>
+              <foaf:Agent>
+                <foaf:name>ナガノ</foaf:name>
+                <dcndl:transcription>ナガノ</dcndl:transcription>
+              </foaf:Agent>
+            </dcterms:creator>
+            <dc:creator>ナガノ 著・文・その他</dc:creator>
+            <dcterms:publisher>
+              <foaf:Agent>
+                <foaf:name>講談社</foaf:name>
+              </foaf:Agent>
+            </dcterms:publisher>
+            <dcndl:publicationPlace rdf:datatype="http://purl.org/dc/terms/ISO3166">JP</dcndl:publicationPlace>
+            <dcterms:date>2025-02-27</dcterms:date>
+            <dcterms:issued rdf:datatype="http://purl.org/dc/terms/W3CDTF">2025-02-27</dcterms:issued>
+            <dcterms:abstract>ちいかわ、うさぎ、ハチワレ……個性豊かなキャラクターが人気「ちいかわ」。そのキャラクターたちがかわいい絵本になりました！</dcterms:abstract>
+            <dcterms:description>装丁 : B5</dcterms:description>
+            <dcterms:description>著者略歴 : イラストレーター。アナログらしいやわらかな線画から生まれる、ゆるく自由なキャラたちにいやされる人が続出中。ＬＩＮＥスタンプで人気の「ナガノのくま」「ちいかわ」をはじめ、人気のスタンプシリーズを数多く手掛ける。企業やアーティストとのコラボなど、多岐にわたって活躍中。</dcterms:description>
+            <dcterms:description>児童 中学生以下対象</dcterms:description>
+            <dcterms:description>絵本</dcterms:description>
+            <dcterms:description>絵画・彫刻</dcterms:description>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>キャラクター</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>ナガノ</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>モーニング</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>モモンガ</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>ラッコ</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>シーサー</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>くりまんじゅう</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>鎧</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>ちいかわ</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>うさぎ</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>ハチワレ</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>中学生から</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>保護者向け</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>２歳</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>３歳</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>４歳</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject rdf:resource="http://id.ndl.go.jp/class/ndc10/726.6"/>
+            <dcterms:language rdf:datatype="http://purl.org/dc/terms/ISO639-2">jpn</dcterms:language>
+            <dcndl:price>900</dcndl:price>
+            <dcterms:extent>14p</dcterms:extent>
+            <dcndl:materialType rdf:resource="http://ndl.go.jp/ndltype/Book" rdfs:label="図書"/>
+            <dcterms:audience>一般</dcterms:audience>
+            <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065381557"/>
+            <foaf:thumbnail rdf:resource="https://ndlsearch.ndl.go.jp/thumbnail/9784065381557.jpg"/>
+          </dcndl:BibResource>
+          <dcndl:BibResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784065381557#material">
+            <dcndl:record rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000137-I9784065381557#item"/>
+          </dcndl:BibResource>
+          <dcndl:Item rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784065381557#item">
+            <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784065381557"/>
+            <dcterms:identifier rdf:datatype="http://ndl.go.jp/dcndl/terms/JPNO">24091680</dcterms:identifier>
+          </dcndl:Item>
+        </rdf:RDF>
+      </metadata>
+    </record>
+    <record>
+      <header>
+        <identifier>oai:ndlsearch.ndl.go.jp:R100000137-I9784105901684</identifier>
+        <datestamp>2026-10-14T15:50:19Z</datestamp>
+        <setSpec>jpro</setSpec>
+        <setSpec>jpro-book</setSpec>
+      </header>
+      <metadata>
+        <rdf:RDF xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcndl="http://ndl.go.jp/dcndl/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+          <dcndl:BibAdminResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784105901684">
+            <dcterms:description>type : book</dcterms:description>
+            <dcndl:bibRecordCategory>R100000137</dcndl:bibRecordCategory>
+            <dcndl:record rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000137-I9784105901684#material"/>
+          </dcndl:BibAdminResource>
+          <dcndl:BibResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784105901684#material">
+            <rdfs:seeAlso rdf:resource="http://id.ndl.go.jp/jpno/23457022"/>
+            <dcterms:identifier rdf:datatype="http://ndl.go.jp/dcndl/terms/JPNO">23457022</dcterms:identifier>
+            <rdfs:seeAlso rdf:resource="http://iss.ndl.go.jp/isbn/9784105901684"/>
+            <dcterms:identifier rdf:datatype="http://ndl.go.jp/dcndl/terms/ISBN">9784105901684</dcterms:identifier>
+            <dcterms:title>海と山のオムレツ</dcterms:title>
+            <dc:title>
+              <rdf:Description>
+                <rdf:value>海と山のオムレツ</rdf:value>
+                <dcndl:transcription>ウミトヤマノオムレツ</dcndl:transcription>
+              </rdf:Description>
+            </dc:title>
+            <dcndl:seriesTitle>
+              <rdf:Description>
+                <rdf:value>新潮クレスト・ブックス</rdf:value>
+                <dcndl:transcription>シンチョウクレストブックス</dcndl:transcription>
+              </rdf:Description>
+            </dcndl:seriesTitle>
+            <dcterms:creator>
+              <foaf:Agent>
+                <foaf:name>カルミネ・アバーテ</foaf:name>
+                <dcndl:transcription>カルミネ アバーテ</dcndl:transcription>
+              </foaf:Agent>
+            </dcterms:creator>
+            <dcterms:creator>
+              <foaf:Agent>
+                <foaf:name>関口 英子</foaf:name>
+                <dcndl:transcription>セキグチ エイコ</dcndl:transcription>
+              </foaf:Agent>
+            </dcterms:creator>
+            <dc:creator>カルミネ・アバーテ 著・文・その他</dc:creator>
+            <dc:creator>関口 英子 翻訳</dc:creator>
+            <dcterms:publisher>
+              <foaf:Agent>
+                <foaf:name>新潮社</foaf:name>
+              </foaf:Agent>
+            </dcterms:publisher>
+            <dcndl:publicationPlace rdf:datatype="http://purl.org/dc/terms/ISO3166">JP</dcndl:publicationPlace>
+            <dcterms:date>2020-10-30</dcterms:date>
+            <dcterms:issued rdf:datatype="http://purl.org/dc/terms/W3CDTF">2020-10-30</dcterms:issued>
+            <dcterms:abstract>食べることはその土地と生きてゆくこと。南イタリア、カラブリア州出身の作家が、絶品郷土料理と家族の記憶を綴る自伝的短篇集。</dcterms:abstract>
+            <dcterms:description>装丁 : 46変形</dcterms:description>
+            <dcterms:description>一般</dcterms:description>
+            <dcterms:description>全集・双書</dcterms:description>
+            <dcterms:description>外国文学小説</dcterms:description>
+            <dcterms:description>文芸</dcterms:description>
+            <dcterms:subject>
+              <rdf:Description>
+                <rdf:value>FB : 小説：一般、文学</rdf:value>
+              </rdf:Description>
+            </dcterms:subject>
+            <dcterms:subject rdf:resource="http://id.ndl.go.jp/class/ndc10/973"/>
+            <dcterms:language rdf:datatype="http://purl.org/dc/terms/ISO639-2">jpn</dcterms:language>
+            <dcndl:price>2200</dcndl:price>
+            <dcterms:extent>197×132mm</dcterms:extent>
+            <dcterms:extent>176p</dcterms:extent>
+            <dcndl:materialType rdf:resource="http://ndl.go.jp/ndltype/Book" rdfs:label="図書"/>
+            <dcterms:audience>一般</dcterms:audience>
+            <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784105901684"/>
+            <foaf:thumbnail rdf:resource="https://ndlsearch.ndl.go.jp/thumbnail/9784105901684.jpg"/>
+          </dcndl:BibResource>
+          <dcndl:BibResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784105901684#material">
+            <dcndl:record rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000137-I9784105901684#item"/>
+          </dcndl:BibResource>
+          <dcndl:Item rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I9784105901684#item">
+            <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/9784105901684"/>
+            <dcterms:identifier rdf:datatype="http://ndl.go.jp/dcndl/terms/JPNO">23457022</dcterms:identifier>
+          </dcndl:Item>
+        </rdf:RDF>
+      </metadata>
+    </record>
+    <record>
+      <header>
+        <identifier>oai:ndlsearch.ndl.go.jp:R100000137-I06A0000000000970974D</identifier>
+        <datestamp>2026-10-14T15:53:24Z</datestamp>
+        <setSpec>book</setSpec>
+        <setSpec>jpro</setSpec>
+        <setSpec>jpro-online</setSpec>
+      </header>
+      <metadata>
+        <rdf:RDF xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcndl="http://ndl.go.jp/dcndl/terms/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+          <dcndl:BibAdminResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I06A0000000000970974D">
+            <dcterms:description>type : book</dcterms:description>
+            <dcndl:bibRecordCategory>R100000137</dcndl:bibRecordCategory>
+            <dcndl:record rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000137-I06A0000000000970974D#material"/>
+          </dcndl:BibAdminResource>
+          <dcndl:BibResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I06A0000000000970974D#material">
+            <dcndl:sourceIdentifier rdf:datatype="http://ndl.go.jp/dcndl/terms/ISBN">9784062812054</dcndl:sourceIdentifier>
+            <dcterms:title>人生の１００のリスト</dcterms:title>
+            <dc:title>
+              <rdf:Description>
+                <rdf:value>人生の１００のリスト</rdf:value>
+                <dcndl:transcription>ジンセイノヒャクノリスト</dcndl:transcription>
+              </rdf:Description>
+            </dc:title>
+            <dcterms:creator>
+              <foaf:Agent>
+                <foaf:name>ロバート・ハリス</foaf:name>
+                <dcndl:transcription>ロバートハリス</dcndl:transcription>
+              </foaf:Agent>
+            </dcterms:creator>
+            <dc:creator>ロバート・ハリス 著・文・その他</dc:creator>
+            <dcndl:publicationPlace rdf:datatype="http://purl.org/dc/terms/ISO3166">JP</dcndl:publicationPlace>
+            <dcndl:digitizedPublisher>講談社</dcndl:digitizedPublisher>
+            <dcndl:dateDigitized rdf:datatype="http://purl.org/dc/terms/W3CDTF">2026-10-29</dcndl:dateDigitized>
+            <dcterms:abstract>『エグザイルス』の著者ロバート・ハリスが世界を放浪するなかで見つけた「人生を楽しむシナリオ作り」</dcterms:abstract>
+            <dcterms:description>電子書籍</dcterms:description>
+            <dcterms:description>文芸</dcterms:description>
+            <dcterms:description>JP-eコード : 06A0000000000970974D</dcterms:description>
+            <dcterms:language rdf:datatype="http://purl.org/dc/terms/ISO639-2">jpn</dcterms:language>
+            <dcndl:materialType rdf:resource="http://ndl.go.jp/ndltype/Book" rdfs:label="図書"/>
+            <dcterms:audience>一般</dcterms:audience>
+            <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000970974D"/>
+            <dcterms:source rdf:resource="http://iss.ndl.go.jp/isbn/9784062812054"/>
+          </dcndl:BibResource>
+          <dcndl:BibResource rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I06A0000000000970974D#material">
+            <dcndl:record rdf:resource="https://ndlsearch.ndl.go.jp/books/R100000137-I06A0000000000970974D#item"/>
+          </dcndl:BibResource>
+          <dcndl:Item rdf:about="https://ndlsearch.ndl.go.jp/books/R100000137-I06A0000000000970974D#item">
+            <rdfs:seeAlso rdf:resource="https://www.books.or.jp/book-details/06A0000000000970974D"/>
+          </dcndl:Item>
+        </rdf:RDF>
+      </metadata>
+    </record>
+    <record>
+      <header status="deleted">
+        <identifier>oai:ndlsearch.ndl.go.jp:R100000137-I9784334110239</identifier>
+        <datestamp>2026-09-15T16:27:09Z</datestamp>
+        <setSpec>book</setSpec>
+        <setSpec>jpro</setSpec>
+        <setSpec>jpro-book</setSpec>
+      </header>
+    </record>
+    <resumptionToken completeListSize="21" cursor="0">dcndl/2026-10-14T00:00:00Z/2026-10-14T23:59:59Z/jpro/200/1791960566301_R100000137-I9784065448236,1791961402885_R100000137-I9784863103191</resumptionToken>
+  </ListRecords>
+</OAI-PMH>

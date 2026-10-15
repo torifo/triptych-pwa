@@ -89,6 +89,8 @@ async def request_with_retry(
 ) -> httpx.Response:
     """One HTTP request with pacing, 429/5xx/timeout retries and exponential backoff.
 
+    A Retry-After on a 429 or a 5xx (503 maintenance) is obeyed instead of the backoff.
+
     Raises the last error when all attempts fail. 4xx other than 429 are
     returned to the caller as-is (they are not transient).
     """
@@ -119,7 +121,8 @@ async def request_with_retry(
             )
             log(f"  retry {attempt + 1}/{retries}: HTTP {response.status_code} {url}")
             if attempt < retries:
-                await clock.sleep(backoff * (2**attempt))
+                # 503 などが Retry-After を付けてきた時はそれに従う（無ければ指数バックオフ）
+                await clock.sleep(_retry_after_seconds(response, backoff * (2**attempt)))
             continue
         return response
     assert last_error is not None

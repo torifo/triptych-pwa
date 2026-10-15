@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 import string
 import unicodedata
-from typing import Iterable, Optional
+from typing import Iterable, Mapping, Optional
 
 _NON_WORD = re.compile(r"[\W_]+", re.UNICODE)
 _SPACES = re.compile(r"\s+")
@@ -110,3 +110,46 @@ def search_text(values: Iterable[Optional[str]]) -> str:
         if key and key != name.translate(_SQLITE_LOWER) and key not in names and key not in folded:
             folded.append(key)
     return " ".join([*names, *folded])
+
+
+# -- 叢書名 (NDL "line") --------------------------------------------------------------------
+
+# Latin and kana spellings of the same label word ("花とゆめCOMICS" / "花とゆめコミックス").
+_LINE_WORDS = (
+    ("comics", "コミックス"),
+    ("comic", "コミック"),
+    ("novels", "ノベルス"),
+    ("novel", "ノベル"),
+    ("ノベルズ", "ノベルス"),
+)
+RELATED_LINE_MIN = 4  # shorter label keys ("KC") are too generic to be read as variants
+
+
+def line_key(line: Optional[str]) -> str:
+    """Comparison key of a 叢書名: `normalize_title` with the Latin label words in kana."""
+    key = normalize_title(line or "")
+    for word, kana in _LINE_WORDS:
+        key = key.replace(word, kana)
+    return key
+
+
+def align_line(label: str, lines: Mapping[str, int]) -> str:
+    """The line of `lines` (name -> books) that `label` is a spelling or a variant of, else `label`.
+
+    JPRO's 近刊 records name the label another way than NDL's catalogue: "モーニング KC" ->
+    "モーニングKC" (spacing, case, COMICS / コミックス), "ヤンマガKCスペシャル" -> "ヤンマガKC" (one
+    name holds the other, both at least RELATED_LINE_MIN long). The line with more books wins.
+    """
+    key = line_key(label)
+    same = [line for line in lines if line_key(line) == key]
+    if same:
+        return max(same, key=lambda line: (lines[line], line))
+    if len(key) >= RELATED_LINE_MIN:
+        related = [
+            line
+            for line in lines
+            if len(line_key(line)) >= RELATED_LINE_MIN and (line_key(line) in key or key in line_key(line))
+        ]
+        if related:
+            return max(related, key=lambda line: (lines[line], line))
+    return label

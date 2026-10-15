@@ -4,6 +4,9 @@
     python -m backend.catalog link
     python -m backend.catalog export [--format csv|json|both] [--out local/catalog]
     python -m backend.catalog stats
+
+Sources run in order; `jpro` (NDL's 近刊 records from JPRO) comes after `ndl` and writes into
+the same `ndl:<isbn>` rows.
 """
 
 from __future__ import annotations
@@ -22,7 +25,7 @@ import httpx
 from . import db
 from .runtime import DEFAULT_TIMEOUT, HarvestResult, RealClock
 
-SOURCES = ("anilist", "syoboi", "narou", "kakuyomu", "ndl")
+SOURCES = ("anilist", "syoboi", "narou", "kakuyomu", "ndl", "jpro")
 REPO_DIR = Path(__file__).resolve().parents[2]
 
 
@@ -107,6 +110,10 @@ def _stats() -> None:
         return
     for row in conn.execute("SELECT source, kind, COUNT(*) AS n FROM entries GROUP BY source, kind ORDER BY source, kind"):
         _log(f"{row['source']:9} {row['kind']:10} {row['n']:>7}")
+    upcoming = conn.execute(
+        "SELECT COUNT(*) FROM entries WHERE source = 'ndl' AND json_extract(extra, '$.via') = 'jpro'"
+    ).fetchone()[0]
+    _log(f"  (ndl rows from JPRO, not catalogued yet: {upcoming})")
     works = conn.execute("SELECT COUNT(*) FROM cluster_summary").fetchone()[0]
     links = conn.execute("SELECT COUNT(*) FROM links").fetchone()[0]
     errors = conn.execute("SELECT source, COUNT(*) FROM harvest_state WHERE status = 'error' GROUP BY source").fetchall()
@@ -125,7 +132,7 @@ def main(argv: list[str] | None = None) -> int:
     build.add_argument(
         "--recent",
         action="store_true",
-        help="light update (~8 min): upcoming books, this year on and airing anime, top web novels",
+        help="light update (~15 min): upcoming books, this year on and airing anime, top web novels",
     )
     build.add_argument("--no-link", action="store_true", help="skip linking after harvest")
 

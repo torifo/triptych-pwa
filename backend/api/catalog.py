@@ -42,7 +42,7 @@ FTS_MIN_CHARS = 3  # the trigram index needs 3+ characters; shorter queries scan
 LINK_THRESHOLD = 0.8  # links below this are only "candidates" (see link.py)
 MAX_CANDIDATES = 100
 
-SOURCE_ORDER = ("anilist", "syoboi", "narou", "kakuyomu", "ndl")
+SOURCE_ORDER = ("anilist", "syoboi", "narou", "kakuyomu", "ndl", "jpro")  # jpro: harvester of the 近刊 ndl rows
 _KIND_COLUMN = {
     "anime": "has_anime",
     "manga": "has_manga",

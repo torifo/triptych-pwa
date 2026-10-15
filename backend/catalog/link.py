@@ -8,7 +8,9 @@
 2. Works are made with union-find over the merge relations
    (ADAPTATION / SOURCE / SEQUEL / PREQUEL) and the links whose
    confidence is >= MERGE_THRESHOLD. Weaker links stay in `links` as candidates.
-3. NDL books that joined no work are grouped per (series, kindHint, line).
+3. NDL books that joined no work are grouped per (series, kindHint, line). A JPRO book
+   (`extra.via = "jpro"`, not catalogued yet) joins its series' catalogued shelf when its
+   label is a variant of that shelf's line, or when the series has only that one shelf.
 4. `cluster_id` is the smallest member id, so it is stable across runs.
 """
 
@@ -24,8 +26,9 @@ from collections import Counter
 from datetime import date, datetime
 from typing import Any, Iterable, Optional
 
-from .text import normalize_title, search_text, strip_notes, strip_season, strip_subtitle, title_key
+from .text import align_line, normalize_title, search_text, strip_notes, strip_season, strip_subtitle, title_key
 
+JPRO_VIA = "jpro"  # extra.via of an NDL row the JPRO harvester wrote (not catalogued yet)
 MERGE_THRESHOLD = 0.8
 # PARENT は SIDE_STORY / SPIN_OFF の逆向き。統合に使うと共通の特番を介して別シリーズがつながる
 MERGE_RELATIONS = ("ADAPTATION", "SOURCE", "SEQUEL", "PREQUEL")
@@ -497,6 +500,8 @@ def _build_clusters(
     # Books that joined no work: one work per (series, kindHint, line), not one per volume.
     keys = _Keys()
     shelves: dict[tuple[str, str, str], int] = {}
+    catalogued: dict[tuple[str, str], Counter[str]] = {}  # (series, kindHint) -> catalogued line -> books
+    upcoming: list[tuple[_Row, tuple[str, str, str]]] = []
     for row in rows:
         if row.source != "ndl" or row.kind != "book" or row.idx in merged:
             continue
@@ -504,6 +509,23 @@ def _build_clusters(
         if not key:
             continue
         shelf = (key, str(row.extra.get("kindHint") or ""), str(row.extra.get("line") or ""))
+        if row.extra.get("via") == JPRO_VIA:
+            upcoming.append((row, shelf))
+            continue
+        catalogued.setdefault(shelf[:2], Counter())[shelf[2]] += 1
+        first = shelves.setdefault(shelf, row.idx)
+        if first != row.idx:
+            uf.union(first, row.idx)
+    # A JPRO book (not catalogued yet) joins its series' catalogued shelf: JPRO often names the label
+    # differently ("ヤンマガKCスペシャル" / "ヤンマガKC", "Letter Comics" / "No.9 COMICS").
+    for row, shelf in upcoming:
+        lines = catalogued.get(shelf[:2])
+        if lines and shelf[2] not in lines:
+            aligned = align_line(shelf[2], lines) if shelf[2] else shelf[2]
+            if aligned in lines:
+                shelf = (*shelf[:2], aligned)
+            elif len(lines) == 1:  # one catalogued shelf: that is the series
+                shelf = (*shelf[:2], next(iter(lines)))
         first = shelves.setdefault(shelf, row.idx)
         if first != row.idx:
             uf.union(first, row.idx)

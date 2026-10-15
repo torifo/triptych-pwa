@@ -412,6 +412,41 @@ def test_unlinked_books_group_by_series_kind_and_line(tmp_path):
     assert s["popularity"] == 0 and s["cover"] is None and s["anime_status"] is None
 
 
+def _jpro_book(external_id, title, series, hint, start_date, *, line="") -> db.Entry:
+    """A row of the JPRO harvester: not catalogued yet, the label named JPRO's way."""
+    extra = {"series": series, "kindHint": hint, "line": line, "isbn": f"978{external_id:0>10}", "via": "jpro"}
+    return _entry("ndl", external_id, "book", title, start_date=start_date, start_precision="day", extra=extra)
+
+
+def test_a_jpro_book_joins_the_catalogued_shelf_of_its_series(tmp_path):
+    entries = [
+        _book("1", "フーディーズ 1", "フーディーズ", "manga", "2026-01-01", line="ヤンマガKC"),
+        _book("2", "フーディーズ 2", "フーディーズ", "manga", "2026-04-01", line="ヤンマガKC"),
+        _jpro_book("3", "フーディーズ(5)", "フーディーズ", "manga", "2026-11-19", line="ヤンマガKCスペシャル"),  # a variant
+        _jpro_book("4", "フーディーズ(6)", "フーディーズ", "manga", "2027-02-19", line="ヤンマガKC"),  # the same line
+        _book("5", "薬師の本 1", "薬師の本", "novel", "2026-01-01", line=""),
+        _book("6", "薬師の本 1", "薬師の本", "novel", "2026-02-01", line="ジュニア文庫"),
+        _jpro_book("7", "薬師の本 2", "薬師の本", "novel", "2026-12-01", line="ジュニア文庫"),
+        _jpro_book("8", "薬師の本 3", "薬師の本", "novel", "2026-12-01", line="新しい文庫"),  # two shelves: no guess
+        _jpro_book("9", "新シリーズ 1", "新シリーズ", "manga", "2026-12-01", line="新コミックス"),
+        _jpro_book("10", "新シリーズ 2", "新シリーズ", "manga", "2027-03-01", line="新コミックス"),
+        _jpro_book("11", "一つだけ 4", "一つだけ", "manga", "2026-12-01", line="Letter Comics"),
+        _book("12", "一つだけ 3", "一つだけ", "manga", "2026-06-01", line="No.9 COMICS"),  # one shelf: joined
+    ]
+    conn = _open(tmp_path, entries)
+    run_link(conn, today=TODAY)
+
+    def work(entry_id):
+        return _members(conn, _cluster(conn, entry_id))
+
+    assert work("ndl:1") == {"ndl:1", "ndl:2", "ndl:3", "ndl:4"}
+    assert work("ndl:6") == {"ndl:6", "ndl:7"}
+    assert work("ndl:5") == {"ndl:5"}
+    assert work("ndl:8") == {"ndl:8"}
+    assert work("ndl:9") == {"ndl:9", "ndl:10"}
+    assert work("ndl:12") == {"ndl:11", "ndl:12"}
+
+
 # --------------------------------------------------------------------------- summary
 
 

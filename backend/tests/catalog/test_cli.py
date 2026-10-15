@@ -75,7 +75,7 @@ def meta(catalog, key: str) -> Any:
 def test_plain_build_runs_every_source_without_any_recent_flag(harvesters, catalog):
     assert cli.main(["build"]) == 0
 
-    assert harvesters.sources == ["anilist", "syoboi", "narou", "kakuyomu", "ndl"]
+    assert harvesters.sources == ["anilist", "syoboi", "narou", "kakuyomu", "ndl", "jpro"]
     assert all(call == {"source": call["source"], "limit": None} for call in harvesters.calls)  # no `recent` kwarg
     assert len(harvesters.linked) == 1
     assert meta(catalog, "harvest:ndl:result")["fetched"] == 3
@@ -86,7 +86,7 @@ def test_plain_build_runs_every_source_without_any_recent_flag(harvesters, catal
 def test_recent_build_passes_recent_to_every_source_and_then_links(harvesters, catalog, capsys):
     assert cli.main(["build", "--recent"]) == 0
 
-    assert harvesters.sources == ["anilist", "syoboi", "narou", "kakuyomu", "ndl"]
+    assert harvesters.sources == ["anilist", "syoboi", "narou", "kakuyomu", "ndl", "jpro"]
     assert all(call["recent"] is True and call["limit"] is None for call in harvesters.calls)
     assert len(harvesters.linked) == 1
     out = capsys.readouterr().out
@@ -150,7 +150,7 @@ def test_a_source_that_raises_does_not_stop_the_others(harvesters, catalog, caps
 
     cli.main(["build", "--recent", "--no-link"])
 
-    assert harvesters.sources == ["anilist", "syoboi", "narou", "kakuyomu", "ndl"]
+    assert harvesters.sources == ["anilist", "syoboi", "narou", "kakuyomu", "ndl", "jpro"]
     failed = meta(catalog, "harvest:syoboi:recent_result")
     assert failed["fetched"] == 0 and "RuntimeError: boom" in failed["errors"][0]
     assert meta(catalog, "harvest:ndl:recent_result")["fetched"] == 3

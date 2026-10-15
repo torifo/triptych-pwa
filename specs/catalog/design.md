@@ -5,7 +5,7 @@
 collector 側に、応答キャッシュとは別のカタログ DB（`backend/catalog.db`、SQLite）を持つ。収集は CLI のバッチ（`python -m backend.catalog ...`）で行い、ソースごとの収集器（harvester）が `entries` / `relations` に書き込む。紐付け器（linker）がソースをまたいだ結び付きと「作品」（cluster）を作り、全文検索の索引を作り直す。アプリは新しい API（`/api/catalog/*`）から読む。ユーザーの追跡データ（端末の IndexedDB）とは場所も API も分かれている。
 
 ```
-CLI build ──> harvesters (anilist / syoboi / narou / kakuyomu / ndl) ──> entries, relations, harvest_state
+CLI build ──> harvesters (anilist / syoboi / narou / kakuyomu / ndl / jpro) ──> entries, relations, harvest_state
 CLI link  ──> linker ──> links, clusters, cluster_summary, entries_fts
 API       ──> /api/catalog/works, /works/{id}, /stats, /export  ──> カタログ画面
 CLI export──> local/catalog/catalog-YYYYMMDD.{csv,json}
@@ -47,7 +47,7 @@ async def harvest(
 ### 実装で分かった制約（2026-10-14）
 
 - AniList: `pageInfo.total` は件数に関係なく 5000 を返すので信用しない（短いページか `hasNextPage:false` で終わる）。`startDate_lesser` だけだと開始日の無い作品も混ざるため、`<1960`（日付あり）と `nodate` を分けた。今年+3 より先の作品用に末尾の区切りを足した。null の変数は受け付けないので、区切りごとに使う条件だけでクエリを組む
-- NDL: 1つの検索で届くのは先頭 500 件だけ（idx で先へ進めない）。月より細かい日付指定は効かない。月の件数が 500 を超えるので、ISBN の前方一致（`97840`〜`97849`、溢れたら次の桁）で再帰的に割る。`ndc` 検索は目録済みのレコードしか返さないため、目録前の近刊は取れない（Library に入れた作品の近刊は、作品名で引く既存の同期が拾う。取得手段は「今後の課題」）
+- NDL: 1つの検索で届くのは先頭 500 件だけ（idx で先へ進めない）。月より細かい日付指定は効かない。月の件数が 500 を超えるので、ISBN の前方一致（`97840`〜`97849`、溢れたら次の桁）で再帰的に割る。`ndc` 検索は目録済みのレコードしか返さないため、目録前の近刊は別の収集器 `jpro` が OAI-PMH で取る（下の「目録前の近刊（JPRO）」）
 - しょぼかる: 全 8085 件のうちアニメ系（Cat 1 アニメ・7 OVA・8 映画・10 アニメ(終了/再放送)）の約 6760 件を採用。実写・占有行は除外
 - 更新: 取り終えた区切りは再実行で飛ばすため、データを新しくするには次のどちらか
   - `build --recent`（日常用・約8分＋紐付け約15秒）: 新しい本・放送中の作品・上位の Web 小説だけを取り直す。週1回〜新刊が気になる時
@@ -62,6 +62,7 @@ async def harvest(
 | narou | (ジャンル)。`type=re&order=hyoka&lim=500&st=1..2000` | 2500 件 | 1 req/s・gzip |
 | kakuyomu | (ジャンル)。人気順の検索ページ | 50 ページ（1000 件） | 1 req/s・同時1・robots 確認 |
 | ndl | (ndc 913.6 / 726.1)。`mediatype=books&from=<1年前の年月>&cnt=500&idx=` | 取れるだけ | 1 req/s・30 秒タイムアウト |
+| jpro | 更新日（JST）の日 `day:<YYYY-MM-DD>`、新しい順。直近 30 日（`WINDOW_DAYS`）。`resumptionToken` で 200 件ずつ | 1日 2 万件（`MAX_DAY_RECORDS`）。超える日は1ページ目で件数を見て取らない | 1 req/s・90 秒タイムアウト。429 は Retry-After（無ければ 20 秒）、503 も Retry-After |
 
 `build --recent` の範囲（2026-10-15、前日に全件を取った DB で実測: 合計約7分44秒）:
 
@@ -72,6 +73,7 @@ async def harvest(
 | narou | 21 ジャンル × 総合評価の上位 2 ページ（500 件 × 2） | 1 ジャンル 1000 件 | 専用の `recent:genre:<code>` |
 | kakuyomu | 12 ジャンル × 人気順の上位 5 ページ（20 件 × 5） | 1 ジャンル 100 件 | 専用の `recent:genre:<name>` |
 | ndl | 先月〜6か月先の月と、その先をまとめた区切り（小説・漫画）。月が 500 件を超えたら ISBN で割るのは全件と同じ | 全件と同じ（取れるだけ） | 全件と同じ区切りを `done` にし直す。昔の月の記録は残す |
+| jpro | 前回最後まで終わった実行（`harvest_state` の `run` 行、`cursor` がその日）の1日前から今日までの日。`done` でも取り直す。記録が無ければ全件と同じ（直近 30 日・`done` は飛ばす） | 全件と同じ | 日の区切りは全件と同じ。エラー・`--limit` の実行は `run` を進めない |
 
 ### 紐付け（`backend/catalog/link.py`）
 
@@ -79,8 +81,8 @@ async def harvest(
 2. **題名の照合**（正規化は NFKC・小文字・空白記号除去・「第N期 / Season N / 2nd Season」などの期表記除去）:
    - しょぼかる ↔ AniList アニメ: 正規化題名一致かつ開始年 ±1 → 0.95、題名一致のみ → 0.7
    - なろう・カクヨム ↔ AniList 小説/漫画: 正規化題名一致 → 0.9、別名一致 → 0.85、長さ 8 文字以上の前方一致 → 0.6
-   - NDL の本 ↔ AniList 小説/漫画: 本のシリーズ名（巻数を除いた題名）が一致 → 0.85（小説は NOVEL、漫画は MANGA にだけ結ぶ）
-3. **作品（cluster）**: 関係と、信頼度 0.8 以上の links で union-find。0.8 未満は「候補」として詳細画面にだけ出す
+   - NDL の本 ↔ AniList 小説/漫画: 本のシリーズ名（巻数を除いた題名）が一致 → 0.85（小説は NOVEL、漫画は MANGA にだけ結ぶ）。JPRO の近刊の行も同じ
+3. **作品（cluster）**: 関係と、信頼度 0.8 以上の links で union-find。0.8 未満は「候補」として詳細画面にだけ出す。どの作品にも結ばれなかった本は (シリーズ名, kindHint, line) ごとに1作品。JPRO の近刊の行は、同じシリーズ名・種類の目録済みの棚があれば、line が同じ・書き換え（空白・大小文字・COMICS/コミックス）・どちらかがもう一方を含む棚へ、棚が1つだけならその棚へ入る（JPRO と NDL で叢書名の書き方が違うため。「ヤンマガKCスペシャル」/「ヤンマガKC」）
 4. `cluster_summary` と `entries_fts` を作り直す
 
 ### API（`backend/api/catalog.py`）
@@ -119,11 +121,27 @@ async def harvest(
 
 ## 今後の課題
 
-### 近刊（NDL 目録前）の取得手段
+### 近刊（NDL 目録前）の取得手段 → 実装済み（2026-10-15、下の「目録前の近刊（JPRO）」）
 
-NDL の目録に載る前の近刊（出版予定）は、`ndc` 検索では取れない。取得手段を調べた結果（未実装）:
+調べた手段と採否:
 
 | 手段 | 評価 |
 |---|---|
-| NDL Search の OAI-PMH `set=jpro`（JPRO 由来の出版予定） | **推奨**。登録不要、200 件/ページ、OpenSearch のような 500 件の壁が無い。JPRO のジャンル語と NDC へのリンクで漫画・小説を判定でき、ISBN をキーに `ndl:<isbn>` へ統合できる |
-| NDL OpenSearch の `dpid=jpro` | 分類が弱く、ムックなどが小説に混ざる。見送り |
+| NDL Search の OAI-PMH `set=jpro`（JPRO 由来の出版予定） | **採用**（`harvest/jpro.py`）。登録不要、200 件/ページ、OpenSearch のような 500 件の壁が無い。JPRO のジャンル語と NDC へのリンクで漫画・小説を判定でき、ISBN をキーに `ndl:<isbn>` へ統合できる |
+| NDL OpenSearch の `dpid=jpro` | 分類が弱く（ジャンル語が載らない）、ムックなどが小説に混ざる。見送り |
+
+## 目録前の近刊（JPRO）
+
+収集器 `jpro`（`backend/catalog/harvest/jpro.py`、`--source jpro`、全ソースの build では `ndl` の後）。詳細はモジュールの docstring。
+
+- **取り方**: `https://ndlsearch.ndl.go.jp/api/oaipmh?verb=ListRecords&metadataPrefix=dcndl&set=jpro&from=<日>&until=<日>`、続きは `verb=ListRecords&resumptionToken=<token>`。`from` / `until` はレコードの更新日時で、`Z` 付きだが日本時間（`responseDate` と HTTP の `Date` で確認）。区切りは JST の日。`until` 無しの `from` は全件（358 万件）なので必ず両端を付ける
+- **日の件数**: ふだんは 1日 1,000〜2,600 件（10/01〜10/07: 8,865 件、10/08〜10/14: 6,649 件、10/15 は昼時点 1,912 件）。2026-09-27 に全件（3,556,855 件、すべて 16:30:00）の更新日が付け直され、それより前の日はほぼ空（09/15〜09/23 で削除済み 9 件）。各日の1ページ目の `completeListSize` で見積もり、2 万件を超える日は取らずに `done`（メッセージ `bulk: ...`）にする。その日にしか更新の無い登録は、登録が次に更新された時か、NDL の目録ができた時（`ndl` 収集器）に入る
+- **日の確定**: 応答に `Cache-Control: max-age=83212`（約 23 時間、CloudFront）が付く。当日に取った応答が翌日夕方まで返り得るので、日は 2 日後（`SETTLE_DAYS`）に `done`。今日と昨日は `pending`（`open`）のまま次の実行で取り直す
+- **判定**（`classify`。表は `test_harvest_jpro.py` の `test_classification_table` で固定）: 削除・電子書籍・ISBN なし → 除外。成人向け（Content warning / Any adult / 成人向け・成人指定）→ 除外。形態がムック・絵本・図鑑・事典・写真集・電磁的記録媒体 → 除外。NDC リンク 726.1 → 漫画、913.6 → 小説（NDL 自身の分類）。芸能・タレント・趣味・実用・実用・ビジネス・学参 → 除外（「日本文学小説・物語」と付いた写真集や戦術書）。内容「コミックス・劇画」→ 漫画、「日本文学小説・物語」→ 小説。JPRO のジャンル「コミックス（書籍 / 雑誌扱 / 廉価版）」で児童でないもの → 漫画（内容が「諸芸・娯楽」のマーマレードコミックスなど）。それ以外 → 除外。そのあと `ndl` 収集器と同じ除外（978-4 以外・特装版・アンソロジー・ガイドなど）、題名の語（写真集・ビジュアルブック・キャラクターブック・シールブック・特別版）、発売日が先月 1 日より前
+- **行**: `ndl` 収集器と同じ `ndl:<ISBN>`（source `ndl`、kind `book`）。シリーズ名・巻・叢書名の取り出しは `ndl` 収集器の関数を使う（近刊は巻数が題名に入るので `in_title`）。題名の「（仮）」は落とす。`extra.via = "jpro"`、`extra.jpro` に元の題名・巻・叢書名・ジャンル語。書影は入れない（`https://ndlsearch.ndl.go.jp/thumbnail/<isbn>.jpg` は Referer が NDL Search 以外だと 403。アプリの origin から `<img>`・Referer なし・`no-referrer` で確認。openBD にも無かった）
+- **既存の行との統合**: 目録済みの行（`via` なし）は題名・叢書名・種類を保ち、JPRO の発売日が細かい時だけ日付を取る。前の JPRO の行は新しい登録で上書きし、細かい日付は残す。目録ができると `ndl` 収集器が同じ行を上書きし、JPRO の日付は `_keep_finer_dates` で残る
+- **区切りと再開**: `day:<YYYY-MM-DD>`。`build` は直近 30 日のうち `done` でない日、`--fresh` は記録を消して 30 日、`--recent` は前回最後まで終わった実行の1日前から今日まで（`done` でも）。途中で止めた日は次の実行で最初から。`--limit` で止めた日は `pending`（`limit`）
+- **所要時間（2026-10-15 実測）**: 1 リクエスト 1.3〜9.5 秒（夕方は平均 5〜9 秒。キャッシュに当たると速い）。試運転: 300 行で 16 リクエスト 2分31秒、520 行で約 25 リクエスト 1分54秒。直近 30 日（9/16〜10/15）はおよそ 23,000 件 ≒ 120 ページ＋空の日など ≒ 150 リクエストで 12〜22 分、残るのは約 1 割（2,000〜2,500 冊）。`--recent` は週 1 回なら 8 日 ≒ 50 リクエストで 4〜8 分
+- **判定の精度（2026-10-15）**: 10/14 の全 473 件で漫画 87・小説 39、除外はジャンル 241・形態 55・発売日 22・電子書籍 15・成人 7・除外語 7。10/12〜10/15 の試運転で残った 500 冊を目で確かめ、明らかな誤りは 7 冊（写真集 2・麻雀の戦術書・公式ビジュアルブック・キャラクターブック・シールブック・特別版）で、上の規則で落とすようにした。残る境界例は戯曲・古典の現代語訳・児童向けの動物ノンフィクション・画集寄りの短編集・漫画誌の単行本化・特典付きの版（およそ 2%）
+- **紐付け**: JPRO の行のうち 206 冊は AniList の作品に結び付き（シリーズ名一致）、64 冊は目録済みの本の棚に入り、230 冊は JPRO だけの棚になった（新しいシリーズ、または叢書名が別名のもの）
+- **同期での利用**: `/api/ndl/series` がカタログの JPRO の行を読み取り専用で足す（`backend/catalog/upcoming.py`。specs/data-coverage/design.md の「カタログの近刊を足す」「近刊の叢書名のゆれ」）

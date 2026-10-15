@@ -24,5 +24,11 @@
 - [x] **R**: 初回の全件収集（バックグラウンド）→ 紐付け → 書き出し
 - [x] **V**: 統合検証（件数・代表作品のまとまり・画面からの追加・375px/ダーク）
 
+### Wave 3（目録前の近刊）
+- [x] **J1**: JPRO 収集器（OAI-PMH `set=jpro`・日ごとの区切り・一括付け直しの日を飛ばす・小説/漫画の判定表・`ndl:<isbn>` への統合・JPRO の棚を目録済みの棚へ）
+  - Files: `backend/catalog/harvest/jpro.py`, `backend/catalog/{__main__,link,runtime}.py`, `backend/tests/catalog/test_harvest_jpro.py`, fixture
+- [x] **J2**: 同期の NDL 系統 API がカタログの近刊を足す（種類の補正・叢書名のゆれの吸収）
+  - Files: `backend/catalog/upcoming.py`, `backend/adapters/ndl.py`, `backend/tests/{test_ndl.py,conftest.py}`, `backend/tests/catalog/test_upcoming.py`
+
 ## Progress
-- Total: 9 tasks | Completed: 9 | In Progress: 0
+- Total: 11 tasks | Completed: 11 | In Progress: 0
