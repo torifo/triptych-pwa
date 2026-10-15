@@ -8,6 +8,8 @@ from pydantic import BaseModel, Field
 
 CatalogKind = Literal["anime", "manga", "novel", "web-novel", "book"]
 CatalogSort = Literal["popularity", "recent", "upcoming", "title"]
+CatalogEventKind = Literal["anime", "book"]
+CatalogEventType = Literal["season-start", "movie", "release", "episode"]
 
 
 class CatalogSourceCount(BaseModel):
@@ -89,3 +91,23 @@ class CatalogWorkDetail(BaseModel):
     kinds: list[CatalogKind]
     entries: list[CatalogEntry]  # members, AniList first then by kind / date
     candidates: list[CatalogEntry] = Field(default_factory=list)  # low-confidence links (< 0.8)
+
+
+class CatalogEvent(BaseModel):
+    """One dated thing on the calendar: an anime starting / a film opening / a book on sale / an airing anime's next episode."""
+
+    clusterId: str
+    entryId: str  # the anime or book row the date comes from
+    title: str  # the work's title (cluster_summary.title)
+    kind: CatalogEventKind
+    event: CatalogEventType
+    date: str  # YYYY-MM-DD (JST)
+    time: Optional[str] = None  # HH:MM, JST, the real clock (not 24:30); only episodes that have one
+    label: str  # 放送開始 / 第2期 放送開始 / 公開 / 2巻 / 第3話
+    cover: Optional[str] = None
+    popularity: int = 0
+
+
+class CatalogEventPage(BaseModel):
+    items: list[CatalogEvent]
+    truncated: bool  # more events than the limit: only the earliest ones are here

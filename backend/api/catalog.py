@@ -12,8 +12,10 @@ from __future__ import annotations
 import json
 import re
 import sqlite3
+import sys
 import unicodedata
 from contextlib import contextmanager
+from datetime import date, timedelta
 from typing import Any, Iterable, Iterator, Optional, Sequence
 from urllib.parse import quote
 
@@ -24,6 +26,8 @@ from .. import timeutil
 from ..catalog import db, export
 from ..catalog.dto import (
     CatalogEntry,
+    CatalogEvent,
+    CatalogEventPage,
     CatalogSort,
     CatalogSourceCount,
     CatalogStats,
@@ -532,6 +536,236 @@ def get_work(cluster_id: str) -> CatalogWorkDetail:
             _entry(candidate_rows[a_id], candidate_links[a_id]) for a_id in candidate_ids if a_id in candidate_rows
         ],
     )
+
+
+# -- /events --------------------------------------------------------------------
+
+MAX_EVENT_DAYS = 62  # both ends included
+MAX_EVENTS = 600
+_EVENT_KINDS = ("anime", "book")
+_START_FORMATS = ("TV", "TV_SHORT", "ONA", "MOVIE")  # the formats of an anime that has a start day to show
+_DAY_RE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
+_CLOCK_RE = re.compile(r"([0-9]{1,2}):([0-5][0-9])")
+_NUMBER = r"([0-9]+|[一二三四五六七八九十]+)"
+# 第2期 / Season 2 / シーズン2 / 2nd Season in the title of a season (a cour or a bare '3期生' is not one).
+_SEASON_LABELS = (
+    re.compile(f"第{_NUMBER}期(?!生)"),
+    re.compile(r"(?<![A-Za-z])(?:season|シーズン)\s*([0-9]+)", re.IGNORECASE),
+    re.compile(r"(?<![0-9])([0-9]+)(?:st|nd|rd|th)\s*season", re.IGNORECASE),
+)
+_VOLUME_LABEL_RE = re.compile(r"([0-9]+)巻")
+_ANIME_EVENT_COLUMNS = (
+    "e.id AS entry_id, e.title AS entry_title, e.cover AS entry_cover, c.cluster_id, "
+    "cs.title AS work_title, cs.cover AS work_cover, cs.popularity"
+)
+# Unary '+' on kind / source keeps SQLite on the start_date index: a month holds a few thousand rows, while
+# the kind / source indexes it would pick instead cover 100k books (about 10x slower on the 196k-row catalog).
+_EVENT_JOINS = "FROM entries e JOIN clusters c ON c.entry_id = e.id JOIN cluster_summary cs ON cs.cluster_id = c.cluster_id "
+_EVENT_DAY = "(e.start_precision = 'day' OR (e.start_precision IS NULL AND length(e.start_date) = 10))"
+
+
+def _season_label(title: Optional[str]) -> Optional[str]:
+    """'薬屋のひとりごと 第3期' / 'アオのハコ Season２' -> '第3期'. None when the title names no season."""
+    text = unicodedata.normalize("NFKC", title or "")
+    for pattern in _SEASON_LABELS:
+        match = pattern.search(text)
+        if match:
+            return f"第{match.group(1)}期"
+    return None
+
+
+def _event_period(first: str, last: str) -> tuple[str, str]:
+    """`from` / `to` as given when both are YYYY-MM-DD days, `to` is not before `from` and the span is at most 62 days."""
+    days: list[date] = []
+    for name, value in (("from", first), ("to", last)):
+        try:
+            if not _DAY_RE.fullmatch(value):
+                raise ValueError(value)
+            days.append(date.fromisoformat(value))
+        except ValueError:
+            raise _unprocessable(f"{name} must be a date (YYYY-MM-DD): {value}") from None
+    if days[1] < days[0]:
+        raise _unprocessable("to is before from")
+    if (days[1] - days[0]).days + 1 > MAX_EVENT_DAYS:
+        raise _unprocessable(f"the period is at most {MAX_EVENT_DAYS} days")
+    return first, last
+
+
+def _event_kinds(kind: Optional[str]) -> list[str]:
+    names = [part.strip() for part in (kind or "").split(",") if part.strip()]
+    for name in names:
+        if name not in _EVENT_KINDS:
+            raise _unprocessable(f"unknown kind: {name}")
+    return [name for name in _EVENT_KINDS if name in names] or list(_EVENT_KINDS)
+
+
+def _anime_start_events(conn: sqlite3.Connection, first: str, last: str) -> list[CatalogEvent]:
+    """A TV / ONA season starting or a film opening on a day of the period (AniList rows with a day-precision date)."""
+    rows = conn.execute(
+        f"SELECT {_ANIME_EVENT_COLUMNS}, e.title_native, e.format, e.start_date {_EVENT_JOINS}"
+        "WHERE +e.kind = 'anime' AND +e.source = 'anilist' AND e.start_date BETWEEN ? AND ? "
+        f"AND {_EVENT_DAY} AND e.format IN ({', '.join('?' * len(_START_FORMATS))})",
+        (first, last, *_START_FORMATS),
+    ).fetchall()
+    events: list[CatalogEvent] = []
+    for row in rows:
+        movie = row["format"] == "MOVIE"
+        season = None if movie else _season_label(row["entry_title"]) or _season_label(row["title_native"])
+        events.append(
+            CatalogEvent(
+                clusterId=row["cluster_id"],
+                entryId=row["entry_id"],
+                title=row["work_title"],
+                kind="anime",
+                event="movie" if movie else "season-start",
+                date=row["start_date"],
+                label="公開" if movie else f"{season} 放送開始" if season else "放送開始",
+                cover=row["entry_cover"] or row["work_cover"],
+                popularity=row["popularity"] or 0,
+            )
+        )
+    return events
+
+
+def _airing_moment(day: Any, clock: Any) -> Optional[tuple[str, Optional[str]]]:
+    """AniList's next airing (broadcast day, 'HH:MM' that reads 24:30 for 00:30 the next day) as the real JST (day, 'HH:MM').
+
+    The clock is None when it is missing or unreadable; None altogether when the day is not a date.
+    """
+    if not isinstance(day, str) or not _DAY_RE.fullmatch(day):
+        return None
+    try:
+        when = date.fromisoformat(day)
+    except ValueError:
+        return None
+    match = _CLOCK_RE.fullmatch(clock) if isinstance(clock, str) else None
+    if match is None or int(match.group(1)) >= 48:
+        return day, None
+    hour = int(match.group(1))
+    if hour >= 24:
+        when, hour = when + timedelta(days=1), hour - 24
+    return when.isoformat(), f"{hour:02d}:{match.group(2)}"
+
+
+def _episode_events(
+    conn: sqlite3.Connection, first: str, last: str, starts: set[tuple[str, str]]
+) -> list[CatalogEvent]:
+    """The next episode of each airing anime (AniList RELEASING rows that carry `extra.nextAiringEpisode`), one per work.
+
+    The next airing is a snapshot from the last harvest, so a work shows its earliest next episode inside the
+    period. `starts` holds (entry, day) of the start events already listed: an entry's first episode is not
+    listed again next to them.
+    """
+    # The stored day is the broadcast day, which is the day before the real one for 24:00 and later.
+    earliest = (date.fromisoformat(first) - timedelta(days=1)).isoformat()
+    rows = conn.execute(
+        f"SELECT {_ANIME_EVENT_COLUMNS}, "
+        "json_extract(e.extra, '$.nextAiringEpisode.date') AS day, "
+        "json_extract(e.extra, '$.nextAiringEpisode.time') AS clock, "
+        "json_extract(e.extra, '$.nextAiringEpisode.episode') AS episode "
+        f"{_EVENT_JOINS}"
+        "WHERE e.kind = 'anime' AND e.source = 'anilist' AND e.status = 'RELEASING' "
+        "AND json_extract(e.extra, '$.nextAiringEpisode.date') BETWEEN ? AND ?",
+        (earliest, last),
+    ).fetchall()
+    chosen: dict[str, tuple[tuple[str, bool, str, str], CatalogEvent]] = {}
+    for row in rows:
+        moment = _airing_moment(row["day"], row["clock"])
+        if moment is None:
+            continue
+        day, clock = moment
+        if not first <= day <= last or (row["entry_id"], day) in starts:
+            continue
+        episode = row["episode"]
+        event = CatalogEvent(
+            clusterId=row["cluster_id"],
+            entryId=row["entry_id"],
+            title=row["work_title"],
+            kind="anime",
+            event="episode",
+            date=day,
+            time=clock,
+            label=f"第{episode}話" if isinstance(episode, int) and not isinstance(episode, bool) else "次回放送",
+            cover=row["entry_cover"] or row["work_cover"],
+            popularity=row["popularity"] or 0,
+        )
+        order = (day, clock is None, clock or "", row["entry_id"])
+        if row["cluster_id"] not in chosen or order < chosen[row["cluster_id"]][0]:
+            chosen[row["cluster_id"]] = (order, event)
+    return [event for _, event in chosen.values()]
+
+
+def _volume_rank(label: str) -> int:
+    match = _VOLUME_LABEL_RE.fullmatch(label)
+    return int(match.group(1)) if match else sys.maxsize
+
+
+def _book_events(conn: sqlite3.Connection, first: str, last: str) -> list[CatalogEvent]:
+    """Books on sale on a day of the period, of works that have an AniList row (cluster_summary.popularity > 0).
+
+    A work's books of one day are one event: the smaller volume.
+    """
+    rows = conn.execute(
+        "SELECT e.id AS entry_id, e.title AS entry_title, e.start_date, c.cluster_id, "
+        "cs.title AS work_title, cs.cover AS work_cover, cs.popularity "
+        f"{_EVENT_JOINS}"
+        "WHERE +e.kind = 'book' AND e.start_date BETWEEN ? AND ? AND e.start_precision = 'day' AND cs.popularity > 0",
+        (first, last),
+    ).fetchall()
+    chosen: dict[tuple[str, str], tuple[tuple[int, str], CatalogEvent]] = {}
+    for row in rows:
+        label = _book_next_label(row["work_title"], row["entry_title"])
+        key = (row["cluster_id"], row["start_date"])
+        order = (_volume_rank(label), row["entry_id"])
+        if key in chosen and chosen[key][0] <= order:
+            continue
+        chosen[key] = (
+            order,
+            CatalogEvent(
+                clusterId=row["cluster_id"],
+                entryId=row["entry_id"],
+                title=row["work_title"],
+                kind="book",
+                event="release",
+                date=row["start_date"],
+                label=label,
+                cover=row["work_cover"],
+                popularity=row["popularity"] or 0,
+            ),
+        )
+    return [event for _, event in chosen.values()]
+
+
+def _event_order(event: CatalogEvent) -> tuple[Any, ...]:
+    """Day, then the time of day (events without one last), the more popular work, then a fixed tie-break."""
+    return (
+        event.date,
+        event.time is None,
+        event.time or "",
+        -event.popularity,
+        event.clusterId,
+        _EVENT_KINDS.index(event.kind),
+        event.entryId,
+    )
+
+
+@router.get("/events", response_model=CatalogEventPage)
+def list_events(
+    from_: str = Query(..., alias="from", description="first day, YYYY-MM-DD"),
+    to: str = Query(..., description="last day (included), YYYY-MM-DD; at most 62 days from `from`"),
+    kind: Optional[str] = Query(None, description="comma separated: anime, book (both when omitted)"),
+) -> CatalogEventPage:
+    first, last = _event_period(from_, to)
+    kinds = _event_kinds(kind)
+    events: list[CatalogEvent] = []
+    with _open() as conn:
+        if "anime" in kinds:
+            events = _anime_start_events(conn, first, last)
+            events += _episode_events(conn, first, last, {(event.entryId, event.date) for event in events})
+        if "book" in kinds:
+            events += _book_events(conn, first, last)
+    events.sort(key=_event_order)
+    return CatalogEventPage(items=events[:MAX_EVENTS], truncated=len(events) > MAX_EVENTS)
 
 
 # -- /export --------------------------------------------------------------------
