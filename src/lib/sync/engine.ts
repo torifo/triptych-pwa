@@ -2,9 +2,11 @@
 // status.svelte.ts は import しない（vitest は svelte プラグインを通さず `$state` が未定義になる）。
 
 import { apiGet } from '../api';
+import { isSafeHttpUrl } from '../components/release-view';
 import { db as defaultDB, type TriptychDB } from '../db/schema';
 import type {
   AiringStatus,
+  BroadcastHint,
   DatePrecision,
   Edition,
   Release,
@@ -15,14 +17,17 @@ import type {
 import {
   createRelease,
   deleteRelease,
+  getEdition,
   listEditions,
   listReleasesByEdition,
   listWorks,
   mergeRelease,
   setEditionCompleted,
+  updateEdition,
   updateEditionProgress,
   updateEditionSyncHints,
   updateRelease,
+  type EditionSyncHintsPatch,
   type ReleaseMergeInput,
 } from '../db/store';
 import { isPastRelease, isValidYmd, todayJst } from '../dates';
@@ -59,10 +64,21 @@ interface NdlSeriesDTO {
   releases: ReleaseDTO[];
 }
 
+/** しょぼかるの番組1枠（日付は朝5時区切り、時刻は '25:30' 表記）。 */
+interface BroadcastDTO {
+  channel: string;
+  isStreaming: boolean;
+  date: string;
+  time: string;
+  episodeCount?: number | null;
+}
+
 interface SyoboiTitleDTO {
   status: 'ok' | 'queued' | 'not_found';
   tid?: string | null;
   title?: string | null;
+  /** 今日以降の番組（collector が日時順に最大 8 件）。古い collector には無い。 */
+  programs?: BroadcastDTO[] | null;
   streamStarts?: ReleaseDTO[];
   /** streamStarts のうち、直近にも配信があった（配信中の）externalId。古い collector には無い。 */
   startedStreams?: string[] | null;
@@ -307,6 +323,29 @@ async function syncAnimeMedia(edition: Edition, ref: SourceRef, ctx: SyncContext
   }
 
   await rollNextEpisode(edition, ref, nextEpisode, ctx);
+
+  // 表紙は先頭の AniList id のものだけを使う（id が複数ある Edition で、同期のたびに入れ替わらないように）。
+  if (edition.sourceRefs.find((r) => r.source === 'anilist')?.externalId === ref.externalId) {
+    await syncCover(edition.id, dto.cover, ctx);
+  }
+}
+
+/**
+ * AniList の表紙を Edition に入れる。更新するのは、表紙が空か、前の同期が入れた表紙（coverFrom が anilist）の時だけ。
+ * 手で設定した表紙（coverFrom が無いまま coverUrl がある）やカタログから借りた表紙には触らない。
+ */
+async function syncCover(editionId: string, cover: string | null | undefined, ctx: SyncContext): Promise<void> {
+  const url = cover?.trim();
+  if (!url || !isSafeHttpUrl(url)) return;
+  const { database } = ctx;
+  // 判定と書き込みを同じトランザクションにして、同期の最中に手で変えた表紙を上書きしない。
+  await database.transaction('rw', database.editions, async () => {
+    const current = await getEdition(editionId, database);
+    if (!current) return;
+    if (current.coverUrl?.trim() && current.syncHints?.coverFrom !== 'anilist') return;
+    if (current.coverUrl !== url) await updateEdition(editionId, { coverUrl: url }, database);
+    await updateEditionSyncHints(editionId, { coverFrom: 'anilist' }, database); // 同じ値なら書かれない
+  });
 }
 
 async function rollNextEpisode(
@@ -372,11 +411,14 @@ async function syncSyoboi(edition: Edition, work: Work | undefined, ctx: SyncCon
   const dto = await apiGet<SyoboiTitleDTO>('/api/syoboi/title', knownTid ? { tid: knownTid } : { title });
   if (dto.status !== 'ok') return; // queued は次の同期で拾う
 
-  if (dto.tid && dto.tid !== edition.syncHints?.syoboiTid) {
-    await updateEditionSyncHints(edition.id, { syoboiTid: dto.tid }, database);
-  }
-
   const today = todayJst(ctx.now());
+  const hints: EditionSyncHintsPatch = {};
+  if (dto.tid && dto.tid !== edition.syncHints?.syoboiTid) hints.syoboiTid = dto.tid;
+  // programs の無い古い collector では保存済みの番組を触らない。今日以降が無ければ消す（null）。
+  if (dto.programs) hints.broadcasts = upcomingBroadcasts(dto.programs, today);
+  // 中身が同じなら updateEditionSyncHints が書かない。
+  if (Object.keys(hints).length > 0) await updateEditionSyncHints(edition.id, hints, database);
+
   const streams = (await listReleasesByEdition(edition.id, database)).filter(
     (r) => r.kind === 'stream-start',
   );
@@ -401,6 +443,35 @@ async function syncSyoboi(edition: Edition, work: Work | undefined, ctx: SyncCon
       mergeRelease(toMergeInput(edition.id, release, 'syoboi'), database, { now: ctx.now() }),
     );
   }
+}
+
+const MAX_BROADCASTS = 8;
+const CLOCK_RE = /^(\d{1,2}):(\d{2})$/;
+
+/** '25:30' -> 分（1530）。朝5時区切りなので 24 時以降もそのまま数える。形式が違えば undefined。 */
+function clockMinutes(time: string): number | undefined {
+  const match = CLOCK_RE.exec(time.trim());
+  return match ? Number(match[1]) * 60 + Number(match[2]) : undefined;
+}
+
+/**
+ * しょぼかるの番組のうち今日（JST）以降を日時順に最大 8 件。
+ * 日付・時刻・局名が不正な枠は捨てる。1件も無ければ null（保存済みの番組を消す）。
+ */
+function upcomingBroadcasts(programs: BroadcastDTO[], today: string): BroadcastHint[] | null {
+  const rows: Array<{ minutes: number; hint: BroadcastHint }> = [];
+  for (const p of programs) {
+    const channel = p.channel?.trim();
+    const minutes = typeof p.time === 'string' ? clockMinutes(p.time) : undefined;
+    if (!channel || minutes === undefined || !isValidYmd(p.date) || p.date < today) continue;
+    const hint: BroadcastHint = { channel, date: p.date, time: p.time.trim(), isStreaming: p.isStreaming === true };
+    if (typeof p.episodeCount === 'number' && Number.isInteger(p.episodeCount) && p.episodeCount > 0) {
+      hint.episode = p.episodeCount;
+    }
+    rows.push({ minutes, hint });
+  }
+  rows.sort((a, b) => a.hint.date.localeCompare(b.hint.date) || a.minutes - b.minutes);
+  return rows.length > 0 ? rows.slice(0, MAX_BROADCASTS).map((r) => r.hint) : null;
 }
 
 /** 配信中のサービスは「次回の配信」1件のローリング。日付は延期として記録せずに動かし、新着にしない。 */

@@ -14,6 +14,11 @@ const KNOWN_SOURCES: readonly Source[] = ['anilist', 'narou', 'openbd', 'ndl', '
 /** createEdition の入力から workId を除いたもの（Work が決まってから足す）。 */
 export interface EditionInput extends Omit<CreateEditionInput, 'workId' | 'sourceRefs'> {
   sourceRefs: SourceRef[];
+  /**
+   * 他の面から借りて入れた表紙の印（本だけ）。createEdition は syncHints を受けないので、
+   * 作成のあとで syncHints.coverFrom に書く（書かないと、手で設定した表紙と区別できない）。
+   */
+  coverFrom?: 'catalog';
 }
 
 function text(value: unknown): string {
@@ -109,16 +114,44 @@ export function entrySourceRefs(entry: CatalogEntry): SourceRef[] {
   return [{ source, externalId, url }];
 }
 
-/** CatalogEntry -> createEdition の入力。本はシリーズ名を Edition の題名にする。 */
-export function toEditionInput(entry: CatalogEntry): EditionInput {
+/**
+ * CatalogEntry -> createEdition の入力。本はシリーズ名を Edition の題名にする。
+ * 表紙の無い本は、同じカタログ作品の行（siblings）から AniList の表紙を借りる。
+ */
+export function toEditionInput(entry: CatalogEntry, siblings: readonly CatalogEntry[] = []): EditionInput {
   const input: EditionInput = {
     mediaType: entryMediaType(entry),
     title: entry.kind === 'book' ? ndlSeriesName(entry) : entry.title,
     sourceRefs: entrySourceRefs(entry),
     linkSource: 'manual',
   };
-  if (entry.cover && isSafeHttpUrl(entry.cover)) input.coverUrl = entry.cover;
+  if (entry.cover && isSafeHttpUrl(entry.cover)) {
+    input.coverUrl = entry.cover;
+  } else if (entry.kind === 'book') {
+    const borrowed = borrowedCover(input.mediaType, siblings);
+    if (borrowed) {
+      input.coverUrl = borrowed;
+      input.coverFrom = 'catalog';
+    }
+  }
   return input;
+}
+
+/** 本が表紙を借りる面の順: 本の種別に合う面（漫画→漫画、文庫→小説）、もう一方、アニメ。 */
+function borrowOrder(mediaType: MediaType): CatalogKind[] {
+  return mediaType === 'manga' ? ['manga', 'novel', 'anime'] : ['novel', 'manga', 'anime'];
+}
+
+/** 同じカタログ作品の AniList の行から借りる表紙（http/https のみ）。面ごとに人気が最大の行を使う。 */
+function borrowedCover(mediaType: MediaType, siblings: readonly CatalogEntry[]): string | undefined {
+  for (const kind of borrowOrder(mediaType)) {
+    const withCover = siblings.filter(
+      (e) => e.kind === kind && e.source === 'anilist' && isSafeHttpUrl(text(e.cover)),
+    );
+    const best = mostPopular(withCover);
+    if (best) return text(best.cover);
+  }
+  return undefined;
 }
 
 // ---------------------------------------------------------------------------

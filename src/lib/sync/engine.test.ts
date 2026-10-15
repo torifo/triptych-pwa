@@ -76,7 +76,14 @@ const at = (iso: string) => () => new Date(iso);
 
 function mediaDto(
   id: string,
-  opts: { seasonDate?: string; episode?: number; episodeDate?: string; time?: string; status?: string } = {},
+  opts: {
+    seasonDate?: string;
+    episode?: number;
+    episodeDate?: string;
+    time?: string;
+    status?: string;
+    cover?: string | null;
+  } = {},
 ) {
   const releases: unknown[] = [
     {
@@ -106,6 +113,7 @@ function mediaDto(
     title: 'テストアニメ',
     url: `https://anilist.co/anime/${id}`,
     ...(opts.status ? { status: opts.status } : {}),
+    ...(opts.cover !== undefined ? { cover: opts.cover } : {}),
     releases,
   };
 }
@@ -963,6 +971,346 @@ describe('runSync: 障害と再試行', () => {
     expect(result.errors.detect?.message).toContain('502');
     const throttle = (await db.meta.get('detectionThrottle'))?.value as Record<string, string>;
     expect(throttle[ln.workId]).toBeUndefined();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 表紙（AniList）
+// ---------------------------------------------------------------------------
+
+describe('runSync: アニメの表紙', () => {
+  const COVER = 'https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx1.jpg';
+  const NEW_COVER = 'https://s4.anilist.co/file/anilistcdn/media/anime/cover/large/bx1-v2.jpg';
+  const OLD_STAMP = '2000-01-01T00:00:00.000Z';
+
+  const run = () => runSync({ database: db, force: true, now: () => NOW });
+  const hints = async (id: string) => (await getEdition(id, db))?.syncHints;
+  /** updatedAt を過去に固定して、同期が書き込んだかどうかを見分ける。 */
+  const freeze = async (id: string) => {
+    await db.editions.update(id, { updatedAt: OLD_STAMP });
+  };
+
+  it('表紙の無い Edition に AniList の表紙を入れ、coverFrom に anilist を立てる', async () => {
+    const anime = await setup('W', { mediaType: 'anime', title: 'A', sourceRefs: [anilistRef('1')] });
+    mockFetch({ '/api/anilist/media/': () => mediaDto('1', { cover: COVER }) });
+
+    const result = await run();
+
+    expect(result.errors).toEqual({});
+    const saved = await getEdition(anime.id, db);
+    expect(saved?.coverUrl).toBe(COVER);
+    expect(saved?.syncHints).toEqual({ coverFrom: 'anilist' });
+  });
+
+  it('coverFrom が anilist の表紙は、AniList 側が変われば追従する', async () => {
+    const anime = await setup('W', {
+      mediaType: 'anime',
+      title: 'A',
+      sourceRefs: [anilistRef('1')],
+      coverUrl: COVER,
+    });
+    await updateEditionSyncHints(anime.id, { coverFrom: 'anilist' }, db);
+    mockFetch({ '/api/anilist/media/': () => mediaDto('1', { cover: NEW_COVER }) });
+
+    await run();
+
+    const saved = await getEdition(anime.id, db);
+    expect(saved?.coverUrl).toBe(NEW_COVER);
+    expect(saved?.syncHints?.coverFrom).toBe('anilist');
+  });
+
+  it('手で設定した表紙（coverFrom が無いまま coverUrl がある）は上書きしない', async () => {
+    const anime = await setup('W', {
+      mediaType: 'anime',
+      title: 'A',
+      sourceRefs: [anilistRef('1')],
+      coverUrl: 'https://example.test/mine.jpg',
+    });
+    mockFetch({ '/api/anilist/media/': () => mediaDto('1', { cover: COVER }) });
+
+    await run();
+
+    const saved = await getEdition(anime.id, db);
+    expect(saved?.coverUrl).toBe('https://example.test/mine.jpg');
+    expect(saved?.syncHints).toBeUndefined();
+  });
+
+  it('カタログから借りた表紙（coverFrom が catalog）も上書きしない', async () => {
+    const anime = await setup('W', {
+      mediaType: 'anime',
+      title: 'A',
+      sourceRefs: [anilistRef('1')],
+      coverUrl: 'https://example.test/catalog.jpg',
+    });
+    await updateEditionSyncHints(anime.id, { coverFrom: 'catalog' }, db);
+    mockFetch({ '/api/anilist/media/': () => mediaDto('1', { cover: COVER }) });
+
+    await run();
+
+    const saved = await getEdition(anime.id, db);
+    expect(saved?.coverUrl).toBe('https://example.test/catalog.jpg');
+    expect(saved?.syncHints?.coverFrom).toBe('catalog');
+  });
+
+  it('値が同じなら書き込まない', async () => {
+    const anime = await setup('W', { mediaType: 'anime', title: 'A', sourceRefs: [anilistRef('1')] });
+    mockFetch({ '/api/anilist/media/': () => mediaDto('1', { cover: COVER }) });
+    await run();
+    await freeze(anime.id);
+
+    await run();
+
+    expect((await getEdition(anime.id, db))?.updatedAt).toBe(OLD_STAMP);
+  });
+
+  it('http(s) 以外の表紙は入れない', async () => {
+    const anime = await setup('W', { mediaType: 'anime', title: 'A', sourceRefs: [anilistRef('1')] });
+    for (const bad of ['javascript:alert(1)', 'data:image/png;base64,AAAA', 'not a url', '  ']) {
+      mockFetch({ '/api/anilist/media/': () => mediaDto('1', { cover: bad }) });
+      await run();
+      const saved = await getEdition(anime.id, db);
+      expect(saved?.coverUrl).toBeUndefined();
+      expect(saved?.syncHints).toBeUndefined();
+    }
+  });
+
+  it('AniList に表紙が無い（null・未指定）時は、入っている表紙を消さない', async () => {
+    const anime = await setup('W', {
+      mediaType: 'anime',
+      title: 'A',
+      sourceRefs: [anilistRef('1')],
+      coverUrl: COVER,
+    });
+    await updateEditionSyncHints(anime.id, { coverFrom: 'anilist' }, db);
+
+    mockFetch({ '/api/anilist/media/': () => mediaDto('1', { cover: null }) });
+    await run();
+    mockFetch({ '/api/anilist/media/': () => mediaDto('1') });
+    await run();
+
+    const saved = await getEdition(anime.id, db);
+    expect(saved?.coverUrl).toBe(COVER);
+    expect(saved?.syncHints?.coverFrom).toBe('anilist');
+  });
+
+  it('AniList の id が複数ある Edition は、先頭の id の表紙だけを使う（同期のたびに入れ替わらない）', async () => {
+    const anime = await setup('W', {
+      mediaType: 'anime',
+      title: 'A',
+      sourceRefs: [anilistRef('1'), anilistRef('2')],
+    });
+    mockFetch({
+      '/api/anilist/media/': (url) =>
+        mediaDto(url.pathname.split('/').pop() ?? '', { cover: url.pathname.endsWith('/1') ? COVER : NEW_COVER }),
+    });
+
+    await run();
+    await run();
+
+    expect((await getEdition(anime.id, db))?.coverUrl).toBe(COVER);
+  });
+
+  it('文庫・漫画・Web 小説は AniList の表紙を取り込まない（アニメだけ）', async () => {
+    const manga = await setup('M', {
+      mediaType: 'manga',
+      title: 'M',
+      sourceRefs: [{ source: 'anilist', externalId: '5', url: 'https://anilist.co/manga/5' }],
+    });
+    mockFetch({
+      '/api/anilist/media/': () => mediaDto('5', { cover: COVER }),
+      '/api/ndl/series': () => ndlDto([]),
+    });
+
+    await run();
+
+    expect((await getEdition(manga.id, db))?.coverUrl).toBeUndefined();
+  });
+
+  it('表紙を入れても、TID などほかの syncHints を消さない', async () => {
+    const anime = await setup('W', { mediaType: 'anime', title: 'A', sourceRefs: [anilistRef('1')] });
+    await updateEditionSyncHints(anime.id, { ndlLine: 'x' }, db);
+    mockFetch({
+      '/api/anilist/media/': () => mediaDto('1', { cover: COVER }),
+      '/api/syoboi/title': () => ({ status: 'ok', tid: '7667', programs: [], streamStarts: [] }),
+    });
+
+    await run();
+
+    expect(await hints(anime.id)).toEqual({ ndlLine: 'x', coverFrom: 'anilist', syoboiTid: '7667' });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 番組表（しょぼかる）
+// ---------------------------------------------------------------------------
+
+describe('runSync: しょぼかるの番組表', () => {
+  const OLD_STAMP = '2000-01-01T00:00:00.000Z';
+  const program = (channel: string, date: string, time: string, extra: Record<string, unknown> = {}) => ({
+    channel,
+    isStreaming: false,
+    date,
+    time,
+    episodeCount: null,
+    ...extra,
+  });
+  const okPrograms = (programs: unknown[]) => () => ({
+    status: 'ok',
+    tid: '7667',
+    title: 'A',
+    programs,
+    streamStarts: [],
+  });
+  const broadcasts = async (id: string) => (await getEdition(id, db))?.syncHints?.broadcasts;
+  const run = (now: () => Date = () => NOW) => runSync({ database: db, force: true, now });
+
+  async function anime() {
+    return setup('W', { mediaType: 'anime', title: 'A', sourceRefs: [anilistRef('1')] });
+  }
+
+  it('今日（JST）以降の番組を日時順に syncHints.broadcasts へ保存する', async () => {
+    const edition = await anime();
+    mockFetch({
+      '/api/anilist/media/': () => mediaDto('1'),
+      '/api/syoboi/title': okPrograms([
+        program('ABEMA', '2026-10-14', '24:00', { isStreaming: true, episodeCount: 2 }),
+        program('TOKYO MX', '2026-10-13', '25:30', { episodeCount: 1 }),
+        program('MBS', '2026-10-12', '26:00', { episodeCount: 0 }), // 昨日までは入れない
+        program('TOKYO MX', '2026-10-14', '23:00'),
+      ]),
+    });
+
+    const result = await run();
+
+    expect(result.errors).toEqual({});
+    expect(await broadcasts(edition.id)).toEqual([
+      { channel: 'TOKYO MX', date: '2026-10-13', time: '25:30', isStreaming: false, episode: 1 },
+      { channel: 'TOKYO MX', date: '2026-10-14', time: '23:00', isStreaming: false },
+      { channel: 'ABEMA', date: '2026-10-14', time: '24:00', isStreaming: true, episode: 2 },
+    ]);
+  });
+
+  it('同じ日の番組は時刻の数字順に並べる（9:30 は 25:30 より前）', async () => {
+    const edition = await anime();
+    mockFetch({
+      '/api/anilist/media/': () => mediaDto('1'),
+      '/api/syoboi/title': okPrograms([
+        program('B', '2026-10-14', '25:30'),
+        program('A', '2026-10-14', '9:30'),
+      ]),
+    });
+
+    await run();
+
+    expect((await broadcasts(edition.id))?.map((b) => b.channel)).toEqual(['A', 'B']);
+  });
+
+  it('最大 8 件までにする', async () => {
+    const edition = await anime();
+    const many = Array.from({ length: 12 }, (_, i) => program(`局${i}`, `2026-10-${14 + i}`, '24:00'));
+    mockFetch({ '/api/anilist/media/': () => mediaDto('1'), '/api/syoboi/title': okPrograms(many.reverse()) });
+
+    await run();
+
+    const saved = await broadcasts(edition.id);
+    expect(saved).toHaveLength(8);
+    expect(saved?.[0].date).toBe('2026-10-14');
+    expect(saved?.[7].date).toBe('2026-10-21');
+  });
+
+  it('日付や局名が不正な番組は捨てる', async () => {
+    const edition = await anime();
+    mockFetch({
+      '/api/anilist/media/': () => mediaDto('1'),
+      '/api/syoboi/title': okPrograms([
+        program('', '2026-10-14', '24:00'),
+        program('MBS', '2026-13-40', '24:00'),
+        program('MBS', '2026-10-14', ''),
+        program('TOKYO MX', '2026-10-15', '24:30'),
+      ]),
+    });
+
+    await run();
+
+    expect(await broadcasts(edition.id)).toEqual([
+      { channel: 'TOKYO MX', date: '2026-10-15', time: '24:30', isStreaming: false },
+    ]);
+  });
+
+  it('中身が同じなら書き込まない', async () => {
+    const edition = await anime();
+    mockFetch({
+      '/api/anilist/media/': () => mediaDto('1'),
+      '/api/syoboi/title': okPrograms([program('TOKYO MX', '2026-10-14', '25:30', { episodeCount: 3 })]),
+    });
+    await run();
+    await db.editions.update(edition.id, { updatedAt: OLD_STAMP });
+
+    await run();
+
+    expect((await getEdition(edition.id, db))?.updatedAt).toBe(OLD_STAMP);
+  });
+
+  it('次の同期で番組が変われば置き換え、今日より前になったものは落とす', async () => {
+    const edition = await anime();
+    let programs = [
+      program('TOKYO MX', '2026-10-13', '25:30'),
+      program('TOKYO MX', '2026-10-20', '25:30'),
+    ];
+    mockFetch({ '/api/anilist/media/': () => mediaDto('1'), '/api/syoboi/title': () => okPrograms(programs)() });
+
+    await run();
+    programs = [program('TOKYO MX', '2026-10-20', '25:30'), program('TOKYO MX', '2026-10-27', '25:30')];
+    await run(() => new Date('2026-10-15T03:00:00.000Z'));
+
+    expect((await broadcasts(edition.id))?.map((b) => b.date)).toEqual(['2026-10-20', '2026-10-27']);
+  });
+
+  it('今日以降の番組が無い（ok で空）なら broadcasts を消し、ほかの syncHints は残す', async () => {
+    const edition = await anime();
+    await updateEditionSyncHints(
+      edition.id,
+      { broadcasts: [{ channel: 'MBS', date: '2026-10-01', time: '24:00', isStreaming: false }] },
+      db,
+    );
+    mockFetch({ '/api/anilist/media/': () => mediaDto('1'), '/api/syoboi/title': okPrograms([]) });
+
+    await run();
+
+    expect((await getEdition(edition.id, db))?.syncHints).toEqual({ syoboiTid: '7667' });
+  });
+
+  it('programs が応答に無い（古い collector）時は保存済みの番組を触らない', async () => {
+    const edition = await anime();
+    const saved = [{ channel: 'MBS', date: '2026-10-20', time: '24:00', isStreaming: false }];
+    await updateEditionSyncHints(edition.id, { broadcasts: saved }, db);
+    mockFetch({
+      '/api/anilist/media/': () => mediaDto('1'),
+      '/api/syoboi/title': () => ({ status: 'ok', tid: '7667', streamStarts: [] }),
+    });
+
+    await run();
+
+    expect(await broadcasts(edition.id)).toEqual(saved);
+  });
+
+  it('放送終了（FINISHED）で照会しない時と、queued の時は、保存済みの番組を消さずそのままにする', async () => {
+    const finished = await setup('F', { mediaType: 'anime', title: 'F', sourceRefs: [anilistRef('1')] });
+    const queued = await setup('Q', { mediaType: 'anime', title: 'Q', sourceRefs: [anilistRef('2')] });
+    const saved = [{ channel: 'MBS', date: '2026-10-20', time: '24:00', isStreaming: false }];
+    await updateEditionSyncHints(finished.id, { broadcasts: saved }, db);
+    await updateEditionSyncHints(queued.id, { broadcasts: saved }, db);
+    const calls = mockFetch({
+      '/api/anilist/media/': (url) =>
+        url.pathname.endsWith('/1') ? mediaDto('1', { status: 'FINISHED' }) : mediaDto('2', { status: 'RELEASING' }),
+      '/api/syoboi/title': () => ({ status: 'queued', programs: [], streamStarts: [] }),
+    });
+
+    await run();
+
+    expect(callsTo(calls, '/api/syoboi/title').map((u) => u.searchParams.get('title'))).toEqual(['Q']);
+    expect(await broadcasts(finished.id)).toEqual(saved);
+    expect(await broadcasts(queued.id)).toEqual(saved);
   });
 });
 

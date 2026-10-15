@@ -148,6 +148,104 @@ describe('toEditionInput', () => {
   });
 });
 
+describe('toEditionInput: 本の表紙をカタログの同じ作品から借りる', () => {
+  const anilist = (id: string, kind: CatalogEntry['kind'], cover: string | null, over: Partial<CatalogEntry> = {}) =>
+    makeEntry({ source: 'anilist', externalId: id, kind, cover, ...over });
+  const novelBook = (over: Partial<CatalogEntry> = {}) => book('9784867940228', over);
+  const mangaBook = (over: Partial<CatalogEntry> = {}) =>
+    book('9784867940229', { extra: { kindHint: 'manga', line: '', series: '本好きの下剋上' }, ...over });
+
+  it('表紙の無い本は AniList の小説の表紙を借り、coverFrom を catalog にする', () => {
+    const siblings = [
+      anilist('1', 'anime', 'https://img.example/anime.jpg'),
+      anilist('2', 'novel', 'https://img.example/novel.jpg'),
+    ];
+    const input = toEditionInput(novelBook(), siblings);
+    expect(input.coverUrl).toBe('https://img.example/novel.jpg');
+    expect(input.coverFrom).toBe('catalog');
+  });
+
+  it('本の種別に合う面を先に使う（漫画の本は AniList の漫画、文庫の本は AniList の小説）', () => {
+    const siblings = [
+      anilist('2', 'novel', 'https://img.example/novel.jpg'),
+      anilist('3', 'manga', 'https://img.example/manga.jpg'),
+    ];
+    expect(toEditionInput(mangaBook(), siblings).coverUrl).toBe('https://img.example/manga.jpg');
+    expect(toEditionInput(novelBook(), siblings).coverUrl).toBe('https://img.example/novel.jpg');
+  });
+
+  it('合う面に表紙が無ければ、もう一方の漫画・小説、それも無ければアニメの表紙を使う', () => {
+    const anime = anilist('1', 'anime', 'https://img.example/anime.jpg');
+    const manga = anilist('3', 'manga', 'https://img.example/manga.jpg');
+    expect(toEditionInput(novelBook(), [anime, manga]).coverUrl).toBe('https://img.example/manga.jpg');
+    expect(toEditionInput(novelBook(), [anime]).coverUrl).toBe('https://img.example/anime.jpg');
+    expect(toEditionInput(mangaBook(), [anime, anilist('2', 'novel', null)]).coverUrl).toBe(
+      'https://img.example/anime.jpg',
+    );
+  });
+
+  it('同じ面に複数あれば人気が最大の表紙（同点は先に出てきた方）', () => {
+    const siblings = [
+      anilist('2', 'novel', 'https://img.example/a.jpg', { popularity: 100 }),
+      anilist('4', 'novel', 'https://img.example/b.jpg', { popularity: 900 }),
+      anilist('5', 'novel', 'https://img.example/c.jpg', { popularity: 900 }),
+    ];
+    expect(toEditionInput(novelBook(), siblings).coverUrl).toBe('https://img.example/b.jpg');
+  });
+
+  it('http(s) でない・空の表紙と、AniList 以外の行は借りない', () => {
+    const siblings = [
+      anilist('2', 'novel', 'data:image/png;base64,AAAA'),
+      anilist('3', 'manga', ''),
+      anilist('4', 'novel', '   '),
+      makeEntry({ source: 'narou', externalId: 'n1', kind: 'web-novel', cover: 'https://img.example/web.jpg' }),
+      makeEntry({ source: 'syoboi', externalId: '9', kind: 'anime', cover: 'https://img.example/syoboi.jpg' }),
+    ];
+    const input = toEditionInput(novelBook(), siblings);
+    expect(input.coverUrl).toBeUndefined();
+    expect(input.coverFrom).toBeUndefined();
+  });
+
+  it('本自身の行（entries に本が含まれる）や別の本の表紙は借りない', () => {
+    const siblings = [novelBook({ cover: 'https://img.example/other-book.jpg', externalId: '2' })];
+    const input = toEditionInput(novelBook(), siblings);
+    expect(input.coverUrl).toBeUndefined();
+    expect(input.coverFrom).toBeUndefined();
+  });
+
+  it('本に自分の表紙があればそれを使い、借りた印は付けない', () => {
+    const input = toEditionInput(novelBook({ cover: 'https://img.example/own.jpg' }), [
+      anilist('2', 'novel', 'https://img.example/novel.jpg'),
+    ]);
+    expect(input.coverUrl).toBe('https://img.example/own.jpg');
+    expect(input.coverFrom).toBeUndefined();
+  });
+
+  it('本自身の表紙が http(s) でなければ借りる', () => {
+    const input = toEditionInput(novelBook({ cover: 'javascript:alert(1)' }), [
+      anilist('2', 'novel', 'https://img.example/novel.jpg'),
+    ]);
+    expect(input.coverUrl).toBe('https://img.example/novel.jpg');
+    expect(input.coverFrom).toBe('catalog');
+  });
+
+  it('同じ作品の行が無ければ表紙なしのまま、印も付けない（引数を省いた呼び出しも同じ）', () => {
+    for (const input of [toEditionInput(novelBook()), toEditionInput(novelBook(), [])]) {
+      expect(input.coverUrl).toBeUndefined();
+      expect(input.coverFrom).toBeUndefined();
+    }
+  });
+
+  it('本以外の行は借りない（表紙の無いアニメ・漫画はそのまま）', () => {
+    const siblings = [anilist('9', 'manga', 'https://img.example/manga.jpg')];
+    for (const kind of ['anime', 'manga', 'novel'] as const) {
+      const input = toEditionInput(anilist('1', kind, null), siblings);
+      expect(input.coverUrl).toBeUndefined();
+      expect(input.coverFrom).toBeUndefined();
+    }
+  });
+});
+
 describe('registeredKeys / isRegistered', () => {
   const editions = [
     edition('w1', [{ source: 'anilist', externalId: '101', url: '' }]),

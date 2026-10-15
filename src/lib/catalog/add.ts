@@ -1,7 +1,15 @@
 // カタログの行を Library（IndexedDB）に追加する。変換と判定は register.ts。
 
 import { db as defaultDB, type Edition, type SourceRef, type TriptychDB } from '../db/schema';
-import { addSourceRef, createEdition, createWork, getWork, listEditions, listEditionsByWork } from '../db/store';
+import {
+  addSourceRef,
+  createEdition,
+  createWork,
+  getWork,
+  listEditions,
+  listEditionsByWork,
+  updateEditionSyncHints,
+} from '../db/store';
 import { isRegistered, registeredKeys, toEditionInput, uniqueByRef, type EditionInput } from './register';
 import type { CatalogEntry } from './types';
 
@@ -22,13 +30,20 @@ export interface EditionPlan {
 
 const hasNdlRef = (refs: readonly SourceRef[]) => refs.some((r) => r.source === 'ndl');
 
-/** 本の NDL 参照は同じ種別の Edition に足して1つにまとめる（新刊の同期が二重にならないように）。 */
-export function planEditions(entries: readonly CatalogEntry[], workEditions: readonly Edition[]): EditionPlan {
+/**
+ * 本の NDL 参照は同じ種別の Edition に足して1つにまとめる（新刊の同期が二重にならないように）。
+ * siblings は同じカタログ作品の全行。表紙の無い本が AniList の表紙を借りるのに使う。
+ */
+export function planEditions(
+  entries: readonly CatalogEntry[],
+  workEditions: readonly Edition[],
+  siblings: readonly CatalogEntry[] = [],
+): EditionPlan {
   const create: EditionInput[] = [];
   const attach: EditionPlan['attach'] = [];
   const books: EditionInput[] = [];
   for (const entry of entries) {
-    const input = toEditionInput(entry);
+    const input = toEditionInput(entry, siblings);
     if (entry.kind === 'book') books.push(input);
     else create.push({ ...input, sourceRefs: [...input.sourceRefs] });
   }
@@ -52,7 +67,7 @@ export function planEditions(entries: readonly CatalogEntry[], workEditions: rea
 
 /** entries を1つの Work に追加する。登録済みの行は飛ばし、追加するものが無ければ Work も作らない。 */
 export async function addEntriesToLibrary(
-  input: { title: string; entries: readonly CatalogEntry[]; workId?: string },
+  input: { title: string; entries: readonly CatalogEntry[]; workId?: string; siblings?: readonly CatalogEntry[] },
   database: TriptychDB = defaultDB,
 ): Promise<AddResult> {
   return database.transaction('rw', database.works, database.editions, async () => {
@@ -66,11 +81,13 @@ export async function addEntriesToLibrary(
 
     const workId = existing?.id ?? (await createWork({ title: input.title }, database)).id;
     const workEditions = existing ? await listEditionsByWork(workId, database) : [];
-    const plan = planEditions(fresh, workEditions);
+    const plan = planEditions(fresh, workEditions, input.siblings);
 
     const added: Edition[] = [];
-    for (const edition of plan.create) {
-      added.push(await createEdition({ workId, ...edition }, database));
+    for (const { coverFrom, ...edition } of plan.create) {
+      const created = await createEdition({ workId, ...edition }, database);
+      // createEdition は syncHints を受けないので、借りた表紙の印はここで書く
+      added.push(coverFrom ? await updateEditionSyncHints(created.id, { coverFrom }, database) : created);
     }
     for (const { editionId, ref } of plan.attach) {
       added.push(await addSourceRef(editionId, ref, database));
