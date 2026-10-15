@@ -18,7 +18,7 @@ export interface EditionInput extends Omit<CreateEditionInput, 'workId' | 'sourc
    * 他の面から借りて入れた表紙の印（本だけ）。createEdition は syncHints を受けないので、
    * 作成のあとで syncHints.coverFrom に書く（書かないと、手で設定した表紙と区別できない）。
    */
-  coverFrom?: 'catalog';
+  coverFrom?: 'anilist' | 'catalog';
 }
 
 function text(value: unknown): string {
@@ -127,6 +127,8 @@ export function toEditionInput(entry: CatalogEntry, siblings: readonly CatalogEn
   };
   if (entry.cover && isSafeHttpUrl(entry.cover)) {
     input.coverUrl = entry.cover;
+    // 自動で入れた表紙の印。AniList の表紙は同期が新しいものに入れ替えてよい
+    input.coverFrom = entry.source === 'anilist' ? 'anilist' : 'catalog';
   } else if (entry.kind === 'book') {
     const borrowed = borrowedCover(input.mediaType, siblings);
     if (borrowed) {

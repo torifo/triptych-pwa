@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { apiGet, ApiError } from '../lib/api';
   import { normalizeTitle } from '../lib/normalize';
-  import { listWorks, listEditions, createWork, createEdition } from '../lib/db/store';
+  import { listWorks, listEditions, createWork, createEdition, updateEditionSyncHints } from '../lib/db/store';
   import type { Work, Edition, MediaType, Source } from '../lib/db/schema';
   import { navigate } from '../lib/router.svelte';
   import Cover from '../lib/components/Cover.svelte';
@@ -128,6 +128,10 @@
         coverUrl: result.cover ?? undefined,
         linkSource: 'manual',
       });
+      // AniList の表紙は自動で入れた印を付ける（手で設定した表紙と区別し、同期が新しい表紙に入れ替えられるように）
+      if (result.cover && result.source === 'anilist') {
+        await updateEditionSyncHints(edition.id, { coverFrom: 'anilist' });
+      }
 
       await refreshWorks();
 

@@ -66,6 +66,7 @@ describe('toEditionInput', () => {
       title: '薬屋のひとりごと',
       sourceRefs: [{ source: 'anilist', externalId: '101', url: 'https://anilist.co/anime/101' }],
       coverUrl: 'https://img.example/c.jpg',
+      coverFrom: 'anilist',
       linkSource: 'manual',
     });
   });
@@ -213,12 +214,18 @@ describe('toEditionInput: 本の表紙をカタログの同じ作品から借り
     expect(input.coverFrom).toBeUndefined();
   });
 
-  it('本に自分の表紙があればそれを使い、借りた印は付けない', () => {
+  it('本に自分の表紙があればそれを使い、カタログから入れた印を付ける（手で設定した表紙と区別する）', () => {
     const input = toEditionInput(novelBook({ cover: 'https://img.example/own.jpg' }), [
       anilist('2', 'novel', 'https://img.example/novel.jpg'),
     ]);
     expect(input.coverUrl).toBe('https://img.example/own.jpg');
-    expect(input.coverFrom).toBeUndefined();
+    expect(input.coverFrom).toBe('catalog');
+  });
+
+  it('AniList の行の表紙は AniList から入れた印にする（同期が新しい表紙に入れ替えられるように）', () => {
+    const input = toEditionInput(anilist('7', 'anime', 'https://img.example/anime.jpg'));
+    expect(input.coverUrl).toBe('https://img.example/anime.jpg');
+    expect(input.coverFrom).toBe('anilist');
   });
 
   it('本自身の表紙が http(s) でなければ借りる', () => {
