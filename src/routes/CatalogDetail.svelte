@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { ApiError } from '../lib/api';
   import { addEntriesToLibrary } from '../lib/catalog/add';
-  import { fetchCatalogWork } from '../lib/catalog/api';
+  import { BUILD_COMMAND, describeWorkLoadError, fetchCatalogWork, type WorkLoadFailure } from '../lib/catalog/api';
   import { recalledListHash } from '../lib/catalog/query';
   import {
     defaultSelection,
@@ -26,7 +25,7 @@
 
   let detail = $state<CatalogWorkDetail | null>(null);
   let loading = $state(true);
-  let loadError = $state<{ missing: boolean; message: string } | null>(null);
+  let loadError = $state<WorkLoadFailure | null>(null);
   let works = $state<Work[]>([]);
   let editions = $state<Edition[]>([]);
 
@@ -89,16 +88,7 @@
       })
       .catch((err: unknown) => {
         if (seq !== loadSeq) return;
-        const status = err instanceof ApiError ? err.status : undefined;
-        loadError = {
-          missing: status === 404,
-          message:
-            status === 404
-              ? '作品が見つかりません（カタログが未作成か、作品 ID が古い可能性があります）'
-              : status !== undefined
-                ? `作品を取得できませんでした (${status})`
-                : '作品を取得できませんでした',
-        };
+        loadError = describeWorkLoadError(err);
       })
       .finally(() => {
         if (seq === loadSeq) loading = false;
@@ -137,7 +127,17 @@
   >
 
   {#if loadError}
-    <p class="text-sm" style="color: var(--muted);" role="status">{loadError.message}</p>
+    <div class="flex flex-col gap-2" role="status" data-testid={`catalog-detail-${loadError.kind}`}>
+      <p class="text-sm font-bold">{loadError.title}</p>
+      <p class="text-xs" style="color: var(--muted);">{loadError.message}</p>
+      {#if loadError.kind === 'not-built'}
+        <code
+          class="block px-2 py-1.5 text-xs"
+          style="border: 1px solid var(--line); overflow-x: auto; white-space: nowrap; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;"
+          >{BUILD_COMMAND}</code
+        >
+      {/if}
+    </div>
   {:else if loading || !detail}
     <p class="py-6 text-center text-xs" style="color: var(--muted);">読み込み中…</p>
   {:else}

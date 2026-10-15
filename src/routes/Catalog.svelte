@@ -2,6 +2,7 @@
   import { onDestroy, onMount, untrack } from 'svelte';
   import { ApiError } from '../lib/api';
   import {
+    BUILD_COMMAND,
     downloadCatalogExport,
     fetchCatalogStats,
     fetchCatalogWorks,
@@ -34,7 +35,6 @@
   import FilterChip from '../lib/components/FilterChip.svelte';
   import { replaceQuery, route } from '../lib/router.svelte';
 
-  const BUILD_COMMAND = 'python -m backend.catalog build';
   const EXPORT_FORMATS: ExportFormat[] = ['csv', 'json'];
 
   // 絞り込みの状態は URL（ハッシュのクエリ）が正。行を開いて戻っても復元される。

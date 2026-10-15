@@ -1,6 +1,6 @@
 // カタログ API（/api/catalog/*）の呼び出し。型は ./types.ts が正。
 
-import { ApiError, apiGet, getApiBase } from '../api';
+import { ApiError, TOKEN_KEY, apiGet, getApiBase, readErrorDetail } from '../api';
 import type {
   CatalogQuery,
   CatalogStats,
@@ -11,8 +11,12 @@ import type {
 /** サーバ側の上限（per は最大 100）。 */
 export const MAX_PER = 100;
 
-// src/lib/api.ts の TOKEN_KEY と同じ値（api.ts は書き換えず、書き出しの fetch にだけ使う）。
-const TOKEN_KEY = 'triptych.apiToken';
+/** カタログを作る collector 側のコマンド。 */
+export const BUILD_COMMAND = 'python -m backend.catalog build';
+
+/** collector（backend/api/catalog.py）が 404 に付ける detail。同じ 404 でも理由が違う。 */
+export const DETAIL_NOT_BUILT = 'catalog not built';
+export const DETAIL_WORK_NOT_FOUND = 'work not found';
 
 /**
  * CatalogQuery を GET /api/catalog/works のクエリ文字列用の値に直す。
@@ -49,6 +53,40 @@ export function fetchCatalogWorks(q: CatalogQuery): Promise<CatalogWorkPage> {
 
 export function fetchCatalogWork(id: string): Promise<CatalogWorkDetail> {
   return apiGet<CatalogWorkDetail>(`/api/catalog/works/${encodeURIComponent(id)}`);
+}
+
+export type WorkLoadFailureKind = 'not-built' | 'not-found' | 'error';
+
+export interface WorkLoadFailure {
+  kind: WorkLoadFailureKind;
+  title: string;
+  message: string;
+}
+
+/**
+ * 詳細の取得失敗を、画面に出す文言に直す。
+ * 404 は detail で「カタログ未作成」と「作品なし」を分ける。detail が無い 404（catalog の無い collector や
+ * 間のプロキシ）や 404 以外は、どちらとも決めつけずに取得失敗として扱う。
+ */
+export function describeWorkLoadError(err: unknown): WorkLoadFailure {
+  if (err instanceof ApiError && err.status === 404) {
+    if (err.detail === DETAIL_NOT_BUILT) {
+      return { kind: 'not-built', title: 'カタログ未作成', message: 'collector 側で次のコマンドを実行すると作られます。' };
+    }
+    if (err.detail === DETAIL_WORK_NOT_FOUND) {
+      return {
+        kind: 'not-found',
+        title: '作品が見つかりません',
+        message: 'カタログにない作品です。作品 ID が古いか、カタログを作り直した可能性があります。一覧から探し直してください。',
+      };
+    }
+  }
+  return {
+    kind: 'error',
+    title: '作品を取得できませんでした',
+    message:
+      err instanceof ApiError ? `collector が ${err.status} を返しました。` : 'collector に接続できませんでした。通信を確認してください。',
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -95,7 +133,7 @@ export async function downloadCatalogExport(format: ExportFormat): Promise<strin
 
   const path = exportPath(format);
   const res = await fetch(`${getApiBase()}${path}`, { headers });
-  if (!res.ok) throw new ApiError(res.status, `${path}: ${res.status}`);
+  if (!res.ok) throw new ApiError(res.status, `${path}: ${res.status}`, await readErrorDetail(res));
 
   const blob = await res.blob();
   const filename = filenameFromDisposition(res.headers.get('Content-Disposition'), `catalog.${format}`);

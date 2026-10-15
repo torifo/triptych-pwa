@@ -1,7 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { ApiError, TOKEN_KEY } from '../api';
 import {
+  BUILD_COMMAND,
+  DETAIL_NOT_BUILT,
+  DETAIL_WORK_NOT_FOUND,
   MAX_PER,
   buildWorksQuery,
+  describeWorkLoadError,
   downloadCatalogExport,
   exportPath,
   fetchCatalogWork,
@@ -97,7 +102,7 @@ describe('requests', () => {
   });
 
   it('downloads an export with the bearer token and saves it under the server filename', async () => {
-    localStorage.setItem('triptych.apiToken', 'secret');
+    localStorage.setItem(TOKEN_KEY, 'secret');
     localStorage.setItem('triptych.apiBase', 'http://collector.local');
     fetchMock.mockResolvedValue(
       new Response('id,title\n', { headers: { 'Content-Disposition': 'attachment; filename="catalog-20261014.csv"' } }),
@@ -124,6 +129,55 @@ describe('requests', () => {
 
   it('throws an ApiError when the export fails', async () => {
     fetchMock.mockResolvedValue(new Response('no', { status: 404 }));
-    await expect(downloadCatalogExport('json')).rejects.toMatchObject({ status: 404 });
+    await expect(downloadCatalogExport('json')).rejects.toMatchObject({ status: 404, detail: undefined });
+  });
+
+  it('keeps the reason of a failed export', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ detail: DETAIL_NOT_BUILT }), { status: 404 }));
+    await expect(downloadCatalogExport('csv')).rejects.toMatchObject({ status: 404, detail: DETAIL_NOT_BUILT });
+  });
+
+  it('reads the detail of a failed work request', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ detail: DETAIL_WORK_NOT_FOUND }), { status: 404 }));
+    await expect(fetchCatalogWork('anilist:1')).rejects.toMatchObject({ status: 404, detail: DETAIL_WORK_NOT_FOUND });
+  });
+});
+
+describe('describeWorkLoadError', () => {
+  it('says the catalog has not been built, with the command that builds it', () => {
+    const failure = describeWorkLoadError(new ApiError(404, 'x: 404', DETAIL_NOT_BUILT));
+    expect(failure.kind).toBe('not-built');
+    expect(failure.title).toBe('カタログ未作成');
+    expect(BUILD_COMMAND).toBe('python -m backend.catalog build');
+  });
+
+  it('says the work is not in the catalog', () => {
+    const failure = describeWorkLoadError(new ApiError(404, 'x: 404', DETAIL_WORK_NOT_FOUND));
+    expect(failure.kind).toBe('not-found');
+    expect(failure.title).toBe('作品が見つかりません');
+    expect(failure.message).toContain('作品 ID');
+  });
+
+  it('does not mistake other failures for either', () => {
+    const noDetail = describeWorkLoadError(new ApiError(404, 'x: 404')); // a collector without the catalog routes, a proxy
+    const otherDetail = describeWorkLoadError(new ApiError(404, 'x: 404', 'Not Found'));
+    const server = describeWorkLoadError(new ApiError(500, 'x: 500', DETAIL_NOT_BUILT));
+    const network = describeWorkLoadError(new TypeError('Failed to fetch'));
+    for (const failure of [noDetail, otherDetail, server, network]) {
+      expect(failure.kind).toBe('error');
+      expect(failure.title).toBe('作品を取得できませんでした');
+    }
+    expect(noDetail.message).toContain('404');
+    expect(server.message).toContain('500');
+    expect(network.message).not.toMatch(/\d{3}/);
+  });
+
+  it('tells the three apart by kind', () => {
+    const kinds = [
+      new ApiError(404, 'x', DETAIL_NOT_BUILT),
+      new ApiError(404, 'x', DETAIL_WORK_NOT_FOUND),
+      new ApiError(503, 'x'),
+    ].map((err) => describeWorkLoadError(err).kind);
+    expect(new Set(kinds).size).toBe(3);
   });
 });
