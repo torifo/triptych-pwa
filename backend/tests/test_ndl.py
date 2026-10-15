@@ -702,3 +702,200 @@ def test_route_records_adapter_error_before_502(monkeypatch):
 
     assert response.status_code == 502
     assert errors.last_adapter_errors["ndl"].message == "boom"
+
+
+# --- 目録前の近刊: JPRO rows of the catalog (backend.catalog.upcoming) ---------------------------------
+
+HONZUKI_NEW = _isbn("978486854999")  # not in the title search
+GOGO = "本好きの下剋上~司書になるためには手段を選んでいられません~第五部 女神の化身13"
+
+
+def _upcoming(isbn: str, title: str, kind: str, day: str, **fields) -> "ndl.UpcomingRecord":
+    fields.setdefault("publisher", "TOブックス")
+    record = ndl.NdlRecord(
+        title=title, isbn=isbn, categories=("図書",), issued=day, date=day, precision="day", **fields
+    )
+    return ndl.UpcomingRecord(record=record, kind=kind)  # type: ignore[arg-type]
+
+
+@pytest.mark.asyncio
+async def test_a_catalog_upcoming_volume_joins_the_line_it_belongs_to():
+    upcoming = [_upcoming(HONZUKI_NEW, GOGO, "novel", "2027-03-10")]
+
+    dto = await _series(HONZUKI_XML, HONZUKI, "novel", upcoming=upcoming)
+
+    assert dto.line == ""  # still 本編 by default
+    assert {l.key: l.count for l in dto.lines} == {"": 6, "TOジュニア文庫": 9}  # one more 本編 book
+    first = dto.releases[0]
+    assert (first.externalId, first.date, first.precision, first.source) == (HONZUKI_NEW, "2027-03-10", "day", "ndl")
+    assert first.label.endswith("女神の化身13")
+    pinned = await _series(HONZUKI_XML, HONZUKI, "novel", line="", upcoming=upcoming)  # a synced edition's ndlLine
+    assert pinned.releases[0].externalId == HONZUKI_NEW
+    junior = await _series(HONZUKI_XML, HONZUKI, "novel", line="TOジュニア文庫", upcoming=upcoming)
+    assert HONZUKI_NEW not in _isbns(junior)
+    manga = await _series(HONZUKI_XML, HONZUKI, "manga", upcoming=upcoming)
+    assert HONZUKI_NEW not in _isbns(manga)
+
+
+@pytest.mark.asyncio
+async def test_a_labelled_catalog_volume_makes_or_joins_its_labels_line():
+    upcoming = [_upcoming(HONZUKI_NEW, "本好きの下剋上 第三部 領主の養女11", "novel", "2027-01-08", series_title="TOジュニア文庫")]
+    dto = await _series(HONZUKI_XML, HONZUKI, "novel", line="TOジュニア文庫", upcoming=upcoming)
+    assert dto.releases[0].externalId == HONZUKI_NEW
+    assert len(dto.releases) == 10
+
+
+@pytest.mark.asyncio
+async def test_the_catalog_kind_wins_over_the_guess_for_a_record_without_ndc():
+    # A 近刊 record in the title search with no NDC and no comic word: the adapter guesses "novel".
+    odd = _isbn("978486854998")
+    xml = _inject(HONZUKI_XML, _item("本好きの下剋上 ~新しい物語~ 1", odd, "2026-12-01"))
+    guessed = await _series(xml, HONZUKI, "novel", line="")
+    assert odd in _isbns(guessed)
+
+    upcoming = [_upcoming(odd, "本好きの下剋上 ~新しい物語~ 1", "manga", "2026-12-01")]  # JPRO: コミックス・劇画
+    novel = await _series(xml, HONZUKI, "novel", line="", upcoming=upcoming)
+    manga = await _series(xml, HONZUKI, "manga", line="", upcoming=upcoming)
+    assert odd not in _isbns(novel)
+    assert odd in _isbns(manga)
+
+
+@pytest.mark.asyncio
+async def test_a_catalogued_record_keeps_its_ndc_kind():
+    upcoming = [_upcoming(MANGA_3_10, "本好きの下剋上 第3部[10]", "novel", "2026-08-25")]  # a wrong hint
+    manga = await _series(HONZUKI_XML, HONZUKI, "manga", upcoming=upcoming)
+    assert MANGA_3_10 in _isbns(manga)
+
+
+@pytest.mark.asyncio
+async def test_a_volume_in_both_the_title_search_and_the_catalog_is_one_release():
+    upcoming = [_upcoming(MANGA_UPCOMING_4_13, "本好きの下剋上 別の題 13", "manga", "2026-12-25")]
+
+    dto = await _series(HONZUKI_XML, HONZUKI, "manga", upcoming=upcoming)
+
+    assert _isbns(dto).count(MANGA_UPCOMING_4_13) == 1
+    release = _by_isbn(dto, MANGA_UPCOMING_4_13)
+    assert (release.label, release.date) == ("第四部「貴族院の図書館を救いたい!13」", "2026-12-10")  # the search's own
+
+
+@pytest.mark.asyncio
+async def test_catalog_volumes_of_other_titles_or_dropped_kinds_are_ignored():
+    upcoming = [
+        _upcoming(_isbn("978486854997"), "転生したらスライムだった件 30", "novel", "2027-01-01"),
+        _upcoming(_isbn("978486854996"), "本好きの下剋上 公式ファンブック 10", "novel", "2027-01-01"),
+        _upcoming(_isbn("978123456789"), "本好きの下剋上 英語版 1", "novel", "2027-01-01"),
+    ]
+    dto = await _series(HONZUKI_XML, HONZUKI, "novel", line="", upcoming=upcoming)
+    before = await _series(HONZUKI_XML, HONZUKI, "novel", line="", upcoming=None)
+    assert _isbns(dto) == _isbns(before)
+
+
+@pytest.mark.asyncio
+async def test_series_reads_the_jpro_rows_of_the_catalog_by_default(tmp_path, monkeypatch):
+    from backend.catalog import db as catalog_db
+
+    path = tmp_path / "catalog.db"
+    monkeypatch.setenv(catalog_db.DB_ENV_VAR, str(path))
+    conn = catalog_db.connect(path)
+    jpro_extra = {
+        "isbn": HONZUKI_NEW, "volume": None, "series": "本好きの下剋上~司書になるためには手段を選んでいられません",
+        "line": "", "publisher": "TOブックス", "ndc": "913.6", "kindHint": "novel", "via": "jpro",
+        "jpro": {"title": GOGO, "volume": None, "seriesTitle": None, "labels": ["一般", "日本文学小説・物語"]},
+    }
+    catalogued = _isbn("978486854995")
+    catalog_db.upsert_entries(conn, [
+        catalog_db.Entry(source="ndl", external_id=HONZUKI_NEW, kind="book", title=GOGO, format="小説",
+                         start_date="2027-03-10", start_precision="day", creators=["香月美夜"], extra=jpro_extra),
+        catalog_db.Entry(source="ndl", external_id=catalogued, kind="book", title="本好きの下剋上 第5部[13]", format="小説",
+                         start_date="2027-03-01", start_precision="month",
+                         extra={"isbn": catalogued, "kindHint": "novel", "series": "本好きの下剋上", "line": ""}),
+    ])
+    conn.close()
+
+    dto = await _series(HONZUKI_XML, HONZUKI, "novel", line="")
+
+    assert dto.releases[0].externalId == HONZUKI_NEW
+    assert catalogued not in _isbns(dto)  # catalogued rows come from the title search, not from here
+
+
+@pytest.mark.asyncio
+async def test_a_missing_catalog_changes_nothing():
+    with_default = await _series(HONZUKI_XML, HONZUKI, "novel")  # conftest: TRIPTYCH_CATALOG_DB does not exist
+    without = await _series(HONZUKI_XML, HONZUKI, "novel", upcoming=None)
+    assert with_default == without
+
+
+# --- 近刊 labels spelled differently from NDL's catalogue -------------------------------------------------
+
+KC_PUBLISHER = "講談社"
+KC_AUTHOR = ("講談, 太郎",)  # the same creator on every volume: the adapter's guess makes the 近刊 a comic
+
+
+def _kc_xml(*extra: str) -> bytes:
+    """Four catalogued volumes of a comic in NDL's 'ヤンマガKC' / 'モーニングKC' spelling."""
+    catalogued = [
+        _item(f"フーディーズ {n}", _isbn(f"97840650000{n}"), f"2026.{n}", ndc="726.1", volume=str(n),
+              series="ヤンマガKC", publisher=KC_PUBLISHER, creators=KC_AUTHOR)
+        for n in range(1, 5)
+    ]
+    return _inject(HONZUKI_XML.replace(b"<item>", b"<item>", 1), *catalogued, *extra)
+
+
+@pytest.mark.parametrize(
+    ("jpro_label", "line"),
+    [
+        ("ヤンマガKCスペシャル", "ヤンマガKC"),  # NDL catalogues the label shorter
+        ("ヤンマガ KC", "ヤンマガKC"),  # spacing
+        ("やんまがKC", "やんまがKC"),  # a different label stays apart
+    ],
+)
+@pytest.mark.asyncio
+async def test_a_jpro_label_variant_joins_the_catalogued_line(jpro_label, line):
+    upcoming_isbn = _isbn("978406500005")
+    xml = _kc_xml(_item("フーディーズ(5)", upcoming_isbn, "2026-11-19", series=jpro_label, publisher=KC_PUBLISHER,
+                        creators=KC_AUTHOR))
+
+    dto = await _series(xml, "フーディーズ", "manga", upcoming=None)
+
+    assert {l.key for l in dto.lines} == ({"ヤンマガKC"} if line == "ヤンマガKC" else {"ヤンマガKC", line})
+    pinned = await _series(xml, "フーディーズ", "manga", line="ヤンマガKC", upcoming=None)
+    assert (upcoming_isbn in _isbns(pinned)) == (line == "ヤンマガKC")
+
+
+@pytest.mark.asyncio
+async def test_a_line_pinned_by_the_jpro_spelling_still_finds_its_volumes():
+    upcoming_isbn = _isbn("978406500005")
+    xml = _kc_xml(_item("フーディーズ(5)", upcoming_isbn, "2026-11-19", series="ヤンマガKCスペシャル", publisher=KC_PUBLISHER,
+                        creators=KC_AUTHOR))
+
+    dto = await _series(xml, "フーディーズ", "manga", line="ヤンマガKCスペシャル", upcoming=None)
+
+    assert dto.line == "ヤンマガKCスペシャル"
+    assert upcoming_isbn in _isbns(dto)  # an edition pinned before NDL catalogued the series
+
+
+@pytest.mark.asyncio
+async def test_a_label_variant_of_another_publisher_or_kind_stays_apart():
+    other_publisher = _isbn("978406500006")
+    novel = _isbn("978406500007")
+    xml = _kc_xml(
+        _item("フーディーズ(6)", other_publisher, "2026-12-19", series="ヤンマガKCスペシャル", publisher="別の出版社",
+              creators=KC_AUTHOR),
+        _item("フーディーズ 外伝", novel, "2026-12-01", series="ヤンマガKC文庫", publisher=KC_PUBLISHER),
+    )
+    dto = await _series(
+        xml, "フーディーズ", "manga", line="ヤンマガKC",
+        upcoming=[_upcoming(novel, "フーディーズ 外伝", "novel", "2026-12-01", series_title="ヤンマガKC文庫",
+                            publisher=KC_PUBLISHER)],
+    )
+    assert other_publisher not in _isbns(dto)
+    assert novel not in _isbns(dto)
+
+
+@pytest.mark.asyncio
+async def test_a_catalog_volume_with_the_jpro_label_joins_the_series_line():
+    upcoming_isbn = _isbn("978406500005")
+    upcoming = [_upcoming(upcoming_isbn, "フーディーズ(5)", "manga", "2026-11-19", series_title="ヤンマガKCスペシャル",
+                          publisher=KC_PUBLISHER)]
+    dto = await _series(_kc_xml(), "フーディーズ", "manga", line="ヤンマガKC", upcoming=upcoming)
+    assert _isbns(dto)[0] == upcoming_isbn

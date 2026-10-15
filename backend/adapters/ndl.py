@@ -30,10 +30,22 @@ title (`〜文庫`, `〜ジュニア`, `〜ノベルス`, `〜コミックス` .
 neither joins the line that holds most of the same publisher's labelled
 books of that kind (when that line is not a children's line), so a 近刊
 record of a label series is not split off; otherwise it is `''` (本編).
-Spin-offs (other subtitles) stay in the line of their label. When no line is
+Spin-offs (other subtitles) stay in the line of their label. A 近刊 record's label
+that is another spelling or a longer / shorter name of a catalogued line of the same
+kind and publisher ("モーニング KC" / "モーニングKC", "ヤンマガKCスペシャル" / "ヤンマガKC")
+joins that line; a requested line matches either name, spacing, case and
+COMICS / コミックス aside. When no line is
 requested, the line with the most books is used, children's lines (most
 records `dcndl:genre` 児童図書, e.g. ジュニア文庫 re-editions) coming after
 general ones.
+
+近刊 from the catalog — `series()` also reads the catalog's JPRO rows (books NDL has
+not catalogued yet, `backend.catalog.upcoming`; written by `python -m backend.catalog build
+--source jpro`). A row whose title starts with the requested title and whose ISBN the title
+search did not return is added as one more 近刊 record (its line comes from its label like any
+other record); for an ISBN the search did return, only the kind is taken from the row (JPRO's
+genre words) when the record has no NDC. Same ISBN, same volume: nothing is listed twice, and a
+catalogued record keeps its NDC kind. Without a catalog nothing changes.
 
 Dates keep their real precision: `2026.8.25` / `2026-08-25` -> day,
 `2026.8` / `2026年8月` -> month, `2026` / `[2026]` -> year. For the picked
@@ -54,12 +66,15 @@ import xml.etree.ElementTree as ET
 from collections import Counter
 from dataclasses import dataclass, replace
 from datetime import date, timedelta
-from typing import Any, Iterable, Literal, Optional
+from typing import Any, Iterable, Literal, Mapping, Optional
 from urllib.parse import urlencode
 
 import httpx
 
 from ..cache import TTLCache
+from ..catalog.text import align_line as _align_line
+from ..catalog.text import line_key as _line_key
+from ..catalog.upcoming import load as load_upcoming
 from ..dto import NdlLine, NdlSeriesDTO, ReleaseDTO, SearchResult, SourceUnavailable
 from ..errors import record_adapter_error
 from ..ratelimit import TokenBucket
@@ -413,8 +428,13 @@ def _ndc_kind(ndc: Optional[str]) -> Optional[str]:
     return "other"
 
 
-def _classifier(records: list[NdlRecord]):
-    """Builds kind(record) using creators already classified by NDC."""
+def _classifier(records: list[NdlRecord], known: Optional[Mapping[str, Kind]] = None):
+    """Builds kind(record) using creators already classified by NDC.
+
+    `known`: kinds the catalog read from JPRO's genre words, by ISBN; they beat the guess
+    for a record without NDC (a catalogued record keeps its NDC kind).
+    """
+    known_kinds = known or {}
     novel_creators: set[str] = set()
     manga_creators: set[str] = set()
     for record in records:
@@ -432,6 +452,8 @@ def _classifier(records: list[NdlRecord]):
             return None
         if kind is not None:
             return kind  # type: ignore[return-value]
+        if record.isbn in known_kinds:
+            return known_kinds[record.isbn]
         if any("漫画" in genre for genre in record.genres):
             return "manga"
         if _MANGA_ROLE_RE.search(_fold(record.author)):
@@ -516,6 +538,7 @@ class _Book:
     line: str
     children_line: bool
     label: str
+    own_line: Optional[str] = None  # a 近刊 record's label as it states it, when it joined another spelling
 
     @property
     def isbn(self) -> str:
@@ -545,16 +568,40 @@ def _mostly_children(members: list[NdlRecord]) -> bool:
     return sum(_is_children(r) for r in members) * 2 > len(members)
 
 
-def analyze(xml_bytes: bytes, title: str) -> list[_Book]:
-    """Every volume of `title` in an NDL payload, with kind, line and label."""
+@dataclass(frozen=True)
+class UpcomingRecord:
+    """A 近刊 volume the catalog knows from JPRO, with the kind its genre words give."""
+
+    record: NdlRecord
+    kind: Kind
+
+
+def analyze(
+    xml_bytes: bytes, title: str, upcoming: Iterable[UpcomingRecord] = ()
+) -> list[_Book]:
+    """Every volume of `title` in an NDL payload, with kind, line and label.
+
+    `upcoming` (catalog JPRO rows) adds the volumes the payload lacks and gives the kind of
+    the ones it has (see the module docstring).
+    """
     title_key = _key(title)
     if not title_key:
         return []
 
+    parsed = parse_records(xml_bytes)
+    listed = {r.isbn for r in parsed if r.isbn}
+    extra = [u for u in upcoming if u.record.isbn]
     records = _dedupe(
-        r for r in parse_records(xml_bytes) if exclusion_reason(r, title_key) is None
+        [
+            *(r for r in parsed if exclusion_reason(r, title_key) is None),
+            *(
+                u.record
+                for u in extra
+                if u.record.isbn not in listed and exclusion_reason(u.record, title_key) is None
+            ),
+        ]
     )
-    kind_of = _classifier(records)
+    kind_of = _classifier(records, {u.record.isbn: u.kind for u in extra})  # type: ignore[misc]
 
     remainders: dict[str, str] = {}
     for record in records:
@@ -577,6 +624,24 @@ def analyze(xml_bytes: bytes, title: str) -> list[_Book]:
         if stated is not None and _match_prefix(stated, title_key) is not None:
             stated = ""  # the "series" is the work itself
         staged.append((record, kind, stated, token))
+
+    # 近刊 records (no NDC) often spell the label another way than NDL's catalogue ("モーニング KC" /
+    # "モーニングKC", "ヤンマガKCスペシャル" / "ヤンマガKC", "花とゆめコミックス" / "花とゆめCOMICS"):
+    # such a label joins the catalogued line of the same kind and publisher it is a variant of, so the
+    # upcoming volume lands in the line its series already has. The stated label is kept (`own`).
+    catalogued: dict[tuple[str, str], Counter[str]] = {}
+    for record, kind, stated, _ in staged:
+        if record.ndc and stated:
+            catalogued.setdefault((kind, _key(record.publisher)), Counter())[stated] += 1
+    own_lines: dict[str, str] = {}
+    for index, (record, kind, stated, token) in enumerate(staged):
+        lines = catalogued.get((kind, _key(record.publisher)))
+        if record.ndc or not stated or not lines:
+            continue
+        aligned = _align_line(stated, lines)
+        if aligned != stated:
+            own_lines[record.isbn] = stated  # type: ignore[index]
+            staged[index] = (record, kind, aligned, token)
 
     # Lines whose books are mostly children's editions (ジュニア文庫 ...).
     line_members: dict[tuple[str, str], list[NdlRecord]] = {}
@@ -624,6 +689,7 @@ def analyze(xml_bytes: bytes, title: str) -> list[_Book]:
                 line=line,
                 children_line=(kind, line) in children_lines,
                 label=_label(record, remainder, token),
+                own_line=own_lines.get(record.isbn),  # type: ignore[arg-type]
             )
         )
     return books
@@ -766,6 +832,54 @@ async def _sharpen_dates(
     return sharpened
 
 
+_DEFAULT_UPCOMING: Any = object()
+
+
+def _in_line(book: _Book, line: str) -> bool:
+    """`book` is in the requested line: its line or, for a 近刊 that joined another spelling, its own."""
+    wanted = _line_key(line)
+    return _line_key(book.line) == wanted or (
+        book.own_line is not None and _line_key(book.own_line) == wanted
+    )
+
+
+def catalog_upcoming(title: str) -> list[UpcomingRecord]:
+    """The catalog's JPRO volumes whose title starts with `title` (none without a catalog)."""
+    title_key = _key(title)
+    if not title_key:
+        return []
+    try:
+        books = load_upcoming()
+    except Exception as exc:  # the catalog is a bonus: never fail a sync over it
+        logger.warning("catalog upcoming rows unreadable: %s", exc)
+        return []
+    found = []
+    for book in books:
+        if _match_prefix(_nfkc(book.title), title_key) is None:
+            continue
+        record = NdlRecord(
+            title=_nfkc(book.title).strip(),
+            volume=book.volume,
+            series_title=book.series_title,
+            publisher=book.publisher,
+            creators=tuple(key for key in (_creator_key(name) for name in book.creators) if key),
+            isbn=book.isbn,
+            genres=("児童図書",) if book.children else (),
+            categories=("図書",),
+            issued=book.date,
+            date=book.date,
+            precision=book.precision,  # type: ignore[arg-type]
+        )
+        found.append(UpcomingRecord(record=record, kind=book.kind))  # type: ignore[arg-type]
+    return found
+
+
+def _resolve_upcoming(upcoming: Any, title: str) -> list[UpcomingRecord]:
+    if upcoming is _DEFAULT_UPCOMING:
+        return catalog_upcoming(title)
+    return list(upcoming or ())
+
+
 async def series(
     title: str,
     kind: Kind,
@@ -775,13 +889,15 @@ async def series(
     client: Optional[httpx.AsyncClient] = None,
     cache: Any = _DEFAULT_CACHE,
     today: Optional[date] = None,
+    upcoming: Any = _DEFAULT_UPCOMING,
 ) -> NdlSeriesDTO:
     """New-volume candidates of one series, for one kind (novel / manga).
 
     `line` picks the 系統 (`''` = 本編); without it the default line is used
     (see the module docstring). Releases are the picked line's volumes,
     newest first, at most 30. `cache` defaults to the collector cache;
-    pass None to disable caching.
+    pass None to disable caching. `upcoming` defaults to the catalog's JPRO
+    rows (`catalog_upcoming`); pass None to leave them out.
     """
     if kind not in KINDS:
         raise ValueError(f"unknown kind: {kind!r}")
@@ -795,10 +911,11 @@ async def series(
         xml_bytes = await _fetch_books_xml(
             title, client=http, cache=cache, refresh=refresh, today=today
         )
-        kind_books = [b for b in analyze(xml_bytes, title) if b.kind == kind]
+        extra = _resolve_upcoming(upcoming, title)
+        kind_books = [b for b in analyze(xml_bytes, title, extra) if b.kind == kind]
         chosen = line if line is not None else _default_line(kind_books)
         picked = sorted(
-            (b for b in kind_books if b.line == chosen), key=_newest_first, reverse=True
+            (b for b in kind_books if _in_line(b, chosen)), key=_newest_first, reverse=True
         )[:MAX_RELEASES]
         releases = await _sharpen_dates(
             [_to_release(b) for b in picked],
