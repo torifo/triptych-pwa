@@ -11,7 +11,14 @@ import {
   updateEditionSyncHints,
   type CreateEditionInput,
 } from '../db/store';
-import { acceptDetection, DETECTION_MATCH_THRESHOLD, rejectDetection, runDetection } from './detect';
+import {
+  acceptDetection,
+  DETECTION_MATCH_THRESHOLD,
+  isSameSeries,
+  rejectDetection,
+  RELATION_EXPAND_LIMIT,
+  runDetection,
+} from './detect';
 
 let db: TriptychDB;
 let dbCounter = 0;
@@ -139,6 +146,78 @@ const MUSHOKU = relations('85470', 'MANGA', 'NOVEL', '無職転生 ～異世界�
 ]);
 // 放送済み（FINISHED）の期は提案しない。原作 NOVEL から出るのは放送前の Ⅲ 第2クールだけ
 const MUSHOKU_ANIME_IDS = ['217434'];
+
+// 本好き（catalog.db の relations 2026-10-14）: 原作は部ごとの NOVEL で、第四部アニメ 217712 は第一部 NOVEL から見えない。
+const HONZUKI_PART = {
+  '87383': '本好きの下剋上 ~司書になるためには手段を選んでいられません~ 第一部「兵士の娘」',
+  '110800': '本好きの下剋上~司書になるためには手段を選んでいられません~ 第二部「神殿の巫女見習い」',
+  '110801': '本好きの下剋上~司書になるためには手段を選んでいられません~第三部「領主の養女」',
+  '110802': '本好きの下剋上~司書になるためには手段を選んでいられません~第四部「貴族院の自称図書委員」',
+  '113869': '本好きの下剋上～司書になるためには手段を選んでいられません～第五部「女神の化身」',
+};
+const HONZUKI_SHORTS = '本好きの下剋上~司書になるためには手段を選んでいられません~ 短編集';
+const HONZUKI: Record<string, ReturnType<typeof relations>> = {
+  '87383': relations('87383', 'MANGA', 'NOVEL', HONZUKI_PART['87383'], [
+    edge('ADAPTATION', '108268', 'ANIME', 'TV', '本好きの下剋上 司書になるためには手段を選んでいられません', 'FINISHED', '2019-10-03'),
+    edge('ADAPTATION', '113811', 'ANIME', 'OVA', '本好きの下剋上 司書になるためには手段を選んでいられません OVA', 'FINISHED', '2020-03-10'),
+    edge('ADAPTATION', '96775', 'MANGA', 'MANGA', '本好きの下剋上~司書になるためには手段を選んでいられません~第一部 「本がないなら作ればいい」', 'FINISHED', '2015-10-30'),
+    edge('SEQUEL', '110800', 'MANGA', 'NOVEL', HONZUKI_PART['110800'], 'FINISHED', '2015-09-25'),
+    edge('SIDE_STORY', '113868', 'MANGA', 'NOVEL', HONZUKI_SHORTS, 'RELEASING', '2019-10-10'),
+    edge('SPIN_OFF', '129614', 'MANGA', 'MANGA', '本好きの下剋上～司書になるためには手段を選んでいられません～ 公式コミックアンソロジー', 'RELEASING', '2019-07-07'),
+  ]),
+  '110800': relations('110800', 'MANGA', 'NOVEL', HONZUKI_PART['110800'], [
+    edge('ADAPTATION', '110804', 'MANGA', 'MANGA', '本好きの下剋上~司書になるためには手段を選んでいられません~ 第二部 「本のためなら巫女になる!」', 'FINISHED', '2018-09-24'),
+    edge('ADAPTATION', '113693', 'ANIME', 'TV', '本好きの下剋上 司書になるためには手段を選んでいられません 第2期', 'FINISHED', '2020-04-05'),
+    edge('ADAPTATION', '121176', 'ANIME', 'TV', '本好きの下剋上 司書になるためには手段を選んでいられません 第3期', 'FINISHED', '2022-04-12'),
+    edge('PREQUEL', '87383', 'MANGA', 'NOVEL', HONZUKI_PART['87383'], 'FINISHED', '2015-01-25'),
+    edge('SEQUEL', '110801', 'MANGA', 'NOVEL', HONZUKI_PART['110801'], 'FINISHED', '2016-09-10'),
+    edge('SIDE_STORY', '113868', 'MANGA', 'NOVEL', HONZUKI_SHORTS, 'RELEASING', '2019-10-10'),
+  ]),
+  '110801': relations('110801', 'MANGA', 'NOVEL', HONZUKI_PART['110801'], [
+    edge('ADAPTATION', '110805', 'MANGA', 'MANGA', '本好きの下剋上~司書になるためには手段を選んでいられません~ 第三部 「領地に本を広げよう!」', 'RELEASING', '2018-04-30'),
+    edge('ADAPTATION', '113811', 'ANIME', 'OVA', '本好きの下剋上 司書になるためには手段を選んでいられません OVA', 'FINISHED', '2020-03-10'),
+    edge('ADAPTATION', '171110', 'ANIME', 'TV', '本好きの下剋上 領主の養女', 'FINISHED', '2026-04-04'),
+    edge('PREQUEL', '110800', 'MANGA', 'NOVEL', HONZUKI_PART['110800'], 'FINISHED', '2015-09-25'),
+    edge('SEQUEL', '110802', 'MANGA', 'NOVEL', HONZUKI_PART['110802'], 'FINISHED', '2017-12-09'),
+    edge('SIDE_STORY', '113868', 'MANGA', 'NOVEL', HONZUKI_SHORTS, 'RELEASING', '2019-10-10'),
+  ]),
+  '110802': relations('110802', 'MANGA', 'NOVEL', HONZUKI_PART['110802'], [
+    edge('ADAPTATION', '127249', 'MANGA', 'MANGA', '本好きの下剋上~司書になるためには手段を選んでいられません~ 第四部 「貴族院の図書館を救いたい！」', 'RELEASING', '2020-12-24'),
+    edge('ADAPTATION', '217712', 'ANIME', 'TV', '本好きの下剋上 貴族院の自称図書委員', 'NOT_YET_RELEASED'),
+    edge('PREQUEL', '110801', 'MANGA', 'NOVEL', HONZUKI_PART['110801'], 'FINISHED', '2016-09-10'),
+    edge('SEQUEL', '113869', 'MANGA', 'NOVEL', HONZUKI_PART['113869'], 'FINISHED', '2020-03-10'),
+    edge('SIDE_STORY', '110803', 'MANGA', 'NOVEL', '本好きの下剋上~司書になるためには手段を選んでいられません~貴族院外伝 一年生', 'FINISHED', '2018-10-10'),
+  ]),
+  '171110': relations('171110', 'ANIME', 'TV', '本好きの下剋上 領主の養女', [
+    edge('ALTERNATIVE', '110805', 'MANGA', 'MANGA', '本好きの下剋上 第三部', 'RELEASING', '2018-04-30'),
+    edge('PREQUEL', '121176', 'ANIME', 'TV', '本好きの下剋上 司書になるためには手段を選んでいられません 第3期', 'FINISHED', '2022-04-12'),
+    edge('SEQUEL', '217712', 'ANIME', 'TV', '本好きの下剋上 貴族院の自称図書委員', 'NOT_YET_RELEASED'),
+    edge('SOURCE', '110801', 'MANGA', 'NOVEL', HONZUKI_PART['110801'], 'FINISHED', '2016-09-10'),
+  ]),
+  '217712': relations('217712', 'ANIME', 'TV', '本好きの下剋上 貴族院の自称図書委員', [
+    edge('PREQUEL', '171110', 'ANIME', 'TV', '本好きの下剋上 領主の養女', 'FINISHED', '2026-04-04'),
+    edge('SOURCE', '110802', 'MANGA', 'NOVEL', HONZUKI_PART['110802'], 'FINISHED', '2017-12-09'),
+  ]),
+};
+
+// かぐや様（同上）: 完結編 205081 は原作の ADAPTATION に無く、最新の特番 194884 の SEQUEL にだけある。
+const KAGUYA: Record<string, ReturnType<typeof relations>> = {
+  '86635': relations('86635', 'MANGA', 'MANGA', 'かぐや様は告らせたい～天才たちの恋愛頭脳戦～', [
+    edge('ADAPTATION', '101921', 'ANIME', 'TV', 'かぐや様は告らせたい～天才たちの恋愛頭脳戦～', 'FINISHED', '2019-01-12'),
+    edge('ADAPTATION', '112641', 'ANIME', 'TV', 'かぐや様は告らせたい？～天才たちの恋愛頭脳戦～', 'FINISHED', '2020-04-11'),
+    edge('ADAPTATION', '125367', 'ANIME', 'TV', 'かぐや様は告らせたい-ウルトラロマンティック-', 'FINISHED', '2022-04-09'),
+    edge('ADAPTATION', '151384', 'ANIME', 'TV', 'かぐや様は告らせたい -ファーストキッスは終わらない-', 'FINISHED', '2023-04-01'),
+    edge('ADAPTATION', '194884', 'ANIME', 'SPECIAL', 'かぐや様は告らせたい 大人への階段', 'FINISHED', '2025-12-31'),
+  ]),
+  '194884': relations('194884', 'ANIME', 'SPECIAL', 'かぐや様は告らせたい 大人への階段', [
+    edge('PREQUEL', '151384', 'ANIME', 'TV', 'かぐや様は告らせたい -ファーストキッスは終わらない-', 'FINISHED', '2023-04-01'),
+    edge('SEQUEL', '205081', 'ANIME', 'MOVIE', 'かぐや様は告らせたい 完結編', 'NOT_YET_RELEASED'),
+    edge('SOURCE', '86635', 'MANGA', 'MANGA', 'かぐや様は告らせたい～天才たちの恋愛頭脳戦～', 'FINISHED', '2015-05-19'),
+  ]),
+  '205081': relations('205081', 'ANIME', 'MOVIE', 'かぐや様は告らせたい 完結編', [
+    edge('PREQUEL', '194884', 'ANIME', 'SPECIAL', 'かぐや様は告らせたい 大人への階段', 'FINISHED', '2025-12-31'),
+  ]),
+};
 
 function relationsRoute(table: Record<string, unknown>): Handler {
   return (url) => {
@@ -349,6 +428,161 @@ describe('runDetection: relation', () => {
 
     expect(callsTo(calls, '/api/anilist/resolve-source')).toHaveLength(0);
     expect(callsTo(calls, '/api/anilist/relations/99026')).toHaveLength(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// relation の広げ方（原作の続きの部・原作アニメの続編）
+// ---------------------------------------------------------------------------
+
+describe('runDetection: relation（続きの部と続編）', () => {
+  const relationIds = (calls: URL[]) =>
+    callsTo(calls, '/api/anilist/relations/').map((u) => u.pathname.split('/').pop() ?? '');
+
+  it('本好き: 第一部の NOVEL から SEQUEL の部を辿り、第四部 NOVEL の ADAPTATION（第四部アニメ）を検知する', async () => {
+    const { work } = await setup('本好きの下剋上', [
+      { mediaType: 'light-novel', title: '本好きの下剋上（TOブックス）' },
+    ]);
+    const calls = mockFetch({
+      '/api/anilist/resolve-source': () => [searchResult('87383', HONZUKI_PART['87383'])],
+      '/api/anilist/relations/': relationsRoute(HONZUKI),
+    });
+
+    const result = await runDetection({ database: db, now: () => T0 });
+
+    expect(result.errors).toEqual({});
+    const events = await listDetectionEventsByWork(work.id, db);
+    // 放送済みの各期（108268 / 113693 / 121176 / 171110 / OVA）は提案しない
+    expect(events.map((e) => [e.candidate.externalId, e.via])).toEqual([['217712', 'relation']]);
+    expect(events[0].candidate).toMatchObject({
+      title: '本好きの下剋上 貴族院の自称図書委員',
+      airingStatus: 'NOT_YET_RELEASED',
+      format: 'TV',
+    });
+    const ids = relationIds(calls);
+    // 部は3段（第二部・第三部・第四部）まで。第五部と短編集（SIDE_STORY）は照会しない
+    expect(ids).toEqual(expect.arrayContaining(['87383', '110800', '110801', '110802']));
+    expect(ids).not.toContain('113869');
+    expect(ids).not.toContain('113868');
+  });
+
+  it('副題を除いた題名が違う SEQUEL（別作品の続編）の NOVEL は辿らない', async () => {
+    const { work } = await setup('ある物語', [
+      { mediaType: 'light-novel', title: 'ある物語', sourceRefs: [{ source: 'anilist', externalId: '1', url: 'u' }] },
+    ]);
+    const calls = mockFetch({
+      '/api/anilist/relations/': relationsRoute({
+        '1': relations('1', 'MANGA', 'NOVEL', 'ある物語 第一部', [
+          edge('SEQUEL', '2', 'MANGA', 'NOVEL', 'まったく別の物語', 'RELEASING'),
+          edge('SEQUEL', '4', 'MANGA', 'MANGA', 'ある物語 第二部（漫画）', 'RELEASING'),
+        ]),
+        '2': relations('2', 'MANGA', 'NOVEL', 'まったく別の物語', [
+          edge('ADAPTATION', '3', 'ANIME', 'TV', 'まったく別の物語', 'NOT_YET_RELEASED'),
+        ]),
+        '4': relations('4', 'MANGA', 'MANGA', 'ある物語 第二部（漫画）', [
+          edge('ADAPTATION', '5', 'ANIME', 'TV', 'ある物語 第二部', 'NOT_YET_RELEASED'),
+        ]),
+      }),
+    });
+
+    await runDetection({ database: db, now: () => T0 });
+
+    expect(await listDetectionEventsByWork(work.id, db)).toEqual([]);
+    // 題名の違う NOVEL と、形式の違う（NOVEL → MANGA）SEQUEL は照会もしない
+    expect(relationIds(calls)).not.toContain('2');
+    expect(relationIds(calls)).not.toContain('4');
+  });
+
+  it('かぐや様: 原作から見つけたアニメのうち新しいものの SEQUEL を辿り、ADAPTATION に無い完結編を via=sequel で検知する', async () => {
+    const { work } = await setup('かぐや様は告らせたい', [
+      {
+        mediaType: 'manga',
+        title: 'かぐや様は告らせたい（漫画）',
+        sourceRefs: [{ source: 'anilist', externalId: '86635', url: 'https://anilist.co/manga/86635' }],
+      },
+    ]);
+    const calls = mockFetch({ '/api/anilist/relations/': relationsRoute(KAGUYA) });
+
+    await runDetection({ database: db, now: () => T0 });
+
+    const events = await listDetectionEventsByWork(work.id, db);
+    expect(events.map((e) => [e.candidate.externalId, e.via])).toEqual([['205081', 'sequel']]);
+    expect(events[0].candidate).toMatchObject({ title: 'かぐや様は告らせたい 完結編', format: 'MOVIE' });
+    // 古い期（2019 年の1期など）からは辿らない
+    expect(relationIds(calls)).not.toContain('101921');
+  });
+
+  it('原作アニメの SEQUEL でも、副題を除いた題名が違うもの（別作品）は提案しない', async () => {
+    const { work } = await setup('ある漫画', [
+      { mediaType: 'manga', title: 'ある漫画', sourceRefs: [{ source: 'anilist', externalId: '10', url: 'u' }] },
+    ]);
+    mockFetch({
+      '/api/anilist/relations/': relationsRoute({
+        '10': relations('10', 'MANGA', 'MANGA', 'ある漫画', [
+          edge('ADAPTATION', '11', 'ANIME', 'TV', 'ある漫画 -アニメ-', 'FINISHED', '2024-01-05'),
+        ]),
+        '11': relations('11', 'ANIME', 'TV', 'ある漫画 -アニメ-', [
+          edge('SEQUEL', '12', 'ANIME', 'TV', '次の世代の物語', 'NOT_YET_RELEASED'),
+          edge('SEQUEL', '13', 'ANIME', 'TV', 'ある漫画 第2期', 'NOT_YET_RELEASED'),
+        ]),
+      }),
+    });
+
+    await runDetection({ database: db, now: () => T0 });
+
+    const ids = (await listDetectionEventsByWork(work.id, db)).map((e) => e.candidate.externalId);
+    expect(ids).toEqual(['13']);
+  });
+
+  it(`relations の照会は原作のほか Work ごとに ${RELATION_EXPAND_LIMIT} 回まで（部が長く続いても止まる）`, async () => {
+    const { work } = await setup('長い物語', [
+      { mediaType: 'light-novel', title: '長い物語', sourceRefs: [{ source: 'anilist', externalId: '1', url: 'u' }] },
+    ]);
+    // NOVEL 1 → 2 → 3 → … と SEQUEL が続き、各部に放送前のアニメが1つずつある。アニメにも SEQUEL が続く
+    const table: Record<string, ReturnType<typeof relations>> = {};
+    for (let n = 1; n <= 20; n += 1) {
+      table[String(n)] = relations(String(n), 'MANGA', 'NOVEL', `長い物語 第${n}部`, [
+        edge('SEQUEL', String(n + 1), 'MANGA', 'NOVEL', `長い物語 第${n + 1}部`, 'FINISHED'),
+        edge('ADAPTATION', String(100 + n), 'ANIME', 'TV', `長い物語 第${n}期`, 'NOT_YET_RELEASED'),
+      ]);
+      table[String(100 + n)] = relations(String(100 + n), 'ANIME', 'TV', `長い物語 第${n}期`, [
+        edge('SEQUEL', String(101 + n), 'ANIME', 'TV', `長い物語 第${n + 1}期`, 'NOT_YET_RELEASED'),
+      ]);
+    }
+    const calls = mockFetch({ '/api/anilist/relations/': relationsRoute(table) });
+
+    const result = await runDetection({ database: db, now: () => T0 });
+
+    expect(result.errors).toEqual({});
+    expect(callsTo(calls, '/api/anilist/relations/').length).toBeLessThanOrEqual(1 + RELATION_EXPAND_LIMIT);
+    expect((await listDetectionEventsByWork(work.id, db)).length).toBeGreaterThan(0);
+  });
+
+  it('既存の薬屋（部の分かれていない原作）では照会が増えすぎない', async () => {
+    await setup('薬屋のひとりごと', [
+      { mediaType: 'light-novel', title: '原作', sourceRefs: [{ source: 'anilist', externalId: '99026', url: 'u' }] },
+    ]);
+    const calls = mockFetch({ '/api/anilist/relations/': relationsRoute(KUSURIYA) });
+
+    await runDetection({ database: db, now: () => T0 });
+
+    // 原作 + 新しいアニメ2つ（3期第2クール・3期）
+    expect(relationIds(calls).sort()).toEqual(['195516', '200927', '99026']);
+  });
+});
+
+describe('isSameSeries', () => {
+  it.each([
+    ['本好きの下剋上 ~司書になるためには手段を選んでいられません~ 第一部「兵士の娘」', '本好きの下剋上~司書になるためには手段を選んでいられません~第四部「貴族院の自称図書委員」', true],
+    ['本好きの下剋上 領主の養女', '本好きの下剋上 貴族院の自称図書委員', true],
+    ['無職転生 ～異世界行ったら本気だす～', '無職転生Ⅲ ～異世界行ったら本気だす～ 第2クール', true],
+    ['かぐや様は告らせたい？～天才たちの恋愛頭脳戦～', 'かぐや様は告らせたい 完結編', true],
+    ['Re:ゼロから始める異世界生活', 'Re:ゼロから始める異世界生活 3rd season', true],
+    ['NARUTO -ナルト- 疾風伝', 'BORUTO-ボルト- NARUTO NEXT GENERATIONS', false],
+    ['Re:ゼロから始める異世界生活', 'Re:Monster', false],
+    ['ある物語 第一部', 'まったく別の物語', false],
+  ])('%s / %s → %s', (a, b, expected) => {
+    expect(isSameSeries(a, b)).toBe(expected);
   });
 });
 

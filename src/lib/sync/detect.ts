@@ -2,6 +2,7 @@
 // 経路: sequel（追跡中アニメの SEQUEL）→ relation（原作の ADAPTATION）→ どちらも ID が無い Work だけ title。
 
 import { apiGet } from '../api';
+import { normalizeTitle } from '../normalize';
 import { db as defaultDB, type TriptychDB } from '../db/schema';
 import type {
   AiringStatus,
@@ -80,6 +81,12 @@ const DETECTION_THROTTLE_MS = 24 * 60 * 60 * 1000; // 24h
 const TRACKED_STATUSES: Edition['status'][] = ['plan', 'active', 'paused'];
 const ORIGINAL_MEDIA_TYPES: MediaType[] = ['web-novel', 'light-novel', 'manga'];
 const SEQUEL_MAX_DEPTH = 3;
+/** 原作の続きの部（本好きの第二部〜のように部ごとに別エントリの NOVEL/MANGA）を SEQUEL で辿る段数。 */
+const SOURCE_PART_MAX_DEPTH = 3;
+/** 原作から見つけたアニメのうち、SEQUEL を辿る新しい期の数（ADAPTATION の付いていない新期を拾う）。 */
+const RELATION_TIP_COUNT = 2;
+/** relation 経路で原作のほかに増やす relations 照会の上限（Work ごと。この実行で照会済みの id は数えない）。 */
+export const RELATION_EXPAND_LIMIT = 6;
 const ADAPTATION_RELATION_TYPES = new Set(['ADAPTATION']);
 const EXCLUDED_FORMATS = new Set(['MUSIC']);
 const ENDED_STATUSES = new Set<AiringStatus>(['FINISHED', 'CANCELLED']);
@@ -217,15 +224,21 @@ async function detectForWork(
     await attempt(() => followSequels(animeId, ctx, (edge) => add(edgeCandidate(edge), 1, 'sequel')));
   }
 
+  const budget: FetchBudget = { remaining: RELATION_EXPAND_LIMIT };
   for (const edition of originals) {
     await attempt(async () => {
       const sourceId = await resolveSourceId(edition, work, ctx);
       if (!sourceId) return;
       idResolved = true;
-      const relations = await fetchRelations(sourceId, ctx);
-      for (const edge of relations.relations) {
-        if (edge.type !== 'ANIME' || !ADAPTATION_RELATION_TYPES.has(edge.relationType)) continue;
-        add(edgeCandidate(edge), 1, 'relation');
+      const adapted = await collectAdaptations(sourceId, ctx, budget, (edge) =>
+        add(edgeCandidate(edge), 1, 'relation'),
+      );
+      // 新期が前の期の SEQUEL としてだけ登録され、原作の ADAPTATION に無いことがある（かぐや様の完結編など）
+      for (const tip of newestAnime(adapted, RELATION_TIP_COUNT)) {
+        await followSequels(tip.externalId, ctx, (edge) => add(edgeCandidate(edge), 1, 'sequel'), {
+          budget,
+          accept: (edge) => isSameSeries(tip.title, edge.title),
+        });
       }
     });
   }
@@ -267,22 +280,38 @@ async function detectForWork(
   return { created, failures };
 }
 
+interface FetchBudget {
+  remaining: number;
+}
+
+interface FollowOptions {
+  /** 照会の上限。省略時は上限なし（追跡中アニメの続編）。 */
+  budget?: FetchBudget;
+  /** false の SEQUEL は提案せず、その先も辿らない。 */
+  accept?: (edge: RelationEdgeDTO) => boolean;
+}
+
 /** SEQUEL（type=ANIME）を最大3段まで辿る。登録済みの期も通り抜けて先を探す。 */
 async function followSequels(
   startId: string,
   ctx: DetectionContext,
   onSequel: (edge: RelationEdgeDTO) => void,
+  opts: FollowOptions = {},
 ): Promise<void> {
   const visited = new Set([startId]);
   let frontier = [startId];
   for (let depth = 0; depth < SEQUEL_MAX_DEPTH && frontier.length > 0; depth++) {
     const next: string[] = [];
     for (const id of frontier) {
-      const relations = await fetchRelations(id, ctx);
+      const relations = opts.budget
+        ? await fetchWithin(id, ctx, opts.budget)
+        : await fetchRelations(id, ctx);
+      if (!relations) return; // 上限に達した
       for (const edge of relations.relations) {
         if (edge.relationType !== 'SEQUEL' || edge.type !== 'ANIME') continue;
         if (edge.format && EXCLUDED_FORMATS.has(edge.format)) continue;
         if (visited.has(edge.externalId)) continue;
+        if (opts.accept && !opts.accept(edge)) continue;
         visited.add(edge.externalId);
         onSequel(edge);
         next.push(edge.externalId);
@@ -290,6 +319,89 @@ async function followSequels(
     }
     frontier = next;
   }
+}
+
+/** 原作と、その続きの部（SEQUEL・同じ形式・同じ題名を最大3段）の ADAPTATION アニメを集める。見つけ次第 onAdaptation も呼ぶ。 */
+async function collectAdaptations(
+  sourceId: string,
+  ctx: DetectionContext,
+  budget: FetchBudget,
+  onAdaptation: (edge: RelationEdgeDTO) => void,
+): Promise<RelationEdgeDTO[]> {
+  const source = await fetchRelations(sourceId, ctx);
+  const adapted: RelationEdgeDTO[] = [];
+  const visited = new Set([sourceId]);
+  let frontier = [source];
+  for (let depth = 0; frontier.length > 0; depth++) {
+    const next: RelationsDTO[] = [];
+    for (const part of frontier) {
+      for (const edge of part.relations) {
+        if (edge.type === 'ANIME' && ADAPTATION_RELATION_TYPES.has(edge.relationType)) {
+          adapted.push(edge);
+          onAdaptation(edge);
+          continue;
+        }
+        if (depth >= SOURCE_PART_MAX_DEPTH || visited.has(edge.externalId)) continue;
+        if (!isNextPart(edge, source)) continue;
+        visited.add(edge.externalId);
+        const relations = await fetchWithin(edge.externalId, ctx, budget);
+        if (relations) next.push(relations);
+      }
+    }
+    frontier = next;
+  }
+  return adapted;
+}
+
+/** 原作の続きの部: SEQUEL で、NOVEL/MANGA の別が同じで、副題を除いた題名が同じもの（外伝・別作品は辿らない）。 */
+function isNextPart(edge: RelationEdgeDTO, source: RelationsDTO): boolean {
+  return (
+    edge.relationType === 'SEQUEL' &&
+    edge.type === 'MANGA' &&
+    (edge.format === 'NOVEL') === (source.format === 'NOVEL') &&
+    isSameSeries(source.title, edge.title)
+  );
+}
+
+/** 新しい順に count 件（開始日の無いものは発表直後とみて先頭）。同じ id は1つにまとめる。 */
+function newestAnime(edges: RelationEdgeDTO[], count: number): RelationEdgeDTO[] {
+  const unique = [...new Map(edges.map((e) => [e.externalId, e])).values()];
+  const key = (e: RelationEdgeDTO) => e.startDate ?? '9999-12-31';
+  return unique
+    .filter((e) => !(e.format && EXCLUDED_FORMATS.has(e.format)))
+    .sort((a, b) => (key(a) < key(b) ? 1 : key(a) > key(b) ? -1 : 0))
+    .slice(0, count);
+}
+
+/** 照会済みの id は上限に数えない。上限に達したら undefined。 */
+function fetchWithin(
+  id: string,
+  ctx: DetectionContext,
+  budget: FetchBudget,
+): Promise<RelationsDTO> | undefined {
+  if (!ctx.relations.has(id)) {
+    if (budget.remaining <= 0) return undefined;
+    budget.remaining -= 1;
+  }
+  return fetchRelations(id, ctx);
+}
+
+// NFKC 後の副題の区切り。'Re:ゼロ' のように短く切れすぎる時は題名全体で比べる。
+const SUBTITLE_DELIMITER = /[\s~〜\-‐–—―:「『【〈《([]/u;
+const SERIES_BASE_MIN_LENGTH = 3;
+
+function seriesBase(title: string): string {
+  const text = title.normalize('NFKC').trim();
+  const base = normalizeTitle(text.split(SUBTITLE_DELIMITER)[0] ?? '');
+  return base.length >= SERIES_BASE_MIN_LENGTH ? base : normalizeTitle(text);
+}
+
+/** 副題を除いた題名で同じシリーズか（一方がもう一方で始まる）。NARUTO → BORUTO のような続編の別作品を除く。 */
+export function isSameSeries(a: string, b: string): boolean {
+  const x = seriesBase(a);
+  const y = seriesBase(b);
+  if (!x || !y) return false;
+  return x.startsWith(y) || y.startsWith(x);
 }
 
 /** 原作の AniList NOVEL/MANGA id: sourceRefs → syncHints.anilistSourceId → resolve-source の先頭（保存する）。 */
