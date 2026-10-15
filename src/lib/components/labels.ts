@@ -120,3 +120,13 @@ const ANIME_FORMAT_LABELS: Record<string, string> = {
 export function animeFormatLabel(format: string): string {
   return ANIME_FORMAT_LABELS[format] ?? format;
 }
+
+/**
+ * 画面に出す Release のラベル。NDL の巻は '5'・'外伝小蘭回想録 1' のように数字だけで終わるので、巻なら「巻」を足す。
+ * 保存している label はそのまま（同期の照合に使うため）。
+ */
+export function displayReleaseLabel(release: Pick<Release, 'kind' | 'label'>): string {
+  if (release.kind !== 'volume') return release.label;
+  const label = release.label.trim();
+  return /(?:^|\s)\d+(?:\.\d+)?$/.test(label) ? `${label}巻` : release.label;
+}

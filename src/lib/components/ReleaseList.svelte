@@ -17,6 +17,7 @@
     upcomingBroadcastSlots,
   } from './release-history';
   import { isPostponed, type ReleaseFormValue } from './release-view';
+  import { displayReleaseLabel } from './labels';
   import OnAirLamp from './OnAirLamp.svelte';
   import ReleaseForm from './ReleaseForm.svelte';
   import SectionHead from './SectionHead.svelte';
@@ -199,7 +200,7 @@
             {/if}
             <span class="row-actions">{@render rowActions(release)}</span>
           </div>
-          <p class="row-label">{release.label}</p>
+          <p class="row-label">{displayReleaseLabel(release)}</p>
           {@render syncNote(release)}
         </li>
       {/if}
@@ -263,7 +264,7 @@
               <span class="row-actions band-actions">{@render rowActions(band.release)}</span>
             </div>
             <div class="band-main">
-              <span class="band-label">{band.release.label}</span>
+              <span class="band-label">{displayReleaseLabel(band.release)}</span>
               <span class="mono band-when">{formatReleaseDate(band.release)}</span>
             </div>
           </div>

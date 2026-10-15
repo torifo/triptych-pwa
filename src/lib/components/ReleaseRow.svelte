@@ -2,6 +2,7 @@
   import type { Edition, Release } from '../db/schema';
   import { formatReleaseDate } from '../dates';
   import { isPostponed } from './release-view';
+  import { displayReleaseLabel } from './labels';
   import type { CoverSource } from './cover';
   import Cover from './Cover.svelte';
   import MediaBadge from './MediaBadge.svelte';
@@ -58,7 +59,7 @@
     </span>
     {#if release.label || postponed || services}
       <span class="meta">
-        <span class="label" class:shrink={!!services}>{release.label}</span>
+        <span class="label" class:shrink={!!services}>{displayReleaseLabel(release)}</span>
         {#if services}
           <span class="services">{services} 配信中</span>
         {/if}

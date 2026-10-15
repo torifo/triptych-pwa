@@ -8,6 +8,7 @@ import { editionCover, workCover, type CoverSource } from './cover';
 import { airingInstant, broadcastDayJst, countdownLabel, onAirEditionIds } from './onair';
 import { compareReleases, isTrackedEdition, precisionOf, timeMinutes } from './release-view';
 import { streamServiceName } from './release-history';
+import { displayReleaseLabel } from './labels';
 
 // ---------------------------------------------------------------------------
 // 表紙
@@ -147,7 +148,7 @@ export function todaySubLabel(item: TodayItem, now: Date): TodaySubLabel {
   if (countdown) return { text: countdown, upcoming: true };
   if (item.episode !== undefined) return { text: `#${item.episode}`, upcoming: false };
   if (item.services.length > 0) return { text: item.services.join('・'), upcoming: false };
-  return { text: item.release.label, upcoming: false };
+  return { text: displayReleaseLabel(item.release), upcoming: false };
 }
 
 const AIRING_WINDOW_MINUTES = 30;
