@@ -12,7 +12,7 @@ import pytest
 
 from backend.catalog import db
 from backend.catalog.link import run_link
-from backend.catalog.text import base_title_key, strip_subtitle, title_key
+from backend.catalog.text import base_title_key, strip_subtitle, title_key, volume_label
 
 TODAY = date(2026, 10, 14)
 RUN_SLOW = os.environ.get("TRIPTYCH_SLOW") == "1"  # pytest.ini registers no "slow" marker
@@ -445,6 +445,173 @@ def test_a_jpro_book_joins_the_catalogued_shelf_of_its_series(tmp_path):
     assert work("ndl:8") == {"ndl:8"}
     assert work("ndl:9") == {"ndl:9", "ndl:10"}
     assert work("ndl:12") == {"ndl:11", "ndl:12"}
+
+
+def _upcoming(external_id, jpro_title, hint, start_date, *, creators=(), series=None, line="", volume=None) -> db.Entry:
+    """A row as the JPRO harvester stores it: `extra.jpro.title` is the record's own title.
+
+    `series` is what an older harvester stored (the link derives it again from the title).
+    """
+    extra = {
+        "series": series if series is not None else jpro_title, "volume": volume, "kindHint": hint, "line": line,
+        "isbn": f"978{external_id:0>10}", "via": "jpro",
+        "jpro": {"title": jpro_title, "volume": volume, "seriesTitle": line or None, "labels": []},
+    }
+    return _entry("ndl", external_id, "book", jpro_title, start_date=start_date, start_precision="day",
+                  creators=list(creators), extra=extra)
+
+
+SHANFRO = ["硬梨菜", "不二涼介"]
+
+
+def test_a_jpro_volume_with_an_edition_word_joins_its_work(tmp_path):
+    title = "シャングリラ・フロンティア(28)エキスパンションパス ~クソゲーハンター、神ゲーに挑まんとす~"
+    entries = [
+        _anilist(1, "manga", "シャングリラ・フロンティア〜クソゲーハンター, 神ゲーに挑まんとす〜", popularity=9000,
+                 creators=SHANFRO),
+        _book("27", "シャングリラフロンティア : クソゲーハンター、神ゲーに挑まんとす 27",
+              "シャングリラフロンティア : クソゲーハンター、神ゲーに挑まんとす", "manga", "2026-07-01",
+              precision="month", creators=SHANFRO),
+        # stored by the harvester before the split was fixed
+        _upcoming("28", title, "manga", "2026-10-16", creators=SHANFRO, series=title[:-1],
+                  line="講談社キャラクターズA"),
+        _entry("anilist", 2, "manga", "VS.シャングリラ", title_native="VS.シャングリラ", creators=["誰か"]),
+    ]
+    conn = _open(tmp_path, entries)
+    run_link(conn, today=TODAY)
+
+    assert _cluster(conn, "ndl:28") == _cluster(conn, "anilist:1")
+    assert _links(conn, "ndl:28") == [("anilist:1", "series", 0.95)]
+    assert _cluster(conn, "anilist:2") != _cluster(conn, "anilist:1")
+    s = _summary(conn, _cluster(conn, "anilist:1"))
+    assert (s["next_date"], s["next_label"]) == ("2026-10-16", "28巻 エキスパンションパス")
+    # the stored series is derived again from the JPRO title, so `link` alone mends old rows
+    stored = db.row_to_dict(conn.execute("SELECT * FROM entries WHERE id = 'ndl:28'").fetchone())["extra"]
+    assert (stored["series"], stored["volume"]) == ("シャングリラ・フロンティア", "(28)")
+    assert stored["jpro"]["title"] == title and stored["line"] == "講談社キャラクターズA"
+
+    before = _dump(conn)
+    run_link(conn, today=TODAY)
+    assert _dump(conn) == before
+
+
+def test_a_jpro_volume_joins_a_catalogued_shelf_or_web_novel_by_its_body_and_author(tmp_path):
+    entries = [
+        # NDL catalogues the series with its subtitle after " : ", JPRO puts the volume first
+        _book("1", "山、買いました : 異世界暮らしも悪くない 6", "山、買いました : 異世界暮らしも悪くない", "novel",
+              "2026-01-01", precision="month", creators=["実川えむ", "りりんら"]),
+        _upcoming("2", "山、買いました10 ~異世界暮らしも悪くない~", "novel", "2026-11-01",
+                  creators=["実川えむ", "りりんら"]),
+        # the Web novel the book was made from
+        _entry("kakuyomu", "k1", "web-novel", "週末のんびり異世界冒険譚　～神様と楽しむ自由気ままな観光とグルメ旅行～",
+               creators=["出雲大吉"]),
+        _upcoming("3", "週末のんびり異世界冒険譚 3 ~神様と楽しむ自由気ままな観光とグルメ旅行~", "novel", "2026-11-25",
+                  creators=["出雲大吉", "ox"]),
+        _entry("narou", "n1", "web-novel", "【書籍化・コミカライズ】売られた聖女は異郷の王の愛を得る", creators=["乙原ゆん"]),
+        _upcoming("4", "売られた聖女は異郷の王の愛を得る", "manga", "2026-11-25", creators=["乙原ゆん", "春咲なつね"]),
+        # a series name followed by the volume's own title
+        _book("5", "仏の辰捕物帳", "仏の辰捕物帳", "novel", "2026-06-01", precision="month", creators=["稲葉稔"]),
+        _upcoming("6", "仏の辰捕物帳 老いた掏摸", "novel", "2026-11-12", creators=["稲葉稔"]),
+    ]
+    conn = _open(tmp_path, entries)
+    run_link(conn, today=TODAY)
+
+    assert _cluster(conn, "ndl:2") == _cluster(conn, "ndl:1")
+    assert _cluster(conn, "ndl:3") == _cluster(conn, "kakuyomu:k1")
+    assert _cluster(conn, "ndl:4") == _cluster(conn, "narou:n1")
+    assert _cluster(conn, "ndl:6") == _cluster(conn, "ndl:5")
+    assert _links(conn, "ndl:2") == [] and _links(conn, "ndl:3") == []  # no AniList entry involved
+
+
+def test_a_jpro_body_match_needs_the_same_author(tmp_path):
+    entries = [
+        _anilist(1, "manga", "人生逆転", popularity=500, creators=["別の作者"]),
+        _anilist(2, "novel", "人生逆転", popularity=400),  # no authors to check against
+        _entry("narou", "n1", "web-novel", "人生逆転", creators=["また別の作者"]),
+        _book("1", "人生逆転 3", "人生逆転", "novel", "2026-01-01", creators=["三人目"]),
+        _upcoming("2", "人生逆転5 浮気され、えん罪を着せられた俺が、学園一の美少女に懐かれる", "novel", "2026-11-01",
+                  creators=["本当の作者"]),
+        _upcoming("3", "人生逆転6 浮気され、えん罪を着せられた俺が、学園一の美少女に懐かれる", "novel", "2027-02-01"),
+        # an anthology of the same name by other authors does not join the catalogued book either
+        _book("4", "最後の晩餐", "最後の晩餐", "novel", "2026-03-01", creators=["江國香織ほか"]),
+        _upcoming("5", "最後の晩餐(2)", "novel", "2026-11-01", creators=["坂井希久子", "新川帆立"]),
+    ]
+    conn = _open(tmp_path, entries)
+    run_link(conn, today=TODAY)
+
+    others = {_cluster(conn, i) for i in ("anilist:1", "anilist:2", "narou:n1", "ndl:1")}
+    assert _cluster(conn, "ndl:2") not in others and _cluster(conn, "ndl:3") not in others
+    assert _links(conn, "ndl:2") == [] and _links(conn, "ndl:3") == []  # not even a candidate
+    assert _cluster(conn, "ndl:5") != _cluster(conn, "ndl:4")
+    assert _summary(conn, _cluster(conn, "ndl:2"))["title"] == "人生逆転"
+
+
+def test_the_longest_match_wins_over_the_series_head(tmp_path):
+    conan = ["青山剛昌"]
+    entries = [
+        _anilist(1, "manga", "名探偵コナン", popularity=90000, creators=conan),
+        _anilist(2, "manga", "名探偵コナン 犯人の犯沢さん", popularity=3000, creators=["かんばまゆこ", "青山剛昌"]),
+        _upcoming("1", "名探偵コナン 犯人の犯沢さん 9", "manga", "2026-11-18", creators=["かんばまゆこ", "青山剛昌"]),
+        _upcoming("2", "名探偵コナン エピソード“ZERO” 工藤新一水族館事件", "manga", "2026-11-18", creators=conan),
+    ]
+    conn = _open(tmp_path, entries)
+    run_link(conn, today=TODAY)
+
+    assert _cluster(conn, "ndl:1") == _cluster(conn, "anilist:2") != _cluster(conn, "anilist:1")
+    assert _cluster(conn, "ndl:2") == _cluster(conn, "anilist:1")
+    assert _links(conn, "ndl:2") == [("anilist:1", "series", 0.9)]
+
+
+def test_a_head_that_is_the_authors_name_is_not_a_series(tmp_path):
+    entries = [
+        _anilist(1, "manga", "萩尾望都-愛の宝石-", popularity=300, creators=["萩尾望都"]),
+        _upcoming("1", "萩尾望都 創作の泉", "manga", "2026-11-18", creators=["萩尾望都"]),
+    ]
+    conn = _open(tmp_path, entries)
+    run_link(conn, today=TODAY)
+    assert _cluster(conn, "ndl:1") != _cluster(conn, "anilist:1")
+    assert _links(conn, "ndl:1") == []
+
+
+@pytest.mark.parametrize(
+    ("volume", "label"),
+    [
+        ("5", "5巻"), ("(1)", "1巻"), ("( 2)", "2巻"), ("[3]", "3巻"), ("02", "2巻"), ("1巻", "1巻"), ("第2巻", "2巻"),
+        ("Vol. 2", "2巻"), ("life.19", "19巻"), ("[VOLUME]2", "2巻"), ("二", "2巻"), ("(六)", "6巻"), ("【十二】", "12巻"),
+        ("上", "上巻"), ("(下)", "下巻"), ("下巻", "下巻"), ("全1", "全1巻"), ("第3部[10]", "第3部 10巻"),
+        ("外伝小蘭回想録 1", "外伝小蘭回想録 1巻"), ("非命に死す篇", "非命に死す篇"), ("2026", "2026"), ("―", None),
+        ("", None), (None, None),
+    ],
+)
+def test_volume_label(volume, label):
+    assert volume_label(volume) == label
+
+
+def test_next_label_of_a_book_is_its_volume(tmp_path):
+    entries = [
+        _anilist(1, "novel", "群雄を綴る", popularity=100),
+        _upcoming("1", "群雄を綴る(1)", "novel", "2026-10-20"),
+        _book("2", "辺境の薬師 4", "辺境の薬師", "novel", "2026-11-01"),
+        _upcoming("3", "本好きの下剋上 第五部 女神の化身12", "novel", "2026-12-10"),
+        _upcoming("4", "放課後死体クラブ", "novel", "2026-10-21"),  # one book: the work's own title says it
+        _anilist(2, "manga", "ハイキュー!!", popularity=90000, creators=["古舘春一"]),
+        _upcoming("5", "ハイキュー!! キャラクターリミックス 絆 及川と岩泉", "manga", "2026-11-04", creators=["古舘春一"]),
+        _entry("narou", "n1", "web-novel", "【書籍化決定】放課後の魔法書", creators=["作者"]),
+        _upcoming("6", "放課後の魔法書", "novel", "2026-10-25", creators=["作者"]),
+    ]
+    entries[2].extra["volume"] = "4"  # the catalogued volume field
+    conn = _open(tmp_path, entries)
+    run_link(conn, today=TODAY)
+
+    def label(entry_id):
+        return _summary(conn, _cluster(conn, entry_id))["next_label"]
+
+    assert label("ndl:1") == "1巻"
+    assert label("ndl:2") == "4巻"
+    assert label("ndl:3") == "第五部 女神の化身 12巻"
+    assert label("ndl:4") is None
+    assert label("ndl:5") == "ハイキュー!! キャラクターリミックス 絆 及川と岩泉"
+    assert label("ndl:6") is None  # the Web novel's title with its 【…】 note is the same title
 
 
 # --------------------------------------------------------------------------- summary

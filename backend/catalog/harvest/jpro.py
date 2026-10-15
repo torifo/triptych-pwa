@@ -63,10 +63,13 @@ a date that parses), a few more title words (写真集・ビジュアルブッ�
 month on are kept (`release_floor`).
 
 Rows are the OpenSearch harvester's own `ndl:<ISBN>` rows (source `ndl`, kind `book`, the
-same series / line / volume extraction), so a book keeps one row before and after NDL
-catalogues it. A row written here has `extra.via = "jpro"` and the record's raw fields in
-`extra.jpro` (title, volume, seriesTitle, genre words), which the collector's NDL series
-API reads back (`backend.catalog.upcoming`). When the row is already there:
+same line extraction), so a book keeps one row before and after NDL catalogues it. The
+series and volume are split from the title by `text.split_volume_title` (a 近刊 title holds
+the volume, edition words and subtitles: "シャングリラ・フロンティア(28)エキスパンションパス ~…~"
+-> series "シャングリラ・フロンティア", volume "(28)"). A row written here has
+`extra.via = "jpro"` and the record's raw fields in `extra.jpro` (title, volume, seriesTitle,
+genre words), which the collector's NDL series API reads back (`backend.catalog.upcoming`)
+and from which the linker splits the series again. When the row is already there:
 
 - a catalogued row (no `via`) keeps its title, series, line and kind, and only takes the
   JPRO release day when that is finer than its own date (NDL dates are mostly months);
@@ -110,6 +113,7 @@ from ...adapters.ndl import (
 from ...timeutil import JST
 from .. import db
 from ..runtime import Clock, HarvestResult, Pacer, request_with_retry
+from ..text import split_volume_title
 from . import ndl
 from .ndl import CLASSES, BookClass, _PatientClient
 
@@ -384,8 +388,9 @@ def _creators(record: NdlRecord) -> list[str]:
 
 def _entry(record: JproRecord, book: NdlRecord, cls: BookClass) -> db.Entry:
     assert book.isbn and book.date and book.precision
-    series = ndl.series_name(book.title, book.volume, in_title=True)
-    volume = book.volume or book.title[len(series) :].strip(" 　~〜～:：-") or None
+    # the linker splits `extra.jpro` again the same way (`link._upcoming_title`)
+    split = split_volume_title(book.title, book.volume)
+    series, volume = split.series, split.volume
     ndc = next((code for code in record.ndcs if code.startswith(cls.ndc)), cls.ndc)
     return db.Entry(
         source=ROW_SOURCE,

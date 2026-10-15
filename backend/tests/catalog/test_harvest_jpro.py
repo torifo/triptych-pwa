@@ -31,6 +31,7 @@ from backend.catalog import db, runtime
 from backend.catalog.harvest import jpro
 from backend.catalog.harvest import ndl as ndl_harvest
 from backend.catalog.link import run_link
+from backend.catalog.text import split_volume_title
 
 FIXTURES = Path(__file__).parent / "fixtures"
 quiet = lambda message: None  # noqa: E731
@@ -507,6 +508,100 @@ def test_entries_of_counts_the_reasons():
         "manga": 4, "novel": 6, "genre": 3, "form": 3, "adult": 1, "excluded-word": 1, "old": 1,
         "electronic": 1, "deleted": 1,
     }
+
+
+# -- series / volume / edition of a 近刊 title ----------------------------------------------------------
+
+# 近刊の題名（2026-10-15 のカタログの JPRO の行から）-> (シリーズ名, 巻, 版の語)
+SPLIT_TITLES = [
+    # 巻のあとに版の語と副題: 本体だけがシリーズ名
+    ("シャングリラ・フロンティア(28)エキスパンションパス ~クソゲーハンター、神ゲーに挑まんとす~", None,
+     ("シャングリラ・フロンティア", "(28)", "エキスパンションパス")),
+    # 本体に付いた巻と、そのあとの副題・巻の題
+    ("山、買いました10 ~異世界暮らしも悪くない~", None, ("山、買いました", "10", None)),
+    ("猫になりたい田万川くん(7) またたび", None, ("猫になりたい田万川くん", "(7)", None)),
+    ("深川青春捕物控(六) それぞれの旅立ち", None, ("深川青春捕物控", "(六)", None)),
+    ("911代理店【2】ギルティ―", "第2巻", ("911代理店", "第2巻", None)),
+    ("地龍のダンジョン奮闘記!2~目覚めたら迷宮最強のドラゴンでした~", None, ("地龍のダンジョン奮闘記!", "2", None)),
+    ("週末のんびり異世界冒険譚 3 ~神様と楽しむ自由気ままな観光とグルメ旅行~", None, ("週末のんびり異世界冒険譚", "3", None)),
+    ("Only Sense Online 25 ‐オンリーセンス・オンライン‐", None, ("Only Sense Online", "25", None)),
+    ("ひとりぼっちの異世界攻略 life.19 継ぎ接ぎのパラダイムシフト", None, ("ひとりぼっちの異世界攻略", "life.19", None)),
+    ("森羅記 四 懸軍の塵", None, ("森羅記", "四", None)),
+    ("3S探索者の叛逆無双譚 1 災厄前の世界に帰還した天才少年探索者は、最強魔法使いと共に剣と魔法で無双する", "1",
+     ("3S探索者の叛逆無双譚", "1", None)),
+    # 末尾の巻と同じ番号が本体の直後にもある
+    ("転生したら悪役令嬢だったので引きニートになります9~ずっと隠していたこと、言えなかったこと~ 9", "9",
+     ("転生したら悪役令嬢だったので引きニートになります", "9", None)),
+    ("男一匹ガキ大将 4 本宮ひろ志漫画大全集004", None, ("男一匹ガキ大将", "4", None)),
+    # 末尾の巻: 巻より前の副題は残す
+    ("あなたとさよならするための方法〜忘れら令嬢の婚活奮闘記〜 1巻", "1巻",
+     ("あなたとさよならするための方法〜忘れら令嬢の婚活奮闘記〜", "1巻", None)),
+    ("海運王の身代わり花嫁~こんなに愛されるなんて聞いてません!~2", None,
+     ("海運王の身代わり花嫁~こんなに愛されるなんて聞いてません!~", "2", None)),
+    ("ひみつ―佐世保事件で妹を喪ったぼくの話― 下", None, ("ひみつ―佐世保事件で妹を喪ったぼくの話―", "下", None)),
+    ("宮中は噂のたえない職場にて 二", None, ("宮中は噂のたえない職場にて", "二", None)),
+    ("ハイスクールハックアンドスラッシュ [VOLUME]2", None, ("ハイスクールハックアンドスラッシュ", "[VOLUME]2", None)),
+    ("紙魚の手帖Vol.31", None, ("紙魚の手帖", "Vol.31", None)),
+    ("穏やか貴族の休暇のすすめ。@COMIC 第16巻 16", None, ("穏やか貴族の休暇のすすめ。@COMIC", "第16巻", None)),
+    ("悲劇の元凶となる最強外道ラスボス女王は民の為に尽くします。14", "14",
+     ("悲劇の元凶となる最強外道ラスボス女王は民の為に尽くします。", "14", None)),
+    # 注記（形態・完結・新装版）は落とす
+    ("転生者の私は〝推し活〟するため聖女になりました!(コミック)(3)(完)", None,
+     ("転生者の私は〝推し活〟するため聖女になりました!", "(3)", None)),
+    ("Holoearth Days! A Tale Side:W ウェスタdeクッキング -幸せのルセット-(3)(完)", None,
+     ("Holoearth Days! A Tale Side:W ウェスタdeクッキング -幸せのルセット-", "(3)", None)),
+    ("浮雲十四郎斬日記【三】仇討ち街道<新装版>", None, ("浮雲十四郎斬日記", "【三】", None)),
+    ("孟嘗君(5) 〈新装版〉", None, ("孟嘗君", "(5)", None)),
+    # 部の印から先は巻の側（本好きの下剋上の近刊の書き方）
+    ("本好きの下剋上 第五部 女神の化身12", None, ("本好きの下剋上", "12", None)),
+    ("新装版 デルフィニア戦記 : 第III部 動乱の序章3", None, ("新装版 デルフィニア戦記", "3", None)),
+    # 題名の一部の数字は巻ではない
+    ("ファンタシースターオンライン2 es ぎゅ!!! 1", "1", ("ファンタシースターオンライン2 es ぎゅ!!!", "1", None)),
+    ("テルスター’86 4", "4", ("テルスター’86", "4", None)),
+    ("天国2.0 3", "3", ("天国2.0", "3", None)),
+    ("天国2.0", None, ("天国2.0", None, None)),
+    ("小説版 ゴジラ -0.0", None, ("小説版 ゴジラ -0.0", None, None)),
+    ("赤灯えれじい2024", None, ("赤灯えれじい2024", None, None)),
+    ("宇宙戦艦ヤマト2199 (10)", None, ("宇宙戦艦ヤマト2199", "(10)", None)),
+    ("意味がわかるとゾクゾクする超短編小説54字の物語16", None, ("意味がわかるとゾクゾクする超短編小説54字の物語", "16", None)),
+    ("ようこそ実力至上主義の教室へ 2年生編 2nd Stage 3", None, ("ようこそ実力至上主義の教室へ 2年生編 2nd Stage", "3", None)),
+    ("19番目のカルテ 徳重晃の問診", "14", ("19番目のカルテ 徳重晃の問診", "14", None)),
+    ("スキル【無】の俺が世界最強2スキル無しと馬鹿にされた俺", None, ("スキル【無】の俺が世界最強2スキル無しと馬鹿にされた俺", None, None)),
+    ("432459", None, ("432459", None, None)),
+    ("授かりましたが、愛しているので離婚します~財閥御曹司は逃げ出し懐妊妻を昂る愛で取り戻す~", None,
+     ("授かりましたが、愛しているので離婚します~財閥御曹司は逃げ出し懐妊妻を昂る愛で取り戻す~", None, None)),
+    ("うさひな -5年付き合ってる大学生カップルの話-", "2", ("うさひな -5年付き合ってる大学生カップルの話-", "2", None)),
+]
+
+
+@pytest.mark.parametrize(("title", "volume", "expected"), SPLIT_TITLES)
+def test_a_title_splits_into_series_volume_and_edition(title, volume, expected):
+    split = split_volume_title(title, volume)
+    assert (split.series, split.volume, split.edition) == expected
+
+
+def test_the_text_after_a_volume_in_the_middle_is_kept_apart():
+    split = split_volume_title("シャングリラ・フロンティア(28)エキスパンションパス ~クソゲーハンター、神ゲーに挑まんとす~")
+    assert split.rest == "~クソゲーハンター、神ゲーに挑まんとす~"
+    assert split.whole == "シャングリラ・フロンティア ~クソゲーハンター、神ゲーに挑まんとす~"
+    assert split_volume_title("本好きの下剋上 第五部 女神の化身12").part == "第五部 女神の化身"
+    plain = split_volume_title("魔女の旅々 23")
+    assert (plain.rest, plain.part, plain.whole) == ("", "", "魔女の旅々")
+
+
+def test_a_jpro_row_names_its_series_without_volume_and_edition():
+    record = jpro.JproRecord(
+        identifier=f"R100000137-I{make_isbn(5)}", datestamp="2026-10-14T15:00:00Z", isbn=make_isbn(5),
+        title="シャングリラ・フロンティア(28)エキスパンションパス ~クソゲーハンター、神ゲーに挑まんとす~",
+        series_title="講談社キャラクターズA", issued="2026-10-16", labels=MANGA_LABELS, ndcs=("726.1",),
+        names=("硬梨菜", "不二涼介"),
+    )
+    entry, reason = jpro.outcome(record, jpro.release_floor(TODAY))
+    assert reason is None
+    assert entry.title == record.title
+    assert (entry.extra["series"], entry.extra["volume"]) == ("シャングリラ・フロンティア", "(28)")
+    assert entry.extra["line"] == "講談社キャラクターズA"
+    assert entry.extra["jpro"]["title"] == record.title  # the link derives the series from it again
 
 
 # -- slices ------------------------------------------------------------------------------------------
