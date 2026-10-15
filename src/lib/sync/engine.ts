@@ -1,7 +1,7 @@
 // Sync Engine（仕様は specs/data-coverage/design.md「F2」）。
 // status.svelte.ts は import しない（vitest は svelte プラグインを通さず `$state` が未定義になる）。
 
-import { apiGet } from '../api';
+import { ApiError, apiGet } from '../api';
 import { isSafeHttpUrl } from '../components/release-view';
 import { db as defaultDB, type TriptychDB } from '../db/schema';
 import type {
@@ -217,7 +217,7 @@ async function runSyncOnce(opts: SyncOptions & { database: TriptychDB }): Promis
       } catch (err) {
         failed += 1;
         errors[source] = {
-          message: `${task.label}: ${errorMessage(err)}`,
+          message: `『${task.label}』: ${errorMessage(err)}`,
           occurredAt: now().toISOString(),
         };
       }
@@ -759,7 +759,25 @@ async function skipInvalidDate(fn: () => Promise<unknown>): Promise<void> {
   }
 }
 
-function errorMessage(err: unknown): string {
+// collector の状態コードを、Home・設定に出す言葉にする（相手先の多くは一時的な障害）
+const API_STATUS_WORDS: Record<number, string> = {
+  401: 'トークンが違います',
+  403: '断られました',
+  404: '見つかりませんでした',
+  429: '問い合わせが多すぎます',
+  502: '相手先が応答しませんでした',
+  503: '相手先が混み合っています',
+  504: '相手先の応答が遅すぎました',
+};
+
+/** 同期のエラーの理由。collector の状態コードは言葉に、つながらない時（fetch の TypeError）はそう書く。 */
+export function errorMessage(err: unknown): string {
+  if (err instanceof ApiError) {
+    const words =
+      API_STATUS_WORDS[err.status] ?? (err.status >= 500 ? '相手先でエラーが起きました' : '受け付けられませんでした');
+    return `${words}（${err.status}）`;
+  }
+  if (err instanceof TypeError) return 'collector に接続できませんでした';
   if (err instanceof Error) return err.message;
   return String(err);
 }

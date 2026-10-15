@@ -10,7 +10,8 @@ import {
   updateEditionSyncHints,
   type CreateEditionInput,
 } from '../db/store';
-import { runSync } from './engine';
+import { errorMessage, runSync } from './engine';
+import { ApiError } from '../api';
 
 let db: TriptychDB;
 let dbCounter = 0;
@@ -783,7 +784,7 @@ describe('runSync: しょぼいカレンダー', () => {
 
     const result = await runSync({ database: db, force: true, now: () => NOW });
 
-    expect(result.errors.syoboi?.message).toContain('/api/syoboi/title: 502');
+    expect(result.errors.syoboi?.message).toContain('相手先が応答しませんでした（502）');
     expect(result.errors.anilist).toBeUndefined();
     expect((await listReleasesByEdition(anime.id, db)).length).toBe(2);
   });
@@ -921,7 +922,7 @@ describe('runSync: 障害と再試行', () => {
 
     const result = await runSync({ database: db, force: true, now: () => NOW });
 
-    expect(result.errors.anilist?.message).toContain('/api/anilist/media/1: 502');
+    expect(result.errors.anilist?.message).toContain('相手先が応答しませんでした（502）');
     expect(result.errors.narou).toBeUndefined();
     expect(await listReleasesByEdition(anime.id, db)).toHaveLength(0);
     expect(await listReleasesByEdition(novel.id, db)).toHaveLength(1);
@@ -1333,5 +1334,15 @@ describe('runSync: 多重実行防止', () => {
     // 終わった後は新しく実行できる
     await runSync({ database: db, force: true, now: () => NOW });
     expect(callsTo(calls, '/api/anilist/media/')).toHaveLength(2);
+  });
+});
+
+describe('errorMessage', () => {
+  it('collector の状態コードを言葉にし、つながらない時はそう書く', () => {
+    expect(errorMessage(new ApiError(502, '/api/ndl/series: 502'))).toBe('相手先が応答しませんでした（502）');
+    expect(errorMessage(new ApiError(429, '/api/anilist/media/1: 429'))).toBe('問い合わせが多すぎます（429）');
+    expect(errorMessage(new ApiError(500, '/x: 500'))).toBe('相手先でエラーが起きました（500）');
+    expect(errorMessage(new TypeError('Failed to fetch'))).toBe('collector に接続できませんでした');
+    expect(errorMessage(new Error('壊れた日付'))).toBe('壊れた日付');
   });
 });
