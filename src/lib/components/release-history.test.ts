@@ -11,6 +11,7 @@ import {
   streamEntries,
   streamServiceName,
   upcomingBroadcasts,
+  upcomingBroadcastSlots,
 } from './release-history';
 import { groupEditionReleases } from './release-view';
 
@@ -283,5 +284,54 @@ describe('upcomingBroadcasts', () => {
   it('番組が無ければ空', () => {
     expect(upcomingBroadcasts(undefined, now)).toEqual([]);
     expect(upcomingBroadcasts([], now)).toEqual([]);
+  });
+});
+
+describe('upcomingBroadcastSlots', () => {
+  // 2026-10-15 14:00 JST（放送日 10/15）
+  const now = new Date('2026-10-15T05:00:00Z');
+
+  function hint(over: Partial<BroadcastHint> & Pick<BroadcastHint, 'channel' | 'date' | 'time'>): BroadcastHint {
+    return { isStreaming: false, ...over };
+  }
+
+  it('同じ日時の局を1行にまとめ、在京キー局を表に出して残りを数える', () => {
+    const slots = upcomingBroadcastSlots(
+      [
+        hint({ channel: 'STV札幌テレビ', date: '2026-10-16', time: '23:00', episode: 51 }),
+        hint({ channel: '中京テレビ', date: '2026-10-16', time: '23:00', episode: 51 }),
+        hint({ channel: '日本テレビ', date: '2026-10-16', time: '23:00', episode: 51 }),
+        hint({ channel: '読売テレビ', date: '2026-10-16', time: '23:00', episode: 51 }),
+        hint({ channel: 'BS日テレ', date: '2026-10-18', time: '24:00' }),
+      ],
+      now,
+    );
+    expect(slots).toEqual([
+      { channel: '日本テレビ', others: 3, date: '2026-10-16', time: '23:00', isStreaming: false },
+      { channel: 'BS日テレ', others: 0, date: '2026-10-18', time: '24:00', isStreaming: false },
+    ]);
+  });
+
+  it('キー局が無ければ局名の順で先頭、配信と放送は別の行', () => {
+    const slots = upcomingBroadcastSlots(
+      [
+        hint({ channel: '中京テレビ', date: '2026-10-16', time: '23:00' }),
+        hint({ channel: 'STV札幌テレビ', date: '2026-10-16', time: '23:00' }),
+        hint({ channel: 'ABEMA', date: '2026-10-16', time: '23:00', isStreaming: true }),
+      ],
+      now,
+    );
+    expect(slots.map((s) => [s.channel, s.others, s.isStreaming])).toEqual([
+      ['STV札幌テレビ', 1, false],
+      ['ABEMA', 0, true],
+    ]);
+  });
+
+  it('まとめた後で先頭 limit 件', () => {
+    const many = ['2026-10-16', '2026-10-17', '2026-10-18', '2026-10-19'].flatMap((date) => [
+      hint({ channel: 'TOKYO MX', date, time: '24:00' }),
+      hint({ channel: 'BS11', date, time: '24:00' }),
+    ]);
+    expect(upcomingBroadcastSlots(many, now).map((s) => s.date)).toEqual(['2026-10-16', '2026-10-17', '2026-10-18']);
   });
 });

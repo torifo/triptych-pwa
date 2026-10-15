@@ -166,3 +166,54 @@ export function upcomingBroadcasts(
     .sort(compareBroadcasts)
     .slice(0, limit);
 }
+
+/** 帯の下の1行。同じ日時（と放送／配信の別）の局をまとめ、表に出す局と残りの局数を持つ。 */
+export interface BroadcastSlot {
+  channel: string;
+  /** まとめた残りの局数（「ほか 2 局」） */
+  others: number;
+  date: string;
+  time: string;
+  isStreaming: boolean;
+}
+
+// 同じ時刻に系列局が並ぶ時に表へ出す局（全国波・在京キー局）。先に書いたものほど優先する。
+const KEY_STATIONS = ['NHK総合', 'NHK Eテレ', '日本テレビ', 'TBS', 'フジテレビ', 'テレビ朝日', 'テレビ東京', 'TOKYO MX'];
+
+function stationRank(channel: string): number {
+  const i = KEY_STATIONS.findIndex((key) => channel.startsWith(key));
+  return i === -1 ? KEY_STATIONS.length : i;
+}
+
+/**
+ * upcomingBroadcasts を同じ日時ごとに1行へまとめ、先頭 limit 行。
+ * 系列の地方局が同じ時刻に並ぶと局名だけの行が続くので、キー局（無ければ局名の順で先頭）を表に出して残りを数える。
+ */
+export function upcomingBroadcastSlots(
+  broadcasts: readonly BroadcastHint[] | undefined,
+  now: Date,
+  limit = 3,
+): BroadcastSlot[] {
+  const groups = new Map<string, BroadcastHint[]>();
+  for (const b of upcomingBroadcasts(broadcasts, now, Number.POSITIVE_INFINITY)) {
+    const key = `${b.date}|${b.time}|${b.isStreaming ? 'stream' : 'air'}`;
+    const group = groups.get(key);
+    if (group) group.push(b);
+    else groups.set(key, [b]);
+  }
+  const slots = [...groups.values()].map((group): BroadcastSlot => {
+    const [lead] = [...group].sort(
+      (a, b) => stationRank(a.channel) - stationRank(b.channel) || a.channel.localeCompare(b.channel, 'ja'),
+    );
+    return { channel: lead.channel, others: group.length - 1, date: lead.date, time: lead.time, isStreaming: lead.isStreaming };
+  });
+  // 同じ日時なら放送を先、配信を後に
+  slots.sort((a, b) => {
+    if (a.date !== b.date) return a.date < b.date ? -1 : 1;
+    const ta = timeMinutes(a.time);
+    const tb = timeMinutes(b.time);
+    if (ta !== tb) return ta < tb ? -1 : 1;
+    return Number(a.isStreaming) - Number(b.isStreaming);
+  });
+  return slots.slice(0, limit);
+}

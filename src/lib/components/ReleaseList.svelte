@@ -14,7 +14,7 @@
     laterReleases,
     nextEpisodeBand,
     releaseDayFor,
-    upcomingBroadcasts,
+    upcomingBroadcastSlots,
   } from './release-history';
   import { isPostponed, type ReleaseFormValue } from './release-view';
   import OnAirLamp from './OnAirLamp.svelte';
@@ -40,7 +40,7 @@
   const view = $derived(buildEditionReleaseView(releases, edition.mediaType, today));
   const band = $derived(nextEpisodeBand(view.nextEpisodes, today, now));
   const casts = $derived(
-    edition.mediaType === 'anime' ? upcomingBroadcasts(edition.syncHints?.broadcasts, now) : [],
+    edition.mediaType === 'anime' ? upcomingBroadcastSlots(edition.syncHints?.broadcasts, now) : [],
   );
   const streamRows = $derived(view.streams.map((s) => s.release));
   const later = $derived(laterReleases(view));
@@ -276,11 +276,11 @@
           {#each casts as cast, i (`${cast.channel}|${cast.date}|${cast.time}|${i}`)}
             <li class="cast">
               <span class="cast-ch">{cast.channel}</span>
+              {#if cast.others > 0}
+                <span class="cast-others">ほか{cast.others}局</span>
+              {/if}
               {#if cast.isStreaming}
                 <span class="tag">配信</span>
-              {/if}
-              {#if cast.episode}
-                <span class="mono cast-ep">#{cast.episode}</span>
               {/if}
               <span class="mono cast-when">{formatReleaseDate({ date: cast.date, time: cast.time || undefined })}</span>
             </li>
@@ -472,18 +472,19 @@
   }
   .cast-ch {
     min-width: 0;
-    flex: 1;
+    flex: 0 1 auto;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     font-weight: 500;
   }
-  .cast-ep {
+  .cast-others {
     font-size: 0.6875rem;
     color: var(--muted);
     white-space: nowrap;
   }
   .cast-when {
+    margin-left: auto;
     font-size: 0.75rem;
     white-space: nowrap;
   }
