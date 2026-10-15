@@ -994,3 +994,35 @@ def test_detail_and_stats_stay_fast_on_100k_entries(big_catalog, monkeypatch):
     assert elapsed < PERF_LIMIT
     elapsed, _ = _measure(client, "/api/catalog/stats", {})
     assert elapsed < PERF_LIMIT
+
+
+# -- covers that follow the status / season filter ----------------------------
+
+
+def test_status_and_season_filters_show_the_cover_of_the_matching_season(catalog_path, client):
+    conn = db.connect(catalog_path)
+    add_work(
+        conn, "anilist:900001", "ブラッククローバー",
+        [
+            E("anilist", "900001", "anime", "ブラッククローバー", format="TV", status="FINISHED", season="FALL",
+              season_year=2017, popularity=500, cover="https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/old.jpg"),
+            E("anilist", "900002", "anime", "ブラッククローバー 第2期", format="TV", status="RELEASING", season="FALL",
+              season_year=2026, popularity=50, cover="https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/new.jpg"),
+            E("anilist", "900003", "anime", "ブラッククローバー 特番", format="SPECIAL", status="RELEASING", season="FALL",
+              season_year=2026, popularity=10, cover=None),
+            E("anilist", "900004", "manga", "ブラッククローバー", format="MANGA", status="RELEASING", popularity=900,
+              cover="https://s4.anilist.co/file/anilistcdn/media/manga/cover/small/manga.jpg"),
+        ],
+        anime_status="RELEASING", first_year=2015, last_year=2026, seasons=["2017-FALL", "2026-FALL"],
+        popularity=900, cover="https://s4.anilist.co/file/anilistcdn/media/anime/cover/small/old.jpg",
+    )
+    conn.close()
+
+    def cover(**params: Any) -> Optional[str]:
+        body = client.get("/api/catalog/works", params=params).json()
+        return body["items"][0]["cover"]
+
+    assert cover().endswith("/old.jpg")  # no filter: the work's own cover
+    assert cover(status="RELEASING").endswith("/new.jpg")
+    assert cover(year=2026, season="FALL").endswith("/new.jpg")
+    assert cover(year=2017, season="FALL").endswith("/old.jpg")

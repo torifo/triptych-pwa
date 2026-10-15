@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from contextlib import contextmanager
-from typing import Any, Iterable, Iterator, Optional
+from typing import Any, Iterable, Iterator, Optional, Sequence
 from urllib.parse import quote
 
 from fastapi import APIRouter, HTTPException, Query
@@ -239,7 +239,50 @@ def _kinds(raw: Optional[str]) -> list[str]:
     return sorted(present, key=_KIND_RANK.__getitem__)
 
 
-def _summary(row: sqlite3.Row) -> CatalogWorkSummary:
+def _focused_covers(
+    conn: sqlite3.Connection,
+    cluster_ids: Sequence[str],
+    *,
+    status: Optional[str],
+    year: Optional[int],
+    season: Optional[str],
+) -> dict[str, str]:
+    """Covers of the AniList anime entries that match the status / season filter, per cluster.
+
+    The work's own cover is usually its most popular (first) season; when the list is
+    narrowed to what airs now or in one season, the matching season's cover is what the
+    viewer expects to see.
+    """
+    if not cluster_ids or (status is None and season is None):
+        return {}
+    marks = ", ".join(f":c{i}" for i in range(len(cluster_ids)))
+    params: dict[str, Any] = {f"c{i}": cid for i, cid in enumerate(cluster_ids)}
+    where = [
+        f"c.cluster_id IN ({marks})",
+        "e.kind = 'anime'",
+        "e.source = 'anilist'",
+        "e.cover IS NOT NULL AND e.cover <> ''",
+    ]
+    if status is not None:
+        where.append("e.status = :status")
+        params["status"] = status
+    if season is not None and year is not None:
+        where.append("e.season_year = :year AND e.season = :season")
+        params["year"] = year
+        params["season"] = season
+    rows = conn.execute(
+        "SELECT c.cluster_id, e.cover FROM clusters c JOIN entries e ON e.id = c.entry_id "
+        f"WHERE {' AND '.join(where)} "
+        "ORDER BY CASE WHEN e.format = 'TV' THEN 0 ELSE 1 END, COALESCE(e.popularity, -1) DESC, e.id",
+        params,
+    ).fetchall()
+    covers: dict[str, str] = {}
+    for row in rows:
+        covers.setdefault(row[0], row[1])
+    return covers
+
+
+def _summary(row: sqlite3.Row, cover: Optional[str] = None) -> CatalogWorkSummary:
     return CatalogWorkSummary(
         id=row["cluster_id"],
         title=row["title"],
@@ -252,7 +295,7 @@ def _summary(row: sqlite3.Row) -> CatalogWorkSummary:
         nextPrecision=row["next_precision"],
         nextLabel=row["next_label"],
         popularity=row["popularity"] or 0,
-        cover=row["cover"],
+        cover=cover or row["cover"],
     )
 
 
@@ -309,7 +352,11 @@ def list_works(
             f"ORDER BY {_ORDER_BY[sort]} LIMIT :limit OFFSET :offset",
             {**params, "limit": per, "offset": (page - 1) * per},
         ).fetchall()
-    return CatalogWorkPage(total=total, page=page, per=per, items=[_summary(row) for row in rows])
+        covers = _focused_covers(
+            conn, [row["cluster_id"] for row in rows], status=status or None, year=year, season=season_key
+        )
+    items = [_summary(row, covers.get(row["cluster_id"])) for row in rows]
+    return CatalogWorkPage(total=total, page=page, per=per, items=items)
 
 
 # -- /works/{cluster_id} --------------------------------------------------------
