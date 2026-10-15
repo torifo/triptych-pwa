@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { ChevronDown, ChevronLeft, ChevronRight, Download, Search, SlidersHorizontal } from '@lucide/svelte';
+  import { BookOpen, ChevronDown, ChevronLeft, ChevronRight, Download, Search, SlidersHorizontal, Tv } from '@lucide/svelte';
+  import { todayJst } from '../lib/dates';
+  import { currentSeason } from '../lib/components/home-view';
   import { onDestroy, onMount, untrack } from 'svelte';
   import { ApiError } from '../lib/api';
   import {
@@ -85,6 +87,21 @@
     searchDebouncer.cancel();
     yearDebouncer.cancel();
     replaceQuery(serializeCatalogQuery({ sort: query.sort }));
+  }
+
+  // よく使う見え方への近道（押した状態でもう一度押すと解除）
+  const season = currentSeason(todayJst());
+  const AIRING_PRESET: CatalogQuery = { status: 'RELEASING', year: season.year, season: season.season, sort: 'popularity' };
+  const BOOKS_PRESET: CatalogQuery = { kind: 'book', sort: 'upcoming' };
+  const queryKey = (q: CatalogQuery) => JSON.stringify(Object.entries(serializeCatalogQuery(q)).sort());
+  const isPreset = (preset: CatalogQuery) => queryKey({ ...query, page: undefined, q: undefined }) === queryKey(preset);
+  const airingOn = $derived(isPreset(AIRING_PRESET));
+  const booksOn = $derived(isPreset(BOOKS_PRESET));
+
+  function applyPreset(preset: CatalogQuery, on: boolean) {
+    searchDebouncer.cancel();
+    yearDebouncer.cancel();
+    replaceQuery(serializeCatalogQuery(on ? { sort: query.sort } : preset));
   }
 
   function toggleHasAnime() {
@@ -263,6 +280,15 @@
           if (e.key === 'Enter' && !e.isComposing) searchDebouncer.flush();
         }}
       />
+    </div>
+
+    <div class="presets" role="group" aria-label="よく使う見え方">
+      <button type="button" class="preset" aria-pressed={airingOn} onclick={() => applyPreset(AIRING_PRESET, airingOn)}>
+        <Tv size={14} aria-hidden="true" />今期の放送中
+      </button>
+      <button type="button" class="preset" aria-pressed={booksOn} onclick={() => applyPreset(BOOKS_PRESET, booksOn)}>
+        <BookOpen size={14} aria-hidden="true" />これから出る本
+      </button>
     </div>
 
     <div class="toolbar">
@@ -621,5 +647,27 @@
     height: 0.8rem;
     border-radius: 2px;
     background: var(--cover-ph);
+  }
+  /* よく使う見え方への近道 */
+  .presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .preset {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.7rem;
+    border: 1px solid var(--line);
+    font-size: 0.75rem;
+    color: var(--fg);
+    background: var(--bg);
+    white-space: nowrap;
+  }
+  .preset[aria-pressed='true'] {
+    border-color: var(--fg);
+    background: var(--fg);
+    color: var(--bg);
   }
 </style>
