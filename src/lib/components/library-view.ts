@@ -1,9 +1,10 @@
-// Library の一覧用。同じ Work・同じ媒体の Edition を見分ける副題と並び順を作る。
+// Library の一覧用。同じ Work・同じ媒体の Edition を見分ける副題と並び順、棚の表紙と表示の保存。
 
-import type { Edition, Release } from '../db/schema';
+import type { Edition, EditionProgress, Release, Work } from '../db/schema';
 import { formatReleaseDate, isValidYmd, todayJst } from '../dates';
 import { normalizeTitle } from '../normalize';
-import { MEDIA_TYPES } from './labels';
+import { editionCover, workCover, type CoverSource } from './cover';
+import { MEDIA_TYPES, PROGRESS_UNIT_LABELS } from './labels';
 
 type LibraryEdition = Pick<Edition, 'id' | 'workId' | 'mediaType' | 'title' | 'createdAt'>;
 
@@ -105,4 +106,69 @@ export function sortLibraryEditions<T extends LibraryEdition>(
     if (a.createdAt !== b.createdAt) return a.createdAt < b.createdAt ? -1 : 1;
     return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
   });
+}
+
+// ---------------------------------------------------------------------------
+// 棚・一覧の表示
+// ---------------------------------------------------------------------------
+
+export type LibraryLayout = 'shelf' | 'list';
+
+export const LIBRARY_LAYOUT_KEY = 'triptych:library-layout';
+
+/** localStorage そのものに触れるだけで例外になる環境があるので、取り出しも包む。 */
+function browserStorage(): Storage | null {
+  try {
+    return typeof localStorage === 'undefined' ? null : localStorage;
+  } catch {
+    return null;
+  }
+}
+
+/** 端末に保存した表示。保存が無い・読めない・知らない値なら棚。 */
+export function loadLibraryLayout(storage: Pick<Storage, 'getItem'> | null = browserStorage()): LibraryLayout {
+  try {
+    return storage?.getItem(LIBRARY_LAYOUT_KEY) === 'list' ? 'list' : 'shelf';
+  } catch {
+    return 'shelf';
+  }
+}
+
+/** 表示の選択を端末に残す。保存できない環境では何もしない（切り替え自体はできる）。 */
+export function saveLibraryLayout(
+  layout: LibraryLayout,
+  storage: Pick<Storage, 'setItem'> | null = browserStorage(),
+): void {
+  try {
+    storage?.setItem(LIBRARY_LAYOUT_KEY, layout);
+  } catch {
+    // 容量超過・プライベートモードなど。表示は切り替わるので黙って諦める
+  }
+}
+
+/**
+ * 棚・一覧の表紙。Edition 自身の表紙 → 同じ Work の代表表紙（アニメの表紙を漫画・Web の棚にも借りる）。
+ * 題名は Work 名、文字の表紙に出す媒体は Edition のもの。
+ */
+export function libraryCover(
+  edition: Pick<Edition, 'coverUrl' | 'title' | 'mediaType'>,
+  work: Pick<Work, 'title' | 'coverEditionId'> | undefined,
+  workEditions: readonly Pick<Edition, 'id' | 'coverUrl' | 'mediaType'>[],
+): CoverSource {
+  const own = editionCover(edition, work?.title);
+  if (own.url || !work) return own;
+  return { ...own, url: workCover(work, workEditions).url };
+}
+
+/** 進捗の割合（0〜1）。全体数が分からなければ undefined。 */
+export function progressRatio(progress: EditionProgress | undefined): number | undefined {
+  if (!progress?.total || progress.total <= 0) return undefined;
+  return Math.min(1, Math.max(0, progress.current / progress.total));
+}
+
+/** '3/12話'・'5巻'（全体数が無い時）。進捗が無ければ空。 */
+export function progressText(progress: EditionProgress | undefined): string {
+  if (!progress) return '';
+  const total = progress.total ? `/${progress.total}` : '';
+  return `${progress.current}${total}${PROGRESS_UNIT_LABELS[progress.unit]}`;
 }

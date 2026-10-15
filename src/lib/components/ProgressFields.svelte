@@ -49,7 +49,7 @@
     min="0"
     inputmode="numeric"
     aria-label="現在の進捗"
-    class="w-14 px-1 py-1 text-xs"
+    class="mono w-14 px-1 py-1 text-xs"
     style="border: 1px solid var(--line); background: var(--bg); color: var(--fg);"
     value={current}
     onchange={(e) => {
@@ -64,7 +64,7 @@
     inputmode="numeric"
     placeholder="全"
     aria-label="全体数"
-    class="w-14 px-1 py-1 text-xs"
+    class="mono w-14 px-1 py-1 text-xs"
     style="border: 1px solid var(--line); background: var(--bg); color: var(--fg);"
     value={total ?? ''}
     onchange={(e) => {

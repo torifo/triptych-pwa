@@ -1,8 +1,9 @@
 // WorkDetail の Release 一覧の補助（30 日より前の展開・次話と配信先の組み立て）。純関数で vitest 固定。
 
-import type { Edition, Release } from '../db/schema';
-import { isPastRelease } from '../dates';
-import { compareReleases, groupEditionReleases, PAST_DAYS_SHOWN } from './release-view';
+import type { BroadcastHint, Edition, Release } from '../db/schema';
+import { isPastRelease, isValidYmd, todayJst } from '../dates';
+import { airingInstant, broadcastDayJst, countdownLabel } from './onair';
+import { compareReleases, groupEditionReleases, PAST_DAYS_SHOWN, precisionOf, timeMinutes } from './release-view';
 
 // ---------------------------------------------------------------------------
 // 配信先（stream-start）
@@ -96,4 +97,72 @@ export function buildEditionReleaseView(
     recent: groups.recent.filter((r) => !isStream(r)),
     older,
   };
+}
+
+// ---------------------------------------------------------------------------
+// 次話の帯・番組（局名と時刻）
+// ---------------------------------------------------------------------------
+
+/**
+ * Release 一覧の「今日」。アニメは放送日（朝5時区切り）にして、25:30 の回を深夜 0 時を過ぎても次話に残す。
+ * 本・Web は暦日のまま。
+ */
+export function releaseDayFor(mediaType: Edition['mediaType'], now: Date): string {
+  return mediaType === 'anime' ? broadcastDayJst(now) : todayJst(now);
+}
+
+export interface NextEpisodeBand {
+  release: Release;
+  /** 今日（放送日）の回。ON AIR のランプを点ける。 */
+  onAirToday: boolean;
+  /** 24 時間以内なら「あと 3:12」。 */
+  countdown?: string;
+}
+
+/** 次話の帯に出す回（nextEpisodes の先頭）。today は releaseDayFor の放送日。 */
+export function nextEpisodeBand(
+  nextEpisodes: readonly Release[],
+  today: string,
+  now: Date,
+): NextEpisodeBand | undefined {
+  const release = nextEpisodes[0];
+  if (!release) return undefined;
+  return {
+    release,
+    onAirToday: precisionOf(release) === 'day' && release.date === today,
+    countdown: countdownLabel(release, now),
+  };
+}
+
+/** 帯の後ろの「予定」: 帯に出した次話より後の放送と、それ以外の今日以降を日付順に。 */
+export function laterReleases(view: Pick<EditionReleaseView, 'nextEpisodes' | 'upcoming'>): Release[] {
+  return [...view.nextEpisodes.slice(1), ...view.upcoming].sort(compareReleases);
+}
+
+function compareBroadcasts(a: BroadcastHint, b: BroadcastHint): number {
+  if (a.date !== b.date) return a.date < b.date ? -1 : 1;
+  const ta = timeMinutes(a.time);
+  const tb = timeMinutes(b.time);
+  if (ta !== tb) return ta < tb ? -1 : 1;
+  return a.channel.localeCompare(b.channel, 'ja');
+}
+
+/**
+ * 帯の下に出す番組（しょぼかるの局名と時刻）。今日（放送日）以降で、まだ始まっていないものを日時順に先頭 limit 件。
+ * 時刻が読めない番組は日付だけで判断する。
+ */
+export function upcomingBroadcasts(
+  broadcasts: readonly BroadcastHint[] | undefined,
+  now: Date,
+  limit = 3,
+): BroadcastHint[] {
+  const today = broadcastDayJst(now);
+  return (broadcasts ?? [])
+    .filter((b) => isValidYmd(b.date) && b.date >= today)
+    .filter((b) => {
+      const at = airingInstant(b);
+      return !at || at.getTime() > now.getTime();
+    })
+    .sort(compareBroadcasts)
+    .slice(0, limit);
 }

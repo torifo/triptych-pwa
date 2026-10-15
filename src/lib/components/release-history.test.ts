@@ -1,11 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import type { Release } from '../db/schema';
+import type { BroadcastHint } from '../db/schema';
 import {
   buildEditionReleaseView,
   isStreamStarted,
+  laterReleases,
+  nextEpisodeBand,
+  releaseDayFor,
   startedStreamServices,
   streamEntries,
   streamServiceName,
+  upcomingBroadcasts,
 } from './release-history';
 import { groupEditionReleases } from './release-view';
 
@@ -185,5 +190,98 @@ describe('buildEditionReleaseView', () => {
     const view = buildEditionReleaseView(odd, 'manga', TODAY);
     expect(view.streams).toEqual([]);
     expect(ids(view.older)).toEqual(['stream']);
+  });
+});
+
+describe('releaseDayFor', () => {
+  // 2026-10-14 01:30 JST = 2026-10-13T16:30Z
+  const lateNight = new Date('2026-10-13T16:30:00Z');
+
+  it('アニメは放送日（朝5時区切り）、それ以外は暦日', () => {
+    expect(releaseDayFor('anime', lateNight)).toBe('2026-10-13');
+    expect(releaseDayFor('manga', lateNight)).toBe('2026-10-14');
+    expect(releaseDayFor('web-novel', lateNight)).toBe('2026-10-14');
+  });
+
+  it('深夜 0 時を過ぎても 25:30 の回は次話に残る', () => {
+    const releases = [release({ id: 'ep', kind: 'episode', date: '2026-10-13', time: '25:30' })];
+    const view = buildEditionReleaseView(releases, 'anime', releaseDayFor('anime', lateNight));
+    expect(view.nextEpisodes.map((r) => r.id)).toEqual(['ep']);
+  });
+});
+
+describe('nextEpisodeBand', () => {
+  // 2026-10-13 22:30 JST
+  const now = new Date('2026-10-13T13:30:00Z');
+
+  it('次話が無ければ帯を出さない', () => {
+    expect(nextEpisodeBand([], TODAY, now)).toBeUndefined();
+  });
+
+  it('今日の回はランプを点け、24 時間以内ならカウントダウンを付ける', () => {
+    const ep = release({ id: 'ep', kind: 'episode', date: TODAY, time: '25:30' });
+    expect(nextEpisodeBand([ep], TODAY, now)).toEqual({ release: ep, onAirToday: true, countdown: 'あと 3:00' });
+  });
+
+  it('先の回はランプを点けず、24 時間より先ならカウントダウンも無い', () => {
+    const ep = release({ id: 'ep', kind: 'episode', date: '2026-10-20', time: '25:30' });
+    expect(nextEpisodeBand([ep], TODAY, now)).toEqual({ release: ep, onAirToday: false, countdown: undefined });
+  });
+
+  it('月・年精度の回は今日扱いにしない', () => {
+    const ep = release({ id: 'ep', kind: 'episode', date: TODAY, precision: 'month' });
+    expect(nextEpisodeBand([ep], TODAY, now)?.onAirToday).toBe(false);
+  });
+});
+
+describe('laterReleases', () => {
+  it('帯に出した次話を除き、残りの放送と予定を日付順にまとめる', () => {
+    const next1 = release({ id: 'n1', kind: 'episode', date: '2026-10-14' });
+    const next2 = release({ id: 'n2', kind: 'episode', date: '2026-10-21' });
+    const season = release({ id: 's', kind: 'season-start', date: '2026-10-18' });
+    expect(laterReleases({ nextEpisodes: [next1, next2], upcoming: [season] }).map((r) => r.id)).toEqual(['s', 'n2']);
+    expect(laterReleases({ nextEpisodes: [], upcoming: [season] }).map((r) => r.id)).toEqual(['s']);
+  });
+});
+
+describe('upcomingBroadcasts', () => {
+  // 2026-10-13 22:30 JST（放送日 10/13）
+  const now = new Date('2026-10-13T13:30:00Z');
+
+  function hint(over: Partial<BroadcastHint> & Pick<BroadcastHint, 'channel' | 'date' | 'time'>): BroadcastHint {
+    return { isStreaming: false, ...over };
+  }
+
+  it('まだ始まっていない番組を日時順に先頭 3 件', () => {
+    const list = upcomingBroadcasts(
+      [
+        hint({ channel: 'BS11', date: '2026-10-13', time: '26:00' }),
+        hint({ channel: 'AT-X', date: '2026-10-14', time: '22:00' }),
+        hint({ channel: 'TOKYO MX', date: '2026-10-13', time: '25:30', episode: 2 }),
+        hint({ channel: 'dアニメストア', date: '2026-10-14', time: '12:00', isStreaming: true }),
+        hint({ channel: '過ぎた局', date: '2026-10-13', time: '22:00' }),
+        hint({ channel: '昨日', date: '2026-10-12', time: '25:30' }),
+      ],
+      now,
+    );
+    expect(list.map((b) => b.channel)).toEqual(['TOKYO MX', 'BS11', 'dアニメストア']);
+  });
+
+  it('時刻が読めない番組は日付だけで残し、同じ日の末尾に回す', () => {
+    const list = upcomingBroadcasts(
+      [
+        hint({ channel: '不明', date: '2026-10-14', time: '' }),
+        hint({ channel: 'MX', date: '2026-10-14', time: '1:00' }),
+        hint({ channel: '壊れた日付', date: '2026-10', time: '1:00' }),
+      ],
+      now,
+      5,
+    );
+    expect(list.map((b) => b.channel)).toEqual(['MX', '不明']);
+  });
+
+  it('番組が無ければ空', () => {
+    expect(upcomingBroadcasts(undefined, now)).toEqual([]);
+    expect(upcomingBroadcasts([], now)).toEqual([]);
   });
 });

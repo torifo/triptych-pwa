@@ -3,6 +3,12 @@ import type { Edition, Release } from '../db/schema';
 import {
   editionDisambiguators,
   editionSubtitle,
+  LIBRARY_LAYOUT_KEY,
+  libraryCover,
+  loadLibraryLayout,
+  progressRatio,
+  progressText,
+  saveLibraryLayout,
   seasonLabel,
   seasonStartByEdition,
   sortLibraryEditions,
@@ -150,5 +156,90 @@ describe('sortLibraryEditions', () => {
     const editions = [edition('b'), edition('a')];
     sortLibraryEditions(editions, workTitleOf, new Map());
     expect(editions.map((e) => e.id)).toEqual(['b', 'a']);
+  });
+});
+
+describe('loadLibraryLayout / saveLibraryLayout', () => {
+  function memoryStorage(initial: Record<string, string> = {}) {
+    const data = new Map(Object.entries(initial));
+    return {
+      getItem: (key: string) => data.get(key) ?? null,
+      setItem: (key: string, value: string) => void data.set(key, value),
+      data,
+    };
+  }
+  const throwing = {
+    getItem: () => {
+      throw new Error('SecurityError');
+    },
+    setItem: () => {
+      throw new Error('QuotaExceededError');
+    },
+  };
+
+  it('既定は棚。保存した一覧は一覧で開く', () => {
+    expect(loadLibraryLayout(memoryStorage())).toBe('shelf');
+    expect(loadLibraryLayout(memoryStorage({ [LIBRARY_LAYOUT_KEY]: 'list' }))).toBe('list');
+    expect(loadLibraryLayout(memoryStorage({ [LIBRARY_LAYOUT_KEY]: 'grid' }))).toBe('shelf');
+  });
+
+  it('保存した値を読み戻せる', () => {
+    const storage = memoryStorage();
+    saveLibraryLayout('list', storage);
+    expect(storage.data.get(LIBRARY_LAYOUT_KEY)).toBe('list');
+    expect(loadLibraryLayout(storage)).toBe('list');
+  });
+
+  it('localStorage が使えない時は棚にして、保存の失敗は投げない', () => {
+    expect(loadLibraryLayout(null)).toBe('shelf');
+    expect(loadLibraryLayout(throwing)).toBe('shelf');
+    expect(() => saveLibraryLayout('list', throwing)).not.toThrow();
+    expect(() => saveLibraryLayout('list', null)).not.toThrow();
+  });
+});
+
+describe('libraryCover', () => {
+  const work = { title: '薬屋のひとりごと', coverEditionId: undefined };
+  const anime = { id: 'a', coverUrl: 'https://x/anime.jpg', mediaType: 'anime' as const, title: '薬屋 第2期' };
+  const manga = { id: 'm', coverUrl: undefined, mediaType: 'manga' as const, title: '薬屋のひとりごと' };
+
+  it('Edition 自身の表紙を使い、題名は Work 名にする', () => {
+    expect(libraryCover(anime, work, [anime, manga])).toEqual({
+      url: 'https://x/anime.jpg',
+      title: '薬屋のひとりごと',
+      mediaType: 'anime',
+    });
+  });
+
+  it('表紙の無い Edition は同じ Work の代表表紙を借り、媒体は自分のまま', () => {
+    expect(libraryCover(manga, work, [anime, manga])).toEqual({
+      url: 'https://x/anime.jpg',
+      title: '薬屋のひとりごと',
+      mediaType: 'manga',
+    });
+  });
+
+  it('どこにも表紙が無ければ文字の表紙（url なし）', () => {
+    expect(libraryCover(manga, work, [manga]).url).toBeUndefined();
+    expect(libraryCover(manga, undefined, [anime]).url).toBeUndefined();
+    expect(libraryCover(manga, undefined, [anime]).title).toBe('薬屋のひとりごと');
+  });
+});
+
+describe('progressRatio / progressText', () => {
+  it('全体数がある時だけ割合を出し、0〜1 に収める', () => {
+    expect(progressRatio({ unit: 'episode', current: 3, total: 12 })).toBe(0.25);
+    expect(progressRatio({ unit: 'episode', current: 15, total: 12 })).toBe(1);
+    expect(progressRatio({ unit: 'episode', current: -1, total: 12 })).toBe(0);
+    expect(progressRatio({ unit: 'volume', current: 3 })).toBeUndefined();
+    expect(progressRatio({ unit: 'volume', current: 3, total: 0 })).toBeUndefined();
+    expect(progressRatio(undefined)).toBeUndefined();
+  });
+
+  it('進捗を「3/12話」の形にする', () => {
+    expect(progressText({ unit: 'episode', current: 3, total: 12 })).toBe('3/12話');
+    expect(progressText({ unit: 'volume', current: 5 })).toBe('5巻');
+    expect(progressText({ unit: 'part', current: 0, total: 0 })).toBe('0部分');
+    expect(progressText(undefined)).toBe('');
   });
 });

@@ -10,6 +10,7 @@
     type ResolvableResult,
   } from './release-view';
   import { sourceRefSyncNote } from './source-ref-sync';
+  import SectionHead from './SectionHead.svelte';
 
   let { edition, onchange }: { edition: Edition; onchange: () => void } = $props();
 
@@ -70,20 +71,20 @@
   }
 </script>
 
-<div class="flex flex-col gap-1.5" style="min-width: 0;">
-  <span class="type-label">ソース</span>
+<div class="flex flex-col gap-2" style="min-width: 0;">
+  <SectionHead title="ソース" kicker="SOURCES" />
 
   {#if edition.sourceRefs.length === 0}
     <p class="text-[11px]" style="color: var(--muted);">ソースが未設定です</p>
   {:else}
-    <div style="border-top: 1px solid var(--line); min-width: 0;">
+    <div style="min-width: 0;">
       {#each edition.sourceRefs as ref (sourceRefKey(ref.source, ref.externalId))}
         <div
-          class="flex items-center gap-2 py-1"
+          class="flex items-center gap-2 py-1.5"
           style="border-bottom: 1px solid var(--line); min-width: 0;"
         >
           <span class="text-[11px] font-bold" style="white-space: nowrap;">{SOURCE_LABELS[ref.source] ?? ref.source}</span>
-          <span class="min-w-0 flex-1 truncate text-[11px]" style="color: var(--muted);" title={ref.externalId}>
+          <span class="mono min-w-0 flex-1 truncate text-[11px]" style="color: var(--muted);" title={ref.externalId}>
             {ref.externalId}
           </span>
           {#if isSafeHttpUrl(ref.url)}
@@ -138,6 +139,7 @@
   .field {
     flex: 1;
     min-width: 0;
+    min-height: 1.75rem;
     padding: 0.25rem 0.375rem;
     font-size: 0.75rem;
     border: 1px solid var(--line);
@@ -147,6 +149,7 @@
   }
   .btn {
     padding: 0.125rem 0.5rem;
+    min-height: 1.75rem;
     font-size: 0.6875rem;
     border: 1px solid var(--line);
     color: var(--fg);
