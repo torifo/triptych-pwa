@@ -38,7 +38,8 @@
   {:else}
     <div class="paper" role="img" aria-label={title}>
       {#if size !== 'xs'}<span class="mark" aria-hidden="true"></span>{/if}
-      <span class="paper-title" aria-hidden="true">{text.title}</span>
+      <!-- xs（28px）は縦組みが何列にも折れて読めないので、頭の1字だけを大きく -->
+      <span class="paper-title" aria-hidden="true">{size === 'xs' ? [...text.title][0] : text.title}</span>
       {#if text.media && size !== 'xs'}<span class="mono paper-media" aria-hidden="true">{text.media}</span>{/if}
     </div>
   {/if}
@@ -112,11 +113,15 @@
     opacity: 0.75;
   }
   [data-size='xs'] .paper {
-    padding: 4px 3px;
+    padding: 0;
     align-items: center;
+    justify-content: center;
   }
   [data-size='xs'] .paper-title {
-    font-size: 9px;
+    writing-mode: horizontal-tb;
+    flex: 0 0 auto;
+    font-size: 14px;
+    line-height: 1;
   }
   [data-size='s'] .paper-title {
     font-size: 11px;
