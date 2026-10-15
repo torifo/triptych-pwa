@@ -9,6 +9,9 @@
   import MediaBadge from '../lib/components/MediaBadge.svelte';
   import { SOURCE_LABELS } from '../lib/components/labels';
   import { dedupeResults, registeredSourceKeys, sourceRefKey } from '../lib/components/release-view';
+  import { fetchCatalogWorks } from '../lib/catalog/api';
+  import { catalogListHash } from '../lib/catalog/query';
+  import type { CatalogWorkSummary } from '../lib/catalog/types';
 
   // collector レスポンス型（backend/dto.py の SearchResult / backend/api/search.py の
   // SearchResponse・OriginCandidate に対応。api.ts 側には型を持たないため、ここで定義する）
@@ -78,9 +81,29 @@
 
   onMount(refreshWorks);
 
+  // 手元のカタログ（collector の SQLite）は速いので、外部ソースの検索を待つ間に先に出す
+  const CATALOG_HITS = 5;
+  let catalogHits = $state<CatalogWorkSummary[]>([]);
+  let catalogTotal = $state(0);
+  let catalogQuery = $state('');
+
+  async function searchCatalog(q: string) {
+    try {
+      const page = await fetchCatalogWorks({ q, per: CATALOG_HITS });
+      if (query.trim() !== q) return; // 入力が変わっていたら捨てる
+      catalogHits = page.items;
+      catalogTotal = page.total;
+      catalogQuery = q;
+    } catch {
+      catalogHits = []; // カタログ未作成・失敗の時は枠ごと出さない
+      catalogTotal = 0;
+    }
+  }
+
   async function runSearch() {
     const q = query.trim();
     if (!q || loading) return;
+    void searchCatalog(q);
     loading = true;
     requestError = null;
     // 前の検索の結果は消して、骨組みの行を出す
@@ -286,6 +309,22 @@
     </div>
   {/if}
 
+  {#if catalogHits.length > 0}
+    <div class="catalog-hits">
+      <div class="shou" style="margin-bottom: 0;"><h2>カタログから</h2><span class="no mono">{catalogTotal}</span></div>
+      {#each catalogHits as hit (hit.id)}
+        <a class="hit row-hover" href={`#/catalog/${encodeURIComponent(hit.id)}`}>
+          <Cover src={hit.cover} title={hit.title} size="xs" />
+          <span class="hit-title">{hit.title}</span>
+          {#if hit.firstYear}<span class="mono hit-year">{hit.firstYear}</span>{/if}
+        </a>
+      {/each}
+      {#if catalogTotal > catalogHits.length}
+        <a class="hit-more" href={catalogListHash({ q: catalogQuery })}>カタログで続きを見る（{catalogTotal} 件）</a>
+      {/if}
+    </div>
+  {/if}
+
   <div class="flex flex-col" style="border-top: 1px solid var(--line);">
     {#if loading}
       <p class="search-hint">AniList・なろう・カクヨム・NDL を探しています</p>
@@ -412,5 +451,35 @@
     .sk-line {
       animation: none;
     }
+  }
+  .catalog-hits {
+    display: flex;
+    flex-direction: column;
+  }
+  .hit {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--line);
+    min-width: 0;
+  }
+  .hit-title {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.8125rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .hit-year {
+    font-size: 0.6875rem;
+    color: var(--muted);
+  }
+  .hit-more {
+    padding: 0.5rem 0 0;
+    font-size: 0.75rem;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
 </style>
