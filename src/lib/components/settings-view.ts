@@ -173,7 +173,7 @@ const CATALOG_SOURCE_LABELS: Record<string, string> = {
   narou: 'なろう',
   kakuyomu: 'カクヨム',
   ndl: 'NDL Search',
-  jpro: 'JPRO 近刊',
+  jpro: 'うち JPRO 近刊',
 };
 
 export function catalogSourceLabel(source: string): string {

@@ -206,7 +206,7 @@ describe('カタログのソース', () => {
     expect(catalogSourceLabel('anilist')).toBe('AniList');
     expect(catalogSourceLabel('syoboi')).toBe('しょぼかる');
     expect(catalogSourceLabel('ndl')).toBe('NDL Search');
-    expect(catalogSourceLabel('jpro')).toBe('JPRO 近刊');
+    expect(catalogSourceLabel('jpro')).toBe('うち JPRO 近刊');
     expect(catalogSourceLabel('narou')).toBe('なろう');
     expect(catalogSourceLabel('kakuyomu')).toBe('カクヨム');
     expect(catalogSourceLabel('other')).toBe('other');
@@ -219,7 +219,7 @@ describe('カタログのソース', () => {
     ]);
     expect(rows).toEqual([
       { source: 'anilist', label: 'AniList', entries: '23,456', harvestedAt: '2026-10-14 21:30', errorSlices: 0 },
-      { source: 'jpro', label: 'JPRO 近刊', entries: '0', harvestedAt: null, errorSlices: 3 },
+      { source: 'jpro', label: 'うち JPRO 近刊', entries: '0', harvestedAt: null, errorSlices: 3 },
     ]);
   });
 });

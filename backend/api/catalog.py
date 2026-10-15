@@ -125,6 +125,13 @@ def get_stats() -> CatalogStats:
             row["source"]: row["n"]
             for row in conn.execute("SELECT source, COUNT(*) AS n FROM entries GROUP BY source")
         }
+        total_entries = sum(entry_counts.values())
+        # JPRO の近刊は ndl の行として持つので、ndl の内数として数える（全体の件数には二重に足さない）
+        jpro_rows = conn.execute(
+            "SELECT COUNT(*) FROM entries WHERE source = 'ndl' AND json_extract(extra, '$.via') = 'jpro'"
+        ).fetchone()[0]
+        if jpro_rows:
+            entry_counts["jpro"] = jpro_rows
         error_counts = {
             row["source"]: row["n"]
             for row in conn.execute(
@@ -145,7 +152,7 @@ def get_stats() -> CatalogStats:
         return CatalogStats(
             ready=True,
             works=face_sums["works"],
-            entries=sum(entry_counts.values()),
+            entries=total_entries,
             links=conn.execute("SELECT COUNT(*) FROM links").fetchone()[0],
             sources=[
                 CatalogSourceCount(

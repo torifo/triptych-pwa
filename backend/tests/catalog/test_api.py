@@ -1089,3 +1089,21 @@ def test_upcoming_books_sort_and_show_the_next_book_not_the_next_episode(catalog
 )
 def test_book_next_label(work, book, label):
     assert catalog_api._book_next_label(work, book) == label
+
+
+def test_stats_counts_jpro_rows_within_ndl(catalog_path, client):
+    conn = db.connect(catalog_path)
+    add_work(
+        conn, "ndl:9784000000201", "近刊の本",
+        [
+            E("ndl", "9784000000201", "book", "近刊の本(1)", start_date="2026-11-01", start_precision="day",
+              extra={"isbn": "9784000000201", "via": "jpro"}),
+            E("ndl", "9784000000202", "book", "目録の本", extra={"isbn": "9784000000202"}),
+        ],
+    )
+    conn.close()
+    body = client.get("/api/catalog/stats").json()
+    counts = {s["source"]: s["entries"] for s in body["sources"]}
+    assert counts["ndl"] == 2
+    assert counts["jpro"] == 1  # ndl の内数
+    assert body["entries"] == 2  # 二重に足さない
