@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { Release } from '../db/schema';
 import {
   buildEditionReleaseView,
+  isStreamStarted,
   startedStreamServices,
   streamEntries,
   streamServiceName,
@@ -71,6 +72,20 @@ describe('streamEntries / startedStreamServices', () => {
     expect(map.get('e1')).toEqual(['Prime Video', 'Netflix']);
     expect(map.get('e2')).toEqual(['U-NEXT']);
     expect(map.has('e3')).toBe(false);
+  });
+
+  it('配信中のサービスの「次回の配信」（rolling）は日付が先でも配信中に数える', () => {
+    const stream = { editionId: 'e3', kind: 'stream-start' as const };
+    const next = release({ ...stream, id: 'next', label: 'ABEMA 配信', date: '2026-10-16', rolling: true });
+    const planned = release({ ...stream, id: 'planned', label: 'Netflix 配信', date: '2026-10-20' });
+
+    expect(isStreamStarted(next, TODAY)).toBe(true);
+    expect(isStreamStarted(planned, TODAY)).toBe(false);
+    expect(streamEntries([next, planned], TODAY).map((e) => [e.release.id, e.started])).toEqual([
+      ['next', true],
+      ['planned', false],
+    ]);
+    expect(startedStreamServices([next, planned], TODAY).get('e3')).toEqual(['ABEMA']);
   });
 });
 

@@ -66,6 +66,7 @@ export interface Release {
   time?: string; // v2 アニメの放送時刻（JST・朝5時区切り表記 例 '25:30'）
   externalId?: string; // v2 volume=ISBN13 / episode='<anilistId>:<n>' / season-start=anilistId
   origin?: 'sync' | 'manual'; // v2（未設定は 'sync'）。manual は同期で上書きも削除もしない
+  rolling?: boolean; // v2 配信中のサービスの「次回の配信」（stream-start）。日付は同期ごとに動き、延期にも新着にもしない
   dateHistory: ReleaseDateHistoryEntry[]; // 延期履歴 (US-003)
   source: Source;
   seenAt?: string; // ユーザーが新着マークを確認した時刻

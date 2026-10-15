@@ -6,8 +6,8 @@
     listReleasesByEdition,
     updateRelease,
   } from '../db/store';
-  import { formatReleaseDate, isPastRelease, todayJst } from '../dates';
-  import { buildEditionReleaseView } from './release-history';
+  import { formatReleaseDate, todayJst } from '../dates';
+  import { buildEditionReleaseView, isStreamStarted } from './release-history';
   import { isPostponed, type ReleaseFormValue } from './release-view';
   import ReleaseForm from './ReleaseForm.svelte';
 
@@ -100,7 +100,7 @@
 
   /** 次話・配信の状態を示すタグ。それ以外の行には付けない。 */
   function watchTag(release: Release): string | null {
-    if (release.kind === 'stream-start') return isPastRelease(release, today) ? '配信中' : '配信予定';
+    if (release.kind === 'stream-start') return isStreamStarted(release, today) ? '配信中' : '配信予定';
     if (release.id === view.nextEpisodes[0]?.id) return '次話';
     return null;
   }

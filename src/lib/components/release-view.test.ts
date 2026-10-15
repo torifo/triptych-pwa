@@ -130,6 +130,28 @@ describe('Home: 新着', () => {
     ];
     expect(unseenReleases(releases, editionMap).map((r) => r.id)).toEqual(['plan', 'new']);
   });
+
+  it('配信中のサービスの「次回の配信」（rolling）は seenAt が無くても新着にしない', () => {
+    const releases = [
+      release({ id: 'next', kind: 'stream-start', date: '2026-10-16', rolling: true }),
+      release({ id: 'start', kind: 'stream-start', date: '2026-10-17' }),
+    ];
+    expect(unseenReleases(releases, editionMap).map((r) => r.id)).toEqual(['start']);
+  });
+});
+
+describe('Home / Calendar: 配信中のサービスの次回の配信', () => {
+  // 次話の行に「◯◯ 配信中」と添えて出すので、サービスごとの行は Work 詳細だけに出す
+  const releases = [
+    release({ id: 'ep', kind: 'episode', date: '2026-10-16', time: '23:00' }),
+    release({ id: 'next', kind: 'stream-start', date: '2026-10-16', time: '24:00', rolling: true }),
+    release({ id: 'start', kind: 'stream-start', date: '2026-10-17' }),
+  ];
+
+  it('直近7日とカレンダーには出さず、配信開始（rolling でない行）は出す', () => {
+    expect(upcomingReleases(releases, editionMap, TODAY, 7).map((r) => r.id)).toEqual(['ep', 'start']);
+    expect(trackedReleases(releases, editionMap).map((r) => r.id)).toEqual(['ep', 'start']);
+  });
 });
 
 describe('Calendar', () => {

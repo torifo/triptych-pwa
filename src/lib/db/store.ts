@@ -305,6 +305,7 @@ export interface CreateReleaseInput {
   origin?: Release['origin'];
   source: Release['source'];
   seenAt?: string;
+  rolling?: boolean;
 }
 
 /** month/year 精度の date は月初・年初に揃える。 */
@@ -334,6 +335,7 @@ function buildRelease(input: CreateReleaseInput, ts: string): Release {
   };
   if (input.time !== undefined) release.time = input.time;
   if (input.externalId !== undefined) release.externalId = input.externalId;
+  if (input.rolling) release.rolling = true;
   return release;
 }
 

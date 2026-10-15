@@ -24,6 +24,11 @@ export function isPostponed(release: Pick<Release, 'dateHistory'>): boolean {
   return release.dateHistory.length > 0;
 }
 
+/** 配信中のサービスの「次回の配信」。次話の行に「◯◯ 配信中」と添えて出すので、直近・カレンダーに行として出さない。 */
+function isRollingStream(release: Pick<Release, 'kind' | 'rolling'>): boolean {
+  return release.kind === 'stream-start' && !!release.rolling;
+}
+
 // ---------------------------------------------------------------------------
 // 並べ替え
 // ---------------------------------------------------------------------------
@@ -56,16 +61,17 @@ export function upcomingReleases(
 ): Release[] {
   return releases
     .filter((r) => isTrackedEdition(editions.get(r.editionId)) && isWithinDays(r, today, days))
+    .filter((r) => !isRollingStream(r))
     .sort(compareReleases);
 }
 
-/** 新着: 追跡中 Edition の seenAt 未設定の Release。 */
+/** 新着: 追跡中 Edition の seenAt 未設定の Release（毎週動く次回の配信は除く）。 */
 export function unseenReleases(
   releases: readonly Release[],
   editions: ReadonlyMap<string, Edition>,
 ): Release[] {
   return releases
-    .filter((r) => !r.seenAt && isTrackedEdition(editions.get(r.editionId)))
+    .filter((r) => !r.seenAt && !isRollingStream(r) && isTrackedEdition(editions.get(r.editionId)))
     .sort(compareReleases);
 }
 
@@ -77,7 +83,9 @@ export function trackedReleases(
   releases: readonly Release[],
   editions: ReadonlyMap<string, Edition>,
 ): Release[] {
-  return releases.filter((r) => isTrackedEdition(editions.get(r.editionId))).sort(compareReleases);
+  return releases
+    .filter((r) => isTrackedEdition(editions.get(r.editionId)) && !isRollingStream(r))
+    .sort(compareReleases);
 }
 
 export interface PrecisionSplit {

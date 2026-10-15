@@ -76,7 +76,7 @@ const at = (iso: string) => () => new Date(iso);
 
 function mediaDto(
   id: string,
-  opts: { seasonDate?: string; episode?: number; episodeDate?: string; time?: string } = {},
+  opts: { seasonDate?: string; episode?: number; episodeDate?: string; time?: string; status?: string } = {},
 ) {
   const releases: unknown[] = [
     {
@@ -105,6 +105,7 @@ function mediaDto(
     mediaType: 'anime',
     title: 'テストアニメ',
     url: `https://anilist.co/anime/${id}`,
+    ...(opts.status ? { status: opts.status } : {}),
     releases,
   };
 }
@@ -595,6 +596,174 @@ describe('runSync: しょぼいカレンダー', () => {
     const [stream] = (await listReleasesByEdition(anime.id, db)).filter((r) => r.kind === 'stream-start');
     expect(stream.date).toBe('2026-10-17');
     expect(stream.dateHistory).toEqual([]);
+  });
+
+  describe('放送状態による扱い', () => {
+    const streamRows = async (editionId: string) =>
+      (await listReleasesByEdition(editionId, db)).filter((r) => r.kind === 'stream-start');
+    const okSyoboi = (streams: unknown[], startedStreams?: string[]) => () => ({
+      status: 'ok',
+      tid: '7667',
+      streamStarts: streams,
+      ...(startedStreams ? { startedStreams } : {}),
+    });
+
+    it('放送終了（FINISHED）の Edition はしょぼかるを照会しない（AniList は取り込む）', async () => {
+      const anime = await setup('W', { mediaType: 'anime', title: 'A', sourceRefs: [anilistRef('1')] });
+      const calls = mockFetch({
+        '/api/anilist/media/': () => mediaDto('1', { status: 'FINISHED', seasonDate: '2026-04-04' }),
+        '/api/syoboi/title': okSyoboi([streamStart('2026-10-17')]),
+      });
+
+      const result = await runSync({ database: db, force: true, now: () => NOW });
+
+      expect(result.errors).toEqual({});
+      expect(callsTo(calls, '/api/syoboi/title')).toHaveLength(0);
+      expect((await listReleasesByEdition(anime.id, db)).map((r) => r.kind)).toEqual(['season-start']);
+    });
+
+    it('中止（CANCELLED）も照会せず、AniList が取れなかった・まだ放送中の id が残る Edition は照会する', async () => {
+      await setup('中止', { mediaType: 'anime', title: 'C', sourceRefs: [anilistRef('1')] });
+      await setup('失敗', { mediaType: 'anime', title: 'F', sourceRefs: [anilistRef('2')] });
+      await setup('混在', { mediaType: 'anime', title: 'M', sourceRefs: [anilistRef('3'), anilistRef('4')] });
+      const status: Record<string, string> = { '1': 'CANCELLED', '3': 'FINISHED', '4': 'RELEASING' };
+      const calls = mockFetch({
+        '/api/anilist/media/': (url) => {
+          const id = url.pathname.split('/').pop() ?? '';
+          return id === '2' ? fail(502) : mediaDto(id, { status: status[id] });
+        },
+      });
+
+      await runSync({ database: db, force: true, now: () => NOW });
+
+      expect(callsTo(calls, '/api/syoboi/title').map((u) => u.searchParams.get('title')).sort()).toEqual(['F', 'M']);
+    });
+
+    it('配信中のサービス（startedStreams）は「次回の配信」1件のローリング: 既読で作り、日付は延期にせず動かす', async () => {
+      const anime = await setup('W', { mediaType: 'anime', title: 'A', sourceRefs: [anilistRef('1')] });
+      let date = '2026-10-16';
+      mockFetch({
+        '/api/anilist/media/': () => mediaDto('1', { status: 'RELEASING', episode: 3 }),
+        '/api/syoboi/title': () => okSyoboi([streamStart(date)], ['7667:232'])(),
+      });
+
+      await runSync({ database: db, force: true, now: () => NOW });
+      const [first] = await streamRows(anime.id);
+      expect(first).toMatchObject({ date: '2026-10-16', time: '24:00', rolling: true, origin: 'sync' });
+      expect(first.seenAt).toBeDefined();
+
+      date = '2026-10-23';
+      await runSync({ database: db, force: true, now: at('2026-10-20T03:00:00Z') });
+      const rows = await streamRows(anime.id);
+      expect(rows).toHaveLength(1);
+      expect(rows[0]).toMatchObject({ id: first.id, date: '2026-10-23', rolling: true, origin: 'sync', dateHistory: [] });
+      expect(rows[0].seenAt).toBeDefined();
+    });
+
+    it('放送中でも、まだ配信の無いサービス（後から始まる配信）は配信開始として新着にする', async () => {
+      const anime = await setup('W', { mediaType: 'anime', title: 'A', sourceRefs: [anilistRef('1')] });
+      mockFetch({
+        '/api/anilist/media/': () => mediaDto('1', { status: 'RELEASING', episode: 3 }),
+        '/api/syoboi/title': okSyoboi([streamStart('2026-10-16', '239'), streamStart('2026-10-20', '256')], [
+          '7667:239',
+        ]),
+      });
+
+      await runSync({ database: db, force: true, now: () => NOW });
+
+      const rows = await streamRows(anime.id);
+      const byId = new Map(rows.map((r) => [r.externalId, r]));
+      expect(byId.get('7667:239')).toMatchObject({ rolling: true });
+      expect(byId.get('7667:239')?.seenAt).toBeDefined();
+      expect(byId.get('7667:256')?.rolling).toBeUndefined();
+      expect(byId.get('7667:256')?.seenAt).toBeUndefined();
+    });
+
+    it('startedStreams の無い古い応答では、放送中（RELEASING）なら配信中とみなし、放送前なら配信開始のまま', async () => {
+      const releasing = await setup('R', { mediaType: 'anime', title: 'R', sourceRefs: [anilistRef('1')] });
+      const upcoming = await setup('U', { mediaType: 'anime', title: 'U', sourceRefs: [anilistRef('2')] });
+      mockFetch({
+        '/api/anilist/media/': (url) =>
+          url.pathname.endsWith('/1')
+            ? mediaDto('1', { status: 'RELEASING' })
+            : mediaDto('2', { status: 'NOT_YET_RELEASED', seasonDate: '2026-10-30' }),
+        '/api/syoboi/title': okSyoboi([streamStart('2026-10-17')]),
+      });
+
+      await runSync({ database: db, force: true, now: () => NOW });
+
+      const [r] = await streamRows(releasing.id);
+      expect(r).toMatchObject({ rolling: true });
+      expect(r.seenAt).toBeDefined();
+      const [u] = await streamRows(upcoming.id);
+      expect(u.rolling).toBeUndefined();
+      expect(u.seenAt).toBeUndefined();
+    });
+
+    it('配信開始として作った行（旧同期の新着）は、配信中になったら既読のローリング1件に置き換える', async () => {
+      const anime = await setup('W', { mediaType: 'anime', title: 'A', sourceRefs: [anilistRef('1')] });
+      await createRelease(
+        {
+          editionId: anime.id,
+          kind: 'stream-start',
+          label: 'dアニメストア 配信',
+          date: '2026-10-16',
+          time: '24:00',
+          externalId: '7667:232',
+          source: 'syoboi',
+        },
+        db,
+      );
+      mockFetch({
+        '/api/anilist/media/': () => mediaDto('1', { status: 'RELEASING' }),
+        '/api/syoboi/title': okSyoboi([streamStart('2026-10-16')], ['7667:232']),
+      });
+
+      await runSync({ database: db, force: true, now: () => NOW });
+
+      const rows = await streamRows(anime.id);
+      expect(rows).toHaveLength(1);
+      expect(rows[0]).toMatchObject({ externalId: '7667:232', date: '2026-10-16', rolling: true, dateHistory: [] });
+      expect(rows[0].seenAt).toBeDefined();
+    });
+
+    it('ローリングの行は、同じサービスの別チャンネルになっても1件のまま追い、配信が途切れても延期にしない', async () => {
+      const anime = await setup('W', { mediaType: 'anime', title: 'A', sourceRefs: [anilistRef('1')] });
+      let reply = okSyoboi([streamStart('2026-10-16', '239')], ['7667:239']);
+      mockFetch({
+        '/api/anilist/media/': () => mediaDto('1', { status: 'RELEASING' }),
+        '/api/syoboi/title': () => reply(),
+      });
+
+      await runSync({ database: db, force: true, now: () => NOW });
+      reply = okSyoboi([streamStart('2026-10-23', '244')], ['7667:244']);
+      await runSync({ database: db, force: true, now: at('2026-10-20T03:00:00Z') });
+      // 3週休んで直近14日に配信が無い（startedStreams に入らない）
+      reply = okSyoboi([streamStart('2026-11-20', '244')], []);
+      await runSync({ database: db, force: true, now: at('2026-11-12T03:00:00Z') });
+
+      const rows = await streamRows(anime.id);
+      expect(rows).toHaveLength(1);
+      expect(rows[0]).toMatchObject({ externalId: '7667:244', date: '2026-11-20', rolling: true, dateHistory: [] });
+      expect(rows[0].seenAt).toBeDefined();
+    });
+
+    it('手動の配信行は触らない', async () => {
+      const anime = await setup('W', { mediaType: 'anime', title: 'A', sourceRefs: [anilistRef('1')] });
+      await createManualRelease(
+        { editionId: anime.id, kind: 'stream-start', label: 'dアニメストア 配信', date: '2026-10-02', externalId: '7667:232' },
+        db,
+      );
+      mockFetch({
+        '/api/anilist/media/': () => mediaDto('1', { status: 'RELEASING' }),
+        '/api/syoboi/title': okSyoboi([streamStart('2026-10-16')], ['7667:232']),
+      });
+
+      await runSync({ database: db, force: true, now: () => NOW });
+
+      const rows = await streamRows(anime.id);
+      expect(rows.map((r) => [r.origin, r.date, r.rolling])).toEqual([['manual', '2026-10-02', undefined]]);
+    });
   });
 
   it('しょぼかるの失敗は syoboi のエラーとして記録し、AniList 側は取り込む', async () => {

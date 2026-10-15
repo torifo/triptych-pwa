@@ -3,8 +3,17 @@
 
 import { apiGet } from '../api';
 import { db as defaultDB, type TriptychDB } from '../db/schema';
-import type { DatePrecision, Edition, Release, Source, SourceRef, Work } from '../db/schema';
+import type {
+  AiringStatus,
+  DatePrecision,
+  Edition,
+  Release,
+  Source,
+  SourceRef,
+  Work,
+} from '../db/schema';
 import {
+  createRelease,
   deleteRelease,
   listEditions,
   listReleasesByEdition,
@@ -40,6 +49,7 @@ interface MediaDetailDTO {
   title: string;
   cover?: string | null;
   url: string;
+  status?: AiringStatus | null;
   releases: ReleaseDTO[];
 }
 
@@ -54,6 +64,8 @@ interface SyoboiTitleDTO {
   tid?: string | null;
   title?: string | null;
   streamStarts?: ReleaseDTO[];
+  /** streamStarts のうち、直近にも配信があった（配信中の）externalId。古い collector には無い。 */
+  startedStreams?: string[] | null;
 }
 
 interface WebNovelDTO {
@@ -75,6 +87,15 @@ interface WebNovelDTO {
 const SYNC_META_KEY = 'sync';
 const THROTTLE_MS = 60 * 60 * 1000; // 1h
 const TRACKED_STATUSES: Edition['status'][] = ['plan', 'active', 'paused'];
+const ENDED_AIRING = new Set<AiringStatus>(['FINISHED', 'CANCELLED']);
+/** Edition に AniList id が複数ある時は、いちばん動いている状態をその Edition の状態にする。 */
+const AIRING_PRIORITY: AiringStatus[] = [
+  'RELEASING',
+  'NOT_YET_RELEASED',
+  'HIATUS',
+  'FINISHED',
+  'CANCELLED',
+];
 
 export interface SyncSourceError {
   message: string;
@@ -133,6 +154,8 @@ interface SyncContext {
   database: TriptychDB;
   force: boolean;
   now: () => Date;
+  /** この同期で取れた AniList の放送状態（キーは airingKey）。 */
+  airing: Map<string, AiringStatus>;
 }
 
 type SyncSource = 'anilist' | 'syoboi' | 'ndl' | 'narou' | 'kakuyomu';
@@ -145,7 +168,7 @@ interface SyncTask {
 async function runSyncOnce(opts: SyncOptions & { database: TriptychDB }): Promise<SyncRunResult> {
   const { database } = opts;
   const now = opts.now ?? (() => new Date());
-  const ctx: SyncContext = { database, force: opts.force ?? false, now };
+  const ctx: SyncContext = { database, force: opts.force ?? false, now, airing: new Map() };
 
   const metaEntry = await database.meta.get(SYNC_META_KEY);
   const meta: SyncMeta = (metaEntry?.value as SyncMeta | undefined) ?? {};
@@ -170,22 +193,24 @@ async function runSyncOnce(opts: SyncOptions & { database: TriptychDB }): Promis
   let succeeded = 0;
   let failed = 0;
 
-  await Promise.all(
-    Array.from(plan.entries()).map(async ([source, tasks]) => {
-      for (const task of tasks) {
-        try {
-          await task.run(ctx);
-          succeeded += 1;
-        } catch (err) {
-          failed += 1;
-          errors[source] = {
-            message: `${task.label}: ${errorMessage(err)}`,
-            occurredAt: now().toISOString(),
-          };
-        }
+  const runLane = async (source: SyncSource) => {
+    for (const task of plan.get(source) ?? []) {
+      try {
+        await task.run(ctx);
+        succeeded += 1;
+      } catch (err) {
+        failed += 1;
+        errors[source] = {
+          message: `${task.label}: ${errorMessage(err)}`,
+          occurredAt: now().toISOString(),
+        };
       }
-    }),
-  );
+    }
+  };
+
+  // しょぼかるは同じ同期で取った AniList の放送状態を使うので、AniList のあとに回す。
+  const others = Array.from(plan.keys()).filter((s) => s !== 'anilist' && s !== 'syoboi');
+  await Promise.all([runLane('anilist').then(() => runLane('syoboi')), ...others.map(runLane)]);
 
   const syncedAt = now().toISOString();
 
@@ -268,6 +293,7 @@ async function syncAnimeMedia(edition: Edition, ref: SourceRef, ctx: SyncContext
     `/api/anilist/media/${encodeURIComponent(ref.externalId)}`,
     queryParams(ctx),
   );
+  if (dto.status) ctx.airing.set(airingKey(edition.id, ref.externalId), dto.status);
 
   let nextEpisode: ReleaseDTO | undefined;
   for (const release of dto.releases) {
@@ -332,6 +358,10 @@ function episodeOwner(externalId: string): string | undefined {
 
 async function syncSyoboi(edition: Edition, work: Work | undefined, ctx: SyncContext): Promise<void> {
   const { database } = ctx;
+  const airing = editionAiring(edition, ctx);
+  // 放送終了・中止の期は配信の予定がもう増えないので、Crawl-delay 60 の枠を使わない。
+  if (airing && ENDED_AIRING.has(airing)) return;
+
   const knownTid =
     edition.syncHints?.syoboiTid ??
     edition.sourceRefs.find((r) => r.source === 'syoboi')?.externalId;
@@ -347,11 +377,21 @@ async function syncSyoboi(edition: Edition, work: Work | undefined, ctx: SyncCon
   }
 
   const today = todayJst(ctx.now());
-  const rows = (await listReleasesByEdition(edition.id, database)).filter(
-    (r) => r.kind === 'stream-start' && r.origin !== 'manual',
+  const streams = (await listReleasesByEdition(edition.id, database)).filter(
+    (r) => r.kind === 'stream-start',
   );
+  const rows = streams.filter((r) => r.origin !== 'manual');
+  // startedStreams の無い古い collector では、放送中の期の配信はすべて配信中とみなす。
+  const started = dto.startedStreams ? new Set(dto.startedStreams) : undefined;
   for (const release of dto.streamStarts ?? []) {
     if (release.kind !== 'stream-start') continue;
+    const ongoing =
+      rows.some((r) => r.rolling && sameStream(r, release)) ||
+      (started ? started.has(release.externalId ?? '') : airing === 'RELEASING');
+    if (ongoing) {
+      await skipInvalidDate(() => rollStream(edition, release, streams, ctx));
+      continue;
+    }
     // 始まった配信を、毎週の「今日以降の最初の番組」で延期扱いにしない。
     const existing = release.externalId
       ? rows.find((r) => r.externalId === release.externalId)
@@ -361,6 +401,89 @@ async function syncSyoboi(edition: Edition, work: Work | undefined, ctx: SyncCon
       mergeRelease(toMergeInput(edition.id, release, 'syoboi'), database, { now: ctx.now() }),
     );
   }
+}
+
+/** 配信中のサービスは「次回の配信」1件のローリング。日付は延期として記録せずに動かし、新着にしない。 */
+async function rollStream(
+  edition: Edition,
+  next: ReleaseDTO,
+  streams: Release[],
+  ctx: SyncContext,
+): Promise<void> {
+  const { database } = ctx;
+  if (!isValidYmd(next.date)) return;
+  if (streams.some((r) => r.origin === 'manual' && sameExternalId(r, next))) return;
+
+  const same = streams.filter((r) => r.origin !== 'manual' && sameStream(r, next));
+  const current = same.find((r) => r.rolling);
+  // 配信開始として作った行は、延期履歴や新着を持ち越さないよう作り直す。
+  for (const row of same) {
+    if (row !== current) await deleteRelease(row.id, database);
+  }
+
+  const seenAt = ctx.now().toISOString();
+  const time = next.time ?? undefined;
+  const externalId = next.externalId ?? current?.externalId;
+  if (!current) {
+    await createRelease(
+      {
+        editionId: edition.id,
+        kind: 'stream-start',
+        label: next.label,
+        date: next.date,
+        precision: 'day',
+        time,
+        externalId,
+        source: next.source ?? 'syoboi',
+        seenAt,
+        rolling: true,
+      },
+      database,
+    );
+    return;
+  }
+  const changed =
+    current.date !== next.date ||
+    current.time !== time ||
+    current.label !== next.label ||
+    current.externalId !== externalId ||
+    (current.precision ?? 'day') !== 'day';
+  if (!changed && current.seenAt) return;
+  await updateRelease(
+    current.id,
+    {
+      label: next.label,
+      date: next.date,
+      precision: 'day',
+      time,
+      externalId,
+      origin: 'sync',
+      seenAt: current.seenAt ?? seenAt,
+    },
+    database,
+  );
+}
+
+/** 同じ配信先の行: 同じ externalId か、ローリングで同じラベル（ABEMA は週ごとにチャンネルが変わることがある）。 */
+function sameStream(row: Release, release: ReleaseDTO): boolean {
+  return sameExternalId(row, release) || (!!row.rolling && row.label === release.label);
+}
+
+function sameExternalId(row: Release, release: ReleaseDTO): boolean {
+  return !!release.externalId && row.externalId === release.externalId;
+}
+
+/** この同期で取れた AniList の放送状態。取れなかった id があれば undefined（分からないので照会する）。 */
+function editionAiring(edition: Edition, ctx: SyncContext): AiringStatus | undefined {
+  const statuses = edition.sourceRefs
+    .filter((r) => r.source === 'anilist')
+    .map((r) => ctx.airing.get(airingKey(edition.id, r.externalId)));
+  if (statuses.length === 0 || statuses.some((s) => s === undefined)) return undefined;
+  return AIRING_PRIORITY.find((s) => statuses.includes(s));
+}
+
+function airingKey(editionId: string, anilistId: string): string {
+  return `${editionId}\u0000${anilistId}`;
 }
 
 // ---------------------------------------------------------------------------

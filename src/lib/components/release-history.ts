@@ -20,8 +20,13 @@ export function streamServiceName(label: string): string {
 export interface StreamEntry {
   release: Release;
   service: string;
-  /** 配信開始日が過ぎている。今日始まるものは時刻がまだ先かもしれないので「予定」に数える。 */
+  /** 配信が始まっている（isStreamStarted）。 */
   started: boolean;
+}
+
+/** 配信が始まっているか。開始日が過ぎたもの（今日はまだ「予定」）と、配信中のサービスの次回の配信（rolling）。 */
+export function isStreamStarted(release: Release, today: string): boolean {
+  return !!release.rolling || isPastRelease(release, today);
 }
 
 /** 配信開始（stream-start）を日付順に。過去分も含める。 */
@@ -32,7 +37,7 @@ export function streamEntries(releases: readonly Release[], today: string): Stre
     .map((release) => ({
       release,
       service: streamServiceName(release.label),
-      started: isPastRelease(release, today),
+      started: isStreamStarted(release, today),
     }));
 }
 
