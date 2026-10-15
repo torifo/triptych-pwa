@@ -117,14 +117,15 @@
   </main>
 
   <nav
-    class="fixed bottom-0 left-0 right-0 flex"
+    class="bottom-nav fixed bottom-0 left-0 right-0"
     style="max-width: 480px; margin: 0 auto; border-top: 1px solid var(--line); background: var(--bg);"
+    aria-label="メインナビゲーション"
   >
     {#each navItems as item}
       <button
         type="button"
-        class="flex-1 py-2.5 text-center text-[9px] font-medium"
-        style={`letter-spacing: 0.06em; white-space: nowrap; min-width: 0; color: ${route.name === item.name ? 'var(--fg)' : 'var(--muted)'};`}
+        class="bottom-nav-item"
+        style={`color: ${route.name === item.name ? 'var(--fg)' : 'var(--muted)'};`}
         aria-current={route.name === item.name ? 'page' : undefined}
         onclick={() => navigate(item.path)}
       >
