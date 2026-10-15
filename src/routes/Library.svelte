@@ -16,11 +16,16 @@
     progressText,
     saveLibraryLayout,
     seasonStartByEdition,
-    sortLibraryEditions,
+    sortLibrary,
+    nextDateByEdition,
+    loadLibrarySort,
+    saveLibrarySort,
+    type LibrarySort,
     type LibraryLayout,
   } from '../lib/components/library-view';
   import { broadcastDayJst, onAirEditionIds } from '../lib/components/onair';
   import { workCover } from '../lib/components/cover';
+  import { todayJst } from '../lib/dates';
 
   let editions = $state<Edition[]>([]);
   let works = $state<Work[]>([]);
@@ -31,6 +36,7 @@
   let mediaTypeFilter = $state<MediaType | 'all'>('all');
   // 既定は表紙の棚。端末に保存した選択があればそれ（localStorage が使えなければ棚）
   let layout = $state<LibraryLayout>(loadLibraryLayout());
+  let sort = $state<LibrarySort>(loadLibrarySort());
   let showCreate = $state(false);
   let newTitle = $state('');
   let creating = $state(false);
@@ -55,13 +61,16 @@
   const seasonStarts = $derived(seasonStartByEdition(releases));
   const subtitles = $derived(editionDisambiguators(editions, workTitleOf, seasonStarts));
 
+  const nextDates = $derived(nextDateByEdition(releases, todayJst()));
   const filtered = $derived(
-    sortLibraryEditions(
+    sortLibrary(
+      sort,
       editions
         .filter((e) => statusFilter === 'all' || e.status === statusFilter)
         .filter((e) => mediaTypeFilter === 'all' || e.mediaType === mediaTypeFilter),
       workTitleOf,
       seasonStarts,
+      nextDates,
     ),
   );
 
@@ -80,6 +89,11 @@
   }
 
   onMount(refresh);
+
+  function setSort(next: LibrarySort) {
+    sort = next;
+    saveLibrarySort(next);
+  }
 
   function setLayout(next: LibraryLayout) {
     layout = next;
@@ -189,6 +203,14 @@
       {/if}
       <span class="no">{layout === 'shelf' ? 'WORKS' : 'EDITIONS'}</span>
     </p>
+    <label class="sort">
+      <span class="type-label">並び</span>
+      <select value={sort} aria-label="並べ方" onchange={(e) => setSort(e.currentTarget.value as LibrarySort)}>
+        <option value="title">作品名</option>
+        <option value="next">次の予定が近い</option>
+        <option value="added">追加した順</option>
+      </select>
+    </label>
     <button type="button" class="btn btn-main" aria-expanded={showCreate} onclick={() => (showCreate = !showCreate)}>
       <Plus size={14} />新規作品
     </button>
@@ -591,5 +613,18 @@
     .shelf-item:hover .shelf-cover {
       transform: none;
     }
+  }
+  .sort {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-left: auto;
+  }
+  .sort select {
+    padding: 0.25rem 0.4rem;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--fg);
+    font-size: 0.75rem;
   }
 </style>

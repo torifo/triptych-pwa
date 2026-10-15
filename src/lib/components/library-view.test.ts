@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import type { Edition, Release } from '../db/schema';
 import {
+  nextDateByEdition,
+  sortLibrary,
+  loadLibrarySort,
+  saveLibrarySort,
+  LIBRARY_SORT_KEY,
   groupShelfByWork,
   editionDisambiguators,
   editionSubtitle,
@@ -287,5 +292,47 @@ describe('groupShelfByWork', () => {
     expect(group.status).toBe('paused');
     const [active] = groupShelfByWork([ed('a', 'A', 'dropped'), ed('b', 'A', 'active')], new Set());
     expect(active.status).toBe('active');
+  });
+});
+
+describe('nextDateByEdition / sortLibrary', () => {
+  const rel = (id: string, editionId: string, date: string, precision: 'day' | 'month' = 'day') =>
+    release({ id, editionId, date, precision });
+
+  it('今日以降で最も近い予定の日（月精度は月末まで有効）', () => {
+    const map = nextDateByEdition(
+      [rel('a1', 'a', '2026-10-01'), rel('a2', 'a', '2026-10-20'), rel('a3', 'a', '2026-10-18'), rel('b1', 'b', '2026-10-01', 'month')],
+      '2026-10-15',
+    );
+    expect(map.get('a')).toBe('2026-10-18');
+    expect(map.get('b')).toBe('2026-10-01');
+    expect(map.has('c')).toBe(false);
+  });
+
+  const ed = (id: string, workId: string, createdAt: string) => ({
+    ...edition(id, { workId, createdAt }),
+  });
+  const titles: Record<string, string> = { A: 'あ', B: 'い', C: 'う' };
+
+  it('次の予定が近い順（予定の無いものは後ろで作品名順）', () => {
+    const list = [ed('a', 'A', '2026-10-01T00:00:00Z'), ed('b', 'B', '2026-10-02T00:00:00Z'), ed('c', 'C', '2026-10-03T00:00:00Z')];
+    const next = new Map([['c', '2026-10-16'], ['b', '2026-10-30']]);
+    expect(sortLibrary('next', list, (w) => titles[w], new Map(), next).map((e) => e.id)).toEqual(['c', 'b', 'a']);
+  });
+
+  it('追加した順（新しいものから）と作品名順', () => {
+    const list = [ed('a', 'A', '2026-10-01T00:00:00Z'), ed('c', 'C', '2026-10-03T00:00:00Z'), ed('b', 'B', '2026-10-02T00:00:00Z')];
+    expect(sortLibrary('added', list, (w) => titles[w], new Map(), new Map()).map((e) => e.id)).toEqual(['c', 'b', 'a']);
+    expect(sortLibrary('title', list, (w) => titles[w], new Map(), new Map()).map((e) => e.id)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('並べ方の保存と読み出し（知らない値は作品名順）', () => {
+    const store = new Map<string, string>();
+    const storage = { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => void store.set(k, v) };
+    expect(loadLibrarySort(storage)).toBe('title');
+    saveLibrarySort('next', storage);
+    expect(loadLibrarySort(storage)).toBe('next');
+    store.set(LIBRARY_SORT_KEY, 'bogus');
+    expect(loadLibrarySort(storage)).toBe('title');
   });
 });

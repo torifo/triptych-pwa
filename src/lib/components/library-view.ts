@@ -1,7 +1,7 @@
 // Library の一覧用。同じ Work・同じ媒体の Edition を見分ける副題と並び順、棚の表紙と表示の保存。
 
 import type { Edition, EditionProgress, MediaType, Release, Status, Work } from '../db/schema';
-import { formatReleaseDate, isValidYmd, todayJst } from '../dates';
+import { formatReleaseDate, isPastRelease, isValidYmd, todayJst } from '../dates';
 import { normalizeTitle } from '../normalize';
 import { editionCover, workCover, type CoverSource } from './cover';
 import { MEDIA_TYPES, PROGRESS_UNIT_LABELS } from './labels';
@@ -111,6 +111,66 @@ export function sortLibraryEditions<T extends LibraryEdition>(
 // ---------------------------------------------------------------------------
 // 棚・一覧の表示
 // ---------------------------------------------------------------------------
+
+/** 並べ方: 作品名順 / 次の予定が近い順 / 追加した順（新しいものから）。 */
+export type LibrarySort = 'title' | 'next' | 'added';
+export const LIBRARY_SORT_KEY = 'triptych:library-sort';
+const LIBRARY_SORTS: LibrarySort[] = ['title', 'next', 'added'];
+
+/** Edition ごとの、今日以降で最も近い予定の日（月・年精度は期間の終わりまで今日以降とみなす）。 */
+export function nextDateByEdition(releases: readonly Release[], today: string): Map<string, string> {
+  const next = new Map<string, string>();
+  for (const r of releases) {
+    if (!isValidYmd(r.date) || isPastRelease(r, today)) continue;
+    const current = next.get(r.editionId);
+    if (!current || r.date < current) next.set(r.editionId, r.date);
+  }
+  return next;
+}
+
+/** 並べ方に従って Edition を並べる。次の予定が無いもの・同じ日のものは作品名順。 */
+export function sortLibrary<T extends LibraryEdition>(
+  sort: LibrarySort,
+  editions: readonly T[],
+  workTitleOf: (workId: string) => string,
+  seasonStarts: ReadonlyMap<string, SeasonStart>,
+  nextDates: ReadonlyMap<string, string>,
+): T[] {
+  const byTitle = sortLibraryEditions(editions, workTitleOf, seasonStarts);
+  if (sort === 'title') return byTitle;
+  const rank = new Map(byTitle.map((e, i) => [e.id, i]));
+  const tie = (a: T, b: T) => (rank.get(a.id) ?? 0) - (rank.get(b.id) ?? 0);
+  if (sort === 'added') {
+    return [...byTitle].sort((a, b) => (a.createdAt === b.createdAt ? tie(a, b) : a.createdAt < b.createdAt ? 1 : -1));
+  }
+  return [...byTitle].sort((a, b) => {
+    const da = nextDates.get(a.id);
+    const db = nextDates.get(b.id);
+    if (da !== db) {
+      if (!da) return 1;
+      if (!db) return -1;
+      return da < db ? -1 : 1;
+    }
+    return tie(a, b);
+  });
+}
+
+export function loadLibrarySort(storage: Pick<Storage, 'getItem'> | null = browserStorage()): LibrarySort {
+  try {
+    const value = storage?.getItem(LIBRARY_SORT_KEY);
+    return LIBRARY_SORTS.includes(value as LibrarySort) ? (value as LibrarySort) : 'title';
+  } catch {
+    return 'title';
+  }
+}
+
+export function saveLibrarySort(sort: LibrarySort, storage: Pick<Storage, 'setItem'> | null = browserStorage()): void {
+  try {
+    storage?.setItem(LIBRARY_SORT_KEY, sort);
+  } catch {
+    // 保存できない環境では、並べ替え自体はできるので黙って諦める
+  }
+}
 
 export type LibraryLayout = 'shelf' | 'list';
 
