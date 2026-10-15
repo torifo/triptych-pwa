@@ -57,12 +57,12 @@
     inset: -32px;
     background-size: cover;
     background-position: center 30%;
-    filter: blur(28px) saturate(1.25);
+    filter: blur(28px) saturate(1.4);
   }
   .hero-veil {
     position: absolute;
     inset: 0;
-    background: color-mix(in srgb, var(--bg) 74%, transparent);
+    background: color-mix(in srgb, var(--bg) 58%, transparent);
   }
   .hero-body {
     position: relative;

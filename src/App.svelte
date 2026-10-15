@@ -140,7 +140,7 @@
     </div>
   {/if}
 
-  <main class="flex-1 overflow-y-auto pb-16">
+  <main class="flex-1 overflow-y-auto" style="padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));">
     {#if route.name === 'home'}
       <Home />
     {:else if route.name === 'library'}
@@ -164,7 +164,7 @@
 
   <nav
     class="bottom-nav fixed bottom-0 left-0 right-0"
-    style="max-width: 480px; margin: 0 auto; border-top: 1px solid var(--line); background: var(--bg);"
+    style="max-width: 480px; margin: 0 auto; border-top: 1px solid var(--line); background: var(--bg); padding-bottom: env(safe-area-inset-bottom);"
     aria-label="メインナビゲーション"
   >
     {#each navItems as item (item.path)}

@@ -127,11 +127,6 @@ body {
   border-color: var(--fg);
 }
 
-/* --hi の効かせ方: 面で塗らず左の短い黄バーで指す */
-.hi-bar {
-  border-left: 3px solid var(--hi);
-  padding-left: calc(0.75rem - 3px);
-}
 
 /* ナビ・リンクのホバー黄下線（mono nav） */
 .hi-underline {
@@ -156,12 +151,12 @@ body {
   transform-origin: left;
 }
 
-/* リスト行ホバー: 小面積の黄で反応（mono .cat の応用） */
+/* リスト行ホバー: 無彩色の薄い面（黄はページ見出しの一点だけに残す） */
 .row-hover {
   transition: background 0.2s ease;
 }
 .row-hover:hover {
-  background: var(--hi-soft);
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
 }
 
 /* フォーム: フォーカスで罫線が黒く締まる（インラインstyle上書きのため!important） */
@@ -213,6 +208,14 @@ textarea {
 }
 @media (prefers-reduced-motion: reduce) {
   .bottom-nav-item {
+    transition: none;
+  }
+}
+
+/* 動きを減らす設定では、下線の伸び縮みと行の色の移り変わりを止める */
+@media (prefers-reduced-motion: reduce) {
+  .hi-underline::after,
+  .row-hover {
     transition: none;
   }
 }

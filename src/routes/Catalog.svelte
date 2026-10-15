@@ -427,7 +427,7 @@
               <div class="flex items-baseline justify-between gap-2">
                 <span class="min-w-0 flex-1 text-sm font-medium" style="overflow-wrap: anywhere;">{item.title}</span>
                 {#if years}
-                  <MonoTime text={years} muted />
+                  <span class="text-[11px]"><MonoTime text={years} muted /></span>
                 {/if}
               </div>
               <div class="catalog-meta flex flex-wrap items-center gap-x-1.5 gap-y-1">
