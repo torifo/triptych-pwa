@@ -401,3 +401,83 @@ async def test_limit_spans_genres_and_shrinks_the_last_window(conn):
     assert db.is_slice_done(conn, "narou", "genre:101")
     assert db.slice_status(conn, "narou", "genre:102")["cursor"] == "51"
     assert db.slice_status(conn, "narou", "genre:201") is None
+
+
+# --- recent (build --recent) -----------------------------------------------
+
+
+async def test_recent_asks_only_the_top_pages_of_every_genre_and_ignores_done_slices(conn):
+    await run(FakeNarou(FakeClock(), {201: 1200, 101: 3}), conn)  # a finished full build
+    full_state = dict(db.slice_status(conn, "narou", "genre:201"))
+    assert full_state["status"] == "done"
+
+    fake = FakeNarou(FakeClock(), {201: 1200, 101: 3})
+    result = await run(fake, conn, recent=True)
+
+    assert narou.RECENT_PAGES == 2
+    assert [int(p["st"]) for p in fake.for_genre(201)] == [1, 501]  # the top 2 x 500, not 1001 / 1501
+    assert len(fake.requests) == 21 + 1  # every genre once, 201 twice
+    assert {int(p["lim"]) for p in fake.requests} == {500}
+    assert all(p["order"] == "hyoka" and p["type"] == "re" for p in fake.requests)
+    assert (result.slices_done, result.slices_skipped, result.slices_error) == (21, 0, 0)
+    assert result.fetched == 1000 + 3
+    # the full build's own slice record is left alone ...
+    assert dict(db.slice_status(conn, "narou", "genre:201")) == full_state
+    # ... and the recent run keeps its own
+    state = db.slice_status(conn, "narou", "recent:genre:201")
+    assert (state["status"], state["fetched"], state["cursor"]) == ("done", 1000, None)
+    assert db.is_slice_done(conn, "narou", "recent:genre:101")
+
+
+async def test_recent_updates_rows_in_place_and_never_deletes(conn):
+    await run(FakeNarou(FakeClock(), {201: 1200}), conn)
+    before = {r["external_id"]: r for r in entry_rows(conn)}
+    assert len(before) == 1200
+
+    fake = FakeNarou(FakeClock(), {201: 1200})
+    fake.ranked = lambda genre: [  # type: ignore[method-assign]
+        record(genre, rank, end=0, general_all_no=999) for rank in range(1, 1201)
+    ] if genre == 201 else []
+    await run(fake, conn, recent=True)
+
+    after = {r["external_id"]: r for r in entry_rows(conn)}
+    assert len(after) == 1200  # nothing added, nothing removed
+    first = "n0201" + "00001"
+    assert (before[first]["status"], after[first]["status"]) == ("連載中", "完結")
+    assert after[first]["episodes"] == 999
+    deep = "n0201" + "01100"  # rank 1100 is outside the top 1000: still as the full build left it
+    assert (after[deep]["status"], after[deep]["episodes"]) == (before[deep]["status"], before[deep]["episodes"])
+
+
+async def test_recent_starts_from_the_top_even_after_a_failed_recent_run(conn):
+    fake = FakeNarou(FakeClock(), {201: 1200})
+    fail = {"on": True}
+
+    def intercept(params: dict[str, str]) -> Optional[httpx.Response]:
+        if fail["on"] and params["genre"] == "201" and params["st"] == "501":
+            return httpx.Response(503, text="maintenance")
+        return None
+
+    fake.intercept = intercept
+    first = await run(fake, conn, recent=True)
+
+    assert first.slices_error == 1 and "recent:genre:201 st=501" in first.errors[0]
+    state = db.slice_status(conn, "narou", "recent:genre:201")
+    assert state["status"] == "error"
+    assert db.slice_status(conn, "narou", "genre:201") is None  # the full build never saw it
+
+    fail["on"] = False
+    fake.requests.clear()
+    second = await run(fake, conn, recent=True)
+    assert [int(p["st"]) for p in fake.for_genre(201)] == [1, 501]  # again from the top: no resume
+    assert second.slices_error == 0
+    assert db.is_slice_done(conn, "narou", "recent:genre:201")
+
+
+async def test_recent_honours_the_limit(conn):
+    fake = FakeNarou(FakeClock(), {101: 1200, 102: 5})
+    result = await run(fake, conn, limit=200, recent=True)
+
+    assert [(p["genre"], p["st"], p["lim"]) for p in fake.requests] == [("101", "1", "200")]
+    assert result.fetched == 200 and len(entry_rows(conn)) == 200
+    assert db.slice_status(conn, "narou", "genre:101") is None

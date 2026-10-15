@@ -20,6 +20,11 @@ Facts verified against the live API (2026-10-14):
 
 Slices are `genre:<code>`. A slice's `cursor` is the next `st` to request, so an
 interrupted run resumes inside a genre. 1 req/s.
+
+`recent=True` (`build --recent`) re-asks only the top RECENT_PAGES windows of every
+genre (the works readers look at, whose episode counts and status change), whether
+or not the full slice is done. It keeps its own slice records, `recent:genre:<code>`,
+and starts from `st=1` every time: the full slice's cursor and state are not touched.
 """
 
 from __future__ import annotations
@@ -42,6 +47,8 @@ REQUEST_INTERVAL = 1.0  # seconds between requests (1 req/s)
 PAGE_SIZE = 500  # API maximum for `lim`
 MAX_START = 2000  # API maximum for `st`
 GZIP_LEVEL = 5
+RECENT_PAGES = 2  # `build --recent`: the top 2 x 500 of each genre
+RECENT_PREFIX = "recent:"  # slice keys of a recent run: recent:genre:<code>
 RESPONSE_FIELDS = "t-n-w-bg-g-k-gf-gl-e-ga-gp-f"
 
 # Official genre codes (https://dev.syosetu.com/man/api/, "genre").
@@ -202,13 +209,18 @@ async def _harvest_genre(
     limit: Optional[int],
     result: HarvestResult,
     log: Callable[[str], None],
+    recent: bool = False,
 ) -> bool:
-    """Harvests one genre slice. Returns False when the run's `limit` was reached."""
-    key = slice_key(code)
-    state = db.slice_status(conn, SOURCE, key)
+    """Harvests one genre slice. Returns False when the run's `limit` was reached.
+
+    A recent run never resumes (it is a few requests) and keeps its own slice record.
+    """
+    key = (RECENT_PREFIX if recent else "") + slice_key(code)
+    state = None if recent else db.slice_status(conn, SOURCE, key)
     st = _resume_start(state["cursor"]) if state is not None else 1
     total = state["fetched"] if state is not None and st > 1 else 0
     seen: set[str] = set()
+    pages = 0
     log(f"  {key} {GENRES[code]} (from st={st})")
 
     while True:
@@ -248,9 +260,16 @@ async def _harvest_genre(
         total += len(entries)
         log(f"    st={st} lim={lim}: {len(entries)} rows (allcount={allcount}, slice total {total})")
 
+        pages += 1
         following = following_start(st, lim)
-        # Done when the window reached the end of the result set or of what the API allows.
-        if len(records) < lim or following is None or st + lim > allcount:
+        # Done when the window reached the end of the result set or of what the API allows
+        # (or, for a recent run, of the top pages it wants).
+        if (
+            len(records) < lim
+            or following is None
+            or st + lim > allcount
+            or (recent and pages >= RECENT_PAGES)
+        ):
             db.mark_slice(conn, SOURCE, key, "done", fetched=total)
             result.slices_done += 1
             return True
@@ -267,18 +286,22 @@ async def harvest(
     clock: Clock,
     limit: Optional[int] = None,
     log: Callable[[str], None] = print,
+    recent: bool = False,
 ) -> HarvestResult:
-    """Top-rated serials of every genre into `entries`. `limit` caps the rows of this run."""
+    """Top-rated serials of every genre into `entries`. `limit` caps the rows of this run.
+
+    `recent`: only the top RECENT_PAGES windows of each genre, done slices or not.
+    """
     result = HarvestResult(source=SOURCE)
     pacer = Pacer(REQUEST_INTERVAL, clock)
     for code in GENRES:
         if limit is not None and result.fetched >= limit:
             break
-        if db.is_slice_done(conn, SOURCE, slice_key(code)):
+        if not recent and db.is_slice_done(conn, SOURCE, slice_key(code)):
             result.slices_skipped += 1
             continue
         keep_going = await _harvest_genre(
-            conn, client, code, clock=clock, pacer=pacer, limit=limit, result=result, log=log
+            conn, client, code, clock=clock, pacer=pacer, limit=limit, result=result, log=log, recent=recent
         )
         if not keep_going:
             break

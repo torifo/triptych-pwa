@@ -712,3 +712,272 @@ async def test_full_plan_with_nothing_found_finishes_every_slice(conn, clock):
     assert count(conn, "harvest_state") == len(planned)
     # 20 requests a minute: one every 3 s.
     assert clock.sleeps == [3.0] * (len(planned) - 1)
+
+
+# --------------------------------------------------------------------------- recent (build --recent)
+
+
+def done_everywhere(conn, fetched: int = 7) -> None:
+    """A finished full build: every planned slice is done."""
+    for sl in A.plan_slices(START.year):
+        db.mark_slice(conn, A.SOURCE, sl.key, "done", fetched=fetched)
+
+
+class RecentAniList:
+    """AniList for a recent run: answers by the filters a request carries (status, ids, dates, sort)."""
+
+    def __init__(self) -> None:
+        # (does it match the variables, the answer: a list of rows or a function page -> rows)
+        self.rules: list[tuple[Callable[[dict[str, Any]], bool], Any]] = []
+        self.requests: list[Req] = []
+        self.world: dict[int, dict[str, Any]] = {}  # what `id_in` can find
+
+    def when(self, rows: Any, *, type: Optional[str] = None, like: Optional[str] = None, status: Optional[list[str]] = None,
+             sort: str = "ID", greater: Optional[int] = None) -> None:
+        def match(v: dict[str, Any]) -> bool:
+            return (
+                v["type"] == type
+                and v.get("startLike") == like
+                and v.get("startGreater") == greater
+                and v.get("statusIn") == status
+                and v["sort"][0] == sort
+                and "idIn" not in v
+                and "startLesser" not in v
+            )
+
+        self.rules.append((match, rows))
+
+    def __call__(self, request: httpx.Request) -> httpx.Response:
+        body = json.loads(request.content)
+        v = body["variables"]
+        self.requests.append(Req((v["type"], v.get("startLike")), v["page"], body["query"], v, dict(request.headers)))
+        if "idIn" in v:
+            rows: Any = [self.world[i] for i in sorted(v["idIn"]) if i in self.world and self.world[i]["type"] == v["type"]]
+        else:
+            rows = next((answer for match, answer in self.rules if match(v)), [])
+        if callable(rows):  # endless pages
+            return FakeAniList.page_response(rows, v["page"], {})
+        pages = [rows[i : i + 50] for i in range(0, len(rows), 50)]
+        return FakeAniList.page_response(pages, v["page"], {})
+
+    def asked(self) -> list[tuple]:
+        """(type, startLike, statusIn, sort, page) of every request that was not an id lookup."""
+        return [
+            (r.variables["type"], r.variables.get("startLike"), r.variables.get("statusIn"), r.variables["sort"][0], r.page)
+            for r in self.requests
+            if "idIn" not in r.variables
+        ]
+
+    def id_lookups(self) -> list[tuple[str, list[int]]]:
+        return [(r.variables["type"], r.variables["idIn"]) for r in self.requests if "idIn" in r.variables]
+
+
+async def run_recent(conn, fake: RecentAniList, clock: FakeClock, **kwargs: Any) -> A.HarvestResult:
+    logs: list[str] = []
+    async with httpx.AsyncClient(transport=httpx.MockTransport(fake)) as client:
+        result = await A.harvest(conn, client, clock=clock, log=logs.append, recent=True, **kwargs)
+    result.logs = logs  # type: ignore[attr-defined]
+    return result
+
+
+def store(conn, *medias: dict[str, Any]) -> None:
+    db.upsert_entries(conn, [A.to_entry(m) for m in medias])
+
+
+def test_recent_plan_is_this_year_on_plus_the_airing_and_upcoming_shows():
+    slices = A.plan_recent_slices(2026)
+    keys = [s.key for s in slices]
+
+    assert keys == [
+        "recent:ANIME:airing", "recent:MANGA:upcoming", "recent:MANGA:serial",
+        "ANIME:2026", "ANIME:2027", "ANIME:2028", "ANIME:2029", "ANIME:>2029",
+        "MANGA:2026", "MANGA:2027", "MANGA:2028", "MANGA:2029", "MANGA:>2029",
+    ]  # fmt: skip
+    full = {s.key: s for s in A.plan_slices(2026)}
+    assert all(full[s.key] == s for s in slices if not s.key.startswith("recent:"))  # the full build's own slices
+
+    by_key = {s.key: s for s in slices}
+    airing = by_key["recent:ANIME:airing"]
+    assert airing.variables(2) == {
+        "page": 2, "type": "ANIME", "sort": ["ID"], "statusIn": ["RELEASING", "NOT_YET_RELEASED"],
+    }  # fmt: skip
+    assert "status_in: $statusIn" in airing.query and "$statusIn: [MediaStatus]" in airing.query
+    assert "startDate_" not in airing.query
+    assert by_key["recent:MANGA:upcoming"].variables(1)["statusIn"] == ["NOT_YET_RELEASED"]
+    serial = by_key["recent:MANGA:serial"]  # thousands of old serials: only the most popular ones
+    assert serial.variables(1) == {"page": 1, "type": "MANGA", "sort": ["POPULARITY_DESC"], "statusIn": ["RELEASING"]}
+    assert serial.max_pages == A.RECENT_SERIAL_PAGES == 20
+
+
+def test_the_id_lookup_query_declares_only_its_own_filter():
+    lookup = A.Slice(key="x", type="ANIME", id_in=(1, 2, 3))
+    assert lookup.variables(1) == {"page": 1, "type": "ANIME", "sort": ["ID"], "idIn": [1, 2, 3]}
+    assert "id_in: $idIn" in lookup.query and "$idIn: [Int]" in lookup.query
+    assert "status_in" not in lookup.query and "startDate_" not in lookup.query
+    assert "status_in" not in A.plan_slices(2026)[1].query  # nothing leaks into the full build's queries
+
+
+async def test_recent_refetches_this_year_on_and_the_airing_shows_whatever_the_slice_state(conn, clock):
+    done_everywhere(conn)
+    db.mark_slice(conn, "anilist", "ANIME:2026", "pending", fetched=100, cursor="7")  # an interrupted full build
+    old_state = dict(db.slice_status(conn, "anilist", "ANIME:2024"))
+    store(conn, media(5, status="FINISHED", startDate={"year": 2010, "month": 4, "day": 1}))
+    fake = RecentAniList()
+    fake.when([media(100, status="RELEASING"), media(101, status="NOT_YET_RELEASED")], type="ANIME", status=["RELEASING", "NOT_YET_RELEASED"])
+    fake.when([media(100, status="RELEASING", popularity=999)], type="ANIME", like="2026%")
+    fake.when([media(102, startDate={"year": 2027, "month": None, "day": None})], type="ANIME", like="2027%")
+    fake.when([media(200, "MANGA", status="NOT_YET_RELEASED")], type="MANGA", status=["NOT_YET_RELEASED"])
+    fake.when([media(201, "MANGA", status="RELEASING")], type="MANGA", status=["RELEASING"], sort="POPULARITY_DESC")
+    fake.when([media(202, "MANGA", format="NOVEL")], type="MANGA", like="2026%")
+
+    result = await run_recent(conn, fake, clock)
+
+    asked = fake.asked()
+    assert [a[:4] for a in asked] == [
+        ("ANIME", None, ["RELEASING", "NOT_YET_RELEASED"], "ID"),
+        ("MANGA", None, ["NOT_YET_RELEASED"], "ID"),
+        ("MANGA", None, ["RELEASING"], "POPULARITY_DESC"),
+        ("ANIME", "2026%", None, "ID"),
+        ("ANIME", "2027%", None, "ID"),
+        ("ANIME", "2028%", None, "ID"),
+        ("ANIME", "2029%", None, "ID"),
+        ("ANIME", None, None, "ID"),  # > 2029
+        ("MANGA", "2026%", None, "ID"),
+        ("MANGA", "2027%", None, "ID"),
+        ("MANGA", "2028%", None, "ID"),
+        ("MANGA", "2029%", None, "ID"),
+        ("MANGA", None, None, "ID"),
+    ]  # fmt: skip
+    assert [a for a in asked if a[1] == "2026%" and a[0] == "ANIME"][0][4] == 1  # from page 1, not from the cursor 7
+    assert not any(r.variables.get("startLike") in ("2025%", "2024%") for r in fake.requests)
+    assert not any("startLesser" in r.variables for r in fake.requests)  # no <1960, nodate
+
+    ids = {r["id"]: r for r in conn.execute("SELECT * FROM entries")}
+    assert set(ids) == {"anilist:5", "anilist:100", "anilist:101", "anilist:102", "anilist:200", "anilist:201", "anilist:202"}
+    assert ids["anilist:100"]["popularity"] == 999  # the year slice came after the status slice
+    assert (result.slices_done, result.slices_skipped, result.slices_error) == (13, 0, 0)
+    assert result.errors == []
+    for key in ("ANIME:2026", "ANIME:2027", "MANGA:>2029", "recent:ANIME:airing", "recent:MANGA:serial"):
+        assert db.is_slice_done(conn, "anilist", key), key
+    assert dict(db.slice_status(conn, "anilist", "ANIME:2024")) == old_state  # the older slices are left alone
+    assert not db.slice_status(conn, "anilist", "ANIME:2026")["cursor"]
+
+
+async def test_recent_asks_again_by_id_for_open_rows_that_the_run_did_not_see(conn, clock):
+    done_everywhere(conn)
+    store(
+        conn,
+        media(900, status="RELEASING"),  # was airing, ended since
+        media(901, status="NOT_YET_RELEASED"),  # announced, still not out: seen below
+        media(800, "MANGA", status="RELEASING"),  # an old serial outside the popular ones
+        media(801, "MANGA", status="FINISHED"),  # closed rows are never asked again
+        media(802, "MANGA", status="CANCELLED"),
+    )
+    fake = RecentAniList()
+    fake.when([media(901, status="NOT_YET_RELEASED")], type="ANIME", status=["RELEASING", "NOT_YET_RELEASED"])
+    fake.world = {
+        900: media(900, status="FINISHED", episodes=12),
+        800: media(800, "MANGA", status="FINISHED", volumes=30),
+        801: media(801, "MANGA", status="FINISHED"),
+    }
+
+    result = await run_recent(conn, fake, clock)
+
+    assert fake.id_lookups() == [("ANIME", [900]), ("MANGA", [800])]  # anime first; 901 was seen, 801 / 802 are closed
+    rows = {r["id"]: r for r in conn.execute("SELECT id, status, episodes, volumes FROM entries")}
+    assert (rows["anilist:900"]["status"], rows["anilist:900"]["episodes"]) == ("FINISHED", 12)
+    assert (rows["anilist:800"]["status"], rows["anilist:800"]["volumes"]) == ("FINISHED", 30)
+    assert rows["anilist:802"]["status"] == "CANCELLED"
+    assert result.errors == [] and result.slices_error == 0
+    assert len(rows) == 5  # nothing was deleted
+    assert fake.requests[-1].variables == {"page": 1, "type": "MANGA", "sort": ["ID"], "idIn": [800]}
+
+
+async def test_the_sweep_is_capped_anime_first_then_the_most_popular(conn, clock, monkeypatch):
+    monkeypatch.setattr(A, "RECENT_SWEEP_MAX", 4)
+    done_everywhere(conn)
+    store(
+        conn,
+        media(11, status="RELEASING", popularity=5),
+        media(12, status="NOT_YET_RELEASED", popularity=50),
+        media(21, "MANGA", status="RELEASING", popularity=100),
+        media(22, "MANGA", status="RELEASING", popularity=300),
+        media(23, "MANGA", status="RELEASING", popularity=1),
+    )
+    fake = RecentAniList()
+
+    await run_recent(conn, fake, clock)
+
+    assert fake.id_lookups() == [("ANIME", [11, 12]), ("MANGA", [21, 22])]  # 23 (the least popular) is left for later
+
+
+async def test_the_sweep_pages_by_fifty_ids(conn, clock):
+    done_everywhere(conn)
+    store(conn, *[media(1000 + n, status="RELEASING", popularity=n) for n in range(120)])
+    fake = RecentAniList()
+    fake.world = {1000 + n: media(1000 + n, status="FINISHED") for n in range(120)}
+
+    result = await run_recent(conn, fake, clock)
+
+    lookups = fake.id_lookups()
+    assert [len(ids) for _, ids in lookups] == [50, 50, 20]
+    assert result.slices_error == 0
+    assert {r[0] for r in conn.execute("SELECT status FROM entries")} == {"FINISHED"}
+
+
+async def test_a_failed_slice_is_reported_and_the_rest_of_the_recent_run_goes_on(conn, clock):
+    done_everywhere(conn)
+    store(conn, media(900, status="RELEASING"))
+    fake = RecentAniList()
+    fake.when([media(1)], type="ANIME", like="2027%")
+    fake.world = {900: media(900, status="FINISHED")}
+    original = fake.__call__
+
+    def flaky(request: httpx.Request) -> httpx.Response:
+        body = json.loads(request.content)
+        if body["variables"].get("startLike") == "2026%" and body["variables"]["type"] == "ANIME":
+            return httpx.Response(400, json={"errors": [{"message": "boom", "status": 400}]})
+        return original(request)
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(flaky)) as client:
+        result = await A.harvest(conn, client, clock=clock, log=lambda m: None, recent=True)
+
+    assert result.slices_error == 1 and "ANIME:2026 page 1" in result.errors[0]
+    assert db.slice_status(conn, "anilist", "ANIME:2026")["status"] == "error"
+    assert db.is_slice_done(conn, "anilist", "ANIME:2027")  # the next slices ran
+    assert conn.execute("SELECT status FROM entries WHERE id = 'anilist:900'").fetchone()[0] == "FINISHED"  # and the sweep
+
+
+async def test_recent_splits_a_year_that_hits_the_wall_and_asks_every_month_again(conn, clock):
+    done_everywhere(conn)
+    for month in range(1, 13):
+        db.mark_slice(conn, "anilist", f"ANIME:2026{month:02d}", "done", fetched=3)
+    fake = RecentAniList()
+    fake.when(lambda page: [media(1_000_000 + (page - 1) * 50 + n) for n in range(50)], type="ANIME", like="2026%")
+    fake.when([media(9_000 + n) for n in range(3)], type="ANIME", like="202603%")
+
+    result = await run_recent(conn, fake, clock)
+
+    asked_2026 = [a for a in fake.asked() if a[0] == "ANIME" and a[1] == "2026%"]
+    assert [a[4] for a in asked_2026] == list(range(1, 101))
+    months = sorted({a[1] for a in fake.asked() if a[0] == "ANIME" and a[1] and a[1] != "2026%" and a[1].startswith("2026")})
+    assert months == [f"2026{m:02d}%" for m in range(1, 13)]  # the months done before are asked again
+    assert result.slices_error == 0
+    assert db.slice_status(conn, "anilist", "ANIME:2026")["message"] == "split by month"
+    assert conn.execute("SELECT COUNT(*) FROM entries WHERE id LIKE 'anilist:9%'").fetchone()[0] == 3
+
+
+async def test_recent_honours_the_limit_and_skips_the_sweep(conn, clock):
+    done_everywhere(conn)
+    store(conn, media(900, status="RELEASING"))
+    fake = RecentAniList()
+    fake.when([media(n) for n in range(1, 5)], type="ANIME", status=["RELEASING", "NOT_YET_RELEASED"])
+    fake.world = {900: media(900, status="FINISHED")}
+
+    result = await run_recent(conn, fake, clock, limit=3)
+
+    assert result.fetched == 3
+    assert len(fake.requests) == 1 and fake.id_lookups() == []
+    state = db.slice_status(conn, "anilist", "recent:ANIME:airing")
+    assert state["status"] == "pending"
+    assert db.is_slice_done(conn, "anilist", "ANIME:2026")  # slices it never reached keep their record

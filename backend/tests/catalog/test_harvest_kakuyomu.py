@@ -102,6 +102,7 @@ class FakeKakuyomu:
         self.counts = counts or {}
         self.robots = robots
         self.robots_status = 200
+        self.work_overrides: dict[str, Any] = {}  # fields every work of the answers carries
         self.requests: list[httpx.Request] = []
         self.times: list[float] = []
         self.intercept: Optional[Callable[[dict[str, str]], Optional[httpx.Response]]] = None
@@ -121,7 +122,10 @@ class FakeKakuyomu:
         page = int(params.get("page", "1"))
         total = self.counts.get(name, 0)
         offset = (page - 1) * 20
-        works = [work(i, id=f"{GENRE_NAMES.index(name) + 1}{i:07d}") for i in range(offset, min(offset + 20, total))]
+        works = [
+            work(i, id=f"{GENRE_NAMES.index(name) + 1}{i:07d}", **self.work_overrides)
+            for i in range(offset, min(offset + 20, total))
+        ]
         return httpx.Response(200, text=search_html(works, has_next=offset + 20 < total, genre=name.upper(), offset=offset))
 
     def client(self) -> httpx.AsyncClient:
@@ -481,3 +485,80 @@ async def test_limit_spans_genres(conn):
     assert result.fetched == 25
     assert result.slices_done == 1
     assert db.slice_status(conn, "kakuyomu", "genre:sf") is None
+
+
+# --- recent (build --recent) ----------------------------------------------
+
+
+async def test_recent_asks_only_the_first_pages_of_every_genre_and_ignores_done_slices(conn):
+    await run(FakeKakuyomu(FakeClock(), {"fantasy": 200, "sf": 3}), conn)  # a finished full build
+    full_state = dict(db.slice_status(conn, "kakuyomu", "genre:fantasy"))
+    assert full_state["status"] == "done"
+
+    fake = FakeKakuyomu(FakeClock(), {"fantasy": 200, "sf": 3})
+    result = await run(fake, conn, recent=True)
+
+    assert kakuyomu.RECENT_PAGES == 5
+    assert [p.get("page") for p in fake.searches("fantasy")] == [None, "2", "3", "4", "5"]  # not 10 pages
+    assert len(fake.searches("sf")) == 1
+    assert len(fake.searches()) == 5 + 11  # fantasy's five and one first page for each of the others
+    assert all(p["order"] == "popular" for p in fake.searches())
+    assert fake.robots_requests() == 1
+    gaps = [b - a for a, b in zip(fake.times, fake.times[1:])]
+    assert min(gaps) >= 1.0
+    assert (result.slices_done, result.slices_skipped, result.slices_error) == (12, 0, 0)
+    assert result.fetched == 100 + 3
+    # the full build's slice record is untouched; the recent run has its own
+    assert dict(db.slice_status(conn, "kakuyomu", "genre:fantasy")) == full_state
+    state = db.slice_status(conn, "kakuyomu", "recent:genre:fantasy")
+    assert (state["status"], state["fetched"], state["cursor"]) == ("done", 100, None)
+
+
+async def test_recent_updates_rows_in_place_and_never_deletes(conn):
+    await run(FakeKakuyomu(FakeClock(), {"fantasy": 120}), conn)
+    before = {r["external_id"]: r for r in entry_rows(conn)}
+    assert len(before) == 120
+
+    fake = FakeKakuyomu(FakeClock(), {"fantasy": 120})
+    fake.work_overrides = {"serialStatus": "COMPLETED", "publicEpisodeCount": 777}
+    await run(fake, conn, recent=True)
+
+    after = {r["external_id"]: r for r in entry_rows(conn)}
+    assert len(after) == 120
+    top = "10000000"  # genre 1, row 0
+    assert (before[top]["status"], after[top]["status"]) == ("連載中", "完結")
+    assert after[top]["episodes"] == 777
+    deep = "10000110"  # row 110 is on page 6: not part of the recent run
+    assert (after[deep]["status"], after[deep]["episodes"]) == (before[deep]["status"], before[deep]["episodes"])
+
+
+async def test_recent_starts_from_the_first_page_even_after_a_failed_recent_run(conn):
+    fake = FakeKakuyomu(FakeClock(), {"fantasy": 200})
+    fail = {"on": True}
+
+    def intercept(params: dict[str, str]) -> Optional[httpx.Response]:
+        if fail["on"] and params["genre_name"] == "fantasy" and params.get("page") == "3":
+            return httpx.Response(502, text="bad gateway")
+        return None
+
+    fake.intercept = intercept
+    first = await run(fake, conn, recent=True)
+
+    assert first.slices_error == 1 and "recent:genre:fantasy page=3" in first.errors[0]
+    assert db.slice_status(conn, "kakuyomu", "recent:genre:fantasy")["status"] == "error"
+    assert db.slice_status(conn, "kakuyomu", "genre:fantasy") is None
+
+    fail["on"] = False
+    fake.requests.clear()
+    second = await run(fake, conn, recent=True)
+    assert [p.get("page") for p in fake.searches("fantasy")] == [None, "2", "3", "4", "5"]
+    assert second.slices_error == 0 and db.is_slice_done(conn, "kakuyomu", "recent:genre:fantasy")
+
+
+async def test_recent_honours_the_limit(conn):
+    fake = FakeKakuyomu(FakeClock(), {"fantasy": 100, "action": 40})
+    result = await run(fake, conn, limit=30, recent=True)
+
+    assert [(p["genre_name"], p.get("page")) for p in fake.searches()] == [("fantasy", None), ("fantasy", "2")]
+    assert result.fetched == 30 and len(entry_rows(conn)) == 30
+    assert db.slice_status(conn, "kakuyomu", "genre:fantasy") is None

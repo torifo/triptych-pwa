@@ -21,6 +21,20 @@ as separate slices; otherwise MANGA could run past the 5000 wall.
 Slice keys: `ANIME:<1960`, `ANIME:2024`, `ANIME:202404`, `ANIME:>2029`,
 `MANGA:nodate`, `MANGA:pop`.
 
+`recent=True` (`build --recent`) is the light update, whatever the slice records say
+(done slices are asked again from page 1, and they stay done):
+  - the dated slices of this year on (`plan_recent_slices`): this year .. now+3 and the
+    far-future tail, per type, with the same month split when a year hits the wall;
+  - the airing and upcoming shows, `status_in: [RELEASING, NOT_YET_RELEASED]`, which
+    also catches the ones without a start date: all of ANIME, the NOT_YET_RELEASED
+    MANGA, and only the RECENT_SERIAL_PAGES most popular RELEASING MANGA (there are
+    ~13000 old serials, past the 5000 wall);
+  - a sweep (`_Run.sweep`): rows stored as RELEASING / NOT_YET_RELEASED that none of the
+    above returned have changed state (ended, cancelled, on hiatus) or dropped out of
+    the popular serials, so they are asked again by `id_in` (50 per request), anime
+    first and then the most popular, at most RECENT_SWEEP_MAX.
+Rows are upserted, never deleted. The status slices are recorded as `recent:<TYPE>:...`.
+
 Every page is committed on its own, and the slice's progress is kept in
 `harvest_state`, so an interrupted or failed slice resumes from its `cursor`
 (the page to fetch next). Finished slices are skipped on the next run.
@@ -64,6 +78,9 @@ MAX_RESET_WAIT = 120.0
 RESET_MARGIN = 1.0
 
 TYPES = ("ANIME", "MANGA")
+OPEN_STATUSES = ("RELEASING", "NOT_YET_RELEASED")  # still airing / not out yet: they change
+RECENT_SERIAL_PAGES = 20  # recent run: the 1000 most popular RELEASING MANGA
+RECENT_SWEEP_MAX = 500  # recent run: open rows asked again by id (10 requests)
 SPLIT_CURSOR = "split"  # year slice that moved on to its twelve month slices
 
 MAX_TAGS = 8
@@ -90,7 +107,12 @@ _MEDIA_FIELDS = """
 """
 
 def build_query(
-    *, start_like: bool = False, start_greater: bool = False, start_lesser: bool = False
+    *,
+    start_like: bool = False,
+    start_greater: bool = False,
+    start_lesser: bool = False,
+    status_in: bool = False,
+    id_in: bool = False,
 ) -> str:
     """The page query; only the filters a slice uses are declared (AniList rejects null filters)."""
     declarations = ["$page: Int", "$type: MediaType", "$sort: [MediaSort]"]
@@ -104,6 +126,12 @@ def build_query(
     if start_lesser:
         declarations.append("$startLesser: FuzzyDateInt")
         filters.append("startDate_lesser: $startLesser")
+    if status_in:
+        declarations.append("$statusIn: [MediaStatus]")
+        filters.append("status_in: $statusIn")
+    if id_in:
+        declarations.append("$idIn: [Int]")
+        filters.append("id_in: $idIn")
     return (
         f"query ({', '.join(declarations)}) {{\n"
         f"  Page(page: $page, perPage: {PER_PAGE}) {{\n"
@@ -131,6 +159,8 @@ class Slice:
     sort: str = "ID"
     max_pages: int = MAX_PAGES
     year: Optional[int] = None  # set on a year slice: it may split into months
+    status_in: Optional[tuple[str, ...]] = None  # recent run: only these MediaStatus values
+    id_in: Optional[tuple[int, ...]] = None  # recent run: only these ids (the sweep)
 
     def variables(self, page: int) -> dict[str, Any]:
         variables: dict[str, Any] = {"page": page, "type": self.type, "sort": [self.sort]}
@@ -140,6 +170,10 @@ class Slice:
             variables["startGreater"] = self.start_greater
         if self.start_lesser is not None:
             variables["startLesser"] = self.start_lesser
+        if self.status_in is not None:
+            variables["statusIn"] = list(self.status_in)
+        if self.id_in is not None:
+            variables["idIn"] = list(self.id_in)
         return variables
 
     @property
@@ -148,6 +182,8 @@ class Slice:
             start_like=self.start_like is not None,
             start_greater=self.start_greater is not None,
             start_lesser=self.start_lesser is not None,
+            status_in=self.status_in is not None,
+            id_in=self.id_in is not None,
         )
 
     def month(self, month: int) -> "Slice":
@@ -185,6 +221,31 @@ def plan_slices(this_year: int) -> list[Slice]:
                 sort="POPULARITY_DESC",
                 max_pages=POP_PAGES,
             )
+        )
+    return slices
+
+
+def plan_recent_slices(this_year: int) -> list[Slice]:
+    """Slices of a recent run: the airing / upcoming shows, then this year on (see the module doc)."""
+    last_year = this_year + YEARS_AHEAD
+    slices = [
+        Slice(key="recent:ANIME:airing", type="ANIME", status_in=OPEN_STATUSES),
+        Slice(key="recent:MANGA:upcoming", type="MANGA", status_in=("NOT_YET_RELEASED",)),
+        Slice(
+            key="recent:MANGA:serial",
+            type="MANGA",
+            status_in=("RELEASING",),
+            sort="POPULARITY_DESC",
+            max_pages=RECENT_SERIAL_PAGES,
+        ),
+    ]
+    for media_type in TYPES:
+        for year in range(this_year, last_year + 1):
+            slices.append(
+                Slice(key=f"{media_type}:{year}", type=media_type, start_like=f"{year}%", year=year)
+            )
+        slices.append(
+            Slice(key=f"{media_type}:>{last_year}", type=media_type, start_greater=last_year * 10000 + 1231)
         )
     return slices
 
@@ -387,6 +448,8 @@ class _Run:
     result: HarvestResult
     limit: Optional[int]
     log: Callable[[str], None]
+    refresh: bool = False  # recent run: ignore the slice records, ask every slice again from page 1
+    seen: Optional[set[str]] = None  # recent run: ids stored so far (the sweep skips them)
 
     @property
     def limit_reached(self) -> bool:
@@ -408,11 +471,13 @@ class _Run:
                 entries.append(entry)
             except Exception as exc:  # one odd record must not sink a whole slice
                 self._record_error(f"convert anilist:{media.get('id')}: {type(exc).__name__}: {exc}")
+        if self.seen is not None:
+            self.seen.update(entry.external_id for entry in entries)
         return db.upsert_entries(self.conn, entries)
 
     async def run_slice(self, sl: Slice) -> bool:
         """Runs one slice; True when it finished (done), False when it failed or stopped early."""
-        state = db.slice_status(self.conn, SOURCE, sl.key)
+        state = None if self.refresh else db.slice_status(self.conn, SOURCE, sl.key)
         if state is not None and state["status"] == "done":
             self.result.slices_skipped += 1
             return True
@@ -481,6 +546,43 @@ class _Run:
         self.log(f"{sl.key}: done, {fetched} rows")
         return True
 
+    async def sweep(self) -> None:
+        """Asks again, by id, for the open rows (RELEASING / NOT_YET_RELEASED) this run did not see.
+
+        Such a row has ended, been cancelled or put on hiatus since it was stored, or it is a
+        serial outside the popular ones the status slice asked for. Anime come first, then the
+        most popular, at most RECENT_SWEEP_MAX in all; rows AniList no longer returns stay as they were.
+        """
+        seen = self.seen or set()
+        rows = self.conn.execute(
+            "SELECT external_id, kind FROM entries WHERE source = ? AND status IN (?, ?) "
+            "ORDER BY (kind = 'anime') DESC, popularity DESC, id",
+            (SOURCE, *OPEN_STATUSES),
+        ).fetchall()
+        stale = [row for row in rows if row["external_id"] not in seen][:RECENT_SWEEP_MAX]
+        by_type: dict[str, list[int]] = {media_type: [] for media_type in TYPES}
+        for row in stale:
+            by_type["ANIME" if row["kind"] == "anime" else "MANGA"].append(int(row["external_id"]))
+        self.log(f"sweep: {len(stale)} open rows not seen again, asking by id")
+        for media_type, ids in by_type.items():
+            ids.sort()
+            for offset in range(0, len(ids), PER_PAGE):
+                if self.limit_reached:
+                    return
+                sl = Slice(key=f"{media_type}:ids", type=media_type, id_in=tuple(ids[offset : offset + PER_PAGE]))
+                try:
+                    data = await self.api.page(sl.query, sl.variables(1))
+                except Exception as exc:
+                    message = f"{type(exc).__name__}: {exc}"
+                    self.result.slices_error += 1
+                    self._record_error(f"{sl.key} sweep ({len(sl.id_in or ())} ids): {message}")
+                    self.log(f"{sl.key}: sweep error: {message}")
+                    continue
+                media_list = [m for m in data.get("media") or [] if m]
+                if self.limit is not None:
+                    media_list = media_list[: max(self.limit - self.result.fetched, 0)]
+                self.result.fetched += self._store(media_list)
+
     async def _run_months(self, sl: Slice, fetched: int) -> bool:
         self.log(f"{sl.key}: more than {MAX_ITEMS} rows, splitting by month")
         db.mark_slice(
@@ -504,11 +606,28 @@ async def harvest(
     clock: Clock,
     limit: Optional[int] = None,
     log: Callable[[str], None] = print,
+    recent: bool = False,
 ) -> HarvestResult:
+    """Every Japanese anime / manga / light novel into `entries`.
+
+    `recent`: the light update of the module doc (this year on, airing / upcoming shows, the
+    sweep of stale open rows) instead of the whole plan.
+    """
     result = HarvestResult(source=SOURCE)
-    run = _Run(conn=conn, api=_Api(client, clock, log), result=result, limit=limit, log=log)
-    for sl in plan_slices(clock.now().year):
+    run = _Run(
+        conn=conn,
+        api=_Api(client, clock, log),
+        result=result,
+        limit=limit,
+        log=log,
+        refresh=recent,
+        seen=set() if recent else None,
+    )
+    plan = plan_recent_slices if recent else plan_slices
+    for sl in plan(clock.now().year):
         if run.limit_reached:
             break
         await run.run_slice(sl)
+    if recent and not run.limit_reached:
+        await run.sweep()
     return result

@@ -44,6 +44,12 @@ Slices (resume units) are `<ndc>:<YYYY-MM>`, one per month from one year ago to
 six months ahead, newest first (an interrupted or `--limit` run keeps the books
 that matter most), plus `<ndc>:<YYYY-MM>..` for everything after that. A slice is
 cut into ISBN prefixes inside; an interrupted slice is simply fetched again.
+
+`recent=True` (`build --recent`) asks only the slices from last month on (RECENT_MONTHS_BACK:
+the books NDL is cataloguing now), the months ahead and the tail, whether or not they are
+done. They are the full build's own slices, so a finished one is simply marked done again;
+older months keep their record.
+
 Filtering reuses the real-time adapter (`backend.adapters.ndl`): ISBNs other
 than 978-4, records without an ISBN, e-books, date ranges and excluded words
 (アンソロジー・ファンブック・特装版 ...) are dropped, and the same ISBN listed
@@ -86,6 +92,7 @@ PAGE_SIZE = 500  # NDL's maximum `cnt`
 REACH = 500  # records reachable per query: idx + cnt - 1 must not pass this
 MONTHS_BACK = 12
 MONTHS_AHEAD = 6
+RECENT_MONTHS_BACK = 1  # `build --recent`: last month (still being catalogued), this month and the months ahead
 ISBN_ROOT = "9784"  # Japanese ISBNs; `isbn=9784` itself never answers, its 5-digit children do
 ISBN_LENGTH = 13
 MAX_REQUESTS_PER_SLICE = 600
@@ -134,8 +141,11 @@ def _add_months(first: date, months: int) -> date:
     return date(index // 12, index % 12 + 1, 1)
 
 
-def build_slices(today: date) -> list[Slice]:
-    """Every slice of a run, newest first: the open-ended tail, then month by month back."""
+def build_slices(today: date, *, recent: bool = False) -> list[Slice]:
+    """Every slice of a run, newest first: the open-ended tail, then month by month back.
+
+    `recent` keeps the tails and the months from RECENT_MONTHS_BACK before this month on.
+    """
     this_month = today.replace(day=1)
     last = _add_months(this_month, MONTHS_AHEAD)
     months = [_add_months(last, -n) for n in range(MONTHS_BACK + MONTHS_AHEAD + 1)]
@@ -143,6 +153,9 @@ def build_slices(today: date) -> list[Slice]:
     for month in months:
         ym = month.strftime("%Y-%m")
         slices.extend(Slice(cls, ym, ym) for cls in CLASSES)
+    if recent:
+        first = _add_months(this_month, -RECENT_MONTHS_BACK).strftime("%Y-%m")
+        slices = [spec for spec in slices if spec.start >= first]  # YYYY-MM sorts as text
     return slices
 
 
@@ -473,16 +486,20 @@ async def harvest(
     clock: Clock,
     limit: Optional[int] = None,
     log: Callable[[str], None] = print,
+    recent: bool = False,
 ) -> HarvestResult:
-    """New and upcoming novels / manga into `entries`. `limit` caps the rows of this run."""
+    """New and upcoming novels / manga into `entries`. `limit` caps the rows of this run.
+
+    `recent`: only the slices from last month on, done or not.
+    """
     result = HarvestResult(source=SOURCE)
     pacer = Pacer(REQUEST_INTERVAL, clock)
     patient = _PatientClient(client, RATE_LIMIT_WAIT)
     today = clock.now().astimezone(JST).date()
-    for spec in build_slices(today):
+    for spec in build_slices(today, recent=recent):
         if limit is not None and result.fetched >= limit:
             break
-        if db.is_slice_done(conn, SOURCE, spec.key):
+        if not recent and db.is_slice_done(conn, SOURCE, spec.key):
             result.slices_skipped += 1
             continue
         keep_going = await _harvest_slice(

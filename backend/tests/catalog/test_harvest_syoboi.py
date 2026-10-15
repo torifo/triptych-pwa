@@ -486,3 +486,125 @@ async def test_opens_and_closes_the_collector_cache_by_default(conn, client, clo
     check = TTLCache(tmp_path / "default-cache.db")
     assert check.get(syoboi.LAST_REQUEST_KEY) == pytest.approx(clock.t)
     check.close()
+
+
+# -- recent (build --recent): only the titles edited since the last run ------------------------------------------
+
+
+def settle(conn, at: str = "2026-10-14T09:23:43+00:00", fetched: int = SAMPLE_ANIME) -> None:
+    """A finished full build whose last request was at `at`."""
+    db.mark_slice(conn, "syoboi", "all", "done", fetched=fetched)
+    conn.execute("UPDATE harvest_state SET updated_at = ? WHERE source = 'syoboi'", (at,))
+    conn.commit()
+
+
+def test_diff_start_is_a_day_before_the_last_run_in_jst():
+    assert syoboi.diff_start("2026-10-14T09:23:43.708279+00:00") == "20261013_182343"
+    assert syoboi.diff_start("2026-01-01T00:30:00+00:00") == "20251231_093000"  # across the year boundary
+
+
+def test_nothing_updated_is_a_404_result_that_only_a_diff_accepts():
+    body = title_xml(code="404")  # what the live site answers when no title matches LastUpdate
+    assert list(syoboi.parse_titles(body, allow_empty=True)) == []
+    with pytest.raises(syoboi.SyoboiError, match="result code 404"):
+        list(syoboi.parse_titles(body))
+    with pytest.raises(syoboi.SyoboiError, match="result code 500"):
+        list(syoboi.parse_titles(title_xml(code="500"), allow_empty=True))
+
+
+async def test_recent_without_a_finished_build_fetches_everything(conn, client, clock, cache, server):
+    result = await syoboi.harvest(conn, client, clock=clock, log=quiet, cache=cache, recent=True)
+
+    assert (result.fetched, result.slices_done) == (SAMPLE_ANIME, 1)
+    assert dict(server.sent[0][1].url.params) == {"Command": "TitleLookup", "TID": "*"}  # no LastUpdate
+
+
+async def test_recent_after_a_trial_run_fetches_everything(conn, client, clock, cache, server):
+    await syoboi.harvest(conn, client, clock=clock, limit=5, log=quiet, cache=cache)  # left pending
+    assert not db.is_slice_done(conn, "syoboi", "all")
+
+    result = await syoboi.harvest(conn, client, clock=clock, log=quiet, cache=cache, recent=True)
+
+    assert result.fetched == SAMPLE_ANIME
+    assert "LastUpdate" not in dict(server.sent[1][1].url.params)
+
+
+async def test_recent_asks_for_titles_updated_since_the_last_run(conn, client, clock, cache, server):
+    settle(conn)
+    server.responses = [
+        lambda: httpx.Response(
+            200,
+            content=title_xml(
+                item(3601, "新妹魔王の契約者 改題", cat=10),
+                item(99001, "新番組", cat=1, FirstYear="2026", FirstMonth="10"),
+                item(99002, "ラジオ", cat=2),
+            ),
+        )
+    ]
+
+    result = await syoboi.harvest(conn, client, clock=clock, log=quiet, cache=cache, recent=True)
+
+    assert len(server.sent) == 1
+    assert dict(server.sent[0][1].url.params) == {
+        "Command": "TitleLookup",
+        "TID": "*",
+        "LastUpdate": "20261013_182343-",
+    }
+    assert (result.fetched, result.slices_done, result.slices_skipped, result.slices_error) == (2, 1, 0, 0)
+    assert {r[0] for r in conn.execute("SELECT external_id FROM entries")} == {"3601", "99001"}
+    assert conn.execute("SELECT title FROM entries WHERE id = 'syoboi:3601'").fetchone()[0] == "新妹魔王の契約者 改題"
+    state = db.slice_status(conn, "syoboi", "all")
+    assert (state["status"], state["fetched"]) == ("done", SAMPLE_ANIME)  # the build's row count stays
+    assert "recent" in state["message"] and "2" in state["message"]
+    assert state["updated_at"] > "2026-10-14T09:23:43+00:00"  # the next diff starts from this run
+
+
+async def test_recent_run_is_chained_from_the_previous_recent_run(conn, client, clock, cache, server):
+    settle(conn)
+    server.responses = [lambda: httpx.Response(200, content=title_xml(item(7, "一つ目")))] * 2
+
+    await syoboi.harvest(conn, client, clock=clock, log=quiet, cache=cache, recent=True)
+    first_end = db.slice_status(conn, "syoboi", "all")["updated_at"]
+    await syoboi.harvest(conn, client, clock=clock, log=quiet, cache=cache, recent=True)
+
+    expected = syoboi.diff_start(first_end)
+    assert dict(server.sent[1][1].url.params)["LastUpdate"] == f"{expected}-"
+    assert server.times[1] - server.times[0] >= CRAWL_DELAY_SECONDS
+
+
+async def test_recent_with_no_updates_is_a_clean_run(conn, client, clock, cache, server):
+    settle(conn)
+    server.responses = [lambda: httpx.Response(200, content=title_xml(code="404"))]
+
+    result = await syoboi.harvest(conn, client, clock=clock, log=quiet, cache=cache, recent=True)
+
+    assert (result.fetched, result.slices_done, result.slices_error) == (0, 1, 0)
+    assert result.errors == []
+    assert db.is_slice_done(conn, "syoboi", "all")
+
+
+async def test_recent_trial_run_leaves_the_finished_slice_alone(conn, client, clock, cache, server):
+    settle(conn)
+    before = dict(db.slice_status(conn, "syoboi", "all"))
+    server.responses = [lambda: httpx.Response(200, content=title_xml(item(1, "a"), item(2, "b"), item(3, "c")))]
+
+    result = await syoboi.harvest(conn, client, clock=clock, limit=2, log=quiet, cache=cache, recent=True)
+
+    assert result.fetched == 2
+    assert dict(db.slice_status(conn, "syoboi", "all")) == before  # the next diff still starts from the old time
+
+
+async def test_a_failed_recent_run_is_an_error_slice_and_the_next_one_fetches_everything(
+    conn, client, clock, cache, server
+):
+    settle(conn)
+    server.responses = [lambda: httpx.Response(200, content=title_xml(code="503"))]
+
+    failed = await syoboi.harvest(conn, client, clock=clock, log=quiet, cache=cache, recent=True)
+
+    assert failed.slices_error == 1 and "result code 503" in failed.errors[0]
+    assert db.slice_status(conn, "syoboi", "all")["status"] == "error"
+
+    again = await syoboi.harvest(conn, client, clock=clock, log=quiet, cache=cache, recent=True)
+    assert again.fetched == SAMPLE_ANIME  # the default response is the whole sample
+    assert "LastUpdate" not in dict(server.sent[-1][1].url.params)

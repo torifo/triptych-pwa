@@ -30,12 +30,23 @@ Facts verified against the live API (2026-10-14):
   harvester together stay at one request per 60 s. Retries obey the same wait.
 
 One slice, `all`. The response is parsed as a stream so the 24 MB tree is never built.
+
+`recent=True` (`build --recent`) asks only for the titles edited since the last run:
+`TitleLookup&TID=*&LastUpdate=<YYYYMMDD_HHMMSS>-` answers just those (every title has a
+`<LastUpdate>`; verified 2026-10-15: 119 titles for a week, mostly Cat 1 = on air, 0.5 MB,
+0.2 s). Airing and upcoming shows are edited when their dates, episodes or category change,
+so they are in it. When nothing matches the answer is `Code 404`, an empty `<TitleItems>`,
+which a diff accepts. The window starts a day before the last finished run (RECENT_MARGIN;
+`harvest_state.updated_at` of the `all` slice, JST), and a finished diff moves that time
+forward while keeping the row count of the build. Without a finished `all` slice (never
+built, a trial run, a failed run) a recent run falls back to the full request.
 """
 
 from __future__ import annotations
 
 import io
 import sqlite3
+from datetime import datetime, timedelta, timezone
 from typing import Callable, Iterator, Optional
 from xml.etree import ElementTree
 
@@ -48,7 +59,7 @@ from ...adapters.syoboi import (
     _LAST_REQUEST_KEY as LAST_REQUEST_KEY,
 )
 from ...cache import TTLCache
-from ...timeutil import partial_date
+from ...timeutil import JST, partial_date
 from .. import db
 from ..runtime import Clock, HarvestResult, request_with_retry
 
@@ -57,6 +68,7 @@ SLICE_KEY = "all"
 TITLE_URL = "https://cal.syoboi.jp/tid/{tid}"
 REQUEST_TIMEOUT = httpx.Timeout(120.0, connect=10.0)  # the body is ~24 MB
 ATTEMPTS = 3  # tries for the one request; each one waits out the crawl delay
+RECENT_MARGIN = timedelta(days=1)  # a diff starts this long before the last run (clock and edit-time slack)
 
 # Cat -> format. Only these categories are anime-like.
 ANIME_CATS: dict[int, str] = {1: "TV", 7: "OVA", 8: "映画", 10: "TV"}
@@ -121,17 +133,27 @@ def to_entry(item: ElementTree.Element) -> Optional[db.Entry]:
     )
 
 
-def parse_titles(body: bytes) -> Iterator[db.Entry]:
+def diff_start(last_run: str) -> str:
+    """`LastUpdate` start ("20261013_182343") for a diff after a run at `last_run` (ISO 8601, UTC)."""
+    when = datetime.fromisoformat(last_run)
+    if when.tzinfo is None:
+        when = when.replace(tzinfo=timezone.utc)
+    return (when.astimezone(JST) - RECENT_MARGIN).strftime("%Y%m%d_%H%M%S")
+
+
+def parse_titles(body: bytes, *, allow_empty: bool = False) -> Iterator[db.Entry]:
     """Streams the anime entries of a TitleLookup response (a generator).
 
     Raises SyoboiError when the result code is not 200 or the XML is broken.
+    `allow_empty` also accepts `Code 404` (no title matches), the answer of a diff
+    that has nothing new.
     """
     checked = False
     try:
         for event, element in ElementTree.iterparse(io.BytesIO(body), events=("end",)):
             if element.tag == "Result":
                 code = _text(element, "Code")
-                if code != "200":
+                if code != "200" and not (allow_empty and code == "404"):
                     raise SyoboiError(f"result code {code or '?'}: {_text(element, 'Message')}")
                 checked = True
             elif element.tag == "TitleItem":
@@ -178,9 +200,20 @@ class CrawlDelay:
 
 
 async def _fetch(
-    client: httpx.AsyncClient, delay: CrawlDelay, *, clock: Clock, log: Callable[[str], None]
+    client: httpx.AsyncClient,
+    delay: CrawlDelay,
+    *,
+    clock: Clock,
+    log: Callable[[str], None],
+    since: Optional[str] = None,
 ) -> bytes:
-    """The TitleLookup body. Every attempt waits for its turn; raises SyoboiError at the end."""
+    """The TitleLookup body (only the titles updated since `since`, if given).
+
+    Every attempt waits for its turn; raises SyoboiError at the end.
+    """
+    params = {"Command": "TitleLookup", "TID": "*"}
+    if since is not None:
+        params["LastUpdate"] = f"{since}-"
     last_error = "no attempt"
     for attempt in range(1, ATTEMPTS + 1):
         await delay.wait_turn(log)
@@ -194,7 +227,7 @@ async def _fetch(
                 clock=clock,
                 retries=0,
                 log=log,
-                params={"Command": "TitleLookup", "TID": "*"},
+                params=params,
                 timeout=REQUEST_TIMEOUT,
             )
         except httpx.HTTPStatusError as exc:  # 429 / 5xx after request_with_retry gave up
@@ -224,25 +257,30 @@ async def harvest(
     limit: Optional[int] = None,
     log: Callable[[str], None] = print,
     cache: Optional[TTLCache] = None,
+    recent: bool = False,
 ) -> HarvestResult:
     """All anime-like titles into `entries`. `limit` caps the rows of this run.
 
     `cache` is the collector's response cache (backend/cache.db by default); it
-    holds the shared time of the last request.
+    holds the shared time of the last request. `recent`: only the titles edited
+    since the last finished run (the whole list when there is none).
     """
     result = HarvestResult(source=SOURCE)
-    if db.is_slice_done(conn, SOURCE, SLICE_KEY):
+    state = db.slice_status(conn, SOURCE, SLICE_KEY)
+    finished = state is not None and state["status"] == "done"
+    if finished and not recent:
         result.slices_skipped = 1
         return result
+    since = diff_start(state["updated_at"]) if finished and recent else None
 
     owns_cache = cache is None
     shared = cache if cache is not None else TTLCache()
     try:
         delay = CrawlDelay(shared, clock)
         try:
-            body = await _fetch(client, delay, clock=clock, log=log)
+            body = await _fetch(client, delay, clock=clock, log=log, since=since)
             entries = []
-            for entry in parse_titles(body):
+            for entry in parse_titles(body, allow_empty=since is not None):
                 entries.append(entry)
                 if limit is not None and len(entries) >= limit:
                     break
@@ -258,7 +296,23 @@ async def harvest(
             shared.close()
 
     result.fetched = db.upsert_entries(conn, entries)
-    if limit is not None and result.fetched >= limit:
+    cut = limit is not None and result.fetched >= limit
+    if since is not None:
+        # A diff keeps the build's row count. A trial run (cut) leaves the slice and its time as
+        # they were, so the next diff still starts from the last complete run.
+        if not cut:
+            db.mark_slice(
+                conn,
+                SOURCE,
+                SLICE_KEY,
+                "done",
+                fetched=state["fetched"],
+                message=f"recent: {result.fetched} titles updated since {since}",
+            )
+            result.slices_done = 1
+        log(f"  {SLICE_KEY}: {result.fetched} anime titles updated since {since}")
+        return result
+    if cut:
         # Trial run: the slice stays open so a full run fetches everything.
         db.mark_slice(conn, SOURCE, SLICE_KEY, "pending", fetched=result.fetched, message="limit")
     else:

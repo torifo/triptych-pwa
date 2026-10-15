@@ -14,6 +14,11 @@ the search page). The server applies it as `genres: ["FANTASY"]` and honors
 `page` up to at least 50 (offset 980). A slice is `genre:<name>`, up to
 MAX_PAGES pages (1000 works); its `cursor` is the next page number.
 
+`recent=True` (`build --recent`) re-asks only the first RECENT_PAGES pages of every
+genre (the works at the top, whose episode counts and status change), whether or not
+the full slice is done. It keeps its own slice records, `recent:genre:<name>`, and
+starts from page 1 every time: the full slice's cursor and state are not touched.
+
 Politeness: robots.txt is fetched once per run and checked for the path and
 query of every request; 1 req/s (Crawl-delay is honored when robots.txt sets
 one for us); one request at a time.
@@ -47,6 +52,8 @@ SEARCH_PATH = "/search"
 ROBOTS_URL = f"{BASE_URL}/robots.txt"
 REQUEST_INTERVAL = 1.0  # seconds between requests (1 req/s)
 MAX_PAGES = 50  # 20 works per page -> 1000 works per genre
+RECENT_PAGES = 5  # `build --recent`: the top 5 x 20 = 100 works of each genre
+RECENT_PREFIX = "recent:"  # slice keys of a recent run: recent:genre:<name>
 
 # (genre_name in the URL, label shown on the site)
 GENRES: tuple[tuple[str, str], ...] = (
@@ -205,10 +212,15 @@ async def _harvest_genre(
     limit: Optional[int],
     result: HarvestResult,
     log: Callable[[str], None],
+    recent: bool = False,
 ) -> bool:
-    """Harvests one genre slice. Returns False when the run's `limit` was reached."""
-    key = slice_key(genre_name)
-    state = db.slice_status(conn, SOURCE, key)
+    """Harvests one genre slice. Returns False when the run's `limit` was reached.
+
+    A recent run stops after RECENT_PAGES pages, never resumes and keeps its own slice record.
+    """
+    key = (RECENT_PREFIX if recent else "") + slice_key(genre_name)
+    max_pages = RECENT_PAGES if recent else MAX_PAGES
+    state = None if recent else db.slice_status(conn, SOURCE, key)
     page = _resume_page(state["cursor"]) if state is not None else 1
     total = state["fetched"] if state is not None and page > 1 else 0
     seen: set[str] = set()
@@ -260,7 +272,7 @@ async def _harvest_genre(
             # Part of this page was left out: fetch it again on the next run.
             db.mark_slice(conn, SOURCE, key, "pending", fetched=total, cursor=str(page))
             return False
-        if not has_next or not works or page >= MAX_PAGES:
+        if not has_next or not works or page >= max_pages:
             db.mark_slice(conn, SOURCE, key, "done", fetched=total)
             result.slices_done += 1
             return True
@@ -277,15 +289,19 @@ async def harvest(
     clock: Clock,
     limit: Optional[int] = None,
     log: Callable[[str], None] = print,
+    recent: bool = False,
 ) -> HarvestResult:
-    """Popular works of every genre into `entries`. `limit` caps the rows of this run."""
+    """Popular works of every genre into `entries`. `limit` caps the rows of this run.
+
+    `recent`: only the first RECENT_PAGES pages of each genre, done slices or not.
+    """
     result = HarvestResult(source=SOURCE)
     pacer = Pacer(REQUEST_INTERVAL, clock)
     robots = RobotsGate(client, clock, pacer, log)
     for genre_name, genre_label in GENRES:
         if limit is not None and result.fetched >= limit:
             break
-        if db.is_slice_done(conn, SOURCE, slice_key(genre_name)):
+        if not recent and db.is_slice_done(conn, SOURCE, slice_key(genre_name)):
             result.slices_skipped += 1
             continue
         keep_going = await _harvest_genre(
@@ -299,6 +315,7 @@ async def harvest(
             limit=limit,
             result=result,
             log=log,
+            recent=recent,
         )
         if not keep_going:
             break

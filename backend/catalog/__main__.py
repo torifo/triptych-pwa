@@ -1,6 +1,6 @@
 """Catalog CLI.
 
-    python -m backend.catalog build [--source anilist,syoboi,...] [--limit N] [--fresh] [--no-link]
+    python -m backend.catalog build [--source anilist,syoboi,...] [--limit N] [--fresh | --recent] [--no-link]
     python -m backend.catalog link
     python -m backend.catalog export [--format csv|json|both] [--out local/catalog]
     python -m backend.catalog stats
@@ -13,6 +13,7 @@ import asyncio
 import importlib
 import json
 import sys
+import time
 from datetime import date
 from pathlib import Path
 
@@ -29,30 +30,51 @@ def _log(message: str) -> None:
     print(message, flush=True)
 
 
-async def _build(sources: list[str], limit: int | None, fresh: bool) -> list[HarvestResult]:
+def _duration(seconds: float) -> str:
+    minutes, rest = divmod(int(seconds), 60)
+    hours, minutes = divmod(minutes, 60)
+    return f"{hours}h{minutes:02d}m{rest:02d}s" if hours else f"{minutes}m{rest:02d}s"
+
+
+async def _build(
+    sources: list[str], limit: int | None, fresh: bool, recent: bool = False
+) -> list[HarvestResult]:
+    """Harvests each source in turn. `recent` runs the light update (each harvester's `recent=True`)."""
     conn = db.connect()
     clock = RealClock()
     results: list[HarvestResult] = []
+    extra = {"recent": True} if recent else {}  # a harvester is only told about the flag it is given
+    started = time.monotonic()
+    if recent:
+        _log(f"recent update: {', '.join(sources)}")
     async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT, http2=False) as client:
         for source in sources:
+            began = time.monotonic()
             if fresh:
                 db.reset_source(conn, source)
             module = importlib.import_module(f"backend.catalog.harvest.{source}")
             _log(f"== {source} ==")
             try:
-                result = await module.harvest(conn, client, clock=clock, limit=limit, log=_log)
+                result = await module.harvest(conn, client, clock=clock, limit=limit, log=_log, **extra)
             except Exception as exc:  # one source must not stop the others
                 result = HarvestResult(source=source, errors=[f"{type(exc).__name__}: {exc}"])
-            db.set_meta(conn, f"harvest:{source}:at", db.utc_now())
-            db.set_meta(conn, f"harvest:{source}:result", result.__dict__)
+            now = db.utc_now()
+            db.set_meta(conn, f"harvest:{source}:at", now)  # "last harvested", shown in the app
+            if recent:  # the full build's own result stays as it was
+                db.set_meta(conn, f"harvest:{source}:recent_at", now)
+                db.set_meta(conn, f"harvest:{source}:recent_result", result.__dict__)
+            else:
+                db.set_meta(conn, f"harvest:{source}:result", result.__dict__)
             results.append(result)
             _log(
                 f"-- {source}: fetched={result.fetched} done={result.slices_done} "
-                f"skipped={result.slices_skipped} error={result.slices_error}"
+                f"skipped={result.slices_skipped} error={result.slices_error} "
+                f"({_duration(time.monotonic() - began)})"
             )
             for err in result.errors[:10]:
                 _log(f"   ! {err}")
     conn.close()
+    _log(f"harvest finished in {_duration(time.monotonic() - started)}")
     return results
 
 
@@ -100,6 +122,11 @@ def main(argv: list[str] | None = None) -> int:
     build.add_argument("--source", default=",".join(SOURCES), help="comma separated: " + ",".join(SOURCES))
     build.add_argument("--limit", type=int, default=None, help="max rows per source (trial run)")
     build.add_argument("--fresh", action="store_true", help="forget resume state and re-fetch every slice")
+    build.add_argument(
+        "--recent",
+        action="store_true",
+        help="light update (~10 min): upcoming books, this year on and airing anime, top web novels",
+    )
     build.add_argument("--no-link", action="store_true", help="skip linking after harvest")
 
     sub.add_parser("link", help="rebuild cross-source links, works and search index")
@@ -116,7 +143,9 @@ def main(argv: list[str] | None = None) -> int:
         unknown = [s for s in sources if s not in SOURCES]
         if unknown:
             parser.error(f"unknown source: {', '.join(unknown)}")
-        asyncio.run(_build(sources, args.limit, args.fresh))
+        if args.recent and args.fresh:
+            parser.error("--recent and --fresh cannot be combined (--fresh re-fetches everything)")
+        asyncio.run(_build(sources, args.limit, args.fresh, args.recent))
         if not args.no_link:
             _link()
     elif args.command == "link":

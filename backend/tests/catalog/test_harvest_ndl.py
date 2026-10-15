@@ -741,3 +741,78 @@ async def test_a_finer_date_stored_earlier_is_not_overwritten_by_a_coarser_one(c
     [row] = rows(conn)
     assert row["title"] == "新しい題"  # everything else is updated
     assert (row["start_date"], row["start_precision"]) == ("2026-10-15", "day")
+
+
+# -- recent (build --recent) -------------------------------------------------------------------------------------
+
+
+def test_recent_slices_are_the_tails_and_the_months_from_last_month_on():
+    slices = ndl.build_slices(date(2026, 10, 14), recent=True)
+    keys = [s.key for s in slices]
+
+    assert ndl.RECENT_MONTHS_BACK == 1
+    assert len(keys) == 2 + 8 * 2  # two tails, and 2026-09 .. 2027-04 for both classes
+    assert keys[:2] == ["913.6:2027-05..", "726.1:2027-05.."]
+    assert keys[2:4] == ["913.6:2027-04", "726.1:2027-04"]
+    assert keys[-2:] == ["913.6:2026-09", "726.1:2026-09"]
+    assert "913.6:2026-10" in keys and "913.6:2026-08" not in keys
+    # the slices are the full build's own, so a recent run settles the same records
+    full = {s.key: s for s in ndl.build_slices(date(2026, 10, 14))}
+    assert all(full[s.key] == s for s in slices)
+    assert len(ndl.build_slices(date(2026, 10, 14))) == 40  # without `recent` nothing changed
+
+
+def test_recent_slices_cross_the_year_boundary():
+    keys = [s.key for s in ndl.build_slices(date(2026, 1, 31), recent=True) if s.key.startswith("726.1")]
+    assert keys[0] == "726.1:2026-08.."
+    assert keys[-1] == "726.1:2025-12"
+
+
+async def test_recent_refetches_done_months_ahead_and_leaves_the_older_ones(conn, client, clock, server):
+    server.books = [
+        Book(make_isbn("9784100", 1), "十月", month="2026-10"),
+        Book(make_isbn("9784100", 2), "九月", month="2026-09"),
+        Book(make_isbn("9784100", 3), "八月", month="2026-08"),
+        Book(make_isbn("9784100", 4), "来年", month="2027-02"),
+    ]
+    await ndl.harvest(conn, client, clock=clock, log=quiet)  # the full build: 40 slices done
+    old_state = dict(db.slice_status(conn, "ndl", "913.6:2026-08"))
+    old_fetched = conn.execute("SELECT fetched_at FROM entries WHERE id = ?", (f"ndl:{make_isbn('9784100', 3)}",)).fetchone()[0]
+
+    server.books.append(Book(make_isbn("9784100", 5), "新刊", month="2026-10"))  # catalogued since
+    server.books[0] = Book(make_isbn("9784100", 1), "十月 改題", month="2026-10")
+    server.sent.clear()
+    result = await ndl.harvest(conn, client, clock=clock, log=quiet, recent=True)
+
+    assert (result.slices_done, result.slices_skipped, result.slices_error) == (18, 0, 0)
+    assert len(server.sent) == 18  # nothing over 500: one request per slice
+    assert min(s.params["from"] for s in server.sent) == "2026-09"  # 2026-08 and older: not asked
+    assert [s.params["from"] for s in server.sent][:4] == ["2027-05", "2027-05", "2027-04", "2027-04"]
+    gaps = [b.at - a.at for a, b in zip(server.sent, server.sent[1:])]
+    assert all(gap >= 1.0 for gap in gaps)  # still 1 req/s
+    assert result.fetched == 4  # 十月 (changed), 新刊, 九月, 来年
+
+    titles = {r["title"] for r in rows(conn)}
+    assert titles == {"十月 改題", "新刊", "九月", "八月", "来年"}  # updated and added; nothing deleted
+    assert db.is_slice_done(conn, "ndl", "913.6:2026-10")
+    assert dict(db.slice_status(conn, "ndl", "913.6:2026-08")) == old_state  # untouched
+    assert conn.execute("SELECT fetched_at FROM entries WHERE id = ?", (f"ndl:{make_isbn('9784100', 3)}",)).fetchone()[0] == old_fetched
+
+
+async def test_recent_cuts_a_big_current_month_by_isbn_prefix(conn, client, clock, server):
+    server.books = [Book(make_isbn(f"9784{n % 10}", n), f"本 {n:04d}", month="2026-10") for n in range(900)]
+
+    result = await ndl.harvest(conn, client, clock=clock, log=quiet, recent=True)  # no earlier build at all
+
+    assert result.slices_error == 0 and server.out_of_reach == 0
+    asked = server.slice_requests("913.6", "2026-10")
+    assert "isbn" not in asked[0] and [p["isbn"] for p in asked[1:]] == [f"9784{d}" for d in "0123456789"]
+    assert len(rows(conn)) == 900
+
+
+async def test_recent_honours_the_limit(conn, client, clock, server):
+    server.books = [Book(make_isbn("9784100", n), f"小説 {n}", month="2026-10") for n in range(6)]
+    result = await ndl.harvest(conn, client, clock=clock, limit=4, log=quiet, recent=True)
+
+    assert result.fetched == 4 and len(rows(conn)) == 4
+    assert not any(s.params["from"] <= "2026-08" for s in server.sent)
