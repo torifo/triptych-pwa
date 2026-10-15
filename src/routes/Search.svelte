@@ -83,6 +83,10 @@
     if (!q || loading) return;
     loading = true;
     requestError = null;
+    // 前の検索の結果は消して、骨組みの行を出す
+    results = [];
+    sourceErrors = [];
+    searched = false;
     originWorkId = null;
     originCandidates = [];
     originError = null;
@@ -215,8 +219,8 @@
   {#if sourceErrors.length > 0}
     <div class="flex flex-col gap-0.5 p-2 text-[11px]" style="border: 1px solid var(--line); color: var(--muted);">
       {#each sourceErrors as e (e.source)}
-        <p style="white-space: nowrap; overflow-x: auto;">
-          {SOURCE_LABELS[e.source as Source] ?? e.source} が利用できません: {e.message}
+        <p style="overflow-wrap: anywhere;">
+          {SOURCE_LABELS[e.source as Source] ?? e.source}: {e.message}
         </p>
       {/each}
     </div>
@@ -279,6 +283,15 @@
   {/if}
 
   <div class="flex flex-col" style="border-top: 1px solid var(--line);">
+    {#if loading}
+      <p class="search-hint">AniList・なろう・カクヨム・NDL を探しています</p>
+      {#each [0, 1, 2, 3] as i (i)}
+        <div class="skeleton-row" aria-hidden="true">
+          <span class="sk-cover"></span>
+          <span class="sk-lines"><span class="sk-line"></span><span class="sk-line short"></span></span>
+        </div>
+      {/each}
+    {/if}
     {#if searched && results.length === 0 && !requestError}
       <p class="py-6 text-center text-xs" style="color: var(--muted);">該当する結果がありません</p>
     {/if}
@@ -350,3 +363,50 @@
     {/each}
   </div>
 </section>
+
+<style>
+  .search-hint {
+    padding: 0.6rem 0 0.2rem;
+    font-size: 0.6875rem;
+    color: var(--muted);
+  }
+  .skeleton-row {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.625rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .sk-cover {
+    width: 48px;
+    aspect-ratio: 2 / 3;
+    flex-shrink: 0;
+    border-radius: 2px;
+    background: var(--cover-ph);
+  }
+  .sk-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+    padding-top: 0.25rem;
+  }
+  .sk-line {
+    height: 0.7rem;
+    width: 70%;
+    background: var(--cover-ph);
+    animation: sk-pulse 1.4s ease-in-out infinite;
+  }
+  .sk-line.short {
+    width: 40%;
+  }
+  @keyframes sk-pulse {
+    50% {
+      opacity: 0.45;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sk-line {
+      animation: none;
+    }
+  }
+</style>

@@ -280,6 +280,26 @@ def test_search_skips_failing_source_and_returns_partial_results(sources, client
     assert body["errors"][0]["message"] == "rate limited"
 
 
+def test_search_does_not_wait_for_a_slow_source(sources, client, monkeypatch):
+    """A source that never answers is cut off so the others still come back quickly."""
+    import asyncio as _asyncio
+
+    async def slow_ndl(q):
+        await _asyncio.sleep(5)
+        return [_ndl_hit()]
+
+    monkeypatch.setattr(search_module, "SEARCH_SOURCE_TIMEOUT_SECONDS", 0.05)
+    monkeypatch.setattr(search_module.ndl_adapter, "search_books", slow_ndl, raising=False)
+    sources.anilist._results = [_anilist_hit()]
+    sources.narou_results = [_narou_hit()]
+
+    body = client.get("/api/search", params={"q": "葬送のフリーレン"}).json()
+
+    assert [r["source"] for r in body["results"]] == ["anilist", "narou"]
+    assert [e["source"] for e in body["errors"]] == ["ndl"]
+    assert "応答" in body["errors"][0]["message"]
+
+
 def test_search_one_source_returning_nothing_is_not_an_error(sources, client):
     sources.narou_results = [_narou_hit()]
 

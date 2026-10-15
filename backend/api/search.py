@@ -230,6 +230,32 @@ def _error_message(exc: BaseException) -> str:
     return str(exc) or type(exc).__name__
 
 
+# 1つのソースを待つ上限（秒）。NDL は混んでいると数十秒かかり、全体の結果まで止めてしまうので打ち切る。
+SEARCH_SOURCE_TIMEOUT_SECONDS = 12.0
+
+
+def _discard_result(task: "asyncio.Task[Any]") -> None:
+    """Retrieve a background search's outcome so an error is not reported as never retrieved."""
+    if not task.cancelled():
+        task.exception()
+
+
+async def _within(source: str, search: Awaitable[list[SearchResult]]) -> list[SearchResult]:
+    """Wait for one source up to SEARCH_SOURCE_TIMEOUT_SECONDS.
+
+    On timeout the search keeps running in the background (shielded) so its
+    adapter can still fill the cache; the next identical query is then fast.
+    """
+    task = asyncio.ensure_future(search)
+    try:
+        return await asyncio.wait_for(asyncio.shield(task), SEARCH_SOURCE_TIMEOUT_SECONDS)
+    except asyncio.TimeoutError as exc:
+        task.add_done_callback(_discard_result)
+        raise SourceUnavailable(
+            source, f"{SEARCH_SOURCE_TIMEOUT_SECONDS:g}秒以内に応答がありませんでした（裏で取得を続けます）"
+        ) from exc
+
+
 @router.get("", response_model=SearchResponse)
 async def search(
     q: str = Query(..., min_length=1),
@@ -257,10 +283,10 @@ async def search(
         return SearchResponse(results=[hit], errors=[])
 
     sources = {
-        "anilist": _search_anilist(q, refresh),
-        "narou": _search_narou(q, refresh),
-        "kakuyomu": _search_kakuyomu(q, refresh),
-        "ndl": _search_ndl(q, refresh),
+        "anilist": _within("anilist", _search_anilist(q, refresh)),
+        "narou": _within("narou", _search_narou(q, refresh)),
+        "kakuyomu": _within("kakuyomu", _search_kakuyomu(q, refresh)),
+        "ndl": _within("ndl", _search_ndl(q, refresh)),
     }
     outcomes = await asyncio.gather(*sources.values(), return_exceptions=True)
 
