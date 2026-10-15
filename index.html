@@ -4,6 +4,21 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- テーマを描画前に当てて、ダークの時の白いちらつきを防ぐ（src/lib/theme.ts と同じ判定） -->
+    <script>
+      (function () {
+        try {
+          var s = localStorage;
+          var p = s.getItem('triptych.theme');
+          if (p !== 'light' && p !== 'dark' && p !== 'system') p = s.getItem('triptych.darkMode') === '1' ? 'dark' : 'system';
+          var d = p === 'dark' || (p === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+          if (d) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.style.colorScheme = 'dark';
+          }
+        } catch (e) {}
+      })();
+    </script>
     <meta name="theme-color" content="#0a0a0a" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="mobile-web-app-capable" content="yes" />
