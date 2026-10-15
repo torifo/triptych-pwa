@@ -16,7 +16,8 @@ is honoured across restarts of the collector.
 Requests used (all with `User-Agent: triptych/0.1 (personal tracker)`):
 
 - `json.php?Req=TitleSearch&Search=<title>`        title -> TID
-- `db.php?Command=ProgLookup&TID=<tid>&StTime=...` programs from today on
+- `db.php?Command=ProgLookup&TID=<tid>&StTime=...` programs from 14 days ago on
+  (the earlier ones only tell which services are already streaming)
 - `db.php?Command=ChLookup&ChID=*`                 channel table (7 day cache)
 """
 
@@ -28,7 +29,7 @@ import re
 import time
 import unicodedata
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from difflib import SequenceMatcher
 from typing import Any, Awaitable, Callable, Optional, TypeVar
 from xml.etree import ElementTree
@@ -58,6 +59,9 @@ FAILURE_COOLDOWN_SECONDS = 5 * 60
 CHANNELS_RETRY_SECONDS = 10 * 60
 
 MAX_PROGRAMS = 50
+
+# 配信中かの判定に使う、今日より前の番組の範囲。週1の配信が1回休んでも配信中のままにする。
+STREAMING_LOOKBACK_DAYS = 14
 
 # しょぼいカレンダーの TID は正の整数のみ。
 TID_RE = re.compile(r"^[0-9]+$")
@@ -426,6 +430,11 @@ def classify_channel(chid: str, channels: Optional[ChannelTable]) -> ChannelInfo
     return ChannelInfo(f"ChID {chid}", False, f"ChID {chid}")
 
 
+def lookback_start(today: str) -> str:
+    """First broadcast day (YYYY-MM-DD) looked at to tell whether a service is already streaming."""
+    return (date.fromisoformat(today) - timedelta(days=STREAMING_LOOKBACK_DAYS)).isoformat()
+
+
 def build_title_dto(
     tid: str,
     title: Optional[str],
@@ -433,13 +442,23 @@ def build_title_dto(
     channels: Optional[ChannelTable],
     today: str,
 ) -> SyoboiTitleDTO:
-    """Programs from `today` (broadcast day, YYYY-MM-DD) on, plus the first slot per streaming service."""
+    """Programs from `today` (broadcast day, YYYY-MM-DD) on, plus the first slot per streaming service.
+
+    Earlier programs (within STREAMING_LOOKBACK_DAYS) are not listed; they only mark the
+    services that are already streaming, whose first slot from today is the next episode
+    rather than the start of streaming (`startedStreams`).
+    """
+    since = lookback_start(today)
+    streamed_before: set[str] = set()
     rows: list[tuple[Program, str, str, ChannelInfo]] = []
     for program in programs:
         day, clock_time = broadcast_day(program.start)
+        info = classify_channel(program.chid, channels)
         if day < today:
+            if day >= since and info.is_streaming:
+                streamed_before.add(info.service)
             continue
-        rows.append((program, day, clock_time, classify_channel(program.chid, channels)))
+        rows.append((program, day, clock_time, info))
     rows.sort(key=lambda row: (row[0].start, row[0].chid))
 
     broadcasts = [
@@ -454,11 +473,13 @@ def build_title_dto(
     ]
 
     stream_starts: list[ReleaseDTO] = []
+    started: list[str] = []
     seen_services: set[str] = set()
     for program, day, clock_time, info in rows:
         if not info.is_streaming or info.service in seen_services:
             continue
         seen_services.add(info.service)
+        external_id = f"{tid}:{program.chid}"
         stream_starts.append(
             ReleaseDTO(
                 kind="stream-start",
@@ -467,9 +488,11 @@ def build_title_dto(
                 precision="day",
                 time=clock_time,
                 source="syoboi",
-                externalId=f"{tid}:{program.chid}",
+                externalId=external_id,
             )
         )
+        if info.service in streamed_before:
+            started.append(external_id)
 
     return SyoboiTitleDTO(
         status="ok",
@@ -477,6 +500,7 @@ def build_title_dto(
         title=title,
         programs=broadcasts,
         streamStarts=stream_starts,
+        startedStreams=started,
     )
 
 
@@ -639,9 +663,10 @@ class SyoboiAdapter:
             return  # another lookup has just stored it
         channels = await self._channels()
         today = broadcast_day(int(self._clock.now()))[0]
+        since = lookback_start(today)
         text = await self._request(
             DB_URL,
-            {"Command": "ProgLookup", "TID": tid, "StTime": f"{today.replace('-', '')}_000000-"},
+            {"Command": "ProgLookup", "TID": tid, "StTime": f"{since.replace('-', '')}_000000-"},
         )
         dto = build_title_dto(tid, title, parse_programs(text), channels, today)
         self._cache.set(self._tid_key(tid), dto.model_dump(), TITLE_TTL_SECONDS)

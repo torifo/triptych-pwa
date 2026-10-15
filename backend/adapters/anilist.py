@@ -417,6 +417,7 @@ class AniListAdapter:
             title=_title_text(node["title"]),
             cover=cover_image.get("large") or cover_image.get("medium"),
             url=node["siteUrl"],
+            status=_optional_airing_status(node.get("status")),
             releases=releases,
         )
 

@@ -222,7 +222,8 @@ async def test_request_sequence_and_parameters(adapter, server):
     assert server.sent[0].params["Search"] == "薬屋のひとりごと"  # season suffix removed
     assert server.sent[1].params["ChID"] == "*"
     assert server.sent[2].params["TID"] == "8025"
-    assert server.sent[2].params["StTime"] == "20261013_000000-"
+    # 配信中かを見るため、今日より前の 14 日分から取る（1リクエストのまま）
+    assert server.sent[2].params["StTime"] == "20260929_000000-"
     assert all(s.user_agent == USER_AGENT for s in server.sent)
 
 
@@ -598,6 +599,48 @@ def test_only_programs_from_today_on_are_listed():
     assert min(p.date for p in dto.programs) == "2026-10-17"
     # The Abema slot of 10-16 24:00 is gone: the next one (10-23 24:00) is the stream start.
     assert [(s.date, s.time) for s in dto.streamStarts] == [("2026-10-23", "24:00")]
+    # ...and since Abema already streamed on 10-16, it is streaming now (the 10-23 slot is the next one).
+    assert dto.startedStreams == [dto.streamStarts[0].externalId]
+
+
+def test_nothing_is_streaming_yet_without_earlier_slots():
+    dto = _build("2026-10-13")  # recorded from 10-13 on: no earlier programs
+
+    assert [s.date for s in dto.streamStarts] == ["2026-10-16"]
+    assert dto.startedStreams == []
+
+
+def test_started_streams_look_back_14_days_per_service():
+    pr = syoboi_adapter.Program
+    t = lambda month, day, hour: int(datetime(2026, month, day, hour, 0, tzinfo=JST).timestamp())  # noqa: E731
+    programs = [
+        pr("244", t(10, 9, 12)),  # ABEMA (other channel) 4 days ago
+        pr("239", t(10, 16, 12)),  # ABEMA next
+        pr("256", t(9, 28, 12)),  # Netflix 15 days ago: outside the window
+        pr("256", t(10, 20, 12)),  # Netflix next
+        pr("234", t(9, 29, 12)),  # d 14 days ago: inside the window
+        pr("234", t(10, 13, 12)),  # d today
+        pr("4", t(10, 6, 23)),  # terrestrial: never a stream
+        pr("269", t(10, 14, 12)),  # TVer starts later: not streaming yet
+    ]
+
+    dto = build_title_dto("77", "x", programs, None, "2026-10-13")
+
+    # Earlier slots are only used for the judgement; programs and stream starts stay from today on.
+    assert min(p.date for p in dto.programs) == "2026-10-13"
+    assert [(s.label, s.date, s.externalId) for s in dto.streamStarts] == [
+        ("dアニメストア 配信", "2026-10-13", "77:234"),
+        ("TVer 配信", "2026-10-14", "77:269"),
+        ("ABEMA 配信", "2026-10-16", "77:239"),
+        ("Netflix 配信", "2026-10-20", "77:256"),
+    ]
+    assert dto.startedStreams == ["77:234", "77:239"]
+
+
+def test_cached_answers_from_before_started_streams_are_unknown():
+    dto = SyoboiTitleDTO.model_validate({"status": "ok", "tid": "1", "streamStarts": []})
+
+    assert dto.startedStreams is None
 
 
 def test_late_night_program_belongs_to_the_previous_day():

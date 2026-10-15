@@ -304,6 +304,27 @@ async def test_episode_release_uses_jst_broadcast_day(
     assert episode.externalId == "195516:4"
 
 
+@pytest.mark.parametrize(
+    "media_id, expected",
+    [(101280, "FINISHED"), (195516, "RELEASING"), (199185, "NOT_YET_RELEASED")],
+)
+@pytest.mark.asyncio
+async def test_media_carries_the_airing_status(adapter, monkeypatch, media_id, expected):
+    # 同期がしょぼかるの照会（放送終了なら飛ばす）と配信の扱いを決めるのに使う
+    _use_media(monkeypatch, adapter, media_id)
+
+    assert (await adapter.media(media_id)).status == expected
+
+
+@pytest.mark.asyncio
+async def test_media_unknown_status_is_none(adapter, monkeypatch):
+    node = _media_node(195516)
+    node["status"] = None
+    monkeypatch.setattr(adapter, "_graphql", FakeGraphQL({(("id", 195516),): {"Media": node}}))
+
+    assert (await adapter.media(195516)).status is None
+
+
 @pytest.mark.asyncio
 async def test_media_year_only_start_date_still_yields_season_start(adapter, monkeypatch):
     _use_media(monkeypatch, adapter, 199185)  # 盾の勇者の成り上がり Season 5

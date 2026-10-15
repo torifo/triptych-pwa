@@ -58,6 +58,7 @@ class MediaDetailDTO(BaseModel):
     title: str
     cover: Optional[str] = None
     url: str
+    status: Optional[AiringStatus] = None  # AniList の放送状態（同期がしょぼかるの照会・配信の扱いに使う）
     releases: list[ReleaseDTO] = Field(default_factory=list)
 
 
@@ -127,6 +128,7 @@ class SyoboiTitleDTO(BaseModel):
     title: Optional[str] = None
     programs: list[BroadcastDTO] = Field(default_factory=list)
     streamStarts: list[ReleaseDTO] = Field(default_factory=list)
+    startedStreams: Optional[list[str]] = None  # 配信中（直近 14 日にも配信あり）の externalId。None は不明
 
 
 class WebNovelDTO(BaseModel):
