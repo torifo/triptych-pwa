@@ -147,7 +147,8 @@
 
   function goToWork(editionId: string) {
     const edition = editionMap.get(editionId);
-    if (edition) navigate(`#/work/${edition.workId}`);
+    // 押した Edition のタブで開く
+    if (edition) navigate(`#/work/${encodeURIComponent(edition.workId)}?edition=${encodeURIComponent(edition.id)}`);
   }
 
 </script>

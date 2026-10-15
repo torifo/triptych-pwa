@@ -125,7 +125,7 @@
 
   function openToday(item: TodayItem) {
     const edition = editionMap.get(item.editionId);
-    if (edition) navigate(`#/work/${edition.workId}`);
+    if (edition) navigate(workHref(edition));
   }
 
   let detectionBusy = $state<string | null>(null);
@@ -136,7 +136,7 @@
     try {
       const { edition } = await acceptDetection(detection.id);
       await refresh();
-      navigate(`#/work/${edition.workId}`);
+      navigate(workHref(edition));
     } finally {
       detectionBusy = null;
     }
@@ -165,7 +165,12 @@
       await refresh();
     }
     const edition = editionMap.get(release.editionId);
-    if (edition) navigate(`#/work/${edition.workId}`);
+    if (edition) navigate(workHref(edition));
+  }
+
+  /** 押した Edition のタブで Work 詳細を開く。 */
+  function workHref(edition: Pick<Edition, 'id' | 'workId'>): string {
+    return `#/work/${encodeURIComponent(edition.workId)}?edition=${encodeURIComponent(edition.id)}`;
   }
 
   function formatSyncTime(iso: string | null): string {
