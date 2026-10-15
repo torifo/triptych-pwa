@@ -36,10 +36,10 @@ def get_auth_token() -> Optional[str]:
 
 
 def create_app() -> FastAPI:
-    from .api import anilist, catalog, kakuyomu, narou, ndl, openbd, search, syoboi
+    from .api import anilist, catalog, catalog_jobs, kakuyomu, narou, ndl, openbd, search, syoboi
 
     app = FastAPI(title="triptych collector")
-    for module in (anilist, narou, openbd, ndl, syoboi, kakuyomu, search, catalog):
+    for module in (anilist, narou, openbd, ndl, syoboi, kakuyomu, search, catalog, catalog_jobs):
         app.include_router(module.router)
 
     @app.middleware("http")
