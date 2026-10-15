@@ -94,6 +94,10 @@ CREATE INDEX IF NOT EXISTS summary_next ON cluster_summary(next_date);
 CREATE INDEX IF NOT EXISTS summary_last ON cluster_summary(last_year DESC);
 
 -- Full-text search over titles (trigram: 3+ chars). Rebuilt by the linker.
+-- text = every name of the entry, then those names folded to NFKC + lowercase + single spaces when that
+-- differs (see search_text() in text.py), so full-width / half-width spellings find each other.
+-- The API folds the user's input the same way; 1-2 character queries cannot use the trigram index and
+-- scan this column instead (instr(lower(text), ...)).
 CREATE VIRTUAL TABLE IF NOT EXISTS entries_fts USING fts5(
   entry_id UNINDEXED,
   cluster_id UNINDEXED,

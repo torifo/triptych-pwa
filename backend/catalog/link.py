@@ -24,7 +24,7 @@ from collections import Counter
 from datetime import date, datetime
 from typing import Any, Iterable, Optional
 
-from .text import normalize_title, strip_notes, strip_season, strip_subtitle, title_key
+from .text import normalize_title, search_text, strip_notes, strip_season, strip_subtitle, title_key
 
 MERGE_THRESHOLD = 0.8
 # PARENT は SIDE_STORY / SPIN_OFF の逆向き。統合に使うと共通の特番を介して別シリーズがつながる
@@ -626,12 +626,8 @@ def _summary_row(
 
 
 def _fts_text(row: _Row) -> str:
-    parts: list[str] = []
-    for value in (row.title, row.native, row.romaji, row.english, row.reading, *row.synonyms):
-        value = (value or "").strip()
-        if value and value not in parts:
-            parts.append(value)
-    return " ".join(parts)
+    """All names of the entry plus their width-folded forms (see `search_text`)."""
+    return search_text((row.title, row.native, row.romaji, row.english, row.reading, *row.synonyms))
 
 
 # --------------------------------------------------------------------------- entry point

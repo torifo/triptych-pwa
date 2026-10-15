@@ -3,9 +3,14 @@
 from __future__ import annotations
 
 import re
+import string
 import unicodedata
+from typing import Iterable, Optional
 
 _NON_WORD = re.compile(r"[\W_]+", re.UNICODE)
+_SPACES = re.compile(r"\s+")
+# What SQLite's lower() does: only A-Z.
+_SQLITE_LOWER = str.maketrans(string.ascii_uppercase, string.ascii_lowercase)
 
 # 期・クール・シーズン表記（末尾）。例: 第3期 / 3期 / 第2クール / Season 2 / 2nd Season / Ⅱ
 _SEASON_SUFFIXES = [
@@ -72,3 +77,36 @@ def strip_subtitle(value: str) -> str:
 def base_title_key(value: str) -> str:
     """title_key of the title without its subtitle (for long web-novel titles)."""
     return title_key(strip_subtitle(value))
+
+
+# -- search ---------------------------------------------------------------------
+
+
+def fold_for_search(value: Optional[str]) -> str:
+    """NFKC → lowercase → collapse whitespace. Unlike `normalize_title`, punctuation and word gaps stay.
+
+    Full-width latin / digits and half-width kana become their ordinary forms, which is the whole
+    point; dropping the spaces too would let "heap" find "The Apothecary Diaries".
+    """
+    return _SPACES.sub(" ", unicodedata.normalize("NFKC", value or "").lower()).strip()
+
+
+def search_text(values: Iterable[Optional[str]]) -> str:
+    """The `entries_fts.text` of one entry: its names as they are, then their folded forms.
+
+    A folded form is left out when SQLite's own lower() already yields it (an ASCII name that
+    differs only by case), because the short-query scan lowers the text and the trigram index
+    folds case anyway; that keeps the text about 12% longer instead of about 70%.
+    The query side applies `fold_for_search` to the user's input.
+    """
+    names: list[str] = []
+    for value in values:
+        value = (value or "").strip()
+        if value and value not in names:
+            names.append(value)
+    folded: list[str] = []
+    for name in names:
+        key = fold_for_search(name)
+        if key and key != name.translate(_SQLITE_LOWER) and key not in names and key not in folded:
+            folded.append(key)
+    return " ".join([*names, *folded])

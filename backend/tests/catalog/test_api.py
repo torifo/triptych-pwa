@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import random
+import re
 import sqlite3
 import time
 from datetime import datetime, timezone
@@ -18,7 +19,7 @@ from backend import app as app_module
 from backend import timeutil
 from backend.api import catalog as catalog_api
 from backend.catalog import db
-from backend.catalog.text import normalize_title
+from backend.catalog.text import normalize_title, search_text
 
 TODAY = "2026-10-14"
 
@@ -31,15 +32,10 @@ def E(source: str, external_id: str, kind: str, title: str, **fields: Any) -> db
 
 
 def _fts_text(entry: db.Entry) -> str:
-    parts = [
-        entry.title,
-        entry.title_native,
-        entry.title_romaji,
-        entry.title_english,
-        entry.title_reading,
-        *entry.synonyms,
-    ]
-    return " ".join(part for part in parts if part)
+    """The search text the linker would store for this entry."""
+    return search_text(
+        [entry.title, entry.title_native, entry.title_romaji, entry.title_english, entry.title_reading, *entry.synonyms]
+    )
 
 
 def add_work(
@@ -607,7 +603,7 @@ def test_fts_matches_the_reading_of_any_member(built, client):
     assert works(client, q="くすりや") == [A100]
 
 
-def test_search_one_or_two_characters_uses_like(built, client):
+def test_search_one_or_two_characters_scans_the_search_text(built, client):
     assert works(client, q="薬屋") == [A100, K77]
     assert works(client, q="くす") == [A100]  # only a member's reading contains it
     assert works(client, q="Ap") == [A100]  # a member's English title
@@ -638,6 +634,57 @@ def test_fts_phrase_keeps_operators_literal(built, client):
     assert works(client, q="Re:ゼロ") == [A500]  # ':' would be a column filter if unquoted
     assert works(client, q='"ゼロ') == []  # the quote is a character of the phrase
     assert works(client, q="Slime OR Apothecary") == []  # not an OR query
+
+
+@pytest.fixture()
+def widths(built) -> Path:
+    """Works whose names use full-width / half-width / capital forms."""
+    conn = db.connect(built)
+    add_work(conn, "anilist:1000", "ＳＰＹ×ＦＡＭＩＬＹ", [E("anilist", "1000", "anime", "ＳＰＹ×ＦＡＭＩＬＹ")], popularity=30)
+    add_work(conn, "syoboi:2000", "ﾄﾞﾗｺﾞﾝﾎﾞｰﾙ", [E("syoboi", "2000", "anime", "ﾄﾞﾗｺﾞﾝﾎﾞｰﾙ")], popularity=20)
+    add_work(conn, "anilist:3000", "Ōkami", [E("anilist", "3000", "anime", "Ōkami")], popularity=10)
+    conn.close()
+    return built
+
+
+def test_search_ignores_full_width_and_half_width_differences(widths, client):
+    spy, dragon = "anilist:1000", "syoboi:2000"
+    assert works(client, q="spy×family") == [spy]  # half-width query, full-width title
+    assert works(client, q="ＳＰＹ×ＦＡＭＩＬＹ") == [spy]  # the same spelling as the title
+    assert works(client, q="ｓｐｙ") == [spy]  # full-width, lowercase
+    assert works(client, q="ドラゴン") == [dragon]  # full-width kana, half-width title
+    assert works(client, q="ﾄﾞﾗｺﾞﾝ") == [dragon]  # half-width kana, half-width title
+    assert works(client, q="Re：ゼロ") == [A500]  # full-width colon typed with an IME
+    assert works(client, q="ＲＥ:ゼロ") == [A500]
+    assert works(client, q="apothecary   diaries") == [A100]  # runs of spaces count once
+
+
+def test_short_search_ignores_full_width_and_half_width_differences(widths, client):
+    assert works(client, q="ＳＰ") == ["anilist:1000"]
+    assert works(client, q="ﾄﾞﾗ") == ["syoboi:2000"]
+    assert works(client, q="ドラ") == ["syoboi:2000"]
+    assert works(client, q="Ａｂ") == [A900]
+    assert works(client, q="ｙ") == works(client, q="y")  # one full-width letter is looked up as "y"
+    assert works(client, q="ōk") == ["anilist:3000"]  # SQLite's lower() cannot fold the capital Ō ...
+    assert works(client, q="ŌK") == ["anilist:3000"]  # ... so the folded name is in the text
+
+
+def test_short_search_does_not_read_the_entries_table(built, client, monkeypatch):
+    """The first version scanned every title column of `entries` (100 MB): 0.5 s on the real catalog."""
+    statements: list[str] = []
+    real_connect = catalog_api._connect
+
+    def traced(**kwargs):
+        conn = real_connect(**kwargs)
+        conn.set_trace_callback(statements.append)
+        return conn
+
+    monkeypatch.setattr(catalog_api, "_connect", traced)
+    assert works(client, q="薬屋") == [A100, K77]
+    searched = [s for s in statements if "sqlite_master" not in s]
+    # scanned once (the vtab's own helper statements name entries_fts_content etc.), not again for the page
+    assert len([s for s in searched if re.search(r"\bentries_fts\b", s)]) == 1
+    assert not [s for s in searched if re.search(r"\bentries\b", s)], searched
 
 
 def test_blank_search_is_ignored(built, client):
@@ -898,9 +945,9 @@ PERF_URLS = {
     "q rare (FTS)": {"q": "ネプチューン"},
     "q common (FTS)": {"q": "の物語"},
     "q common (FTS) + kind": {"q": "の物語", "kind": "anime"},
-    "q 2 chars rare (LIKE)": {"q": "ゐゑ"},
-    "q 2 chars common (LIKE)": {"q": "物語"},
-    "q 1 char (LIKE)": {"q": "あ"},
+    "q 2 chars rare (scan)": {"q": "ゐゑ"},
+    "q 2 chars common (scan)": {"q": "物語"},
+    "q 1 char (scan)": {"q": "あ"},
 }
 
 

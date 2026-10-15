@@ -195,6 +195,28 @@ def test_fts_has_one_row_per_entry_with_all_names(tmp_path):
     assert conn.execute("SELECT COUNT(*) FROM entries_fts WHERE entries_fts MATCH 'Apothecary'").fetchone()[0] == 2
 
 
+def test_fts_text_also_holds_the_width_folded_names(tmp_path):
+    entries = [
+        _anilist(1, "anime", "ＳＰＹ×ＦＡＭＩＬＹ", title_romaji="SPY x FAMILY", title_english="Ｓｐｙ　Ｆａｍｉｌｙ"),
+        _entry("syoboi", "9", "anime", "ﾄﾞﾗｺﾞﾝﾎﾞｰﾙ", title_reading="どらごんぼーる"),
+        _anilist(3, "manga", "Abyss"),
+    ]
+    conn = _open(tmp_path, entries)
+    run_link(conn, today=TODAY)
+
+    texts = dict(conn.execute("SELECT entry_id, text FROM entries_fts"))
+    assert texts["anilist:1"] == "ＳＰＹ×ＦＡＭＩＬＹ SPY x FAMILY Ｓｐｙ　Ｆａｍｉｌｙ spy×family spy family"
+    assert texts["syoboi:9"] == "ﾄﾞﾗｺﾞﾝﾎﾞｰﾙ どらごんぼーる ドラゴンボール"
+    assert texts["anilist:3"] == "Abyss"  # nothing to add: lower() covers the case
+
+    def hits(query: str) -> set[str]:
+        return {r[0] for r in conn.execute("SELECT entry_id FROM entries_fts WHERE entries_fts MATCH ?", (query,))}
+
+    assert hits('"spy family"') == {"anilist:1"}
+    assert hits('"ドラゴン"') == {"syoboi:9"}
+    assert hits('"ﾄﾞﾗｺﾞﾝ"') == {"syoboi:9"}  # the raw form is still searchable
+
+
 # --------------------------------------------------------------------------- relations
 
 

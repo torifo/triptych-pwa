@@ -29,14 +29,16 @@ from ..catalog.dto import (
     CatalogWorkPage,
     CatalogWorkSummary,
 )
+from ..catalog.text import fold_for_search
 
 router = APIRouter(prefix="/api/catalog", tags=["catalog"])
 
 NOT_BUILT = "catalog not built"
+WORK_NOT_FOUND = "work not found"  # the front end tells these two 404s apart by their detail
 DEFAULT_PER = 50
 MAX_PER = 100
 MAX_QUERY_LENGTH = 200
-FTS_MIN_CHARS = 3  # trigram needs 3+ characters; shorter queries use LIKE
+FTS_MIN_CHARS = 3  # the trigram index needs 3+ characters; shorter queries scan the search text
 LINK_THRESHOLD = 0.8  # links below this are only "candidates" (see link.py)
 MAX_CANDIDATES = 100
 
@@ -51,9 +53,6 @@ _KIND_COLUMN = {
 _SEASONS = ("WINTER", "SPRING", "SUMMER", "FALL")
 # Order of a work's faces in the detail view (the original comes first).
 _KIND_RANK = {"novel": 0, "manga": 1, "anime": 2, "web-novel": 3, "book": 4}
-_LIKE_ESCAPE = "\\"
-_ENTRY_TITLE_COLUMNS = ("title", "title_native", "title_romaji", "title_english", "title_reading")
-_JSON_PUNCTUATION = '[]",\\'
 
 
 # -- database -----------------------------------------------------------------
@@ -161,32 +160,31 @@ def get_stats() -> CatalogStats:
 # -- /works -------------------------------------------------------------------
 
 
-def _like_pattern(text: str) -> str:
-    escaped = (
-        text.replace(_LIKE_ESCAPE, _LIKE_ESCAPE * 2).replace("%", _LIKE_ESCAPE + "%").replace("_", _LIKE_ESCAPE + "_")
-    )
-    return f"%{escaped}%"
-
-
 def _fts_phrase(text: str) -> str:
     """The input as one FTS5 phrase, so operators and punctuation in it stay literal."""
     return '"' + text.replace('"', '""') + '"'
 
 
-def _search_clause(q: str, params: dict[str, Any]) -> str:
-    """WHERE fragment for a title search: FTS (3+ chars) or LIKE (1-2 chars)."""
-    if len(q) >= FTS_MIN_CHARS:
-        params["fts"] = _fts_phrase(q)
+def _search_clause(conn: sqlite3.Connection, key: str, params: dict[str, Any]) -> str:
+    """WHERE fragment for a title search over `entries_fts.text` (see `search_text` in catalog/text.py).
+
+    `key` is the user's input after `fold_for_search`, the same folding the stored text got.
+    3+ characters use the trigram index. 1-2 characters cannot, so they scan the search text
+    itself (about 25 MB for 190k entries) - once, into a temp table, because the count and the
+    page would otherwise scan it twice. That scan used to read every title column of `entries`
+    (100 MB) instead.
+    """
+    if len(key) >= FTS_MIN_CHARS:
+        params["fts"] = _fts_phrase(key)
         return "cs.cluster_id IN (SELECT cluster_id FROM entries_fts WHERE entries_fts MATCH :fts)"
-    params["like"] = _like_pattern(q)
-    columns = list(_ENTRY_TITLE_COLUMNS)
-    if not any(ch in q for ch in _JSON_PUNCTUATION):  # synonyms is a JSON array: skip its syntax
-        columns.append("synonyms")
-    member_match = " OR ".join(f"e.{column} LIKE :like ESCAPE '{_LIKE_ESCAPE}'" for column in columns)
-    return (
-        f"(cs.title LIKE :like ESCAPE '{_LIKE_ESCAPE}' OR cs.cluster_id IN ("
-        f"SELECT c.cluster_id FROM entries e JOIN clusters c ON c.entry_id = e.id WHERE {member_match}))"
+    # The temp table lives in this request's connection only (a read-only catalog still allows it).
+    conn.execute("CREATE TEMP TABLE short_hits (cluster_id TEXT PRIMARY KEY) WITHOUT ROWID")
+    # lower() only folds A-Z, which is exactly the case difference search_text() leaves to it.
+    conn.execute(
+        "INSERT OR IGNORE INTO short_hits SELECT cluster_id FROM entries_fts WHERE instr(lower(text), ?) > 0",
+        (key,),
     )
+    return "cs.cluster_id IN (SELECT cluster_id FROM short_hits)"
 
 
 def _unprocessable(message: str) -> HTTPException:
@@ -260,7 +258,7 @@ def _summary(row: sqlite3.Row) -> CatalogWorkSummary:
 
 @router.get("/works", response_model=CatalogWorkPage)
 def list_works(
-    q: str = Query("", description="title search: FTS for 3+ characters, LIKE for 1-2"),
+    q: str = Query("", description="title search, ignoring width and case: trigram index for 3+ characters, scan for 1-2"),
     kind: Optional[str] = Query(None, description="works that have this face"),
     has: Optional[str] = Query(None, description="comma separated faces, all required"),
     status: Optional[str] = Query(None, description="anime status (RELEASING / NOT_YET_RELEASED / FINISHED)"),
@@ -299,12 +297,12 @@ def list_works(
         where.append(f"cs.next_date >= :year_start AND {_PERIOD_END} >= :today")
         params["today"] = today
         params["year_start"] = f"{today[:4]}-01-01"
-    search = q.strip()[:MAX_QUERY_LENGTH]
-    if search:
-        where.append(_search_clause(search, params))
-    where_sql = f"WHERE {' AND '.join(where)}" if where else ""
+    key = fold_for_search(q)[:MAX_QUERY_LENGTH]
 
     with _open() as conn:
+        if key:
+            where.append(_search_clause(conn, key, params))
+        where_sql = f"WHERE {' AND '.join(where)}" if where else ""
         total = conn.execute(f"SELECT COUNT(*) FROM cluster_summary cs {where_sql}", params).fetchone()[0]
         rows = conn.execute(
             f"SELECT {_SUMMARY_COLUMNS} FROM cluster_summary cs {where_sql} "
@@ -380,7 +378,7 @@ def get_work(cluster_id: str) -> CatalogWorkDetail:
             "SELECT cluster_id, title, kinds FROM cluster_summary WHERE cluster_id = ?", (cluster_id,)
         ).fetchone()
         if summary is None:
-            raise HTTPException(status_code=404, detail="work not found")
+            raise HTTPException(status_code=404, detail=WORK_NOT_FOUND)
 
         members = sorted(
             conn.execute(
