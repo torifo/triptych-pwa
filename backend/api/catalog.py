@@ -10,7 +10,9 @@ See specs/catalog/design.md ("API").
 from __future__ import annotations
 
 import json
+import re
 import sqlite3
+import unicodedata
 from contextlib import contextmanager
 from typing import Any, Iterable, Iterator, Optional, Sequence
 from urllib.parse import quote
@@ -216,6 +218,40 @@ _PERIOD_END = (
     "ELSE cs.next_date END"
 )
 
+# 本で絞った「近日」: 作品ごとに次に出る本（期間の終わりが今日以降で最も近い巻）。アニメの次の話ではなく本の発売で並べる。
+_BOOK_END = (
+    "CASE e.start_precision "
+    "WHEN 'month' THEN date(e.start_date, 'start of month', '+1 month', '-1 day') "
+    "WHEN 'year' THEN date(e.start_date, 'start of year', '+1 year', '-1 day') "
+    "ELSE e.start_date END"
+)
+_NEXT_BOOK_CTE = (
+    "WITH nb AS (SELECT cid, d, p, t, d_end FROM ("
+    "SELECT c.cluster_id AS cid, e.start_date AS d, e.start_precision AS p, e.title AS t, "
+    f"{_BOOK_END} AS d_end, "
+    f"ROW_NUMBER() OVER (PARTITION BY c.cluster_id ORDER BY {_BOOK_END}, e.start_date, e.id) AS rn "
+    "FROM entries e JOIN clusters c ON c.entry_id = e.id "
+    f"WHERE e.kind = 'book' AND e.start_date >= :year_start AND {_BOOK_END} >= :today"
+    ") WHERE rn = 1) "
+)
+_TRAILING_VOLUME_RE = re.compile(r"(?:[(（\[［]\s*(\d+)\s*[)）\]］]|\s(\d+))$")
+
+
+def _book_next_label(work_title: str, book_title: str) -> str:
+    """'執愛サイケデリカ(2)' -> '2巻'. Without a volume number: the part after the work title, or the title."""
+    title = unicodedata.normalize("NFKC", book_title).strip()
+    match = _TRAILING_VOLUME_RE.search(title)
+    if match:
+        return f"{match.group(1) or match.group(2)}巻"
+    base = unicodedata.normalize("NFKC", work_title).strip()
+    if base and title.startswith(base):
+        rest = title[len(base):].strip(" :：-‐~〜・")
+        if rest.isdigit():  # '…なってました30' のように巻数が題名に直に付いている
+            return f"{rest}巻"
+        return rest or title
+    return title
+
+
 _ORDER_BY: dict[str, str] = {
     "popularity": "cs.popularity DESC, cs.title, cs.cluster_id",
     "recent": "cs.last_year DESC, cs.popularity DESC, cs.title, cs.cluster_id",
@@ -333,7 +369,12 @@ def list_works(
         if season_key is not None:
             where.append("instr(cs.seasons, :season) > 0")
             params["season"] = f'"{year:04d}-{season_key}"'
-    if sort == "upcoming":
+    book_focus = sort == "upcoming" and kind == "book"
+    if book_focus:
+        today = timeutil.today_jst()
+        params["today"] = today
+        params["year_start"] = f"{today[:4]}-01-01"
+    elif sort == "upcoming":
         today = timeutil.today_jst()
         # next_date of a month / year precision date is the first day of that month / year, but it
         # still lies ahead until the period ends. The year-start bound keeps summary_next usable.
@@ -346,16 +387,36 @@ def list_works(
         if key:
             where.append(_search_clause(conn, key, params))
         where_sql = f"WHERE {' AND '.join(where)}" if where else ""
-        total = conn.execute(f"SELECT COUNT(*) FROM cluster_summary cs {where_sql}", params).fetchone()[0]
-        rows = conn.execute(
-            f"SELECT {_SUMMARY_COLUMNS} FROM cluster_summary cs {where_sql} "
-            f"ORDER BY {_ORDER_BY[sort]} LIMIT :limit OFFSET :offset",
-            {**params, "limit": per, "offset": (page - 1) * per},
-        ).fetchall()
+        if book_focus:
+            source = f"{_NEXT_BOOK_CTE}SELECT {{cols}} FROM cluster_summary cs JOIN nb ON nb.cid = cs.cluster_id {where_sql}"
+            total = conn.execute(source.format(cols="COUNT(*)"), params).fetchone()[0]
+            rows = conn.execute(
+                source.format(cols=f"{_SUMMARY_COLUMNS}, nb.d AS book_date, nb.p AS book_precision, nb.t AS book_title")
+                + " ORDER BY nb.d_end, nb.d, cs.popularity DESC, cs.title, cs.cluster_id LIMIT :limit OFFSET :offset",
+                {**params, "limit": per, "offset": (page - 1) * per},
+            ).fetchall()
+        else:
+            total = conn.execute(f"SELECT COUNT(*) FROM cluster_summary cs {where_sql}", params).fetchone()[0]
+            rows = conn.execute(
+                f"SELECT {_SUMMARY_COLUMNS} FROM cluster_summary cs {where_sql} "
+                f"ORDER BY {_ORDER_BY[sort]} LIMIT :limit OFFSET :offset",
+                {**params, "limit": per, "offset": (page - 1) * per},
+            ).fetchall()
         covers = _focused_covers(
             conn, [row["cluster_id"] for row in rows], status=status or None, year=year, season=season_key
         )
     items = [_summary(row, covers.get(row["cluster_id"])) for row in rows]
+    if book_focus:
+        items = [
+            item.model_copy(
+                update={
+                    "nextDate": row["book_date"],
+                    "nextPrecision": row["book_precision"] or "day",
+                    "nextLabel": _book_next_label(row["title"], row["book_title"]),
+                }
+            )
+            for item, row in zip(items, rows)
+        ]
     return CatalogWorkPage(total=total, page=page, per=per, items=items)
 
 

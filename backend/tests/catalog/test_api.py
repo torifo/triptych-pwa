@@ -576,7 +576,8 @@ def test_upcoming_total_counts_the_precision_aware_matches(built, client, monkey
 
 
 def test_upcoming_combines_with_filters(built, client, today):
-    assert works(client, sort="upcoming", kind="book") == [A100, B1]
+    # 本で絞った近日は「次に出る本」で並べる。A100 の本は 2014 年の巻だけなので入らない（次の予定はアニメ）
+    assert works(client, sort="upcoming", kind="book") == [B1]
     assert works(client, sort="upcoming", has="anime", status="NOT_YET_RELEASED") == [A400]
 
 
@@ -1026,3 +1027,65 @@ def test_status_and_season_filters_show_the_cover_of_the_matching_season(catalog
     assert cover(status="RELEASING").endswith("/new.jpg")
     assert cover(year=2026, season="FALL").endswith("/new.jpg")
     assert cover(year=2017, season="FALL").endswith("/old.jpg")
+
+
+# -- upcoming books when the list is narrowed to books ------------------------
+
+
+def test_upcoming_books_sort_and_show_the_next_book_not_the_next_episode(catalog_path, client, today):
+    conn = db.connect(catalog_path)
+    add_work(
+        conn, "anilist:910001", "冰剣の魔術師",
+        [
+            E("anilist", "910001", "anime", "冰剣の魔術師", format="TV", status="RELEASING"),
+            E("ndl", "9784000000101", "book", "冰剣の魔術師が世界を統べる(9)", start_date="2026-12-20", start_precision="day",
+              extra={"isbn": "9784000000101"}),
+        ],
+        anime_status="RELEASING", first_year=2019, last_year=2026,
+        next_date="2026-10-15", next_precision="day", next_label="第2話", popularity=500,
+    )
+    add_work(
+        conn, "anilist:910002", "執愛サイケデリカ",
+        [
+            E("anilist", "910002", "manga", "執愛サイケデリカ", format="MANGA"),
+            E("ndl", "9784000000102", "book", "執愛サイケデリカ(2)", start_date="2026-10-16", start_precision="day",
+              extra={"isbn": "9784000000102"}),
+            E("ndl", "9784000000103", "book", "執愛サイケデリカ(1)", start_date="2025-10-16", start_precision="day",
+              extra={"isbn": "9784000000103"}),
+        ],
+        first_year=2025, last_year=2026, next_date="2026-10-16", next_precision="day", next_label="執愛サイケデリカ(2)",
+        popularity=10,
+    )
+    add_work(
+        conn, "ndl:9784000000104", "来年の本",
+        [
+            E("ndl", "9784000000104", "book", "来年の本", start_date="2027-01-01", start_precision="month",
+              extra={"isbn": "9784000000104"}),
+        ],
+        first_year=2027, last_year=2027, next_date="2027-01-01", next_precision="month", next_label="来年の本",
+    )
+    conn.close()
+
+    body = client.get("/api/catalog/works", params={"kind": "book", "sort": "upcoming"}).json()
+    rows = [(i["id"], i["nextDate"], i["nextPrecision"], i["nextLabel"]) for i in body["items"]]
+    assert rows == [
+        ("anilist:910002", "2026-10-16", "day", "2巻"),
+        ("anilist:910001", "2026-12-20", "day", "9巻"),  # the anime's next episode is not what a book list shows
+        ("ndl:9784000000104", "2027-01-01", "month", "来年の本"),
+    ]
+    assert body["total"] == 3
+
+
+@pytest.mark.parametrize(
+    "work, book, label",
+    [
+        ("執愛サイケデリカ", "執愛サイケデリカ(2)", "2巻"),
+        ("冰剣の魔術師", "冰剣の魔術師が世界を統べる(9)", "9巻"),
+        ("スライム倒して300年、知らないうちにレベルＭＡＸになってました", "スライム倒して300年、知らないうちにレベルMAXになってました30", "30巻"),
+        ("妄想先生", "妄想先生 10", "10巻"),
+        ("来年の本", "来年の本", "来年の本"),
+        ("本好きの下剋上", "本好きの下剋上 短編集", "短編集"),
+    ],
+)
+def test_book_next_label(work, book, label):
+    assert catalog_api._book_next_label(work, book) == label
