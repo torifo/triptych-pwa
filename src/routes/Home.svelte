@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { BookOpen, RefreshCw, Search } from '@lucide/svelte';
+  import { ArrowRight, BookOpen, RefreshCw, Search } from '@lucide/svelte';
   import { listReleases, listEditions, listWorks, updateRelease, listDetectionEvents } from '../lib/db/store';
   import type { Release, Edition, Work, DetectionEvent } from '../lib/db/schema';
   import { formatReleaseDate, todayJst } from '../lib/dates';
@@ -362,6 +362,14 @@
             {/each}
           {/if}
         </ul>
+        <div class="more-links">
+          <a href={`#/catalog?status=RELEASING&year=${season.year}&season=${season.season}`}>
+            今期の放送中をもっと見る<ArrowRight size={14} aria-hidden="true" />
+          </a>
+          <a href="#/catalog?kind=book&sort=upcoming">
+            これから出る本を見る<ArrowRight size={14} aria-hidden="true" />
+          </a>
+        </div>
       </div>
     {/if}
   {:else if loaded}
@@ -516,5 +524,21 @@
     .dateline-button :global(.spin) {
       animation: none;
     }
+  }
+  /* 今期の棚の下: カタログのよく使う見え方へ */
+  .more-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    padding-top: 0.75rem;
+  }
+  .more-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--fg);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
   }
 </style>
