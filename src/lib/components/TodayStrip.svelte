@@ -27,7 +27,7 @@
     {@const sub = todaySubLabel(item, now)}
     <li class="card">
       <button type="button" class="card-button" aria-label={`${cover.title} ${item.badge} ${sub.text}`} onclick={() => onopen(item)}>
-        <Cover src={cover.url} title={cover.title} mediaType={cover.mediaType} size="m" onAir={isAiringNow(item.release, now)}>
+        <Cover src={cover.url} title={cover.title} mediaType={cover.mediaType} size="l" onAir={isAiringNow(item.release, now)}>
           {#snippet badge()}
             <span class="mono time-badge">{item.badge}</span>
           {/snippet}
@@ -57,9 +57,10 @@
     display: none;
   }
 
+  /* 今日の作品は Home の主役なので、詳細ヘッダーと同じ大きさで見せる */
   .card {
-    flex: 0 0 64px;
-    width: 64px;
+    flex: 0 0 112px;
+    width: 112px;
     scroll-snap-align: start;
   }
   .card-button {
@@ -80,7 +81,7 @@
     padding: 1px 4px;
     background: var(--fg);
     color: var(--bg);
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 500;
     line-height: 1.4;
     white-space: nowrap;
@@ -94,11 +95,12 @@
     white-space: nowrap;
   }
   .title {
-    font-size: 11px;
+    font-size: 12px;
+    font-weight: 500;
     line-height: 1.35;
   }
   .sub {
-    font-size: 10px;
+    font-size: 11px;
     line-height: 1.3;
     color: var(--muted);
   }
