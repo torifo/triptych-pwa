@@ -15,6 +15,7 @@
     animeFormatLabel,
     syncKeyLabel,
   } from '../lib/components/labels';
+  import { startedStreamServices } from '../lib/components/release-history';
   import { unseenReleases, upcomingReleases } from '../lib/components/release-view';
 
   const UPCOMING_DAYS = 7;
@@ -42,6 +43,7 @@
 
   const upcoming = $derived(upcomingReleases(releases, editionMap, today, UPCOMING_DAYS));
   const fresh = $derived(unseenReleases(releases, editionMap));
+  const streaming = $derived(startedStreamServices(releases, today));
 
   async function refresh() {
     releases = await listReleases();
@@ -239,6 +241,7 @@
             {release}
             edition={editionMap.get(release.editionId)}
             workTitle={workTitleFor(release.editionId)}
+            streaming={streaming.get(release.editionId)}
             accent
             onclick={() => openRelease(release, false)}
           />
@@ -258,6 +261,7 @@
             {release}
             edition={editionMap.get(release.editionId)}
             workTitle={workTitleFor(release.editionId)}
+            streaming={streaming.get(release.editionId)}
             emphasis={false}
             onclick={() => openRelease(release, true)}
           />

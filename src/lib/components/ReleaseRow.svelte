@@ -11,6 +11,7 @@
     onclick,
     accent = false,
     emphasis = true,
+    streaming = [],
   }: {
     release: Release;
     edition: Edition | undefined;
@@ -20,10 +21,13 @@
     accent?: boolean;
     /** 日付を太字にする（false なら muted） */
     emphasis?: boolean;
+    /** この Edition で配信が始まっているサービス名。次話の行にだけ添える */
+    streaming?: readonly string[];
   } = $props();
 
   const when = $derived(formatReleaseDate(release));
   const postponed = $derived(isPostponed(release));
+  const services = $derived(release.kind === 'episode' ? streaming.join('・') : '');
 </script>
 
 <button
@@ -44,9 +48,12 @@
     {/if}
     <span class="min-w-0 flex-1 truncate text-sm">{workTitle}</span>
   </span>
-  {#if release.label || postponed}
+  {#if release.label || postponed || services}
     <span class="flex items-center gap-2 text-[11px]" style="color: var(--muted); min-width: 0;">
-      <span class="min-w-0 truncate">{release.label}</span>
+      <span class="min-w-0 truncate" style={services ? 'flex-shrink: 0; max-width: 60%;' : undefined}>{release.label}</span>
+      {#if services}
+        <span class="min-w-0 truncate">{services} 配信中</span>
+      {/if}
       {#if postponed}
         <span style="white-space: nowrap;">延期</span>
       {/if}

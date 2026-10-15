@@ -6,8 +6,9 @@
     listReleasesByEdition,
     updateRelease,
   } from '../db/store';
-  import { formatReleaseDate, todayJst } from '../dates';
-  import { groupEditionReleases, isPostponed, type ReleaseFormValue } from './release-view';
+  import { formatReleaseDate, isPastRelease, todayJst } from '../dates';
+  import { buildEditionReleaseView } from './release-history';
+  import { isPostponed, type ReleaseFormValue } from './release-view';
   import ReleaseForm from './ReleaseForm.svelte';
 
   let { edition }: { edition: Edition } = $props();
@@ -19,11 +20,14 @@
   let editingId = $state<string | null>(null);
   let confirmingDeleteId = $state<string | null>(null);
   let actionError = $state<string | null>(null);
+  let showOlder = $state(false);
 
-  const groups = $derived(groupEditionReleases(releases, edition.mediaType, today));
+  const view = $derived(buildEditionReleaseView(releases, edition.mediaType, today));
   const isEmpty = $derived(
-    groups.broadcast.length + groups.upcoming.length + groups.recent.length === 0,
+    view.nextEpisodes.length + view.streams.length + view.upcoming.length + view.recent.length === 0,
   );
+  // 次話と配信先は 1 つの枠にまとめる（次話が先頭、配信開始は過去分も日付順）。
+  const watchRows = $derived([...view.nextEpisodes, ...view.streams.map((s) => s.release)]);
 
   // 親が Edition を読み直しても id が同じなら、編集中のフォームを閉じない。
   const editionId = $derived(edition.id);
@@ -42,6 +46,7 @@
     adding = false;
     editingId = null;
     confirmingDeleteId = null;
+    showOlder = false;
     load();
   });
 
@@ -92,6 +97,13 @@
     confirmingDeleteId = null;
     editingId = release.id;
   }
+
+  /** 次話・配信の状態を示すタグ。それ以外の行には付けない。 */
+  function watchTag(release: Release): string | null {
+    if (release.kind === 'stream-start') return isPastRelease(release, today) ? '配信中' : '配信予定';
+    if (release.id === view.nextEpisodes[0]?.id) return '次話';
+    return null;
+  }
 </script>
 
 {#snippet rows(list: Release[], accent: boolean)}
@@ -107,14 +119,15 @@
           />
         </div>
       {:else}
+        {@const tag = watchTag(release)}
         <div
           class="flex flex-col gap-0.5 py-1.5"
           style="border-bottom: 1px solid var(--line); min-width: 0;"
         >
           <div class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
             <span class="when">{formatReleaseDate(release)}</span>
-            {#if release.kind === 'stream-start'}
-              <span class="tag">配信</span>
+            {#if tag}
+              <span class="tag">{tag}</span>
             {/if}
             {#if isPostponed(release)}
               <span class="tag">延期</span>
@@ -183,35 +196,52 @@
     <p class="text-[11px]" style="color: var(--fg);" role="alert">{actionError}</p>
   {/if}
 
-  {#if groups.broadcast.length > 0}
+  {#if watchRows.length > 0}
     <div class="flex flex-col gap-1">
-      <span class="type-label">今後の放送・配信</span>
-      {@render rows(groups.broadcast, true)}
+      <span class="type-label">{view.nextEpisodes.length > 0 ? '次話と配信先' : '配信先'}</span>
+      {@render rows(watchRows, true)}
+      {#if view.nextEpisodes.length > 0 && view.streams.length === 0}
+        <p class="text-[11px]" style="color: var(--muted);">配信先の情報はまだありません</p>
+      {/if}
     </div>
   {/if}
 
-  {#if groups.upcoming.length > 0}
+  {#if view.upcoming.length > 0}
     <div class="flex flex-col gap-1">
-      {#if groups.broadcast.length > 0 || groups.recent.length > 0}
+      {#if watchRows.length > 0 || view.recent.length > 0}
         <span class="type-label">予定</span>
       {/if}
-      {@render rows(groups.upcoming, false)}
+      {@render rows(view.upcoming, false)}
     </div>
   {/if}
 
-  {#if groups.recent.length > 0}
+  {#if view.recent.length > 0}
     <div class="flex flex-col gap-1">
       <span class="type-label">直近30日</span>
-      {@render rows(groups.recent, false)}
+      {@render rows(view.recent, false)}
     </div>
   {/if}
 
-  {#if loaded && isEmpty && !adding}
-    <p class="text-[11px]" style="color: var(--muted);">表示するリリースはありません</p>
+  {#if view.older.length > 0}
+    <div class="flex flex-col gap-1">
+      <button
+        type="button"
+        class="btn self-start"
+        aria-expanded={showOlder}
+        onclick={() => (showOlder = !showOlder)}
+      >
+        {showOlder ? '過去のリリースを隠す' : `過去のリリースを表示（${view.older.length}件）`}
+      </button>
+      {#if showOlder}
+        <span class="type-label">30日より前</span>
+        {@render rows(view.older, false)}
+      {/if}
+    </div>
   {/if}
-  {#if groups.hiddenCount > 0}
+
+  {#if loaded && isEmpty && !adding && !(showOlder && view.older.length > 0)}
     <p class="text-[11px]" style="color: var(--muted);">
-      30日より前の {groups.hiddenCount} 件は表示していません
+      {view.older.length > 0 ? '直近30日以内のリリースはありません' : '表示するリリースはありません'}
     </p>
   {/if}
 </div>

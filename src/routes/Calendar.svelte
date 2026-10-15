@@ -14,6 +14,7 @@
     trackedReleases,
     yearlyUndecided,
   } from '../lib/components/release-view';
+  import { startedStreamServices } from '../lib/components/release-history';
 
   const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
   const GRID_ITEMS_PER_CELL = 2;
@@ -42,6 +43,7 @@
 
   const tracked = $derived(trackedReleases(releases, editionMap));
   const split = $derived(splitByPrecision(tracked));
+  const streaming = $derived(startedStreamServices(releases, today));
 
   function workTitleFor(editionId: string): string {
     const edition = editionMap.get(editionId);
@@ -147,6 +149,7 @@
         {release}
         edition={editionMap.get(release.editionId)}
         workTitle={workTitleFor(release.editionId)}
+        streaming={streaming.get(release.editionId)}
         onclick={() => goToWork(release.editionId)}
       />
     {/each}
