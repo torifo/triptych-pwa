@@ -9,6 +9,7 @@
     sourceRefKey,
     type ResolvableResult,
   } from './release-view';
+  import { sourceRefSyncNote } from './source-ref-sync';
 
   let { edition, onchange }: { edition: Edition; onchange: () => void } = $props();
 
@@ -41,7 +42,10 @@
       }
       await addSourceRef(edition.id, ref);
       input = '';
-      message = { kind: 'ok', text: `${SOURCE_LABELS[ref.source]} を追加しました。次回の同期から反映されます` };
+      message = {
+        kind: 'ok',
+        text: `${SOURCE_LABELS[ref.source]} を追加しました。${sourceRefSyncNote(edition, ref.source)}`,
+      };
       onchange();
     } catch (err) {
       message = {
