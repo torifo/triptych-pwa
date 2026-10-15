@@ -21,7 +21,7 @@ CLI export──> local/catalog/catalog-YYYYMMDD.{csv,json}
 - `relations`: AniList の辺（`from_id` → `to_id`、`relation_type`）。`to_id` がカタログに無くても残す
 - `links`: ソースをまたいだ結び付き（`method`・`confidence`）
 - `clusters`: entry → 作品 ID。`cluster_summary`: 一覧用の集計
-- `entries_fts`: FTS5（trigram）。題名・別名・読み
+- `entries_fts`: FTS5（trigram）。`text` に題名・別名・読みを入れ、全角半角・大小文字を畳んだ形（NFKC・小文字化。元と違う時だけ）も足す。検索語も同じに畳む（`backend/catalog/text.py` の `fold_for_search` / `search_text`）。索引の中身を変えたら `python -m backend.catalog link` で作り直す
 - `harvest_state`: 区切りごとの進み具合（再開用）。`meta`: 最終実行時刻・件数
 
 ### 収集器の共通インターフェース（`backend/catalog/harvest/<source>.py`）
@@ -34,19 +34,24 @@ async def harvest(
     clock: Clock,            # backend.catalog.runtime.Clock（now/sleep を差し替え可能）
     limit: int | None = None,  # 取得件数の上限（試運転用）
     log: Callable[[str], None] = print,
+    recent: bool = False,    # build --recent の軽い更新（範囲は下の「--recent の範囲」）
 ) -> HarvestResult
 ```
 
 - 書き込みは `backend.catalog.db.upsert_entry()` / `replace_relations()` / `mark_slice()` だけを使う
 - 区切り（slice）ごとに `harvest_state` を `done` にし、再実行時は `done` の区切りを飛ばす（`--fresh` で全部やり直し）
+- `recent=True` は `done` の記録に関わらず、狭めた範囲だけを取り直す。既存の行は upsert するだけで消さない。`--recent` を付けた時だけ `recent=True` を渡す（付けない build は従来と同じ呼び出し）。`--fresh` とは併用できない
+- `--recent` の結果は `meta` の `harvest:<source>:recent_at` / `recent_result` に残し、全件の `result` は上書きしない。画面の「最終収集」（`harvest:<source>:at`）は `--recent` でも進める
 - User-Agent は `triptych/0.1 (personal tracker)`
 
 ### 実装で分かった制約（2026-10-14）
 
 - AniList: `pageInfo.total` は件数に関係なく 5000 を返すので信用しない（短いページか `hasNextPage:false` で終わる）。`startDate_lesser` だけだと開始日の無い作品も混ざるため、`<1960`（日付あり）と `nodate` を分けた。今年+3 より先の作品用に末尾の区切りを足した。null の変数は受け付けないので、区切りごとに使う条件だけでクエリを組む
-- NDL: 1つの検索で届くのは先頭 500 件だけ（idx で先へ進めない）。月より細かい日付指定は効かない。月の件数が 500 を超えるので、ISBN の前方一致（`97840`〜`97849`、溢れたら次の桁）で再帰的に割る。`ndc` 検索は目録済みのレコードしか返さないため、目録前の近刊は取れない（Library に入れた作品の近刊は、作品名で引く既存の同期が拾う）
+- NDL: 1つの検索で届くのは先頭 500 件だけ（idx で先へ進めない）。月より細かい日付指定は効かない。月の件数が 500 を超えるので、ISBN の前方一致（`97840`〜`97849`、溢れたら次の桁）で再帰的に割る。`ndc` 検索は目録済みのレコードしか返さないため、目録前の近刊は取れない（Library に入れた作品の近刊は、作品名で引く既存の同期が拾う。取得手段は「今後の課題」）
 - しょぼかる: 全 8085 件のうちアニメ系（Cat 1 アニメ・7 OVA・8 映画・10 アニメ(終了/再放送)）の約 6760 件を採用。実写・占有行は除外
-- 更新: 取り終えた区切りは再実行で飛ばすため、データを新しくするには `build --fresh`（当月・未来月の本や放送中の作品が増えるため、週1回程度を想定）
+- 更新: 取り終えた区切りは再実行で飛ばすため、データを新しくするには次のどちらか
+  - `build --recent`（日常用・約8分＋紐付け約15秒）: 新しい本・放送中の作品・上位の Web 小説だけを取り直す。週1回〜新刊が気になる時
+  - `build --fresh`（月1回程度・約2時間）: `--recent` が見ない範囲（古い連載の状態、なろう・カクヨムの下位、昔の月の本）まで取り直す
 
 ### 区切りと上限
 
@@ -57,6 +62,16 @@ async def harvest(
 | narou | (ジャンル)。`type=re&order=hyoka&lim=500&st=1..2000` | 2500 件 | 1 req/s・gzip |
 | kakuyomu | (ジャンル)。人気順の検索ページ | 50 ページ（1000 件） | 1 req/s・同時1・robots 確認 |
 | ndl | (ndc 913.6 / 726.1)。`mediatype=books&from=<1年前の年月>&cnt=500&idx=` | 取れるだけ | 1 req/s・30 秒タイムアウト |
+
+`build --recent` の範囲（2026-10-15、前日に全件を取った DB で実測: 合計約7分44秒）:
+
+| harvester | 取り直す範囲 | 上限 | 記録 |
+|---|---|---|---|
+| anilist | 今年〜+3年の年（と、それより先の作品）。放送中・放送予定（RELEASING / NOT_YET_RELEASED）のアニメ全部、予定のマンガ、連載中マンガの人気上位 1000（20 ページ）。最後に、保存済みで放送中・予定のまま今回見えなかった行（終了・中止・休止に変わった作品）を ID 指定（50 件/リクエスト）で取り直す（sweep） | sweep は最大 500 件（アニメ優先、次に人気順）。年が 5000 件の壁に当たったら月に割るのは全件と同じ | 年の区切りは `done` のまま毎回 1 ページ目から。状態の区切りは `recent:<TYPE>:...` |
+| syoboi | 前回の実行の 1 日前以降に更新された番組だけ（`TitleLookup&TID=*&LastUpdate=`）。前回の記録が無い・試運転だった時は全番組 | 1 リクエスト | `all` 区切りの更新時刻を進める（件数は全件のまま）。更新が 0 件でも受け付ける（`Code 404`） |
+| narou | 21 ジャンル × 総合評価の上位 2 ページ（500 件 × 2） | 1 ジャンル 1000 件 | 専用の `recent:genre:<code>` |
+| kakuyomu | 12 ジャンル × 人気順の上位 5 ページ（20 件 × 5） | 1 ジャンル 100 件 | 専用の `recent:genre:<name>` |
+| ndl | 先月〜6か月先の月と、その先をまとめた区切り（小説・漫画）。月が 500 件を超えたら ISBN で割るのは全件と同じ | 全件と同じ（取れるだけ） | 全件と同じ区切りを `done` にし直す。昔の月の記録は残す |
 
 ### 紐付け（`backend/catalog/link.py`）
 
@@ -98,6 +113,17 @@ async def harvest(
 
 - harvester: 録画 fixture と偽の時計で、区切りの分割（5000 件の壁）、再開、待ち（レート・Crawl-delay）、正規化を検証
 - linker: 合成データで、関係による統合、照合の信頼度、閾値、期表記の除去、大きなシリーズが SIDE_STORY で潰れないこと
-- API: 一時 DB で絞り込み・並べ替え・全文検索（3文字以上は FTS、2文字以下は LIKE）・ページ送り・書き出し
+- API: 一時 DB で絞り込み・並べ替え・全文検索（3文字以上は FTS、2文字以下は検索用テキスト `entries_fts.text` の走査。全角半角・大小文字の揺れを吸収すること）・ページ送り・書き出し
 - フロント: 行→Edition の変換、登録済み判定、URL クエリの組み立て
 - 統合: 実際に全件収集を走らせ、件数・代表作品（薬屋・本好き・転スラ・無職転生）の作品まとまり・画面からの追加を確認
+
+## 今後の課題
+
+### 近刊（NDL 目録前）の取得手段
+
+NDL の目録に載る前の近刊（出版予定）は、`ndc` 検索では取れない。取得手段を調べた結果（未実装）:
+
+| 手段 | 評価 |
+|---|---|
+| NDL Search の OAI-PMH `set=jpro`（JPRO 由来の出版予定） | **推奨**。登録不要、200 件/ページ、OpenSearch のような 500 件の壁が無い。JPRO のジャンル語と NDC へのリンクで漫画・小説を判定でき、ISBN をキーに `ndl:<isbn>` へ統合できる |
+| NDL OpenSearch の `dpid=jpro` | 分類が弱く、ムックなどが小説に混ざる。見送り |

@@ -26,7 +26,10 @@ requirements.md の US-101〜106 を、既存の 2 層構成（PWA + collector�
 - **紙の系統（line）**: NDL の `seriesTitle` から番号部分を除いた文字列（例「TOジュニア文庫」）を line キーとし、無いものは `''`（本編）。近刊のように `seriesTitle` が無いレコードは、タイトル中の叢書名（「〜文庫」「〜ジュニア」など）があればそれを line、無ければ本編とする。スピンオフ（「〜ハンネローレの貴族院五年生〜」など）は同じ作品の本として本編 line に含める。Edition ごとに初回同期で件数最大の line を選んで `syncHints.ndlLine` に保存し、以後はその line の巻だけを Release にする
 - **NDL の引き方**: 同期では `title=<Work タイトル>&mediatype=books&from=<2年前の年>&cnt=500` の1リクエスト（6時間キャッシュ）。初回の line 判定もこの結果で行う。除外: 978-4 以外の ISBN（翻訳）、電子書籍カテゴリ、ISBN なし、タイトルが Work タイトルで始まらないもの、除外語（アンソロジー・ファンブック・画集・設定資料・ガイド・カレンダー・ドラマCD・付き・特装版・限定版・同梱）、発行日が範囲（`2018.1-2020.1` のようなセット）のもの。同じ巻が既刊形式と近刊形式で二重に出たら ISBN で1つにする
 - **AniList のレート**: 自主制限を 25 req/min にする（上限 30 に余裕を持たせる）
-- **しょぼいカレンダー**: `Crawl-delay: 60` を守る。collector 内に専用キューを持ち、取得は 60 秒に1回。結果は 24 時間キャッシュ。キャッシュが無い時はエンドポイントが `{"status": "queued"}` を返し、次の同期で拾う。配信系チャンネル（ChLookup のチャンネルグループで判定）の最初の番組を「配信開始」とする
+- **しょぼいカレンダー**: `Crawl-delay: 60` を守る。collector 内に専用キューを持ち、取得は 60 秒に1回。結果は 24 時間キャッシュ。キャッシュが無い時はエンドポイントが `{"status": "queued"}` を返し、次の同期で拾う。番組は14日前（`STREAMING_LOOKBACK_DAYS`）から1リクエストで取り、`programs` には今日以降だけを載せる。配信系チャンネル（ChLookup のチャンネルグループで判定）は、サービスごとの今日以降の最初の番組を `streamStarts` にする。直近14日にも配信系の番組があったサービスは「配信中」で、その externalId を `startedStreams` で返す（週1の配信が1回休んでも配信中のまま）
+- **配信中のサービス（ローリング）**: 配信中のサービスは「配信開始」にせず、次回の配信を1件の Release（`kind='stream-start'`・`rolling: true`・`origin: 'sync'`・既読で作成）で持つ。配信中かは、`startedStreams` に入っている、またはそのサービスのローリング行がすでにある、で判定する（`startedStreams` を返さない古い応答では、AniList の放送状態が RELEASING なら配信中）。日付・時刻・ラベル・externalId は同期のたびに上書きし、`dateHistory` には記録しない。同じサービスは externalId、またはローリング同士のラベルで同定する（ABEMA は週ごとにチャンネルが替わる）。配信開始として作った既存の行は、配信中になった時に削除して作り直す（延期履歴・新着を持ち越さない）。手動の行と同じ externalId の配信は触らない
+- **ローリングの見せ方**: 新着（`unseenReleases`）・直近（`upcomingReleases`）・カレンダー（`trackedReleases`）から外す。Work 詳細の「次話と配信先」では「配信中」の行、Home・カレンダーの次話の行には「◯◯ 配信中」を添える。まだ配信の無いサービスは従来どおり配信開始で、新着になる
+- **しょぼいカレンダーを照会しない**: 同期は AniList のあとにしょぼいカレンダーを回し、Edition の AniList id がすべて FINISHED・CANCELLED なら照会しない（Crawl-delay 60 の枠を使わない）。Edition に id が複数ある時は、RELEASING > NOT_YET_RELEASED > HIATUS > FINISHED > CANCELLED の順でいちばん動いている状態を採る。状態が取れなかった id があれば照会する
 - **成人向け**: AniList の isAdult は除外、なろう R18 API は使わない
 
 ## 共有契約
@@ -108,7 +111,8 @@ class SyoboiTitleDTO(BaseModel):
     tid: Optional[str] = None
     title: Optional[str] = None
     programs: list[BroadcastDTO] = Field(default_factory=list)  # 今日以降の番組（最大50件）
-    streamStarts: list[ReleaseDTO] = Field(default_factory=list) # 配信サービスごとの最初の番組 → kind="stream-start"
+    streamStarts: list[ReleaseDTO] = Field(default_factory=list) # 配信サービスごとの今日以降の最初の番組 → kind="stream-start"
+    startedStreams: Optional[list[str]] = None  # 配信中（直近14日にも配信あり）の streamStarts の externalId。None は不明
 
 class WebNovelDTO(BaseModel):       # なろう・カクヨム共通
     source: Literal["narou", "kakuyomu"]
@@ -128,7 +132,7 @@ class WebNovelDTO(BaseModel):       # なろう・カクヨム共通
 
 | Method | Endpoint | 返り値 | 担当 |
 |---|---|---|---|
-| GET | `/api/anilist/media/{id}` | MediaDetailDTO（releases は JST・朝5時区切り・precision 付き。startDate が年のみ/年月のみでも Release を出す） | B1 |
+| GET | `/api/anilist/media/{id}` | MediaDetailDTO（releases は JST・朝5時区切り・precision 付き。startDate が年のみ/年月のみでも Release を出す。`status` に AniList の放送状態 AiringStatus を返す） | B1 |
 | GET | `/api/anilist/relations/{id}` | RelationsDTO（isAdult は除外済み） | B1 |
 | GET | `/api/anilist/resolve-source?title=&kind=novel\|manga` | `list[SearchResult]`（AniList の NOVEL/MANGA 候補。副題・前方一致を許容したスコア順、最大5件） | B1 |
 | GET | `/api/anilist/detect?title=` | `list[DetectionCandidateDTO]`（via=title、isAdult 除外） | B1 |
@@ -137,7 +141,7 @@ class WebNovelDTO(BaseModel):       # なろう・カクヨム共通
 | GET | `/api/narou/novel/{ncode}` | WebNovelDTO | B3 |
 | GET | `/api/kakuyomu/work/{id}` | WebNovelDTO | B3 |
 | GET | `/api/search?q=&types=` | `{results: SearchResult[], errors: [...]}`。AniList（isAdult 除外）＋なろう（title=1/type=re/order=hyoka）＋カクヨム（`/search?order=popular` の先頭20件）＋NDL 書籍（シリーズ単位に集約）。q が URL（なろう・カクヨム・AniList）・ncode・ISBN なら直接解決して `direct: true` の1件を返す | B3 |
-| GET | `/api/syoboi/title?tid=` または `?title=` | SyoboiTitleDTO（TID 未知ならタイトルで解決。Crawl-delay 60 のキューを通す） | B4 |
+| GET | `/api/syoboi/title?tid=` または `?title=` | SyoboiTitleDTO（TID 未知ならタイトルで解決。Crawl-delay 60 のキューを通す。番組は14日前から取る） | B4 |
 | GET | `/api/health` | 各アダプターの直近エラーを実際に記録して返す | B3 |
 
 ### Frontend スキーマ（`src/lib/db/schema.ts`、Dexie v2）
@@ -155,6 +159,7 @@ export interface Release {
   time?: string;             // v2 '25:30'
   externalId?: string;       // v2 ISBN13 / '<anilistId>:<n>' / anilistId
   origin: 'sync' | 'manual'; // v2 manual は同期で触らない
+  rolling?: boolean;         // v2 配信中のサービスの「次回の配信」（stream-start）。日付は同期ごとに動き、延期にも新着にもしない
   dateHistory: ReleaseDateHistoryEntry[];
   source: Source;
   seenAt?: string;
@@ -199,5 +204,5 @@ Dexie v2:
 ## Testing Strategy
 
 - **Backend**: 実機で確認した事例を fixture に固定する。本好きの NDL 149 件から本編最新巻が日付降順で取れること、ジュニア文庫・翻訳・アンソロジーが除外されること、openBD 未収録の巻が NDL の発行日で残ること、`2026.8` が month 精度になること、JST 01:30 の放送が前日・`25:30` になること、無職転生・薬屋の relations から新期が出ること、なろうの end=0 が完結になること
-- **Frontend**: v2 移行（誤データ削除・既定値補完）、ISBN キーのマージで日付が往復しないこと、手動 Release を同期が触らないこと、初回同期で current が変わらないこと、全失敗時に lastSyncAt が進まないこと、他 Work 登録済みアニメを再提案しないこと、JST 0〜9時の「今日」
+- **Frontend**: v2 移行（誤データ削除・既定値補完）、配信中のサービスがローリング1件（既読・延期にしない・新着/直近/カレンダーに出さない）になること、放送終了・中止でしょぼいカレンダーを照会しないこと、ISBN キーのマージで日付が往復しないこと、手動 Release を同期が触らないこと、初回同期で current が変わらないこと、全失敗時に lastSyncAt が進まないこと、他 Work 登録済みアニメを再提案しないこと、JST 0〜9時の「今日」
 - **統合**: 本好き・薬屋・転スラ・無職転生を実 API で登録→同期→検知まで通す

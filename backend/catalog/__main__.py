@@ -125,7 +125,7 @@ def main(argv: list[str] | None = None) -> int:
     build.add_argument(
         "--recent",
         action="store_true",
-        help="light update (~10 min): upcoming books, this year on and airing anime, top web novels",
+        help="light update (~8 min): upcoming books, this year on and airing anime, top web novels",
     )
     build.add_argument("--no-link", action="store_true", help="skip linking after harvest")
 

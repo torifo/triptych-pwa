@@ -46,7 +46,9 @@ MVP の収集経路を、ローカル運用（Mac 上の collector）前提で�
 - THE SYSTEM SHALL 成人向け（isAdult）を検索・検知から除く
 
 ### US-107: アニメの配信日を拾う
-- WHEN 追跡中のアニメ Edition を同期した時 THE SYSTEM SHALL しょぼいカレンダーで放送局・配信サービスごとの番組を取得し、配信サービスごとの最初の番組を「配信開始」の Release として反映する
+- WHEN 追跡中のアニメ Edition を同期した時 THE SYSTEM SHALL しょぼいカレンダーで放送局・配信サービスごとの番組を（14日前から）取得し、まだ配信の無い配信サービスは、そのサービスの最初の番組を「配信開始」の Release として反映する
+- IF 配信サービスが直近14日にも配信している（配信中）THEN THE SYSTEM SHALL 配信開始とはせず、次回の配信を1件のローリング Release（`rolling`・既読）として持つ。日付が動いても延期として記録せず、新着・直近7日・カレンダーには出さない。Work 詳細の「次話と配信先」の行と、次話の行の「◯◯ 配信中」で示す
+- IF Edition の AniList id がすべて放送終了・中止 THEN THE SYSTEM SHALL しょぼいカレンダーを照会しない。しょぼいカレンダーは AniList のあとに照会する
 - THE SYSTEM SHALL しょぼいカレンダーの `Crawl-delay: 60` を守り、取得できていない間は「取得待ち」として扱い、次の同期で反映する
 - THE SYSTEM SHALL Work 詳細のアニメ面に、次回の放送・配信予定（局・日付・時刻）を表示する
 
