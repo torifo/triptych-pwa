@@ -6,7 +6,7 @@
 1. Title matching ties every non-AniList row to at most one AniList entry
    (syoboi -> anime, narou / kakuyomu -> novel or manga, ndl -> novel or manga).
 2. Works are made with union-find over the merge relations
-   (ADAPTATION / SOURCE / SEQUEL / PREQUEL / PARENT) and the links whose
+   (ADAPTATION / SOURCE / SEQUEL / PREQUEL) and the links whose
    confidence is >= MERGE_THRESHOLD. Weaker links stay in `links` as candidates.
 3. NDL books that joined no work are grouped per (series, kindHint, line).
 4. `cluster_id` is the smallest member id, so it is stable across runs.
@@ -17,6 +17,7 @@ from __future__ import annotations
 import bisect
 import calendar
 import json
+import re
 import sqlite3
 import time
 from collections import Counter
@@ -26,7 +27,8 @@ from typing import Any, Iterable, Optional
 from .text import normalize_title, strip_notes, strip_season, strip_subtitle, title_key
 
 MERGE_THRESHOLD = 0.8
-MERGE_RELATIONS = ("ADAPTATION", "SOURCE", "SEQUEL", "PREQUEL", "PARENT")
+# PARENT は SIDE_STORY / SPIN_OFF の逆向き。統合に使うと共通の特番を介して別シリーズがつながる
+MERGE_RELATIONS = ("ADAPTATION", "SOURCE", "SEQUEL", "PREQUEL")
 
 # syoboi <-> AniList anime
 CONF_TITLE_YEAR = 0.95
@@ -41,6 +43,13 @@ PREFIX_MIN = 8  # the shorter key of a prefix match must be at least this long
 BASE_KEY_MIN = 4  # subtitle-stripped keys shorter than this are too generic to match on
 # ndl book <-> AniList novel / manga
 CONF_SERIES = 0.85
+# 部・巻ごとに分かれた AniList 原作（「本好きの下剋上 ~…~ 第一部」）と副題を除いた題名で一致
+CONF_BASE = 0.82
+BASE_INDEX_MIN = 6  # 副題を除いた AniList 側のキーはこれ以上の長さだけ索引する
+# 作者で裏を取る: 一致すれば上げ、両方に作者がいて一致しない短い題名・副題除去の一致は候補止まりにする
+CONF_AUTHOR_MATCH = 0.95
+CONF_AUTHOR_MISMATCH = 0.6
+SHORT_TITLE_KEY = 10  # 「約束」「短編集」のような短い題名は偶然の一致が多い
 
 SYNONYM_KEY_MIN = 2  # very short synonyms ("S2", "劇") collide across unrelated works
 
@@ -49,8 +58,11 @@ METHOD_TITLE_EXACT = "title-exact"
 METHOD_SYNONYM = "synonym"
 METHOD_PREFIX = "title-prefix"
 METHOD_SERIES = "series"
+METHOD_BASE = "base-title"
 
 KIND_ORDER = ("anime", "manga", "novel", "web-novel", "book")
+# 何かの翻案ではない原作（漫画・小説の代表題名に優先する）
+ORIGINAL_SOURCES = frozenset({None, "ORIGINAL", "WEB_NOVEL", "OTHER"})
 ANIME_STATUS_RANK = {"RELEASING": 5, "NOT_YET_RELEASED": 4, "HIATUS": 3, "FINISHED": 2, "CANCELLED": 1}
 SEASON_ORDER = {"WINTER": 0, "SPRING": 1, "SUMMER": 2, "FALL": 3}
 PRECISION_RANK = {"day": 0, "month": 1, "year": 2}
@@ -64,7 +76,7 @@ _FAR = 10**9  # date distance when a date is missing
 _ENTRY_SQL = (
     "SELECT id, source, kind, title, title_native, title_romaji, title_english, title_reading, "
     "synonyms, status, start_date, start_precision, season, season_year, popularity, cover, "
-    "source_material, extra FROM entries ORDER BY id"
+    "source_material, extra, creators FROM entries ORDER BY id"
 )
 
 
@@ -92,6 +104,7 @@ class _Row:
         "cover",
         "source_material",
         "extra",
+        "creators",
     )
 
     def __init__(self, idx: int, record: tuple[Any, ...]) -> None:
@@ -114,12 +127,14 @@ class _Row:
             self.cover,
             self.source_material,
             extra,
+            creators,
         ) = record
         self.idx = idx
         self.title = self.title or ""
         self.synonyms = _json_list(synonyms)
         self.start, self.precision = parse_partial_date(start_date, start_precision)
         self.extra = _extra(self.source, self.kind, extra)
+        self.creators = _creator_keys(_json_list(creators))
 
     @property
     def pop(self) -> int:
@@ -130,6 +145,22 @@ class _Row:
         if self.start is not None:
             return self.start.year
         return self.season_year
+
+
+_AUTHOR_NOTE = re.compile(r"[@＠].*$")
+
+
+def _creator_keys(names: list[str]) -> set[str]:
+    """Normalized author names; なろうの「名前@告知」は告知を落とす。"""
+    keys = {normalize_title(_AUTHOR_NOTE.sub("", name)) for name in names if name}
+    return {k for k in keys if len(k) >= 2}
+
+
+def _same_author(a: set[str], b: set[str]) -> Optional[bool]:
+    """True / False when both sides list authors, None when either side has none."""
+    if not a or not b:
+        return None
+    return any(x in y or y in x for x in a for y in b)
 
 
 def _json_list(value: Any) -> list[str]:
@@ -201,11 +232,12 @@ def _distance(a: Optional[date], b: Optional[date]) -> int:
 class _Index:
     """Title keys of one AniList kind: primary (title / native / romaji / english) and synonyms."""
 
-    __slots__ = ("primary", "synonym", "_sorted")
+    __slots__ = ("primary", "synonym", "base", "_sorted")
 
     def __init__(self) -> None:
         self.primary: dict[str, list[int]] = {}
         self.synonym: dict[str, list[int]] = {}
+        self.base: dict[str, list[int]] = {}
         self._sorted: Optional[list[str]] = None
 
     def add(self, idx: int, primary: Iterable[str], synonyms: Iterable[str]) -> None:
@@ -213,6 +245,10 @@ class _Index:
             self.primary.setdefault(key, []).append(idx)
         for key in synonyms:
             self.synonym.setdefault(key, []).append(idx)
+
+    def add_base(self, idx: int, keys: Iterable[str]) -> None:
+        for key in keys:
+            self.base.setdefault(key, []).append(idx)
 
     def sorted_primary(self) -> list[str]:
         if self._sorted is None:
@@ -241,28 +277,45 @@ def _primary_keys(row: _Row, keys: _Keys) -> set[str]:
     return found
 
 
+def _base_keys(row: _Row, keys: _Keys, exclude: set[str]) -> set[str]:
+    found = {keys(strip_subtitle(value)) for value in (row.title, row.native) if value}
+    return {k for k in found if len(k) >= BASE_INDEX_MIN and k not in exclude}
+
+
 def _synonym_keys(row: _Row, keys: _Keys, exclude: set[str]) -> set[str]:
     return {k for k in map(keys, row.synonyms) if len(k) >= SYNONYM_KEY_MIN and k not in exclude}
 
 
 # --------------------------------------------------------------------------- matching
 
-# candidates: AniList idx -> (confidence, method); the strongest match per AniList row wins.
-_Candidates = dict[int, tuple[float, str]]
+# candidates: AniList idx -> (confidence, method, matched key length); the strongest match per AniList row wins.
+_Candidates = dict[int, tuple[float, str, int]]
 
 
-def _put(cands: _Candidates, idx: int, confidence: float, method: str) -> None:
+def _put(cands: _Candidates, idx: int, confidence: float, method: str, key_len: int = 99) -> None:
     confidence = round(confidence, 2)
     current = cands.get(idx)
     if current is None or confidence > current[0]:
-        cands[idx] = (confidence, method)
+        cands[idx] = (confidence, method, key_len)
+
+
+def _check_authors(cands: _Candidates, row: _Row, rows: list[_Row]) -> _Candidates:
+    checked: _Candidates = {}
+    for idx, (confidence, method, key_len) in cands.items():
+        same = _same_author(row.creators, rows[idx].creators)
+        if same:
+            confidence = max(confidence, CONF_AUTHOR_MATCH)
+        elif same is False and (key_len < SHORT_TITLE_KEY or method == METHOD_BASE):
+            confidence = min(confidence, CONF_AUTHOR_MISMATCH)
+        checked[idx] = (round(confidence, 2), method, key_len)
+    return checked
 
 
 def _choose(cands: _Candidates, row: _Row, rows: list[_Row]) -> Optional[tuple[int, float, str]]:
     """One AniList row per non-AniList row: best confidence, then popularity, then nearest start."""
     best: Optional[tuple[int, float, str]] = None
     best_rank: Optional[tuple[Any, ...]] = None
-    for idx, (confidence, method) in cands.items():
+    for idx, (confidence, method, _) in cands.items():
         other = rows[idx]
         rank = (-confidence, -other.pop, _distance(row.start, other.start), other.id)
         if best_rank is None or rank < best_rank:
@@ -309,9 +362,11 @@ def _web_candidates(queries: list[str], index: _Index) -> _Candidates:
     cands: _Candidates = {}
     for query in queries:
         for idx in index.primary.get(query, ()):
-            _put(cands, idx, CONF_WEB_TITLE, METHOD_TITLE_EXACT)
+            _put(cands, idx, CONF_WEB_TITLE, METHOD_TITLE_EXACT, len(query))
         for idx in index.synonym.get(query, ()):
-            _put(cands, idx, CONF_WEB_SYNONYM, METHOD_SYNONYM)
+            _put(cands, idx, CONF_WEB_SYNONYM, METHOD_SYNONYM, len(query))
+        for idx in index.base.get(query, ()):
+            _put(cands, idx, CONF_BASE, METHOD_BASE, len(query))
     ordered = index.sorted_primary()
     for query in queries:
         # An AniList title that is a proper prefix of the web-novel title ...
@@ -334,10 +389,10 @@ def _match_web(
     queries = _web_queries(row, keys)
     if not queries:
         return None
-    best_novel = _choose(_web_candidates(queries, novel), row, rows)
+    best_novel = _choose(_check_authors(_web_candidates(queries, novel), row, rows), row, rows)
     if best_novel is not None and best_novel[1] >= CONF_WEB_TITLE:
         return best_novel
-    best_manga = _choose(_web_candidates(queries, manga), row, rows)
+    best_manga = _choose(_check_authors(_web_candidates(queries, manga), row, rows), row, rows)
     # Novels first; a manga only wins with a strictly better match.
     if best_novel is not None and (best_manga is None or best_novel[1] >= best_manga[1]):
         return best_novel
@@ -360,8 +415,10 @@ def _match_book(
     for index in indexes:
         cands: _Candidates = {}
         for idx in (*index.primary.get(key, ()), *index.synonym.get(key, ())):
-            _put(cands, idx, CONF_SERIES, METHOD_SERIES)
-        best = _choose(cands, row, rows)
+            _put(cands, idx, CONF_SERIES, METHOD_SERIES, len(key))
+        for idx in index.base.get(key, ()):
+            _put(cands, idx, CONF_BASE, METHOD_BASE, len(key))
+        best = _choose(_check_authors(cands, row, rows), row, rows)
         if best is not None:
             return best
     return None
@@ -374,6 +431,8 @@ def _match_all(rows: list[_Row]) -> list[tuple[int, int, str, float]]:
         if row.source == "anilist" and row.kind in indexes:
             primary = _primary_keys(row, keys)
             indexes[row.kind].add(row.idx, primary, _synonym_keys(row, keys, primary))
+            if row.kind in ("novel", "manga"):
+                indexes[row.kind].add_base(row.idx, _base_keys(row, keys, primary))
     links: list[tuple[int, int, str, float]] = []
     for row in rows:
         if row.source == "syoboi" and row.kind == "anime":
@@ -474,6 +533,7 @@ def _representative(members: list[_Row]) -> _Row:
     anilist = [r for r in members if r.source == "anilist"]
     novels = [r for r in anilist if r.kind == "novel"]
     tiers = (
+        [r for r in anilist if r.kind in ("novel", "manga") and r.source_material in ORIGINAL_SOURCES],
         [r for r in novels if r.source_material not in NOVELIZATION_SOURCES],  # the original novel
         [r for r in anilist if r.kind == "manga"],
         novels,

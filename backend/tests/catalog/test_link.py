@@ -701,3 +701,93 @@ def test_scale_10k_rows(tmp_path):
 @pytest.mark.skipif(not RUN_SLOW, reason="set TRIPTYCH_SLOW=1 to run the 100k-row timing")
 def test_scale_100k_rows_within_two_minutes(tmp_path):
     _check_scale(tmp_path, anilist=70_000, others=30_000, relations=100_000, budget=120)
+
+
+# --------------------------------------------------------------------------- regressions found on the real catalog
+
+
+def test_parent_relation_does_not_bridge_two_franchises(tmp_path):
+    # 実データ: アヌシー映画祭の記念特番が ONE PIECE とドラゴンボールの両方に PARENT でつながっていた
+    entries = [
+        _anilist(1, "manga", "ONE PIECE", popularity=200000, source_material="ORIGINAL"),
+        _anilist(2, "anime", "One Piece: Annecy Festival 60th Anniversary", popularity=100),
+        _anilist(3, "anime", "Dragon Ball: Annecy Festival 60th Anniversary", popularity=100),
+        _anilist(4, "manga", "ドラゴンボール", popularity=50000, source_material="ORIGINAL"),
+    ]
+    relations = [
+        ("anilist:2", "anilist:1", "PARENT"),
+        ("anilist:3", "anilist:2", "PARENT"),
+        ("anilist:3", "anilist:4", "PARENT"),
+    ]
+    conn = _open(tmp_path, entries, relations)
+    run_link(conn, today=TODAY)
+    assert _cluster(conn, "anilist:1") != _cluster(conn, "anilist:4")
+
+
+def test_web_novel_links_to_part_split_anilist_novel_by_base_title(tmp_path):
+    # 実データ: AniList の原作は部ごと、なろう版は1作品
+    entries = [
+        _anilist(87383, "novel", "本好きの下剋上 ~司書になるためには手段を選んでいられません~ 第一部「兵士の娘」",
+                 popularity=7876, source_material="WEB_NOVEL"),
+        _anilist(110800, "novel", "本好きの下剋上~司書になるためには手段を選んでいられません~ 第二部「神殿の巫女見習い」",
+                 popularity=2957, source_material="WEB_NOVEL"),
+        _entry("narou", "n4830bu", "web-novel", "本好きの下剋上　～司書になるためには手段を選んでいられません～"),
+        _entry("narou", "n7835cj", "web-novel", "本好きの下剋上　SS置き場"),
+    ]
+    conn = _open(tmp_path, entries)
+    run_link(conn, today=TODAY)
+    assert _links(conn, "narou:n4830bu") == [("anilist:87383", "base-title", 0.82)]
+    assert _cluster(conn, "narou:n4830bu") == _cluster(conn, "anilist:87383")
+    assert _cluster(conn, "narou:n7835cj") != _cluster(conn, "anilist:87383")
+
+
+def test_representative_prefers_the_original_over_a_novelization(tmp_path):
+    entries = [
+        _anilist(1, "manga", "ONE PIECE", popularity=234820, source_material="ORIGINAL"),
+        _anilist(2, "novel", "ONE PIECE novel A", popularity=3000, source_material="MANGA"),
+        _anilist(3, "anime", "ONE PIECE", popularity=300000, source_material="MANGA"),
+    ]
+    relations = [("anilist:2", "anilist:1", "SOURCE"), ("anilist:3", "anilist:1", "SOURCE")]
+    conn = _open(tmp_path, entries, relations)
+    run_link(conn, today=TODAY)
+    assert _summary(conn, _cluster(conn, "anilist:1"))["title"] == "ONE PIECE"
+
+
+def test_author_mismatch_keeps_short_generic_titles_as_candidates(tmp_path):
+    entries = [
+        _anilist(1, "manga", "約束", popularity=500, creators=["つむらちた"]),
+        _entry("narou", "n1", "web-novel", "約束", creators=["神村 結美"]),
+        _anilist(2, "manga", "MONSTERS", popularity=9000, creators=["尾田栄一郎"]),
+        _entry("narou", "n2", "web-novel", "MONSTERＳ～モンスターズ～", creators=["RAI"]),
+    ]
+    conn = _open(tmp_path, entries)
+    run_link(conn, today=TODAY)
+    assert _links(conn, "narou:n1") == [("anilist:1", "title-exact", 0.6)]
+    assert _cluster(conn, "narou:n1") != _cluster(conn, "anilist:1")
+    assert _cluster(conn, "narou:n2") != _cluster(conn, "anilist:2")
+
+
+def test_author_match_strengthens_and_tolerates_name_variants(tmp_path):
+    entries = [
+        _anilist(1, "novel", "私は敵になりません！", popularity=500, creators=["佐槻奏多", "藤未都也"]),
+        _entry("narou", "n1", "web-novel", "私は敵になりません！", creators=["奏多"]),
+        _anilist(2, "novel", "ネットの『推し』とリアルの『推し』が隣に引っ越してきた", popularity=500, creators=["遥透子"]),
+        _entry("narou", "n2", "web-novel", "【書籍化】ネットの『推し』とリアルの『推し』が隣に引っ越してきた",
+               creators=["遥透子@5月に3冊出ます！"]),
+    ]
+    conn = _open(tmp_path, entries)
+    run_link(conn, today=TODAY)
+    assert _links(conn, "narou:n1") == [("anilist:1", "title-exact", 0.95)]
+    assert _links(conn, "narou:n2") == [("anilist:2", "title-exact", 0.95)]
+
+
+def test_long_exact_title_survives_an_author_mismatch(tmp_path):
+    # AniList の漫画には漫画家しか載らないことが多い
+    title = "弱気MAX令嬢なのに、辣腕婚約者様の様子がおかしいのです"
+    entries = [
+        _anilist(1, "manga", title, popularity=500, creators=["村田あじ"]),
+        _entry("narou", "n1", "web-novel", title, creators=["小田 ヒロ"]),
+    ]
+    conn = _open(tmp_path, entries)
+    run_link(conn, today=TODAY)
+    assert _cluster(conn, "narou:n1") == _cluster(conn, "anilist:1")
