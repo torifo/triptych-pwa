@@ -3,6 +3,9 @@
 export type AutoSyncMode = 'launch' | 'hourly' | 'manual';
 export type SyncSourceName = 'anilist' | 'syoboi' | 'ndl' | 'narou' | 'kakuyomu';
 export type StartScreen = 'home' | 'library' | 'calendar' | 'catalog';
+/** 深夜の時刻: 放送日のまま 25:30（既定）／実際の時計で翌 1:30 */
+export type TimeNotation = 'late-night' | 'clock';
+export type WeekStart = 'sun' | 'mon';
 export type SyncSourceToggles = Record<SyncSourceName, boolean>;
 
 export interface Preferences {
@@ -14,6 +17,10 @@ export interface Preferences {
   detection: boolean;
   /** URL にハッシュが無い起動の時に開く画面。 */
   startScreen: StartScreen;
+  /** 深夜の時刻の書き方。 */
+  timeNotation: TimeNotation;
+  /** カレンダーの月の升目の始まり。 */
+  weekStart: WeekStart;
 }
 
 export type PreferenceName = keyof Preferences;
@@ -21,6 +28,8 @@ export type PreferenceName = keyof Preferences;
 export const AUTO_SYNC_MODES: readonly AutoSyncMode[] = ['launch', 'hourly', 'manual'];
 export const SYNC_SOURCES: readonly SyncSourceName[] = ['anilist', 'syoboi', 'ndl', 'narou', 'kakuyomu'];
 export const START_SCREENS: readonly StartScreen[] = ['home', 'library', 'calendar', 'catalog'];
+export const TIME_NOTATIONS: readonly TimeNotation[] = ['late-night', 'clock'];
+export const WEEK_STARTS: readonly WeekStart[] = ['sun', 'mon'];
 
 export const PREF_KEY_PREFIX = 'triptych.pref.';
 
@@ -29,6 +38,8 @@ export const PREF_DEFAULTS: Readonly<Preferences> = Object.freeze({
   syncSources: Object.freeze({ anilist: true, syoboi: true, ndl: true, narou: true, kakuyomu: true }),
   detection: true,
   startScreen: 'home',
+  timeNotation: 'late-night',
+  weekStart: 'sun',
 });
 
 export function prefKey(name: PreferenceName): string {
@@ -55,6 +66,8 @@ const PARSERS: { [K in PreferenceName]: (raw: unknown) => Preferences[K] | undef
   },
   detection: (raw) => (typeof raw === 'boolean' ? raw : undefined),
   startScreen: (raw) => (START_SCREENS as readonly unknown[]).includes(raw) ? (raw as StartScreen) : undefined,
+  timeNotation: (raw) => (TIME_NOTATIONS as readonly unknown[]).includes(raw) ? (raw as TimeNotation) : undefined,
+  weekStart: (raw) => (WEEK_STARTS as readonly unknown[]).includes(raw) ? (raw as WeekStart) : undefined,
 };
 
 const NAMES = Object.keys(PARSERS) as PreferenceName[];

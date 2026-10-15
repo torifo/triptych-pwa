@@ -3,7 +3,7 @@
 
 import type { Edition, Release, Work } from '../db/schema';
 import type { CatalogQuery } from '../catalog/types';
-import { todayJst } from '../dates';
+import { displayReleaseTime, todayJst } from '../dates';
 import { editionCover, workCover, type CoverSource } from './cover';
 import { airingInstant, broadcastDayJst, countdownLabel, onAirEditionIds } from './onair';
 import { compareReleases, isTrackedEdition, precisionOf, timeMinutes } from './release-view';
@@ -125,7 +125,7 @@ export function todayItems(
       release: primary,
       editionId,
       releaseIds: sorted.map((r) => r.id),
-      badge: primary.time ?? BADGE_WITHOUT_TIME[primary.kind],
+      badge: badgeTime(primary) ?? BADGE_WITHOUT_TIME[primary.kind],
       episode: episodeNumberOf(primary),
       services,
     });
@@ -134,6 +134,12 @@ export function todayItems(
   return items.sort(
     (a, b) => timeMinutes(a.release.time) - timeMinutes(b.release.time) || comparePrimary(a.release, b.release),
   );
+}
+
+/** 表紙に載せる時刻。時計表記の設定では 25:30 を「翌1:30」と書く。 */
+function badgeTime(release: Pick<Release, 'date' | 'time'>): string | undefined {
+  const shown = displayReleaseTime(release);
+  return shown.time ? `${shown.nextDay ? '翌' : ''}${shown.time}` : undefined;
 }
 
 export interface TodaySubLabel {

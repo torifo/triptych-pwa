@@ -104,15 +104,43 @@ export function isWithinDays(release: ReleaseDateLike, today: string, n: number)
   return compareYmd(release.date, today) >= 0 && compareYmd(release.date, addDaysYmd(today, n)) <= 0;
 }
 
-/** 表示用の日付（day `10/16(金) 25:30` / month `2026年8月` / year `2026年`）。曜日は放送日 date のもの。 */
+// 深夜の時刻の書き方（設定 timeNotation）。'late-night' は放送日のまま 25:30、'clock' は翌日の 1:30。
+// 表示だけの切り替えなので、保存する値（放送日・25:30）は変えない。App が起動時と設定の変更時に合わせる。
+let timeNotation: 'late-night' | 'clock' = 'late-night';
+
+export function setTimeNotation(mode: 'late-night' | 'clock'): void {
+  timeNotation = mode;
+}
+
+const LATE_TIME_RE = /^(\d{1,2}):(\d{2})$/;
+
+/** 表示に使う日付と時刻。時計表記では 24 時以降を翌日に送る（nextDay=true）。 */
+export function displayReleaseTime(release: Pick<ReleaseDateLike, 'date' | 'time'>): {
+  date: string;
+  time: string | undefined;
+  nextDay: boolean;
+} {
+  const match = release.time ? LATE_TIME_RE.exec(release.time) : null;
+  if (timeNotation !== 'clock' || !match || Number(match[1]) < 24 || !isValidYmd(release.date)) {
+    return { date: release.date, time: release.time ?? undefined, nextDay: false };
+  }
+  return {
+    date: addDaysYmd(release.date, 1),
+    time: `${Number(match[1]) - 24}:${match[2]}`,
+    nextDay: true,
+  };
+}
+
+/** 表示用の日付（day `10/16(金) 25:30` / month `2026年8月` / year `2026年`）。時計表記では `10/17(土) 1:30`。 */
 export function formatReleaseDate(release: ReleaseDateLike): string {
-  const parsed = parseYmd(release.date);
+  const precision = release.precision ?? 'day';
+  const shown = precision === 'day' ? displayReleaseTime(release) : { date: release.date, time: undefined };
+  const parsed = parseYmd(shown.date);
   if (!parsed) return release.date;
   const { y, m, d } = parsed;
-  const precision = release.precision ?? 'day';
   if (precision === 'year') return `${y}年`;
   if (precision === 'month') return `${y}年${m}月`;
   const weekday = WEEKDAYS_JA[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
   const base = `${m}/${d}(${weekday})`;
-  return release.time ? `${base} ${release.time}` : base;
+  return shown.time ? `${base} ${shown.time}` : base;
 }

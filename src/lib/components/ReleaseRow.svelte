@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Edition, Release } from '../db/schema';
-  import { formatReleaseDate } from '../dates';
+  import { displayReleaseTime, formatReleaseDate } from '../dates';
   import { isPostponed } from './release-view';
   import { displayReleaseLabel } from './labels';
   import type { CoverSize, CoverSource } from './cover';
@@ -45,7 +45,9 @@
   } = $props();
 
   // 日付と時刻を分け、時刻を日付の下に等幅で揃える（番組表の組み方）
-  const day = $derived(formatReleaseDate({ date: release.date, precision: release.precision }));
+  // 時計表記の設定では 25:30 を翌日の 1:30 として出す（保存している値はそのまま）
+  const shown = $derived(displayReleaseTime(release));
+  const day = $derived(formatReleaseDate({ date: shown.date, precision: release.precision }));
   const postponed = $derived(isPostponed(release));
   const services = $derived(release.kind === 'episode' ? streaming.join('・') : '');
   // 時刻の無い行に出す種類の言葉（timeOnly の時）
@@ -60,11 +62,11 @@
 <button type="button" class="release-row row-hover" class:accent {onclick}>
   <span class="when mono" class:muted={!emphasis}>
     {#if timeOnly}
-      <span class="day">{release.time ?? KIND_WORDS[release.kind]}</span>
+      <span class="day">{shown.time ? `${shown.nextDay ? '翌' : ''}${shown.time}` : KIND_WORDS[release.kind]}</span>
     {:else}
       <span class="day">{day}</span>
-      {#if release.time}
-        <span class="time">{release.time}</span>
+      {#if shown.time}
+        <span class="time">{shown.time}</span>
       {/if}
     {/if}
     {#if onAir}

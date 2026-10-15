@@ -21,6 +21,7 @@
   import { maybeAutoSync, type SyncErrors } from './lib/sync/engine'
   import { beginSync, completeSync, failSync, restoreSync, syncStatus } from './lib/sync/status.svelte'
   import { autoSyncPlan, isAutoSyncDue, preferences, startRedirect, type AutoSyncMode } from './lib/preferences'
+  import { setTimeNotation } from './lib/dates'
   import { db, type Edition, type Release } from './lib/db/schema'
   import { listEditions, listReleases } from './lib/db/store'
   import { onAirCount } from './lib/components/home-view'
@@ -93,7 +94,20 @@
   // 「1時間ごと」: 開いている間（画面が見えている時）だけ、1分ごとに期限を見て同期する。設定の変更はその場で効かせる
   const AUTO_SYNC_CHECK_MS = 60_000
   let autoSyncMode = $state<AutoSyncMode>(preferences.get('autoSync'))
-  onMount(() => preferences.subscribe((prefs) => (autoSyncMode = prefs.autoSync)))
+  // 描き直しのきっかけに使う（{#key} で画面を作り直す）
+  const initialTimeNotation = preferences.get('timeNotation')
+  setTimeNotation(initialTimeNotation)
+  let timeNotation = $state(initialTimeNotation)
+  onMount(() =>
+    preferences.subscribe((prefs) => {
+      autoSyncMode = prefs.autoSync
+      // 深夜の時刻の書き方は dates.ts の表示だけに効く。変わったら画面を描き直す
+      if (prefs.timeNotation !== timeNotation) {
+        setTimeNotation(prefs.timeNotation)
+        timeNotation = prefs.timeNotation
+      }
+    }),
+  )
 
   $effect(() => {
     const { repeatMs } = autoSyncPlan(autoSyncMode)
@@ -186,6 +200,7 @@
   {/if}
 
   <main class="flex-1 overflow-y-auto" style="padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));">
+    {#key timeNotation}
     {#if route.name === 'home'}
       <Home />
     {:else if route.name === 'library'}
@@ -205,6 +220,7 @@
         <Catalog />
       {/if}
     {/if}
+    {/key}
   </main>
 
   <nav

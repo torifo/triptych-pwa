@@ -5,6 +5,7 @@
   import type { Release, Edition, Work } from '../lib/db/schema';
   import { formatReleaseDate, todayJst } from '../lib/dates';
   import { navigate } from '../lib/router.svelte';
+  import { preferences, type WeekStart } from '../lib/preferences';
   import { fetchCatalogEvents } from '../lib/catalog/api';
   import type { CatalogEventPage } from '../lib/catalog/types';
   import ReleaseRow from '../lib/components/ReleaseRow.svelte';
@@ -52,7 +53,11 @@
   import { ICS_DAYS, buildIcs, icsEventsFor, icsFilename } from '../lib/calendar/ics';
   import { saveTextFile } from '../lib/calendar/download';
 
-  const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
+  const WEEKDAYS_SUN = ['日', '月', '火', '水', '木', '金', '土'];
+  // 週の始まり（設定）。月曜からなら升目の先頭を1つずらす
+  let weekStartPref = $state<WeekStart>(preferences.get('weekStart'));
+  onMount(() => preferences.subscribe((prefs) => (weekStartPref = prefs.weekStart)));
+  const WEEKDAYS = $derived(weekStartPref === 'mon' ? [...WEEKDAYS_SUN.slice(1), WEEKDAYS_SUN[0]] : WEEKDAYS_SUN);
   const GRID_ITEMS_PER_CELL = 2;
   const VIEWS: { value: CalendarView; label: string }[] = [
     { value: 'week', label: '週' },
@@ -153,7 +158,8 @@
   const monthGrid = $derived(
     (() => {
       // UTC で暦を計算する（端末のタイムゾーンで月初の曜日がずれないように）
-      const startWeekday = new Date(Date.UTC(cursorYear, cursorMonth, 1)).getUTCDay();
+      const sundayFirst = new Date(Date.UTC(cursorYear, cursorMonth, 1)).getUTCDay();
+      const startWeekday = weekStartPref === 'mon' ? (sundayFirst + 6) % 7 : sundayFirst;
       const daysInMonth = new Date(Date.UTC(cursorYear, cursorMonth + 1, 0)).getUTCDate();
 
       const cells: DayCell[] = [];

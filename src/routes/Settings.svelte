@@ -1035,6 +1035,40 @@
       {/each}
     </div>
     <p class="note">ホーム画面のアイコンなどから開いた時に使います。共有されたリンクやリロードでは、その画面のままです。</p>
+
+    {@render sub('深夜の時刻')}
+    <div class="choice-group cols-2" role="group" aria-label="深夜の時刻">
+      <button
+        type="button"
+        class="choice-btn"
+        aria-pressed={prefs.timeNotation === 'late-night'}
+        onclick={() => preferences.set('timeNotation', 'late-night')}
+      >
+        <span class="mono">25:30</span>
+        <span>放送日のまま</span>
+      </button>
+      <button
+        type="button"
+        class="choice-btn"
+        aria-pressed={prefs.timeNotation === 'clock'}
+        onclick={() => preferences.set('timeNotation', 'clock')}
+      >
+        <span class="mono">翌 1:30</span>
+        <span>実際の時刻</span>
+      </button>
+    </div>
+    <p class="note">深夜番組の時刻の書き方です。並びや保存している日付は変わりません。</p>
+
+    {@render sub('週の始まり')}
+    <div class="choice-group cols-2" role="group" aria-label="週の始まり">
+      <button type="button" class="choice-btn" aria-pressed={prefs.weekStart === 'sun'} onclick={() => preferences.set('weekStart', 'sun')}>
+        <span>日曜から</span>
+      </button>
+      <button type="button" class="choice-btn" aria-pressed={prefs.weekStart === 'mon'} onclick={() => preferences.set('weekStart', 'mon')}>
+        <span>月曜から</span>
+      </button>
+    </div>
+    <p class="note">カレンダーの月の升目に使います。</p>
   </section>
 
   <!-- この app について -->
@@ -1516,6 +1550,9 @@
   /* ─── 択一（テーマ・自動同期・起動時の画面） ─── */
   .choice-group {
     display: grid;
+  }
+  .cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .cols-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));

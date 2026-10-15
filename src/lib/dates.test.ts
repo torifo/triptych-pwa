@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  displayReleaseTime,
+  setTimeNotation,
   addDaysYmd,
   compareYmd,
   diffDaysYmd,
@@ -175,5 +177,26 @@ describe('formatReleaseDate', () => {
 
   it('不正な日付は壊さずそのまま返す', () => {
     expect(formatReleaseDate({ date: 'TBD' })).toBe('TBD');
+  });
+});
+
+describe('time notation', () => {
+  it('既定は放送日のまま 25:30', () => {
+    setTimeNotation('late-night');
+    expect(formatReleaseDate({ date: '2026-10-16', time: '25:30' })).toBe('10/16(金) 25:30');
+    expect(displayReleaseTime({ date: '2026-10-16', time: '25:30' })).toEqual({ date: '2026-10-16', time: '25:30', nextDay: false });
+  });
+
+  it('時計表記では 24 時以降を翌日の実時刻にする', () => {
+    setTimeNotation('clock');
+    try {
+      expect(formatReleaseDate({ date: '2026-10-16', time: '25:30' })).toBe('10/17(土) 1:30');
+      expect(formatReleaseDate({ date: '2026-10-31', time: '24:00' })).toBe('11/1(日) 0:00');
+      expect(formatReleaseDate({ date: '2026-10-16', time: '23:30' })).toBe('10/16(金) 23:30');
+      expect(displayReleaseTime({ date: '2026-10-16', time: '25:30' })).toEqual({ date: '2026-10-17', time: '1:30', nextDay: true });
+      expect(displayReleaseTime({ date: '2026-10-16' })).toEqual({ date: '2026-10-16', time: undefined, nextDay: false });
+    } finally {
+      setTimeNotation('late-night');
+    }
   });
 });

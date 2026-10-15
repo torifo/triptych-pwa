@@ -47,6 +47,8 @@ describe('既定値と保存キー', () => {
       syncSources: { anilist: true, syoboi: true, ndl: true, narou: true, kakuyomu: true },
       detection: true,
       startScreen: 'home',
+      timeNotation: 'late-night',
+      weekStart: 'sun',
     });
     expect(SYNC_SOURCES).toEqual(['anilist', 'syoboi', 'ndl', 'narou', 'kakuyomu']);
     expect(START_SCREENS).toEqual(['home', 'library', 'calendar', 'catalog']);
