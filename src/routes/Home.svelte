@@ -209,6 +209,16 @@
 
   // `detect`（アニメ化検知）もソースと同じ並びで「検知」と出す
   const errorLabels = $derived(Object.keys(syncStatus.errors).map(syncKeyLabel));
+  const errorEntries = $derived(
+    Object.entries(syncStatus.errors).flatMap(([key, e]) => (e ? [{ key, label: syncKeyLabel(key), ...e }] : [])),
+  );
+  let showErrors = $state(false);
+
+  /** '10/15 19:26'（JST） */
+  function errorTime(iso: string): string {
+    const d = new Date(new Date(iso).getTime() + 9 * 3600 * 1000);
+    return `${d.getUTCMonth() + 1}/${d.getUTCDate()} ${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`;
+  }
 </script>
 
 <section class="flex flex-col gap-6 p-4">
@@ -222,10 +232,23 @@
         <span class="mono">{formatSyncTime(syncStatus.lastSyncAt)}</span>
       </span>
       {#if errorLabels.length > 0}
-        <span class="dateline-error">
-          <span style="white-space: nowrap;">エラー:</span>
-          {errorLabels.join(', ')}
-        </span>
+        <button
+          type="button"
+          class="dateline-error"
+          aria-expanded={showErrors}
+          aria-controls="sync-errors"
+          onclick={() => (showErrors = !showErrors)}
+        >
+          <span class="error-dot" aria-hidden="true"></span>{errorLabels.join('・')} で取得できませんでした
+        </button>
+      {/if}
+      {#if showErrors && errorEntries.length > 0}
+        <div id="sync-errors" class="sync-errors">
+          {#each errorEntries as e (e.key)}
+            <p><span class="error-src">{e.label}</span> <span class="mono">{errorTime(e.occurredAt)}</span><br />{e.message}</p>
+          {/each}
+          <p class="error-note">相手先の一時的な障害のことが多く、次の同期でやり直します。続く時は設定の「同期」を見てください。</p>
+        </div>
       {/if}
       <button
         type="button"
@@ -446,7 +469,39 @@
     white-space: nowrap;
   }
   .dateline-error {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
     color: var(--fg);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    text-align: left;
+  }
+  .error-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--onair);
+    flex-shrink: 0;
+  }
+  .sync-errors {
+    flex-basis: 100%;
+    order: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.5rem 0.6rem;
+    border: 1px solid var(--line);
+    font-size: 0.6875rem;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+  }
+  .error-src {
+    color: var(--fg);
+    font-weight: 500;
+  }
+  .error-note {
+    color: var(--muted);
   }
   .dateline-button {
     display: inline-flex;
