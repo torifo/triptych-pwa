@@ -79,6 +79,35 @@ def base_title_key(value: str) -> str:
     return title_key(strip_subtitle(value))
 
 
+# 漫画化の印。目録は「… : コミック」「…@COMIC」「… : THE COMIC」「漫画版…」「…〔コミック版〕」と書き、
+# AniList の漫画も「… THE COMIC」「…@COMIC」と書くことがある
+_ADAPTATION_WORDS = (
+    "フルカラーコミック|コミックス版|コミック版|コミックス|コミック|コミカライズ版|コミカライズ|漫画版|まんが版|マンガ版"
+)
+_ADAPTATION_BRACKETED = re.compile(rf"[\s　]*[(（\[［【〔<〈]\s*(?:{_ADAPTATION_WORDS})\s*[)）\]］】〕>〉]")
+_ADAPTATION_AFTER_COLON = re.compile(rf"[\s　]*[:：][\s　]*(?:{_ADAPTATION_WORDS})[\s　]*$")
+_ADAPTATION_LATIN = re.compile(
+    r"[\s　]*(?:[:：][\s　]*)?(?:the[\s　]*comic!?|[@＠][\s　]*comic)(?=[\s　]*(?:[:：]|$))", re.IGNORECASE
+)
+_ADAPTATION_LEADING = re.compile(r"^(?:漫画版|まんが版|マンガ版|コミック版)[\s　]*")
+
+
+def strip_adaptation(value: str) -> str:
+    """Drops the words that mark a comic adaptation ("X : コミック", "X@COMIC", "漫画版X" -> "X").
+
+    A word that is the title itself ("コミック艶", "THE COMIC") stays: an empty result falls back to the input.
+    """
+    original = (value or "").strip()
+    text = _ADAPTATION_BRACKETED.sub(" ", original)
+    text = _ADAPTATION_LATIN.sub("", text)
+    text = _ADAPTATION_AFTER_COLON.sub("", text)
+    text = _ADAPTATION_LEADING.sub("", text.strip())
+    if text == original:
+        return original
+    text = _SPACES.sub(" ", text).strip()
+    return text if normalize_title(text) else original
+
+
 # -- search ---------------------------------------------------------------------
 
 

@@ -25,6 +25,14 @@ A book whose own title names a catalogued shelf follows those volumes. One witho
 matches by further forms, which only count when the authors overlap: the title without its
 notes, the series cut before the text after its volume ("山、買いました10 ~…~" -> "山、買いました")
 and the heads before a subtitle, a volume title or " : " ("仏の辰捕物帳 老いた掏摸" -> "仏の辰捕物帳").
+
+A catalogued book whose series matches no AniList entry of its kind well enough also matches, with
+the authors overlapping, by its series without the words of a comic ("… : コミック", "…@COMIC",
+"… : THE COMIC") and the heads of that ("十番目のユナス : 呪いの伯爵と死なない生贄" -> "十番目のユナス"),
+and the other kind by those keys (not by synonyms): the comic of a novel joins the novel, the novel the
+comic. A volume without authors uses its shelf's. Authors written in the other order ("とち うえやま" /
+"うえやまとち") are the same, and between entries of one title the one sharing more authors wins. A JPRO
+book whose catalogued volumes all joined a work follows them there.
 """
 
 from __future__ import annotations
@@ -45,6 +53,7 @@ from .text import (
     normalize_title,
     search_text,
     split_volume_title,
+    strip_adaptation,
     strip_notes,
     strip_season,
     strip_subtitle,
@@ -77,9 +86,14 @@ BASE_INDEX_MIN = 6  # 副題を除いた AniList 側のキーはこれ以上の�
 CONF_AUTHOR_MATCH = 0.95
 CONF_AUTHOR_MISMATCH = 0.6
 SHORT_TITLE_KEY = 10  # 「約束」「短編集」のような短い題名は偶然の一致が多い
+# AniList の名前は「名 姓」の順のことがある（「とち うえやま」/「うえやまとち」）。2文字は「田中」/「中田」で別人
+NAME_ROTATION_MIN = 3
 # 近刊（JPRO）の本体: 副題・巻の題の前までの頭や、巻の後ろの語を落としたシリーズ名は作者が重なる時だけ結ぶ
 CONF_HEAD = 0.9
 HEAD_KEY_MIN = BASE_KEY_MIN  # 頭のキーはこれ以上の長さだけ使う
+# 目録済みの本: 漫画化の印（「 : コミック」「@COMIC」）を外した本体・その頭、もう一方の種類（漫画化した漫画・
+# 原作の小説）は作者が重なる時だけ結ぶ。これより短いキー（「銀の匙」「こころ」）は使わない
+BODY_KEY_MIN = HEAD_KEY_MIN
 # 本体で結ぶ先が複数ある時: 長いキー、AniList、目録済みの本、Web 小説の順
 JOIN_SOURCE_RANK = {"anilist": 0, "ndl": 1, "narou": 2, "kakuyomu": 2}
 
@@ -196,11 +210,21 @@ def _creator_keys(names: list[str]) -> set[str]:
     return {k for k in keys if len(k) >= 2}
 
 
+def _same_person(x: str, y: str) -> bool:
+    """One name holds the other ("奏多" / "佐槻奏多"), or the same name in the other order ("信輔近藤" / "近藤信輔")."""
+    return x in y or y in x or (len(x) == len(y) >= NAME_ROTATION_MIN and y in x + x)
+
+
 def _same_author(a: set[str], b: set[str]) -> Optional[bool]:
     """True / False when both sides list authors, None when either side has none."""
     if not a or not b:
         return None
-    return any(x in y or y in x for x in a for y in b)
+    return any(_same_person(x, y) for x in a for y in b)
+
+
+def _shared_authors(a: set[str], b: set[str]) -> int:
+    """How many authors of `a` are also in `b` (two adaptations of one original: the artist decides)."""
+    return sum(1 for x in a if any(_same_person(x, y) for y in b))
 
 
 def _upcoming_title(extra: dict[str, Any]) -> Optional[VolumeTitle]:
@@ -327,7 +351,9 @@ def _primary_keys(row: _Row, keys: _Keys) -> set[str]:
 
 
 def _base_keys(row: _Row, keys: _Keys, exclude: set[str]) -> set[str]:
-    found = {keys(strip_subtitle(value)) for value in (row.title, row.native) if value}
+    """Keys of the title without its subtitle, and without the words of a comic ("… THE COMIC", "…@COMIC")."""
+    names = [value for value in (row.title, row.native) if value]
+    found = {keys(strip_subtitle(value)) for value in names} | {keys(strip_adaptation(value)) for value in names}
     return {k for k in found if len(k) >= BASE_INDEX_MIN and k not in exclude}
 
 
@@ -361,12 +387,13 @@ def _check_authors(cands: _Candidates, row: _Row, rows: list[_Row]) -> _Candidat
 
 
 def _choose(cands: _Candidates, row: _Row, rows: list[_Row]) -> Optional[tuple[int, float, str]]:
-    """One AniList row per non-AniList row: best confidence, then popularity, then nearest start."""
+    """One AniList row per non-AniList row: best confidence, then more shared authors, popularity, nearest start."""
     best: Optional[tuple[int, float, str]] = None
     best_rank: Optional[tuple[Any, ...]] = None
     for idx, (confidence, method, _) in cands.items():
         other = rows[idx]
-        rank = (-confidence, -other.pop, _distance(row.start, other.start), other.id)
+        shared = _shared_authors(row.creators, other.creators) if len(cands) > 1 else 0
+        rank = (-confidence, -shared, -other.pop, _distance(row.start, other.start), other.id)
         if best_rank is None or rank < best_rank:
             best_rank, best = rank, (idx, confidence, method)
     return best
@@ -448,9 +475,13 @@ def _match_web(
     return best_manga
 
 
-def _series_key(row: _Row, keys: _Keys) -> str:
+def _series_text(row: _Row) -> str:
     series = row.extra.get("series")
-    return keys(series if isinstance(series, str) and series.strip() else row.title)
+    return series if isinstance(series, str) and series.strip() else row.title
+
+
+def _series_key(row: _Row, keys: _Keys) -> str:
+    return keys(_series_text(row))
 
 
 # Where a subtitle, a volume title or " : " may start: the text before it is a head of the title.
@@ -489,13 +520,13 @@ def _noted(text: str, notes: str) -> str:
 def _book_forms(row: _Row, keys: _Keys) -> list[tuple[str, int]]:
     """(key, FORM_*) of a book's title, each key once at its nearest form.
 
-    A catalogued book: its series. A JPRO book: its title without the volume (and without its
+    A catalogued book: its series, the series without the words of a comic ("… : コミック",
+    "…@COMIC") and the heads of that. A JPRO book: its title without the volume (and without its
     notes), its series (cut when the text after a volume in the middle was dropped) and its heads.
     """
-    series = _series_key(row, keys)
     book = row.book
     if book is None:
-        return [(series, FORM_OWN)] if series else []
+        return _catalogued_forms(row, keys)
     forms: dict[str, int] = {}
 
     def add(text: str, form: int) -> None:
@@ -516,6 +547,25 @@ def _book_forms(row: _Row, keys: _Keys) -> list[tuple[str, int]]:
     return list(forms.items())
 
 
+def _catalogued_forms(row: _Row, keys: _Keys) -> list[tuple[str, int]]:
+    """A catalogued book: its series, then the body without the words of a comic and the heads of it.
+
+    The further forms are used only with the authors overlapping, so they skip short keys (BODY_KEY_MIN)
+    and a key that is one of the book's authors ("萩尾望都 : 創作の泉").
+    """
+    series = _series_text(row)
+    own = keys(series)
+    if not own:
+        return []
+    forms = {own: FORM_OWN}
+    bare = strip_adaptation(series)
+    for text, form in ((bare, FORM_BARE), *((head, FORM_HEAD) for head in _heads(bare))):
+        key = keys(text)
+        if len(key) >= BODY_KEY_MIN and key not in row.creators and key not in forms:
+            forms[key] = form
+    return list(forms.items())
+
+
 def _shelf_allows(row: _Row, authors: set[str], form: int) -> bool:
     """A book may join a shelf by a key of this form: not when the authors differ, and a cut series
     or a head only when they overlap."""
@@ -523,44 +573,79 @@ def _shelf_allows(row: _Row, authors: set[str], form: int) -> bool:
     return same is True if form >= FORM_CUT else same is not False
 
 
-def _confirmed_head(heads: dict[int, tuple[int, str]], row: _Row, rows: list[_Row]) -> Optional[tuple[int, float, str]]:
-    """The longest head match whose authors overlap with the book's (idx -> (key length, method))."""
+def _confirmed_head(
+    heads: dict[int, tuple[int, str]],
+    row: _Row,
+    rows: list[_Row],
+    kind: Optional[str] = None,
+    authors: Optional[set[str]] = None,
+) -> Optional[tuple[int, float, str]]:
+    """The longest head match whose authors overlap with the book's (idx -> (key length, method)).
+
+    At the same length an entry of `kind` (the book's own kind), then the one sharing more authors
+    comes first. `authors` stands in for the book's own (a catalogued volume without any: its shelf's).
+    """
+    authors = row.creators if authors is None else authors
     best: Optional[tuple[int, float, str]] = None
     best_rank: Optional[tuple[Any, ...]] = None
     for idx, (key_len, method) in heads.items():
         other = rows[idx]
-        if not _same_author(row.creators, other.creators):
+        if not _same_author(authors, other.creators):
             continue
-        rank = (-key_len, -other.pop, _distance(row.start, other.start), other.id)
+        shared = _shared_authors(authors, other.creators)
+        rank = (-key_len, other.kind != kind, -shared, -other.pop, _distance(row.start, other.start), other.id)
         if best_rank is None or rank < best_rank:
             best_rank, best = rank, (idx, CONF_HEAD, method)
     return best
 
 
+def _book_candidates(
+    index: _Index, queries: list[tuple[str, bool]], *, synonyms: bool = True
+) -> tuple[_Candidates, dict[int, tuple[int, str]]]:
+    """Matches of the (key, guarded) queries: plain candidates, and the ones that need the authors
+    (idx -> (key length, method))."""
+    cands: _Candidates = {}
+    heads: dict[int, tuple[int, str]] = {}
+    for key, guarded in queries:
+        found = [(idx, METHOD_SERIES) for idx in index.primary.get(key, ())]
+        found += [(idx, METHOD_SERIES) for idx in index.synonym.get(key, ())] if synonyms else []
+        found += [(idx, METHOD_BASE) for idx in index.base.get(key, ())]
+        for idx, method in found:
+            if not guarded:
+                _put(cands, idx, CONF_SERIES if method == METHOD_SERIES else CONF_BASE, method, len(key))
+            elif heads.get(idx, (0, ""))[0] < len(key):
+                heads[idx] = (len(key), method)
+    return cands, heads
+
+
 def _match_book(
-    row: _Row, novel: _Index, manga: _Index, rows: list[_Row], keys: _Keys, *, loose: bool = True
+    row: _Row,
+    novel: _Index,
+    manga: _Index,
+    rows: list[_Row],
+    keys: _Keys,
+    *,
+    loose: bool = True,
+    authors: Optional[set[str]] = None,
 ) -> Optional[tuple[int, float, str]]:
-    """The AniList novel / manga of a book. Its own title as before; the further forms of a JPRO book
-    (`loose`) only with the authors overlapping, at CONF_HEAD."""
+    """The AniList novel / manga of a book. Its own title as before; the further forms (`loose`) only
+    with the authors (`authors`, else the book's own) overlapping, at CONF_HEAD. A catalogued book
+    also matches the other kind (the comic of its novel, the novel of its comic) that way."""
     queries = [(key, form != FORM_OWN) for key, form in _book_forms(row, keys) if loose or form == FORM_OWN]
     if not queries:
         return None
     hint = row.extra.get("kindHint")
     indexes = [novel] if hint == "novel" else [manga] if hint == "manga" else [novel, manga]
     for index in indexes:
-        cands: _Candidates = {}
-        heads: dict[int, tuple[int, str]] = {}  # matches that need the authors: idx -> (key length, method)
-        for key, guarded in queries:
-            found = [(idx, METHOD_SERIES) for idx in (*index.primary.get(key, ()), *index.synonym.get(key, ()))]
-            found += [(idx, METHOD_BASE) for idx in index.base.get(key, ())]
-            for idx, method in found:
-                if not guarded:
-                    _put(cands, idx, CONF_SERIES if method == METHOD_SERIES else CONF_BASE, method, len(key))
-                elif heads.get(idx, (0, ""))[0] < len(key):
-                    heads[idx] = (len(key), method)
+        cands, heads = _book_candidates(index, queries)
         best = _choose(_check_authors(cands, row, rows), row, rows)
         if best is None or best[1] < MERGE_THRESHOLD:
-            best = _confirmed_head(heads, row, rows) or best
+            if row.book is None and len(indexes) == 1:
+                # not by a synonym: a collection lists the stories it holds ("捨てないで" / "小さな故意の物語")
+                other = manga if index is novel else novel
+                crossing = [(key, True) for key, _ in queries if len(key) >= BODY_KEY_MIN]
+                heads.update(_book_candidates(other, crossing, synonyms=False)[1])
+            best = _confirmed_head(heads, row, rows, hint, authors) or best
         if best is not None:
             return best
     return None
@@ -607,7 +692,11 @@ def _match_all(rows: list[_Row], keys: _Keys) -> list[tuple[int, int, str, float
             best = _match_web(row, indexes["novel"], indexes["manga"], rows, keys)
         elif row.source == "ndl" and row.kind == "book":
             loose = row.book is None or _sibling_shelf(row, keys, shelves) is None
-            best = _match_book(row, indexes["novel"], indexes["manga"], rows, keys, loose=loose)
+            # a catalogued volume without authors is vouched for by the other volumes of its shelf
+            authors = None
+            if row.book is None and not row.creators:
+                authors = shelves.get((_series_key(row, keys), str(row.extra.get("kindHint") or "")))
+            best = _match_book(row, indexes["novel"], indexes["manga"], rows, keys, loose=loose, authors=authors)
         else:
             continue
         if best is not None:
@@ -714,14 +803,21 @@ def _build_clusters(
     shelf_authors: dict[tuple[str, ...], set[str]] = {}
     catalogued: dict[tuple[str, str], Counter[str]] = {}  # (series, kindHint) -> catalogued line -> books
     catalogued_authors: dict[tuple[str, str], set[str]] = {}
+    joined: dict[tuple[str, str], int] = {}  # (series, kindHint) of catalogued books that joined a work -> one
+    joined_authors: dict[tuple[str, str], set[str]] = {}
     upcoming: list[tuple[_Row, tuple[str, str, str]]] = []
     for row in rows:
-        if row.source != "ndl" or row.kind != "book" or row.idx in merged:
+        if row.source != "ndl" or row.kind != "book":
             continue
         key = _series_key(row, keys)
         if not key:
             continue
         shelf = (key, str(row.extra.get("kindHint") or ""), str(row.extra.get("line") or ""))
+        if row.idx in merged:
+            if row.extra.get("via") != JPRO_VIA:
+                joined.setdefault(shelf[:2], row.idx)
+                joined_authors.setdefault(shelf[:2], set()).update(row.creators)
+            continue
         if row.extra.get("via") == JPRO_VIA:
             upcoming.append((row, shelf))
             continue
@@ -745,6 +841,11 @@ def _build_clusters(
                 elif len(lines) == 1:  # one catalogued shelf: that is the series
                     line = next(iter(lines))
             uf.union(shelves.setdefault((*sibling, line), row.idx), row.idx)
+            continue
+        # Its catalogued volumes all joined a work ("… : コミック" -> the AniList novel): it follows them
+        sibling = _sibling_shelf(row, keys, joined_authors)
+        if sibling is not None:
+            uf.union(joined[sibling], row.idx)
             continue
         # Else the work of a row titled with its body and written by the same authors
         if index is None:

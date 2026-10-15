@@ -12,7 +12,7 @@ import pytest
 
 from backend.catalog import db
 from backend.catalog.link import run_link
-from backend.catalog.text import base_title_key, strip_subtitle, title_key, volume_label
+from backend.catalog.text import base_title_key, strip_adaptation, strip_subtitle, title_key, volume_label
 
 TODAY = date(2026, 10, 14)
 RUN_SLOW = os.environ.get("TRIPTYCH_SLOW") == "1"  # pytest.ini registers no "slow" marker
@@ -571,6 +571,192 @@ def test_a_head_that_is_the_authors_name_is_not_a_series(tmp_path):
     run_link(conn, today=TODAY)
     assert _cluster(conn, "ndl:1") != _cluster(conn, "anilist:1")
     assert _links(conn, "ndl:1") == []
+
+
+def test_a_catalogued_comic_joins_the_anilist_work_of_its_body_by_author(tmp_path):
+    # 実データ: 目録は漫画化を「… : コミック」「…@COMIC」「… : THE COMIC」と書き、AniList の漫画は本体だけ
+    entries = [
+        _anilist(1, "manga", "転生第八王子の幸せ家族計画", popularity=900, creators=["南野のこ", "八月八"]),
+        _book("1", "転生第八王子の幸せ家族計画 : コミック 2", "転生第八王子の幸せ家族計画 : コミック", "manga",
+              "2025-04-01", precision="month", line="GAコミックf", creators=["南野のこ", "八月八", "山田J太"]),
+        _anilist(2, "manga", "悪役令嬢グロリア・フォン・コードウェルの断罪と復讐", popularity=400,
+                 creators=["たなこ", "万丸うさこ"]),
+        _book("2", "悪役令嬢グロリア・フォン・コードウェルの断罪と復讐@COMIC 1",
+              "悪役令嬢グロリア・フォン・コードウェルの断罪と復讐@COMIC", "manga", "2025-06-01", precision="month",
+              creators=["たなこ", "万丸うさこ"]),
+        # 漫画化の本は、AniList に漫画が無ければ原作小説の作品へ（同じ作品の別の面）
+        _anilist(3, "novel", "惚れ症のハーフエルフさん", popularity=300, creators=["サクマ伺貴", "神尾丈治"]),
+        _book("3", "惚れ症のハーフエルフさん : THE COMIC 1", "惚れ症のハーフエルフさん : THE COMIC", "manga",
+              "2025-02-01", precision="month", creators=["和泉リオン", "神尾丈治"]),
+    ]
+    conn = _open(tmp_path, entries)
+    run_link(conn, today=TODAY)
+
+    assert _links(conn, "ndl:1") == [("anilist:1", "series", 0.9)]
+    assert _links(conn, "ndl:2") == [("anilist:2", "series", 0.9)]
+    assert _links(conn, "ndl:3") == [("anilist:3", "series", 0.9)]
+    for book, work in (("ndl:1", "anilist:1"), ("ndl:2", "anilist:2"), ("ndl:3", "anilist:3")):
+        assert _cluster(conn, book) == _cluster(conn, work)
+
+
+def test_a_catalogued_novel_joins_the_comic_of_its_title_or_head_by_author(tmp_path):
+    entries = [
+        # 原作小説の目録は「本体 : 副題」、AniList には漫画だけ（副題は「〜…〜」か、無い）
+        _anilist(1, "manga", "白瑞宮のお料理番〜異世界の神様と飯テロスローライフを満喫する〜", popularity=500,
+                 creators=["梁ね", "巻村螢"]),
+        _book("1", "白瑞宮のお料理番 : 異世界の神様と飯テロスローライフを満喫する 2",
+              "白瑞宮のお料理番 : 異世界の神様と飯テロスローライフを満喫する", "novel", "2025-05-01",
+              precision="month", line="カドカワBOOKS", creators=["巻村螢"]),
+        _anilist(2, "manga", "十番目のユナス", popularity=300, creators=["路玖乃きみ", "旋めぐる"]),
+        _book("2", "十番目のユナス : 呪いの伯爵と死なない生贄", "十番目のユナス : 呪いの伯爵と死なない生贄", "novel",
+              "2025-03-01", precision="month", line="富士見L文庫", creators=["旋めぐる"]),
+        # AniList の漫画の題名に付いた漫画化の印も外す
+        _anilist(3, "manga", "夜闇の婚姻 前世の宿縁と偽りの婚約者 THE COMIC", popularity=200,
+                 creators=["野田狛", "沙川りさ"]),
+        _book("3", "夜闇の婚姻 : 前世の宿縁と偽りの婚約者", "夜闇の婚姻 : 前世の宿縁と偽りの婚約者", "novel",
+              "2025-01-01", precision="month", creators=["沙川りさ"]),
+    ]
+    conn = _open(tmp_path, entries)
+    run_link(conn, today=TODAY)
+
+    assert _links(conn, "ndl:1") == [("anilist:1", "series", 0.9)]
+    assert _links(conn, "ndl:2") == [("anilist:2", "series", 0.9)]
+    assert _links(conn, "ndl:3") == [("anilist:3", "base-title", 0.9)]
+    for book, work in (("ndl:1", "anilist:1"), ("ndl:2", "anilist:2"), ("ndl:3", "anilist:3")):
+        assert _cluster(conn, book) == _cluster(conn, work)
+
+
+def test_a_catalogued_body_match_needs_the_authors_and_a_long_enough_title(tmp_path):
+    entries = [
+        # ノベライズの作者は漫画の作者と違う
+        _anilist(1, "manga", "ハイキュー!!", popularity=90000, creators=["古舘春一"]),
+        _book("1", "ハイキュー!! : まんがノベライズ [4]", "ハイキュー!! : まんがノベライズ", "novel", "2025-01-01",
+              creators=["五十嵐美怜"]),
+        # 作者の無い本は本体では結ばない
+        _anilist(2, "novel", "魔女の旅々", popularity=12000, creators=["白石定規"]),
+        _book("2", "魔女の旅々 : コミック 8", "魔女の旅々 : コミック", "manga", "2025-08-07"),
+        # 短い題名（4文字未満）は作者が重なっても使わない
+        _anilist(3, "manga", "銀の匙", popularity=50000, creators=["荒川弘"]),
+        _book("3", "銀の匙 : 15周年記念スペシャル版", "銀の匙 : 15周年記念スペシャル版", "manga", "2025-01-01",
+              creators=["荒川弘"]),
+        # 頭が作者の名前そのものなら作品名ではない
+        _anilist(4, "manga", "石ノ森章太郎", popularity=100, creators=["石ノ森章太郎"]),
+        _book("4", "石ノ森章太郎 : 未収録作品集", "石ノ森章太郎 : 未収録作品集", "manga", "2025-01-01",
+              creators=["石ノ森章太郎"]),
+        # 実データ: もう一方の種類は別名では結ばない（短編を集めた漫画の別名に、収めた短編の題名が並ぶ）
+        _anilist(5, "manga", "捨てないで", popularity=100, synonyms=["鏡の中で", "小さな故意の物語"],
+                 creators=["東野圭吾", "瀧川イヴ"]),
+        _book("5", "小さな故意の物語", "小さな故意の物語", "novel", "2025-01-01", creators=["東野圭吾"]),
+    ]
+    conn = _open(tmp_path, entries)
+    run_link(conn, today=TODAY)
+
+    for book, work in (("ndl:1", "anilist:1"), ("ndl:2", "anilist:2"), ("ndl:3", "anilist:3"), ("ndl:4", "anilist:4"),
+                       ("ndl:5", "anilist:5")):
+        assert _links(conn, book) == []
+        assert _cluster(conn, book) != _cluster(conn, work)
+
+
+def test_a_catalogued_spin_off_joins_its_own_entry_before_the_series_head(tmp_path):
+    conan = ["青山剛昌"]
+    entries = [
+        _anilist(1, "manga", "名探偵コナン", popularity=90000, creators=conan),
+        _anilist(2, "manga", "名探偵コナン　黒鉄の魚影", popularity=300, creators=["阿部ゆたか", "丸伝次郎", "青山剛昌"]),
+        # heads: "名探偵コナン" and "名探偵コナン 黒鉄の魚影"; the longer one is its own entry
+        _book("1", "名探偵コナン 黒鉄の魚影 : 劇場版 上", "名探偵コナン 黒鉄の魚影 : 劇場版", "manga", "2025-01-01",
+              creators=["丸伝次郎", "櫻井武晴", "青山剛昌"]),
+        _book("2", "名探偵コナン : 警察学校編 1", "名探偵コナン : 警察学校編", "manga", "2025-01-01",
+              creators=["新井隆広", "青山剛昌"]),
+    ]
+    conn = _open(tmp_path, entries)
+    run_link(conn, today=TODAY)
+
+    assert _links(conn, "ndl:1") == [("anilist:2", "series", 0.9)]
+    assert _links(conn, "ndl:2") == [("anilist:1", "series", 0.9)]  # no entry of its own: the series' work
+
+
+def test_author_names_written_in_the_other_order_are_the_same_author(tmp_path):
+    # 実データ: AniList の名前は「名 姓」の順のことがある（「とち うえやま」「信輔近藤」）
+    entries = [
+        _anilist(1, "manga", "クッキングパパ", popularity=900, creators=["とち うえやま"]),
+        _book("1", "クッキングパパ 175", "クッキングパパ", "manga", "2025-01-01", creators=["うえやまとち"]),
+        _anilist(2, "manga", "忍者と極道", popularity=9000, creators=["信輔近藤"]),
+        _book("2", "忍者と極道 16", "忍者と極道", "manga", "2025-01-01", creators=["近藤信輔"]),
+        # 2文字の名前の入れ替えは別の人（田中 / 中田）
+        _anilist(3, "manga", "約束の木", popularity=100, creators=["田中"]),
+        _book("3", "約束の木 1", "約束の木", "manga", "2025-01-01", creators=["中田"]),
+    ]
+    conn = _open(tmp_path, entries)
+    run_link(conn, today=TODAY)
+
+    assert _links(conn, "ndl:1") == [("anilist:1", "series", 0.95)]
+    assert _links(conn, "ndl:2") == [("anilist:2", "series", 0.95)]
+    assert _links(conn, "ndl:3") == [("anilist:3", "series", 0.6)]
+
+
+def test_the_entry_sharing_more_authors_wins_between_same_titles(tmp_path):
+    # 実データ: 「仕掛人 藤枝梅安」は AniList に2つの漫画化（さいとう・たかを版、武村勇治版）。原作者だけでは決まらない
+    entries = [
+        _anilist(1, "manga", "仕掛人 藤枝梅安", popularity=100, creators=["さいとう・たかを", "會川昇", "正太郎池波"]),
+        _anilist(2, "manga", "仕掛人・藤枝梅安", popularity=900, creators=["武村勇治", "正太郎池波"]),
+        _book("1", "仕掛人藤枝梅安 1", "仕掛人藤枝梅安", "manga", "2025-01-01", creators=["さいとう・たかを", "池波正太郎"]),
+    ]
+    conn = _open(tmp_path, entries)
+    run_link(conn, today=TODAY)
+    assert _links(conn, "ndl:1") == [("anilist:1", "series", 0.95)]
+
+
+def test_a_catalogued_volume_without_authors_follows_its_shelf(tmp_path):
+    entries = [
+        _anilist(1, "manga", "なにも理解らない", popularity=100, creators=["7liquid"]),
+        _book("1", "なにも理解らない : unknown language 1", "なにも理解らない : unknown language", "manga", "2025-01-01",
+              creators=["7liquid"]),
+        _book("2", "なにも理解らない : unknown language 2", "なにも理解らない : unknown language", "manga", "2025-06-01"),
+    ]
+    conn = _open(tmp_path, entries)
+    run_link(conn, today=TODAY)
+    assert _links(conn, "ndl:1") == _links(conn, "ndl:2") == [("anilist:1", "series", 0.9)]
+
+
+def test_a_jpro_volume_follows_its_catalogued_shelf_into_the_anilist_work(tmp_path):
+    entries = [
+        _anilist(1, "novel", "家から逃げ出したい私が、うっかり憧れの大魔法使い様を買ってしまったら", popularity=300,
+                 creators=["文野さと"]),
+        _book("8", "家から逃げ出したい私が、うっかり憧れの大魔法使い様を買ってしまったら : コミック 8",
+              "家から逃げ出したい私が、うっかり憧れの大魔法使い様を買ってしまったら : コミック", "manga", "2026-05-01",
+              precision="month", creators=["文野さと", "漫画家"]),
+        # the upcoming volume names nobody: it still follows the catalogued volumes
+        _upcoming("9", "家から逃げ出したい私が、うっかり憧れの大魔法使い様を買ってしまったら(コミック)(9)(完)", "manga",
+                  "2026-11-01"),
+    ]
+    conn = _open(tmp_path, entries)
+    run_link(conn, today=TODAY)
+
+    assert _cluster(conn, "ndl:8") == _cluster(conn, "anilist:1")
+    assert _cluster(conn, "ndl:9") == _cluster(conn, "anilist:1")
+
+
+@pytest.mark.parametrize(
+    ("title", "body"),
+    [
+        ("転生第八王子の幸せ家族計画 : コミック", "転生第八王子の幸せ家族計画"),
+        ("悪役令嬢グロリア・フォン・コードウェルの断罪と復讐@COMIC", "悪役令嬢グロリア・フォン・コードウェルの断罪と復讐"),
+        ("惚れ症のハーフエルフさん : THE COMIC", "惚れ症のハーフエルフさん"),
+        ("お飾り聖女のはずが、真の力に目覚めたようですthe comic", "お飾り聖女のはずが、真の力に目覚めたようです"),
+        ("新しいゲーム始めました。@COMIC : 使命もないのに最強です?", "新しいゲーム始めました。 : 使命もないのに最強です?"),
+        ("夜闇の婚姻 前世の宿縁と偽りの婚約者 THE COMIC", "夜闇の婚姻 前世の宿縁と偽りの婚約者"),
+        ("三体 : コミック版", "三体"),
+        ("ABC殺人事件〔コミック版〕", "ABC殺人事件"),
+        ("漫画版ブライト・プリズン", "ブライト・プリズン"),
+        ("ゾンビのあふれた世界で俺だけが襲われない : フルカラーコミック", "ゾンビのあふれた世界で俺だけが襲われない"),
+        ("魔物の花嫁 : コミックス版", "魔物の花嫁"),
+        ("コミック艶", "コミック艶"),  # a label word that is the title itself
+        ("コミックマーケットのあのころ", "コミックマーケットのあのころ"),
+        ("THE COMIC", "THE COMIC"),
+    ],
+)
+def test_strip_adaptation(title, body):
+    assert strip_adaptation(title) == body
 
 
 @pytest.mark.parametrize(
