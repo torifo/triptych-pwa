@@ -1,14 +1,18 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { ChevronLeft, ChevronRight } from '@lucide/svelte';
   import { listReleases, listEditions, listWorks } from '../lib/db/store';
   import type { Release, Edition, Work } from '../lib/db/schema';
   import { formatReleaseDate, todayJst } from '../lib/dates';
   import { navigate } from '../lib/router.svelte';
   import ReleaseRow from '../lib/components/ReleaseRow.svelte';
+  import MiniCover from '../lib/components/MiniCover.svelte';
+  import OnAirLamp from '../lib/components/OnAirLamp.svelte';
+  import { buildCoverIndex } from '../lib/components/home-view';
+  import { calendarDay, cellThumbs, dayCellLabel, dayOnAirMark } from '../lib/components/calendar-view';
   import {
     groupByDate,
     groupByMonth,
-    isPostponed,
     monthlyUndecided,
     splitByPrecision,
     trackedReleases,
@@ -28,9 +32,12 @@
   let today = $state(todayJst());
   let cursorYear = $state(Number(todayJst().slice(0, 4)));
   let cursorMonth = $state(Number(todayJst().slice(5, 7)) - 1); // 0-11
+  // 升目で選んだ日（未選択ならこの月の今日）。その日の行を升目の下に出す
+  let selectedDate = $state<string | null>(null);
 
   const editionMap = $derived(new Map(editions.map((e) => [e.id, e])));
   const workMap = $derived(new Map(works.map((w) => [w.id, w])));
+  const covers = $derived(buildCoverIndex(editions, works));
 
   async function refresh() {
     releases = await listReleases();
@@ -88,6 +95,8 @@
 
   // day 精度だけが日付セルに入る。month / year 精度は下の「未定」欄へ
   const releasesByDate = $derived(groupByDate(split.days));
+  const shownDay = $derived(calendarDay(selectedDate, today, cursorYear, cursorMonth + 1));
+  const shownDayReleases = $derived(shownDay ? (releasesByDate.get(shownDay) ?? []) : []);
   const monthUndecided = $derived(monthlyUndecided(split.months, cursorYear, cursorMonth + 1));
   const yearUndecided = $derived(yearlyUndecided(split.years, today));
 
@@ -132,14 +141,15 @@
     }
   }
 
+  function selectDay(date: string) {
+    selectedDate = date;
+  }
+
   function goToWork(editionId: string) {
     const edition = editionMap.get(editionId);
     if (edition) navigate(`#/work/${edition.workId}`);
   }
 
-  function cellLabel(release: Release): string {
-    return `${workTitleFor(release.editionId)} ${release.label} ${formatReleaseDate(release)}`;
-  }
 </script>
 
 {#snippet rows(list: Release[])}
@@ -150,6 +160,7 @@
         edition={editionMap.get(release.editionId)}
         workTitle={workTitleFor(release.editionId)}
         streaming={streaming.get(release.editionId)}
+        cover={covers.get(release.editionId)}
         onclick={() => goToWork(release.editionId)}
       />
     {/each}
@@ -183,24 +194,14 @@
 
   {#if view === 'month'}
     <div class="flex items-center justify-between gap-2">
-      <button
-        type="button"
-        class="px-2 py-1 text-xs"
-        style="border: 1px solid var(--line); color: var(--fg);"
-        aria-label="前の月"
-        onclick={prevMonth}
-      >
-        ＜
+      <button type="button" class="month-step" aria-label="前の月" onclick={prevMonth}>
+        <ChevronLeft size={16} strokeWidth={2} aria-hidden="true" />
       </button>
-      <span class="text-sm font-bold" style="white-space: nowrap;">{cursorYear}/{pad2(cursorMonth + 1)}</span>
-      <button
-        type="button"
-        class="px-2 py-1 text-xs"
-        style="border: 1px solid var(--line); color: var(--fg);"
-        aria-label="次の月"
-        onclick={nextMonth}
-      >
-        ＞
+      <span class="mono text-sm" style="white-space: nowrap; font-weight: 500; letter-spacing: 0.04em;">
+        {cursorYear}.{pad2(cursorMonth + 1)}
+      </span>
+      <button type="button" class="month-step" aria-label="次の月" onclick={nextMonth}>
+        <ChevronRight size={16} strokeWidth={2} aria-hidden="true" />
       </button>
     </div>
 
@@ -214,39 +215,60 @@
         </div>
       {/each}
       {#each monthGrid as cell, i (i)}
-        {@const cellReleases = releasesByDate.get(cell.date ?? '') ?? []}
-        <div
-          class="flex flex-col gap-0.5 p-1"
-          style={`min-height: 56px; min-width: 0; background: ${cell.isToday ? 'var(--hi-soft)' : 'var(--bg)'};`}
-          aria-current={cell.isToday ? 'date' : undefined}
-        >
-          {#if cell.day !== null}
-            <span class="text-[10px]" style={`white-space: nowrap; color: ${cell.isToday ? 'var(--fg)' : 'var(--muted)'}; ${cell.isToday ? 'font-weight: 700;' : ''}`}>{cell.day}</span>
-            {#each cellReleases.slice(0, GRID_ITEMS_PER_CELL) as release (release.id)}
-              <button
-                type="button"
-                class="flex flex-col px-0.5 text-left text-[9px]"
-                style="border: 1px solid var(--line); min-width: 0; line-height: 1.35;"
-                aria-label={cellLabel(release)}
-                onclick={() => goToWork(release.editionId)}
-              >
-                <span class="truncate" style="white-space: nowrap;">
-                  {workTitleFor(release.editionId)}{#if isPostponed(release)}<span style="color: var(--muted);">・延期</span>{/if}
-                </span>
-                {#if release.time}
-                  <span style="color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums;">{release.time}</span>
-                {/if}
-              </button>
-            {/each}
-            {#if cellReleases.length > GRID_ITEMS_PER_CELL}
-              <span class="text-[9px]" style="color: var(--muted); white-space: nowrap;">
-                +{cellReleases.length - GRID_ITEMS_PER_CELL}
+        {#if cell.date && cell.day !== null}
+          {@const date = cell.date}
+          {@const cellReleases = releasesByDate.get(date) ?? []}
+          {@const thumbs = cellThumbs(cellReleases, GRID_ITEMS_PER_CELL)}
+          {@const mark = dayOnAirMark(cellReleases, date, today)}
+          <button
+            type="button"
+            class="cell"
+            class:today={cell.isToday}
+            class:selected={shownDay === date}
+            aria-current={cell.isToday ? 'date' : undefined}
+            aria-pressed={shownDay === date}
+            aria-label={dayCellLabel(date, cellReleases.length, mark)}
+            onclick={() => selectDay(date)}
+          >
+            <span class="cell-head">
+              <span class="mono cell-day">{cell.day}</span>
+              {#if mark === 'today'}
+                <OnAirLamp />
+              {:else if mark === 'upcoming'}
+                <span class="cell-dot"></span>
+              {/if}
+            </span>
+            {#if thumbs.shown.length > 0}
+              <span class="cell-thumbs">
+                {#each thumbs.shown as release (release.id)}
+                  {@const cover = covers.get(release.editionId)}
+                  <MiniCover src={cover?.url} title={cover?.title ?? workTitleFor(release.editionId)} />
+                {/each}
               </span>
             {/if}
-          {/if}
-        </div>
+            {#if thumbs.rest > 0}
+              <span class="mono cell-more">+{thumbs.rest}</span>
+            {/if}
+          </button>
+        {:else}
+          <div class="cell"></div>
+        {/if}
       {/each}
     </div>
+
+    {#if shownDay}
+      <div class="flex flex-col gap-1.5">
+        <div class="shou" style="margin-bottom: 0;">
+          <h2 class="mono" style="font-weight: 500;">{formatReleaseDate({ date: shownDay })}</h2>
+          <span class="no">{shownDay === today ? 'TODAY' : 'DAY'}</span>
+        </div>
+        {#if shownDayReleases.length > 0}
+          {@render rows(shownDayReleases)}
+        {:else}
+          <p class="text-xs" style="color: var(--muted);">この日の予定はありません</p>
+        {/if}
+      </div>
+    {/if}
 
     {#if monthUndecided.length > 0}
       <div class="flex flex-col gap-1.5">
@@ -305,3 +327,72 @@
     {/if}
   {/if}
 </section>
+
+<style>
+  .month-step {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--line);
+    color: var(--fg);
+  }
+
+  .cell {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    min-height: 56px;
+    padding: 3px;
+    background: var(--bg);
+    text-align: left;
+  }
+  .cell.today {
+    background: var(--hi-soft);
+  }
+  /* 選んだ日は内側に黒い罫（升目の幅を変えない） */
+  .cell.selected {
+    box-shadow: inset 0 0 0 1.5px var(--fg);
+  }
+  .cell:focus-visible {
+    outline: 2px solid var(--fg);
+    outline-offset: -2px;
+  }
+  .cell-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2px;
+    min-width: 0;
+    line-height: 1.2;
+  }
+  .cell-day {
+    font-size: 10px;
+    color: var(--muted);
+  }
+  .today .cell-day {
+    color: var(--fg);
+    font-weight: 500;
+  }
+  /* これから先の放送・配信がある日。点滅はさせず、今日だけ ON AIR のランプにする */
+  .cell-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--onair);
+    flex-shrink: 0;
+  }
+  .cell-thumbs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2px;
+  }
+  .cell-more {
+    font-size: 9px;
+    line-height: 1.2;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+</style>

@@ -1,5 +1,14 @@
 <script lang="ts">
   import { onMount } from 'svelte'
+  import {
+    BookOpen,
+    CalendarDays,
+    House,
+    Library as LibraryIcon,
+    Search as SearchIcon,
+    Settings as SettingsIcon,
+    type LucideIcon,
+  } from '@lucide/svelte'
   import { route, initRouter, navigate } from './lib/router.svelte'
   import Home from './routes/Home.svelte'
   import Library from './routes/Library.svelte'
@@ -10,8 +19,11 @@
   import Catalog from './routes/Catalog.svelte'
   import CatalogDetail from './routes/CatalogDetail.svelte'
   import { maybeAutoSync } from './lib/sync/engine'
-  import { beginSync, completeSync, failSync } from './lib/sync/status.svelte'
-  import { db } from './lib/db/schema'
+  import { beginSync, completeSync, failSync, syncStatus } from './lib/sync/status.svelte'
+  import { db, type Edition, type Release } from './lib/db/schema'
+  import { listEditions, listReleases } from './lib/db/store'
+  import { onAirCount } from './lib/components/home-view'
+  import OnAirLamp from './lib/components/OnAirLamp.svelte'
   import { initStoragePersistence, shouldPromptAddToHomeScreen } from './lib/pwa'
 
   initRouter()
@@ -56,13 +68,42 @@
     }
   })
 
-  const navItems: { label: string; path: string; name: typeof route.name }[] = [
-    { label: 'HOME', path: '#/', name: 'home' },
-    { label: '検索', path: '#/search', name: 'search' },
-    { label: 'LIBRARY', path: '#/library', name: 'library' },
-    { label: 'CATALOG', path: '#/catalog', name: 'catalog' },
-    { label: 'CALENDAR', path: '#/calendar', name: 'calendar' },
-    { label: 'SETTINGS', path: '#/settings', name: 'settings' },
+  // ヘッダーの ON AIR n。同期の前後と画面の移動で読み直し、放送日の切り替わり（朝5時）は時計で拾う
+  let headerReleases = $state<Release[]>([])
+  let headerEditions = $state<Edition[]>([])
+  let clock = $state(new Date())
+  const onAir = $derived(onAirCount(headerReleases, new Map(headerEditions.map((e) => [e.id, e])), clock))
+
+  async function loadOnAir() {
+    try {
+      const [releases, editions] = await Promise.all([listReleases(), listEditions()])
+      headerReleases = releases
+      headerEditions = editions
+      clock = new Date()
+    } catch {
+      // ヘッダーの表示だけなので、読めなくても本体は動かす
+    }
+  }
+
+  $effect(() => {
+    void route.name
+    void route.params.id
+    void syncStatus.running
+    void loadOnAir()
+  })
+
+  $effect(() => {
+    const id = setInterval(() => (clock = new Date()), 60_000)
+    return () => clearInterval(id)
+  })
+
+  const navItems: { label: string; path: string; name: typeof route.name; icon: LucideIcon }[] = [
+    { label: 'HOME', path: '#/', name: 'home', icon: House },
+    { label: '検索', path: '#/search', name: 'search', icon: SearchIcon },
+    { label: 'LIBRARY', path: '#/library', name: 'library', icon: LibraryIcon },
+    { label: 'CATALOG', path: '#/catalog', name: 'catalog', icon: BookOpen },
+    { label: 'CALENDAR', path: '#/calendar', name: 'calendar', icon: CalendarDays },
+    { label: 'SETTINGS', path: '#/settings', name: 'settings', icon: SettingsIcon },
   ]
 </script>
 
@@ -73,6 +114,11 @@
   >
     <span aria-hidden="true" style="width: 15px; height: 15px; background: var(--fg); display: inline-block;"></span>
     <span class="text-sm font-bold" style="letter-spacing: 0.18em;">triptych</span>
+    {#if onAir > 0}
+      <a href="#/" class="onair-link" aria-label={`今日放送・配信のある作品 ${onAir}`}>
+        <OnAirLamp label={`ON AIR ${onAir}`} />
+      </a>
+    {/if}
   </header>
 
   {#if showA2HSBanner}
@@ -121,16 +167,27 @@
     style="max-width: 480px; margin: 0 auto; border-top: 1px solid var(--line); background: var(--bg);"
     aria-label="メインナビゲーション"
   >
-    {#each navItems as item}
+    {#each navItems as item (item.path)}
+      {@const active = route.name === item.name}
       <button
         type="button"
         class="bottom-nav-item"
-        style={`color: ${route.name === item.name ? 'var(--fg)' : 'var(--muted)'};`}
-        aria-current={route.name === item.name ? 'page' : undefined}
+        class:active
+        aria-current={active ? 'page' : undefined}
         onclick={() => navigate(item.path)}
       >
-        <span class="hi-underline" class:active={route.name === item.name}>{item.label}</span>
+        <item.icon size={18} strokeWidth={active ? 2.25 : 1.75} aria-hidden="true" />
+        <span class="hi-underline" class:active>{item.label}</span>
       </button>
     {/each}
   </nav>
 </div>
+
+<style>
+  .onair-link {
+    display: inline-flex;
+    align-items: center;
+    margin-left: auto;
+    padding: 0.25rem 0;
+  }
+</style>

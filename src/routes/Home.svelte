@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { BookOpen, RefreshCw, Search } from '@lucide/svelte';
   import { listReleases, listEditions, listWorks, updateRelease, listDetectionEvents } from '../lib/db/store';
   import type { Release, Edition, Work, DetectionEvent } from '../lib/db/schema';
   import { formatReleaseDate, todayJst } from '../lib/dates';
@@ -7,8 +8,19 @@
   import { runSync } from '../lib/sync/engine';
   import { syncStatus, beginSync, completeSync, failSync } from '../lib/sync/status.svelte';
   import { acceptDetection, rejectDetection } from '../lib/sync/detect';
-  import MediaBadge from '../lib/components/MediaBadge.svelte';
+  import { fetchCatalogWorks } from '../lib/catalog/api';
+  import type { CatalogWorkSummary } from '../lib/catalog/types';
+  import Cover from '../lib/components/Cover.svelte';
   import ReleaseRow from '../lib/components/ReleaseRow.svelte';
+  import TodayStrip from '../lib/components/TodayStrip.svelte';
+  import {
+    buildCoverIndex,
+    currentSeason,
+    datelineLabel,
+    todayItems,
+    withoutToday,
+    type TodayItem,
+  } from '../lib/components/home-view';
   import {
     AIRING_STATUS_LABELS,
     DETECTION_VIA_LABELS,
@@ -19,6 +31,8 @@
   import { unseenReleases, upcomingReleases } from '../lib/components/release-view';
 
   const UPCOMING_DAYS = 7;
+  const SHELF_SIZE = 12;
+  const SHELF_PLACEHOLDERS = 6;
 
   let releases = $state<Release[]>([]);
   let editions = $state<Edition[]>([]);
@@ -26,6 +40,9 @@
   let detections = $state<DetectionEvent[]>([]);
   // 日付はすべて JST の暦日で扱う（toISOString は UTC になるので使わない）
   let today = $state(todayJst());
+  // カウントダウンと放送日の切り替わり（朝5時）のための時計。1分ごとに進める
+  let now = $state(new Date());
+  let loaded = $state(false);
 
   const editionMap = $derived(new Map(editions.map((e) => [e.id, e])));
   const workMap = $derived(new Map(works.map((w) => [w.id, w])));
@@ -41,19 +58,75 @@
       }),
   );
 
-  const upcoming = $derived(upcomingReleases(releases, editionMap, today, UPCOMING_DAYS));
+  const covers = $derived(buildCoverIndex(editions, works));
+  const todays = $derived(todayItems(releases, editionMap, now));
+  // 今日の分は上の横並びに出したので、直近からは外す
+  const upcoming = $derived(withoutToday(upcomingReleases(releases, editionMap, today, UPCOMING_DAYS), todays));
   const fresh = $derived(unseenReleases(releases, editionMap));
   const streaming = $derived(startedStreamServices(releases, today));
+  const libraryEmpty = $derived(loaded && works.length === 0);
 
   async function refresh() {
     releases = await listReleases();
     editions = await listEditions();
     works = await listWorks();
     detections = await listDetectionEvents();
-    today = todayJst();
+    now = new Date();
+    today = todayJst(now);
+    loaded = true;
+    if (works.length === 0 && shelf.status === 'idle') void loadShelf();
   }
 
   onMount(refresh);
+
+  // 起動時の自動同期（App 側）が終わったら読み直す
+  const syncSeen = { at: syncStatus.lastSyncAt };
+  $effect(() => {
+    const at = syncStatus.lastSyncAt;
+    if (!at || at === syncSeen.at) return;
+    syncSeen.at = at;
+    void refresh();
+  });
+
+  onMount(() => {
+    const tick = () => {
+      now = new Date();
+      today = todayJst(now);
+    };
+    let interval: ReturnType<typeof setInterval> | undefined;
+    // 分の変わり目に揃えてから 1 分ごとに進める
+    const timeout = setTimeout(() => {
+      tick();
+      interval = setInterval(tick, 60_000);
+    }, 60_000 - (Date.now() % 60_000));
+    return () => {
+      clearTimeout(timeout);
+      if (interval) clearInterval(interval);
+    };
+  });
+
+  // Library が空の時の「今期の放送中」（カタログ未作成・取得失敗なら枠を出さない）
+  type ShelfState =
+    | { status: 'idle' | 'loading' | 'failed' }
+    | { status: 'ready'; items: CatalogWorkSummary[] };
+  let shelf = $state<ShelfState>({ status: 'idle' });
+  const season = $derived(currentSeason(today));
+
+  async function loadShelf() {
+    shelf = { status: 'loading' };
+    try {
+      const { year, season: s } = currentSeason(todayJst());
+      const page = await fetchCatalogWorks({ status: 'RELEASING', year, season: s, sort: 'popularity', per: SHELF_SIZE });
+      shelf = page.items.length > 0 ? { status: 'ready', items: page.items } : { status: 'failed' };
+    } catch {
+      shelf = { status: 'failed' };
+    }
+  }
+
+  function openToday(item: TodayItem) {
+    const edition = editionMap.get(item.editionId);
+    if (edition) navigate(`#/work/${edition.workId}`);
+  }
 
   let detectionBusy = $state<string | null>(null);
 
@@ -130,37 +203,47 @@
   const errorLabels = $derived(Object.keys(syncStatus.errors).map(syncKeyLabel));
 </script>
 
-<section class="flex flex-col gap-4 p-4">
-  <h1 class="page-title"><span class="hi-marker">追いかける。</span></h1>
-
-  <div
-    class="flex flex-wrap items-center gap-2 px-2 py-1.5 text-[11px]"
-    style="border: 1px solid var(--line); color: var(--muted);"
-  >
-    <span style="white-space: nowrap;">最終同期: {formatSyncTime(syncStatus.lastSyncAt)}</span>
-    {#if errorLabels.length > 0}
-      <span style="color: var(--fg);">
-        <span style="white-space: nowrap;">エラー:</span>
-        {errorLabels.join(', ')}
+<section class="flex flex-col gap-6 p-4">
+  <div class="flex flex-col">
+    <h1 class="page-title" style="margin-bottom: 0.75rem;"><span class="hi-marker">追いかける。</span></h1>
+    <!-- 紙面の日付の帯: 今日の日付・最終同期・同期の操作 -->
+    <div class="dateline">
+      <span class="mono dateline-date">{datelineLabel(today)}</span>
+      <span class="dateline-sync">
+        <span>同期</span>
+        <span class="mono">{formatSyncTime(syncStatus.lastSyncAt)}</span>
       </span>
-    {/if}
-    <button
-      type="button"
-      class="ml-auto px-2 py-0.5 text-[11px]"
-      style="border: 1px solid var(--fg); color: var(--fg); white-space: nowrap;"
-      disabled={syncing || syncStatus.running}
-      onclick={onManualSync}
-    >
-      {syncing || syncStatus.running ? '同期中…' : '今すぐ同期'}
-    </button>
+      {#if errorLabels.length > 0}
+        <span class="dateline-error">
+          <span style="white-space: nowrap;">エラー:</span>
+          {errorLabels.join(', ')}
+        </span>
+      {/if}
+      <button
+        type="button"
+        class="dateline-button"
+        disabled={syncing || syncStatus.running}
+        onclick={onManualSync}
+      >
+        <RefreshCw size={12} strokeWidth={2} aria-hidden="true" class={syncing || syncStatus.running ? 'spin' : ''} />
+        {syncing || syncStatus.running ? '同期中…' : '今すぐ同期'}
+      </button>
+    </div>
   </div>
+
+  {#if todays.length > 0}
+    <div class="flex flex-col">
+      <div class="shou"><h2>今日</h2><span class="no">TODAY</span></div>
+      <TodayStrip items={todays} {covers} {now} onopen={openToday} />
+    </div>
+  {/if}
 
   {#if pendingDetections.length > 0}
     <div class="flex flex-col gap-2">
       <div class="shou">
-        <h2 class="flex items-center gap-1.5">
+        <h2 class="flex items-baseline gap-1.5">
           アニメ化検知
-          <span class="inline-block h-1.5 w-1.5" style="background: var(--hi);" aria-hidden="true"></span>
+          <span class="mono text-[11px]" style="color: var(--muted); font-weight: 500;">{pendingDetections.length}</span>
         </h2>
         <span class="no">DETECTED</span>
       </div>
@@ -230,43 +313,197 @@
     </div>
   {/if}
 
-  <div class="flex flex-col gap-2">
-    <div class="shou"><h2>直近</h2><span class="no">NEXT 7 DAYS</span></div>
-    {#if upcoming.length === 0}
-      <p class="text-xs" style="color: var(--muted);">7日以内の予定はありません</p>
-    {:else}
-      <div class="flex flex-col" style="border-top: 1px solid var(--line);">
-        {#each upcoming as release (release.id)}
-          <ReleaseRow
-            {release}
-            edition={editionMap.get(release.editionId)}
-            workTitle={workTitleFor(release.editionId)}
-            streaming={streaming.get(release.editionId)}
-            accent
-            onclick={() => openRelease(release, false)}
-          />
-        {/each}
+  {#if libraryEmpty}
+    <div class="flex flex-col gap-3">
+      <p class="text-xs" style="color: var(--muted);">
+        Library はまだ空です。カタログや検索から、追いかける作品を足していきます。
+      </p>
+      <div class="flex gap-2">
+        <a href="#/catalog" class="cta cta-primary">
+          <BookOpen size={16} strokeWidth={2} aria-hidden="true" />
+          カタログを見る
+        </a>
+        <a href="#/search" class="cta">
+          <Search size={16} strokeWidth={2} aria-hidden="true" />
+          検索する
+        </a>
       </div>
-    {/if}
-  </div>
+    </div>
 
-  <div class="flex flex-col gap-2">
-    <div class="shou"><h2>新着</h2><span class="no">UNSEEN</span></div>
-    {#if fresh.length === 0}
-      <p class="text-xs" style="color: var(--muted);">新着はありません</p>
-    {:else}
-      <div class="flex flex-col" style="border-top: 1px solid var(--line);">
-        {#each fresh as release (release.id)}
-          <ReleaseRow
-            {release}
-            edition={editionMap.get(release.editionId)}
-            workTitle={workTitleFor(release.editionId)}
-            streaming={streaming.get(release.editionId)}
-            emphasis={false}
-            onclick={() => openRelease(release, true)}
-          />
-        {/each}
+    {#if shelf.status === 'loading' || shelf.status === 'ready'}
+      <div class="flex flex-col">
+        <div class="shou"><h2>今期の放送中</h2><span class="no">{season.season} {season.year}</span></div>
+        <ul class="shelf" aria-busy={shelf.status === 'loading'}>
+          {#if shelf.status === 'ready'}
+            {#each shelf.items as item (item.id)}
+              <li>
+                <a href={`#/catalog/${encodeURIComponent(item.id)}`} class="shelf-item">
+                  <Cover
+                    src={item.cover}
+                    title={item.title}
+                    mediaType={item.kinds.includes('anime') ? 'anime' : undefined}
+                    size="fill"
+                  />
+                  <span class="shelf-title">{item.title}</span>
+                </a>
+              </li>
+            {/each}
+          {:else}
+            {#each { length: SHELF_PLACEHOLDERS } as _, i (i)}
+              <li><span class="shelf-placeholder"></span></li>
+            {/each}
+          {/if}
+        </ul>
       </div>
     {/if}
-  </div>
+  {:else if loaded}
+    <div class="flex flex-col">
+      <div class="shou"><h2>直近</h2><span class="no">NEXT 7 DAYS</span></div>
+      {#if upcoming.length === 0}
+        <p class="text-xs" style="color: var(--muted);">
+          {todays.length > 0 ? '明日から7日以内の予定はありません' : '7日以内の予定はありません'}
+        </p>
+      {:else}
+        <div class="flex flex-col" style="border-top: 1px solid var(--line);">
+          {#each upcoming as release (release.id)}
+            <ReleaseRow
+              {release}
+              edition={editionMap.get(release.editionId)}
+              workTitle={workTitleFor(release.editionId)}
+              streaming={streaming.get(release.editionId)}
+              cover={covers.get(release.editionId)}
+              accent
+              onclick={() => openRelease(release, false)}
+            />
+          {/each}
+        </div>
+      {/if}
+    </div>
+
+    <div class="flex flex-col">
+      <div class="shou"><h2>新着</h2><span class="no">UNSEEN</span></div>
+      {#if fresh.length === 0}
+        <p class="text-xs" style="color: var(--muted);">新着はありません</p>
+      {:else}
+        <div class="flex flex-col" style="border-top: 1px solid var(--line);">
+          {#each fresh as release (release.id)}
+            <ReleaseRow
+              {release}
+              edition={editionMap.get(release.editionId)}
+              workTitle={workTitleFor(release.editionId)}
+              streaming={streaming.get(release.editionId)}
+              cover={covers.get(release.editionId)}
+              emphasis={false}
+              onclick={() => openRelease(release, true)}
+            />
+          {/each}
+        </div>
+      {/if}
+    </div>
+  {/if}
 </section>
+
+<style>
+  .dateline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.75rem;
+    padding: 0.375rem 0;
+    border-top: 1px solid var(--fg);
+    border-bottom: 1px solid var(--line);
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .dateline-date {
+    color: var(--fg);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+  .dateline-sync {
+    display: inline-flex;
+    gap: 0.35em;
+    white-space: nowrap;
+  }
+  .dateline-error {
+    color: var(--fg);
+  }
+  .dateline-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-left: auto;
+    padding: 0.125rem 0.5rem;
+    border: 1px solid var(--fg);
+    color: var(--fg);
+    white-space: nowrap;
+  }
+  .dateline-button:disabled {
+    border-color: var(--line);
+    color: var(--muted);
+  }
+  .dateline-button :global(.spin) {
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Library が空の時の誘導 */
+  .cta {
+    display: inline-flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 44px;
+    padding: 0 0.75rem;
+    border: 1px solid var(--fg);
+    color: var(--fg);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .cta-primary {
+    background: var(--fg);
+    color: var(--bg);
+  }
+
+  .shelf {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem 0.75rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .shelf-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 0;
+  }
+  .shelf-title {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11px;
+    line-height: 1.35;
+  }
+  .shelf-placeholder {
+    display: block;
+    aspect-ratio: 2 / 3;
+    border-radius: 2px;
+    background: var(--cover-ph);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dateline-button :global(.spin) {
+      animation: none;
+    }
+  }
+</style>
