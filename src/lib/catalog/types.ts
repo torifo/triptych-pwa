@@ -95,3 +95,37 @@ export interface CatalogQuery {
   page?: number;
   per?: number;
 }
+
+// ---------------------------------------------------------------------------
+// カレンダーの重ね表示（GET /api/catalog/events）
+// ---------------------------------------------------------------------------
+
+export type CatalogEventKind = 'anime' | 'book';
+/** episode は放送中のアニメの次の話（label は「第3話」）。 */
+export type CatalogEventType = 'episode' | 'season-start' | 'movie' | 'release';
+
+export interface CatalogEvent {
+  clusterId: string;
+  entryId: string; // "<source>:<externalId>"
+  title: string;
+  kind: CatalogEventKind;
+  event: CatalogEventType;
+  date: string; // YYYY-MM-DD
+  /** JST の実時刻 'HH:MM'（放送の話など、分かるものだけ）。 */
+  time?: string | null;
+  label: string;
+  cover?: string | null;
+  popularity?: number | null;
+}
+
+export interface CatalogEventPage {
+  items: CatalogEvent[];
+  /** 上限（600 件）で切れたか。 */
+  truncated: boolean;
+}
+
+export interface CatalogEventQuery {
+  from: string; // YYYY-MM-DD
+  to: string; // YYYY-MM-DD（from から最大 62 日）
+  kinds?: CatalogEventKind[];
+}

@@ -41,11 +41,17 @@ export function calendarDay(
   return today.startsWith(prefix) ? today : null;
 }
 
-/** 升目の読み上げ（'10月15日 3件 放送あり'）。 */
-export function dayCellLabel(date: string, count: number, mark: 'today' | 'upcoming' | null): string {
+/** 升目の読み上げ（'10月15日 3件 放送・配信あり カタログ 12件'）。 */
+export function dayCellLabel(
+  date: string,
+  count: number,
+  mark: 'today' | 'upcoming' | null,
+  catalogCount = 0,
+): string {
   const label = `${Number(date.slice(5, 7))}月${Number(date.slice(8, 10))}日`;
   const parts = [label];
   if (count > 0) parts.push(`${count}件`);
   if (mark) parts.push('放送・配信あり');
+  if (catalogCount > 0) parts.push(`カタログ ${catalogCount}件`);
   return parts.join(' ');
 }

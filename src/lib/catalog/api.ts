@@ -2,6 +2,8 @@
 
 import { ApiError, TOKEN_KEY, apiGet, getApiBase, readErrorDetail } from '../api';
 import type {
+  CatalogEventPage,
+  CatalogEventQuery,
   CatalogQuery,
   CatalogStats,
   CatalogWorkDetail,
@@ -53,6 +55,26 @@ export function fetchCatalogWorks(q: CatalogQuery): Promise<CatalogWorkPage> {
 
 export function fetchCatalogWork(id: string): Promise<CatalogWorkDetail> {
   return apiGet<CatalogWorkDetail>(`/api/catalog/works/${encodeURIComponent(id)}`);
+}
+
+// ---------------------------------------------------------------------------
+// カレンダーの重ね表示（期間の出来事）
+// ---------------------------------------------------------------------------
+
+/** GET /api/catalog/events の上限（期間は最大 62 日、1 回 600 件）。 */
+export const MAX_EVENT_DAYS = 62;
+export const MAX_EVENT_ITEMS = 600;
+
+/** CatalogEventQuery をクエリ文字列用の値に直す。kind はカンマで連結し、空なら付けない（全種）。 */
+export function buildEventsQuery(q: CatalogEventQuery): Record<string, string> {
+  const out: Record<string, string> = { from: q.from, to: q.to };
+  const kinds = [...new Set(q.kinds ?? [])];
+  if (kinds.length > 0) out.kind = kinds.join(',');
+  return out;
+}
+
+export function fetchCatalogEvents(q: CatalogEventQuery): Promise<CatalogEventPage> {
+  return apiGet<CatalogEventPage>('/api/catalog/events', buildEventsQuery(q));
 }
 
 export type WorkLoadFailureKind = 'not-built' | 'not-found' | 'error';

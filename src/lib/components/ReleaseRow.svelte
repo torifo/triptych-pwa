@@ -3,9 +3,10 @@
   import { formatReleaseDate } from '../dates';
   import { isPostponed } from './release-view';
   import { displayReleaseLabel } from './labels';
-  import type { CoverSource } from './cover';
+  import type { CoverSize, CoverSource } from './cover';
   import Cover from './Cover.svelte';
   import MediaBadge from './MediaBadge.svelte';
+  import OnAirLamp from './OnAirLamp.svelte';
 
   let {
     release,
@@ -18,6 +19,8 @@
     cover,
     isNew = false,
     timeOnly = false,
+    coverSize = 'xs',
+    onAir = false,
   }: {
     release: Release;
     edition: Edition | undefined;
@@ -35,6 +38,10 @@
     isNew?: boolean;
     /** 日の一覧など、見出しに日付がある所では日付を省いて時刻（無ければ種類の言葉）だけ出す */
     timeOnly?: boolean;
+    /** 表紙の大きさ（既定 xs）。カレンダーの週では s */
+    coverSize?: CoverSize;
+    /** いま放送中。時刻の下に ON AIR のランプを出す */
+    onAir?: boolean;
   } = $props();
 
   // 日付と時刻を分け、時刻を日付の下に等幅で揃える（番組表の組み方）
@@ -60,11 +67,14 @@
         <span class="time">{release.time}</span>
       {/if}
     {/if}
+    {#if onAir}
+      <span class="lamp"><OnAirLamp label="ON AIR" /></span>
+    {/if}
   </span>
   {#if cover}
     <!-- 作品名は右に文字で出すので、表紙は読み上げない -->
     <span class="thumb" aria-hidden="true">
-      <Cover src={cover.url} title={cover.title} mediaType={cover.mediaType} size="xs" />
+      <Cover src={cover.url} title={cover.title} mediaType={cover.mediaType} size={coverSize} />
     </span>
   {/if}
   <span class="body">
@@ -135,6 +145,10 @@
   }
   .time {
     font-size: 12px;
+  }
+  .lamp {
+    display: flex;
+    margin-top: 0.2rem;
   }
 
   .thumb {

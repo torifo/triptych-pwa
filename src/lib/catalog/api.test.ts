@@ -5,10 +5,12 @@ import {
   DETAIL_NOT_BUILT,
   DETAIL_WORK_NOT_FOUND,
   MAX_PER,
+  buildEventsQuery,
   buildWorksQuery,
   describeWorkLoadError,
   downloadCatalogExport,
   exportPath,
+  fetchCatalogEvents,
   fetchCatalogWork,
   fetchCatalogWorks,
   filenameFromDisposition,
@@ -179,5 +181,50 @@ describe('describeWorkLoadError', () => {
       new ApiError(503, 'x'),
     ].map((err) => describeWorkLoadError(err).kind);
     expect(new Set(kinds).size).toBe(3);
+  });
+});
+
+describe('buildEventsQuery', () => {
+  it('keeps the range and joins the kinds with commas, without duplicates', () => {
+    expect(buildEventsQuery({ from: '2026-10-15', to: '2026-10-21' })).toEqual({ from: '2026-10-15', to: '2026-10-21' });
+    expect(buildEventsQuery({ from: '2026-10-15', to: '2026-10-21', kinds: [] })).toEqual({
+      from: '2026-10-15',
+      to: '2026-10-21',
+    });
+    expect(buildEventsQuery({ from: '2026-10-01', to: '2026-10-31', kinds: ['anime', 'book', 'anime'] })).toEqual({
+      from: '2026-10-01',
+      to: '2026-10-31',
+      kind: 'anime,book',
+    });
+  });
+});
+
+describe('fetchCatalogEvents', () => {
+  const fetchMock = vi.fn();
+
+  beforeEach(() => {
+    localStorage.clear();
+    fetchMock.mockReset();
+    vi.stubGlobal('fetch', fetchMock);
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('calls the events endpoint with the range and kinds', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ items: [], truncated: false })));
+    const page = await fetchCatalogEvents({ from: '2026-10-15', to: '2026-10-21', kinds: ['anime'] });
+    const url = new URL(String(fetchMock.mock.calls[0][0]), 'http://x');
+    expect(url.pathname).toBe('/api/catalog/events');
+    expect(Object.fromEntries(url.searchParams)).toEqual({ from: '2026-10-15', to: '2026-10-21', kind: 'anime' });
+    expect(page).toEqual({ items: [], truncated: false });
+  });
+
+  it('keeps the reason when the catalog has not been built', async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ detail: DETAIL_NOT_BUILT }), { status: 404 }));
+    await expect(fetchCatalogEvents({ from: '2026-10-15', to: '2026-10-21' })).rejects.toMatchObject({
+      status: 404,
+      detail: DETAIL_NOT_BUILT,
+    });
   });
 });

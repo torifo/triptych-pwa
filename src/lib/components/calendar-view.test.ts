@@ -43,4 +43,9 @@ describe('dayCellLabel', () => {
     expect(dayCellLabel('2026-10-05', 0, null)).toBe('10月5日');
     expect(dayCellLabel('2026-10-15', 3, 'today')).toBe('10月15日 3件 放送・配信あり');
   });
+
+  it('カタログの出来事の数も読み上げる', () => {
+    expect(dayCellLabel('2026-10-15', 0, null, 12)).toBe('10月15日 カタログ 12件');
+    expect(dayCellLabel('2026-10-15', 1, 'upcoming', 0)).toBe('10月15日 1件 放送・配信あり');
+  });
 });
