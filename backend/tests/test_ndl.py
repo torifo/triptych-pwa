@@ -486,7 +486,7 @@ async def test_sorts_by_date_before_keeping_thirty():
 
     assert dto.lines[0].count == 40
     assert len(dto.releases) == 30
-    assert [r.label for r in dto.releases] == [f"[{n}]" for n in range(40, 10, -1)]
+    assert [r.label for r in dto.releases] == [str(n) for n in range(40, 10, -1)]  # 目録の [40] も数字に揃える
 
 
 @pytest.mark.asyncio
@@ -899,3 +899,18 @@ async def test_a_catalog_volume_with_the_jpro_label_joins_the_series_line():
                           publisher=KC_PUBLISHER)]
     dto = await _series(_kc_xml(), "フーディーズ", "manga", line="ヤンマガKC", upcoming=upcoming)
     assert _isbns(dto)[0] == upcoming_isbn
+
+
+@pytest.mark.parametrize(
+    "remainder, volume, expected",
+    [
+        ("(5)", None, "5"),  # 近刊は題名に「金田一パパの事件簿(5)」と書く
+        ("（12）", None, "12"),
+        ("[3]", None, "3"),
+        ("第3部[10]", None, "第3部[10]"),  # 括弧だけでなければそのまま
+        ("", "(7)", "7"),
+    ],
+)
+def test_label_unwraps_a_bare_bracketed_volume(remainder, volume, expected):
+    record = ndl.NdlRecord(title="金田一パパの事件簿" + remainder, volume=volume)
+    assert ndl._label(record, remainder, None) == expected

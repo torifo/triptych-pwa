@@ -514,14 +514,24 @@ def _strip_subtitle(remainder: str, subtitle_key: str) -> str:
     return remainder[end:]
 
 
+# 括弧だけで包まれた巻数（近刊の題名「金田一パパの事件簿(5)」の残り「(5)」など）
+_BARE_VOLUME_RE = re.compile(r"^[(（\[［]\s*(\d+)\s*[)）\]］]$")
+
+
+def _unwrap_volume(text: str) -> str:
+    """'(5)' / '（12）' / '[3]' -> the number; anything else as it is."""
+    match = _BARE_VOLUME_RE.match(text)
+    return match.group(1) if match else text
+
+
 def _label(record: NdlRecord, remainder: str, line_token: Optional[str]) -> str:
     """Readable volume name, e.g. '第3部[10]', 'ハンネローレの貴族院五年生 1',
     '第三部 領主の養女10' (近刊 records carry the volume in the title)."""
     if line_token:
         remainder = remainder.replace(line_token, " ")
         remainder = re.sub(r"[(\[]\s*[)\]]", " ", remainder)
-    rest = _tidy(remainder)
-    volume = _tidy(record.volume or "")
+    rest = _unwrap_volume(_tidy(remainder))
+    volume = _unwrap_volume(_tidy(record.volume or ""))
     if rest and volume:
         numbers = re.findall(r"\d+", volume)
         core = rest.rstrip(" 」』)]】>〉》\"'")
