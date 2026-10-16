@@ -14,7 +14,7 @@ from typing import Any
 import pytest
 
 from backend.catalog import __main__ as cli
-from backend.catalog import db, runtime
+from backend.catalog import db, lock, runtime
 
 
 class Harvesters:
@@ -50,6 +50,14 @@ class Harvesters:
     @property
     def sources(self) -> list[str]:
         return [call["source"] for call in self.calls]
+
+
+@pytest.fixture(autouse=True)
+def lock_dir(tmp_path, monkeypatch):
+    """Own lock directory: a real build or job on this machine never meets the tests'."""
+    monkeypatch.setattr(cli, "LOCAL_DIR", tmp_path / "local")
+    monkeypatch.delenv(lock.HELD_ENV, raising=False)
+    return tmp_path / "local"
 
 
 @pytest.fixture()
@@ -162,3 +170,51 @@ def test_unknown_source_is_rejected(harvesters, catalog):
         cli.main(["build", "--recent", "--source", "anilist,nope"])
     assert stop.value.code == 2
     assert harvesters.calls == []
+
+
+# -- one writer at a time (the lock shared with the collector's job API) ----------------------
+
+
+def test_build_and_link_refuse_while_another_writer_holds_the_lock(harvesters, catalog, lock_dir, capsys):
+    held = lock.acquire(lock_dir)
+    assert held is not None
+    try:
+        assert cli.main(["build", "--recent"]) == 2
+        assert cli.main(["link"]) == 2
+    finally:
+        import os
+
+        os.close(held)
+    assert harvesters.calls == [] and harvesters.linked == []
+    assert "already running" in capsys.readouterr().out
+
+
+def test_a_job_child_runs_under_the_lock_it_inherited(harvesters, catalog, lock_dir, monkeypatch):
+    held = lock.acquire(lock_dir)
+    monkeypatch.setenv(lock.HELD_ENV, "1")
+    try:
+        assert cli.main(["build", "--source", "anilist"]) == 0
+    finally:
+        import os
+
+        os.close(held)
+    assert harvesters.sources == ["anilist"]
+
+
+def test_the_lock_is_released_when_the_command_ends(harvesters, catalog, lock_dir):
+    assert cli.main(["build", "--source", "anilist"]) == 0
+    again = lock.acquire(lock_dir)
+    assert again is not None
+    import os
+
+    os.close(again)
+
+
+def test_reading_commands_do_not_take_the_lock(catalog, lock_dir):
+    held = lock.acquire(lock_dir)
+    try:
+        assert cli.main(["stats"]) == 0
+    finally:
+        import os
+
+        os.close(held)

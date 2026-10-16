@@ -15,6 +15,7 @@ import argparse
 import asyncio
 import importlib
 import json
+import os
 import sys
 import time
 from datetime import date
@@ -22,11 +23,12 @@ from pathlib import Path
 
 import httpx
 
-from . import db
+from . import db, lock
 from .runtime import DEFAULT_TIMEOUT, HarvestResult, RealClock
 
 SOURCES = ("anilist", "syoboi", "narou", "kakuyomu", "ndl", "jpro")
 REPO_DIR = Path(__file__).resolve().parents[2]
+LOCAL_DIR = REPO_DIR / "local"  # the lock shared with the job API; read at call time so tests can point it elsewhere
 
 
 def _log(message: str) -> None:
@@ -145,6 +147,23 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("stats", help="print counts")
 
     args = parser.parse_args(argv)
+    held: int | None = None
+    if args.command in ("build", "link") and os.environ.get(lock.HELD_ENV) != "1":
+        held = lock.acquire(LOCAL_DIR)
+        if held is None:
+            pid = lock.holder(LOCAL_DIR)
+            _log(f"already running: another catalog build/link holds {LOCAL_DIR / lock.LOCK_NAME}" + (f" (pid {pid})" if pid else ""))
+            return 2
+        os.ftruncate(held, 0)
+        os.pwrite(held, f"{os.getpid()}\n".encode(), 0)
+    try:
+        return _run(args, parser)
+    finally:
+        if held is not None:
+            os.close(held)
+
+
+def _run(args: argparse.Namespace, parser: argparse.ArgumentParser) -> int:
     if args.command == "build":
         sources = [s.strip() for s in args.source.split(",") if s.strip()]
         unknown = [s for s in sources if s not in SOURCES]

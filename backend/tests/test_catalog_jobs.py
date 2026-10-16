@@ -45,6 +45,7 @@ INSPECT_SCRIPT = """
 import os
 print('cwd=' + os.getcwd())
 print('db=' + os.environ.get('TRIPTYCH_CATALOG_DB', ''))
+print('lock_held=' + os.environ.get('TRIPTYCH_CATALOG_LOCK_HELD', ''))
 print('pgid_is_own=' + str(os.getpgrp() == os.getpid()))
 """
 
@@ -292,6 +293,7 @@ def test_the_child_runs_in_the_repo_root_with_the_collectors_environment(
 
     assert f"cwd={REPO_DIR}" in job["lines"]
     assert f"db={db_path}" in job["lines"]
+    assert "lock_held=1" in job["lines"]  # the CLI must not try to take the lock it was handed
 
 
 def test_the_child_is_detached_from_the_collectors_process_group(client, monkeypatch):

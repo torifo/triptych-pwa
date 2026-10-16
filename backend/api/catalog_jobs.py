@@ -28,19 +28,16 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import BinaryIO, Literal, Optional
 
-try:
-    import fcntl
-except ImportError:  # no flock on this platform: jobs still run, only the cross-process guard is lost
-    fcntl = None  # type: ignore[assignment]
-
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
+
+from ..catalog import lock as catalog_lock
 
 router = APIRouter(prefix="/api/catalog/jobs", tags=["catalog"])
 
 REPO_DIR = Path(__file__).resolve().parents[2]
 LOCAL_DIR = REPO_DIR / "local"  # logs and the lock file; read at call time so tests can point it elsewhere
-LOCK_NAME = "catalog-job.lock"
+LOCK_NAME = catalog_lock.LOCK_NAME
 MAX_LINES = 40
 MAX_LINE_CHARS = 400
 TAIL_BYTES = 64 * 1024  # how much of the log's end is read to find those lines
@@ -127,24 +124,8 @@ def _tail_lines(path: Path) -> list[str]:
 
 
 def _acquire_lock() -> Optional[int]:
-    """Opens `local/catalog-job.lock` and takes an exclusive flock on it.
-
-    Returns the open descriptor, or None when another process holds the lock. Raises OSError
-    when the directory or the file cannot be made.
-    """
-    LOCAL_DIR.mkdir(parents=True, exist_ok=True)
-    fd = os.open(LOCAL_DIR / LOCK_NAME, os.O_RDWR | os.O_CREAT, 0o644)
-    if fcntl is None:
-        return fd
-    try:
-        fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
-    except BlockingIOError:
-        os.close(fd)
-        return None
-    except OSError:
-        os.close(fd)
-        raise
-    return fd
+    """The catalog's one-writer lock (`local/catalog-job.lock`, shared with the CLI). None when it is taken."""
+    return catalog_lock.acquire(LOCAL_DIR)
 
 
 def _open_log(started_at: datetime) -> tuple[Path, BinaryIO]:
@@ -177,7 +158,8 @@ async def _spawn(job: _Job, lock_fd: int) -> None:
         proc = await asyncio.create_subprocess_exec(
             *recent_command(),
             cwd=REPO_DIR,
-            env={**os.environ, "PYTHONUNBUFFERED": "1"},  # so the log's tail is live
+            # the log's tail is live; the child already holds the lock through pass_fds
+            env={**os.environ, "PYTHONUNBUFFERED": "1", catalog_lock.HELD_ENV: "1"},
             stdin=subprocess.DEVNULL,
             stdout=log,
             stderr=subprocess.STDOUT,
