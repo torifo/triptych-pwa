@@ -186,6 +186,7 @@ def test_an_anime_event_has_every_field(events_catalog, client):
         "label": "第3期 放送開始",
         "cover": "https://img/e11.jpg",
         "popularity": 90000,
+        "estimated": False,
     }
 
 
@@ -247,6 +248,7 @@ def test_a_book_event_has_every_field(events_catalog, client):
         "label": "16巻",
         "cover": "https://img/w1.jpg",  # the work's cover
         "popularity": 90000,
+        "estimated": False,
     }
 
 
@@ -349,7 +351,16 @@ def episodes_catalog(events_catalog) -> Path:
 
 
 def episode_items(client, **params: Any) -> list[dict[str, Any]]:
-    return [item for item in anime_items(client, **params) if item["event"] == "episode"]
+    """The next episodes as harvested (not the weekly projections after them)."""
+    return [item for item in anime_items(client, **params) if item["event"] == "episode" and not item["estimated"]]
+
+
+def projected_items(client, cluster: str, **params: Any) -> list[tuple[str, str | None, str, bool]]:
+    return [
+        (item["date"], item["time"], item["label"], item["estimated"])
+        for item in anime_items(client, **params)
+        if item["event"] == "episode" and item["clusterId"] == cluster
+    ]
 
 
 def test_an_episode_event_has_every_field(episodes_catalog, client):
@@ -365,6 +376,7 @@ def test_an_episode_event_has_every_field(episodes_catalog, client):
         "label": "第5話",
         "cover": "https://img/w7.jpg",  # no cover of its own: the work's
         "popularity": 80000,
+        "estimated": False,
     }
     assert items["anilist:801"]["cover"] == "https://img/e801.jpg"
 
@@ -391,14 +403,62 @@ def test_an_episode_without_a_clock_has_no_time_and_one_without_a_number_a_gener
     assert (items["anilist:1701"]["date"], items["anilist:1701"]["time"]) == ("2026-10-17", None)
 
 
-def test_one_next_episode_per_work(episodes_catalog, client):
-    mine = [item for item in episode_items(client) if item["clusterId"] == "anilist:11"]
-    assert [(item["entryId"], item["date"], item["label"]) for item in mine] == [("anilist:1102", "2026-10-14", "第2話")]
-    later = [item for item in episode_items(client, **{"from": "2026-10-15", "to": "2026-10-31"}) if item["clusterId"] == "anilist:11"]
-    assert [(item["entryId"], item["date"], item["label"]) for item in later] == [("anilist:1101", "2026-10-20", "第3話")]
-    # the clusters of the two unreadable / unlisted rows above also stay at one event each
-    clusters = [item["clusterId"] for item in episode_items(client)]
-    assert len(clusters) == len(set(clusters))
+def test_one_episode_per_work_and_day(episodes_catalog, client):
+    # 二つE has two airing rows on different weekdays: each keeps its own week, never two on one day
+    mine = [(item["entryId"], item["date"], item["label"]) for item in anime_items(client) if item["clusterId"] == "anilist:11" and item["event"] == "episode"]
+    assert mine == [
+        ("anilist:1102", "2026-10-14", "第2話"),
+        ("anilist:1101", "2026-10-20", "第3話"),
+        ("anilist:1102", "2026-10-21", "第3話"),
+        ("anilist:1101", "2026-10-27", "第4話"),
+        ("anilist:1102", "2026-10-28", "第4話"),
+    ]
+    days = [(item["clusterId"], item["date"]) for item in anime_items(client) if item["event"] == "episode"]
+    assert len(days) == len(set(days))
+
+
+# -- weekly projection after the harvested next episode ---------------------------------
+
+
+def test_an_airing_show_is_projected_weekly_up_to_its_last_episode(catalog_path, client):
+    conn = db.connect(catalog_path)
+    add_work(conn, "anilist:50", "全7話", [airing("5001", "全7話", {"date": "2026-10-10", "time": "23:30", "episode": 5}, episodes=7)], popularity=10)
+    conn.close()
+    assert projected_items(client, "anilist:50") == [
+        ("2026-10-10", "23:30", "第5話", False),
+        ("2026-10-17", "23:30", "第6話", True),
+        ("2026-10-24", "23:30", "第7話", True),
+    ]
+
+
+def test_a_projection_keeps_the_late_night_clock_and_reaches_later_months(catalog_path, client):
+    conn = db.connect(catalog_path)
+    add_work(conn, "anilist:51", "深夜", [airing("5101", "深夜", {"date": "2026-10-10", "time": "24:30", "episode": 2})], popularity=10)
+    conn.close()
+    november = projected_items(client, "anilist:51", **{"from": "2026-11-01", "to": "2026-11-30"})
+    assert november == [
+        ("2026-11-01", "00:30", "第5話", True),  # '24:30' of 10/31
+        ("2026-11-08", "00:30", "第6話", True),
+        ("2026-11-15", "00:30", "第7話", True),
+        ("2026-11-22", "00:30", "第8話", True),
+        ("2026-11-29", "00:30", "第9話", True),
+    ]
+
+
+def test_a_projection_without_a_known_total_stops_after_a_cour(catalog_path, client):
+    conn = db.connect(catalog_path)
+    add_work(conn, "anilist:52", "長寿", [airing("5201", "長寿", {"date": "2026-10-03", "time": "18:00", "episode": 100})], popularity=10)
+    conn.close()
+    autumn = projected_items(client, "anilist:52", **{"from": "2026-10-01", "to": "2026-12-01"})
+    assert autumn[0] == ("2026-10-03", "18:00", "第100話", False)
+    assert len(autumn) == 9 and autumn[-1] == ("2026-11-28", "18:00", "第108話", True)
+    december = projected_items(client, "anilist:52", **{"from": "2026-12-01", "to": "2026-12-31"})
+    assert december[-1] == ("2026-12-26", "18:00", "第112話", True)  # 12 weeks after the harvested one
+    assert projected_items(client, "anilist:52", **{"from": "2027-01-01", "to": "2027-01-31"}) == []
+
+
+def test_a_next_episode_without_a_number_is_not_projected(episodes_catalog, client):
+    assert [d[:3] for d in projected_items(client, "anilist:16")] == [("2026-10-13", "20:00", "次回放送")]
 
 
 def test_the_first_episode_of_a_new_series_is_not_listed_twice(episodes_catalog, client):
@@ -420,6 +480,7 @@ def test_episodes_belong_to_the_anime_kind(episodes_catalog, client):
 def test_events_with_a_time_come_first_within_a_day(episodes_catalog, client):
     body = get(client, **OCT)
     assert body["truncated"] is False
+    body = {**body, "items": [item for item in body["items"] if not item["estimated"]]}
     assert keys(body) == [
         ("2026-10-01", "anime", "anilist:1001"),  # 01:00
         ("2026-10-02", "anime", "anilist:11"),
@@ -436,6 +497,7 @@ def test_events_with_a_time_come_first_within_a_day(episodes_catalog, client):
         ("2026-10-14", "anime", "anilist:1102"),
         ("2026-10-16", "anime", "anilist:12"),
         ("2026-10-17", "anime", "anilist:1701"),  # a clock nobody can read: no time
+        ("2026-10-20", "anime", "anilist:1101"),  # 二つE's other series, on its own day
         ("2026-10-20", "anime", "anilist:1401"),
         ("2026-10-31", "book", "ndl:9784000000016"),
     ]
@@ -447,7 +509,7 @@ def test_within_one_day_events_sort_by_time_then_popularity(catalog_path, client
         nxt = {"date": "2026-10-10", "episode": 1 + popularity, **({"time": clock} if clock else {})}
         add_work(conn, cluster, f"作品{cluster}", [airing(f"e{cluster[-1]}", f"作品{cluster}", nxt)], popularity=popularity)
     conn.close()
-    assert [(i["clusterId"], i["time"]) for i in get(client, **OCT)["items"]] == [
+    assert [(i["clusterId"], i["time"]) for i in get(client, **OCT)["items"] if i["date"] == "2026-10-10"] == [
         ("anilist:3", "20:30"), ("anilist:2", "21:00"), ("anilist:1", "21:00"), ("anilist:4", None),
     ]
 

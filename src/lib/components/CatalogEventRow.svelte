@@ -20,8 +20,12 @@
   </span>
   <span class="body">
     <span class="title">{event.title}</span>
-    {#if label !== kindWord}
-      <span class="label">{label}</span>
+    {#if label !== kindWord || event.estimated}
+      <span class="label">
+        {#if label !== kindWord}{label}{/if}
+        <!-- 次の話から毎週と見込んだ分。休止でずれることがあるので、確かな話と見分けられるように -->
+        {#if event.estimated}<span class="estimated">見込み</span>{/if}
+      </span>
     {/if}
   </span>
   {#if kindNote}
@@ -88,6 +92,15 @@
   .kind {
     flex-shrink: 0;
     font-size: 10px;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .estimated {
+    margin-left: 0.375rem;
+    padding: 0 0.25rem;
+    border: 1px dashed var(--line);
+    font-size: 9px;
     letter-spacing: 0.04em;
     color: var(--muted);
     white-space: nowrap;

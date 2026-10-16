@@ -106,6 +106,7 @@ class CatalogEvent(BaseModel):
     label: str  # 放送開始 / 第2期 放送開始 / 公開 / 2巻 / 第3話
     cover: Optional[str] = None
     popularity: int = 0
+    estimated: bool = False  # a later episode projected weekly from the harvested next one, not a listed airing
 
 
 class CatalogEventPage(BaseModel):

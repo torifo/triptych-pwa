@@ -116,6 +116,8 @@ export interface CatalogEvent {
   label: string;
   cover?: string | null;
   popularity?: number | null;
+  /** 取得した次の話のあと、同じ枠で毎週あると見込んだ話（放送休止などでずれることがある）。 */
+  estimated?: boolean;
 }
 
 export interface CatalogEventPage {

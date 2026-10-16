@@ -654,19 +654,41 @@ def _airing_moment(day: Any, clock: Any) -> Optional[tuple[str, Optional[str]]]:
     return when.isoformat(), f"{hour:02d}:{match.group(2)}"
 
 
+MAX_PROJECTED_WEEKS = 12  # one cour after the harvested next episode when the show's length is unknown
+
+
+def _weekly_airings(day: str, clock: Any, episode: Any, total: Any) -> list[tuple[str, Any, Any, bool]]:
+    """The harvested next airing (broadcast day) and the same slot every week after it, as (day, clock, episode, estimated).
+
+    Projected only while the episode number is known: up to the show's last episode, or MAX_PROJECTED_WEEKS weeks.
+    """
+    airings: list[tuple[str, Any, Any, bool]] = [(day, clock, episode, False)]
+    if not isinstance(episode, int) or isinstance(episode, bool) or not _DAY_RE.fullmatch(day):
+        return airings
+    weeks = MAX_PROJECTED_WEEKS
+    if isinstance(total, int) and not isinstance(total, bool) and total > 0:
+        weeks = min(weeks, total - episode)
+    start = date.fromisoformat(day)
+    for week in range(1, weeks + 1):
+        airings.append(((start + timedelta(weeks=week)).isoformat(), clock, episode + week, True))
+    return airings
+
+
 def _episode_events(
     conn: sqlite3.Connection, first: str, last: str, starts: set[tuple[str, str]]
 ) -> list[CatalogEvent]:
-    """The next episode of each airing anime (AniList RELEASING rows that carry `extra.nextAiringEpisode`), one per work.
+    """The airing anime's episodes in the period (AniList RELEASING rows that carry `extra.nextAiringEpisode`).
 
-    The next airing is a snapshot from the last harvest, so a work shows its earliest next episode inside the
-    period. `starts` holds (entry, day) of the start events already listed: an entry's first episode is not
+    The next airing is a snapshot from the last harvest; the weeks after it are projected on the same slot
+    (`estimated`) so the calendar does not empty out past the harvest week. One episode per work and day.
+    `starts` holds (entry, day) of the start events already listed: an entry's first episode is not
     listed again next to them.
     """
-    # The stored day is the broadcast day, which is the day before the real one for 24:00 and later.
-    earliest = (date.fromisoformat(first) - timedelta(days=1)).isoformat()
+    # The stored day is the broadcast day, which is the day before the real one for 24:00 and later; a projection
+    # may start from a next airing up to MAX_PROJECTED_WEEKS weeks before the period.
+    earliest = (date.fromisoformat(first) - timedelta(weeks=MAX_PROJECTED_WEEKS, days=1)).isoformat()
     rows = conn.execute(
-        f"SELECT {_ANIME_EVENT_COLUMNS}, "
+        f"SELECT {_ANIME_EVENT_COLUMNS}, e.episodes AS total, "
         "json_extract(e.extra, '$.nextAiringEpisode.date') AS day, "
         "json_extract(e.extra, '$.nextAiringEpisode.time') AS clock, "
         "json_extract(e.extra, '$.nextAiringEpisode.episode') AS episode "
@@ -675,30 +697,35 @@ def _episode_events(
         "AND json_extract(e.extra, '$.nextAiringEpisode.date') BETWEEN ? AND ?",
         (earliest, last),
     ).fetchall()
-    chosen: dict[str, tuple[tuple[str, bool, str, str], CatalogEvent]] = {}
+    chosen: dict[tuple[str, str], tuple[tuple[bool, str, str], CatalogEvent]] = {}
     for row in rows:
-        moment = _airing_moment(row["day"], row["clock"])
-        if moment is None:
+        if not isinstance(row["day"], str):
             continue
-        day, clock = moment
-        if not first <= day <= last or (row["entry_id"], day) in starts:
-            continue
-        episode = row["episode"]
-        event = CatalogEvent(
-            clusterId=row["cluster_id"],
-            entryId=row["entry_id"],
-            title=row["work_title"],
-            kind="anime",
-            event="episode",
-            date=day,
-            time=clock,
-            label=f"第{episode}話" if isinstance(episode, int) and not isinstance(episode, bool) else "次回放送",
-            cover=row["entry_cover"] or row["work_cover"],
-            popularity=row["popularity"] or 0,
-        )
-        order = (day, clock is None, clock or "", row["entry_id"])
-        if row["cluster_id"] not in chosen or order < chosen[row["cluster_id"]][0]:
-            chosen[row["cluster_id"]] = (order, event)
+        for broadcast, clock_text, episode, estimated in _weekly_airings(row["day"], row["clock"], row["episode"], row["total"]):
+            moment = _airing_moment(broadcast, clock_text)
+            if moment is None:
+                continue
+            day, clock = moment
+            if not first <= day <= last or (row["entry_id"], day) in starts:
+                continue
+            event = CatalogEvent(
+                clusterId=row["cluster_id"],
+                entryId=row["entry_id"],
+                title=row["work_title"],
+                kind="anime",
+                event="episode",
+                date=day,
+                time=clock,
+                label=f"第{episode}話" if isinstance(episode, int) and not isinstance(episode, bool) else "次回放送",
+                cover=row["entry_cover"] or row["work_cover"],
+                popularity=row["popularity"] or 0,
+                estimated=estimated,
+            )
+            # a listed airing beats a projection; then the earlier clock, then the entry
+            order = (estimated, clock is None, clock or "", row["entry_id"])
+            key = (row["cluster_id"], day)
+            if key not in chosen or order < chosen[key][0]:
+                chosen[key] = (order, event)
     return [event for _, event in chosen.values()]
 
 

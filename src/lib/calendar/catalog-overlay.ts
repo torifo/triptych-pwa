@@ -183,6 +183,7 @@ export function normalizeEventPage(raw: unknown): CatalogEventPage {
       label: isString(item.label) ? item.label : '',
       cover: isString(item.cover) ? item.cover : null,
       popularity: typeof item.popularity === 'number' ? item.popularity : null,
+      ...(item.estimated === true ? { estimated: true } : {}),
     });
   }
   return { items, truncated: body.truncated === true };

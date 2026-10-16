@@ -121,7 +121,7 @@ async def harvest(
 - DTO は `backend/catalog/dto.py` が正。フロントの型は `src/lib/catalog/types.ts`
 - `/events`: `from`〜`to`（両端を含む、最大 62 日、`YYYY-MM-DD`。不正・逆順・超過は 422）、`kind`（`anime,book`、省略で両方。未知の値は 422）。応答は `{items, truncated}`、最大 600 件（超えたら `truncated: true` で、日付の早い方 600 件）。並びは date → time（無いものは後）→ 作品の人気降順 → cluster_id。`CatalogEvent` は `clusterId / entryId / title（作品の題名） / kind / event / date / time / label / cover / popularity`
   - anime: AniList の行で、日精度（精度が無く日付が日まで、も含む）の `start_date` が期間内の TV / TV_SHORT / ONA / MOVIE。`event` は MOVIE が `movie`（「公開」）、他は `season-start`（「放送開始」。題名に「第2期」「Season 2」などがあれば「第2期 放送開始」）。cover は行の cover、無ければ作品の cover
-  - anime の次の話: 放送中（RELEASING）の AniList の行の `extra.nextAiringEpisode`（収集時点の次回放送）。`event` は `episode`、label は「第3話」（話数が無ければ「次回放送」）。保存されている日付・時刻は放送日表記（24:30 = 翌日 00:30）なので、実際の JST の日付と `time`（`HH:MM`）に直して期間と比べる。作品ごとに期間内で最も早い1件。同じ行の開始日と重なる第1話は `season-start` だけにする。`time` は他の出来事では常に null
+  - anime の次の話: 放送中（RELEASING）の AniList の行の `extra.nextAiringEpisode`（収集時点の次回放送）。`event` は `episode`、label は「第3話」（話数が無ければ「次回放送」）。保存されている日付・時刻は放送日表記（24:30 = 翌日 00:30）なので、実際の JST の日付と `time`（`HH:MM`）に直して期間と比べる。そのあとは同じ枠で毎週あると見込んで延ばす（`estimated: true`。全話数が分かればその話まで、分からなければ 12 週まで。話数の無い行は延ばさない）。収集時点の次回しか持たないため、延ばさないと翌週以降のカレンダーがほぼ空になる（2026-10-16）。作品・日ごとに1件（取得した次回が見込みより先、次に早い時刻）。同じ行の開始日と重なる第1話は `season-start` だけにする。フロントは実の時刻を放送日（朝5時区切り・24:30 表記）に戻して Library と揃える。`time` は他の出来事では常に null
   - book: 日精度の `start_date` が期間内の本で、作品が AniList の行を持つもの（`cluster_summary.popularity > 0`。本は 1 日に 100 冊を超えるので、知られた作品だけ）。`event` は `release`、label は `_book_next_label`（「2巻」）、cover は作品の cover。同じ作品の同じ日の本は 1 件（巻の小さい方）
   - 成人向けの AniList の行は収集時に除いている（`isAdult: false`）ので、ここでは条件を足さない
 

@@ -145,6 +145,18 @@ describe('行の文言', () => {
 });
 
 describe('normalizeEventPage', () => {
+  it('毎週の見込み（estimated）は true の時だけ持ち越す', () => {
+    const page = normalizeEventPage({
+      items: [
+        { ...ev({ clusterId: 'a', date: '2026-10-22', event: 'episode', label: '第4話' }), estimated: true },
+        { ...ev({ clusterId: 'b', date: '2026-10-15', event: 'episode', label: '第3話' }), estimated: false },
+        { ...ev({ clusterId: 'c', date: '2026-10-15', event: 'episode', label: '第3話' }), estimated: 'yes' },
+      ],
+      truncated: false,
+    });
+    expect(page.items.map((e) => e.estimated)).toEqual([true, undefined, undefined]);
+  });
+
   it('形の崩れた行は落とし、time は HH:MM だけ残す', () => {
     const page = normalizeEventPage({
       items: [
