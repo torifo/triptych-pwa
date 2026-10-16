@@ -145,7 +145,7 @@
   }
 </script>
 
-<section class="library">
+<section class="library page">
   <div class="lib-head">
     <h1 class="page-title">Library<span class="type-label" style="margin-left: 0.8em;">追跡中の作品</span></h1>
     <div class="view-toggle" role="group" aria-label="表示の切り替え">
@@ -311,7 +311,6 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    padding: 1rem;
     min-width: 0;
   }
 
@@ -626,5 +625,33 @@
     background: var(--bg);
     color: var(--fg);
     font-size: 0.75rem;
+  }
+  .list > li {
+    min-width: 0;
+  }
+
+  @media (min-width: 64rem) {
+    .library {
+      gap: 1.25rem;
+    }
+    /* PC: 状態と媒体の絞り込みを1行に並べる（入りきらなければ折り返す） */
+    .filters {
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 0.4rem 2.5rem;
+    }
+    .create {
+      max-width: 32rem;
+    }
+    /* PC: 棚は幅に合わせた多列、一覧は2列 */
+    .shelf {
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 1.5rem 1rem;
+    }
+    .list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 2.5rem;
+    }
   }
 </style>

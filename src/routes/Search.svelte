@@ -214,10 +214,10 @@
   }
 </script>
 
-<section class="flex flex-col gap-3 p-4">
+<section class="flex flex-col gap-3 page">
   <h1 class="page-title">検索<span class="type-label" style="margin-left: 0.8em;">SEARCH &amp; ADD</span></h1>
 
-  <div class="flex items-center gap-2">
+  <div class="narrow flex items-center gap-2">
     <input
       class="min-w-0 flex-1 px-0 py-1.5"
       style="border: 0; border-bottom: 1px solid var(--fg); background: var(--bg); color: var(--fg); font-size: 1.05rem; outline: none;"
@@ -240,11 +240,11 @@
   </div>
 
   {#if requestError}
-    <p class="text-xs" style="color: var(--muted);">{requestError}</p>
+    <p class="narrow text-xs" style="color: var(--muted);">{requestError}</p>
   {/if}
 
   {#if sourceErrors.length > 0}
-    <div class="flex flex-col gap-0.5 p-2 text-[11px]" style="border: 1px solid var(--line); color: var(--muted);">
+    <div class="narrow flex flex-col gap-0.5 p-2 text-[11px]" style="border: 1px solid var(--line); color: var(--muted);">
       {#each sourceErrors as e (e.source)}
         <p style="overflow-wrap: anywhere;">
           {SOURCE_LABELS[e.source as Source] ?? e.source}: {e.message}
@@ -254,7 +254,7 @@
   {/if}
 
   {#if originWorkId}
-    <div class="flex flex-col gap-2 p-3" style="border: 1px solid var(--fg);">
+    <div class="narrow flex flex-col gap-2 p-3" style="border: 1px solid var(--fg);">
       <div class="flex items-center justify-between gap-2">
         <h2 class="text-sm font-bold" style="min-width: 0; overflow-wrap: anywhere;">
           「{originWorkTitle}」の原作候補
@@ -312,20 +312,22 @@
   {#if catalogHits.length > 0}
     <div class="catalog-hits">
       <div class="shou" style="margin-bottom: 0;"><h2>カタログから</h2><span class="no mono">{catalogTotal}</span></div>
-      {#each catalogHits as hit (hit.id)}
-        <a class="hit row-hover" href={`#/catalog/${encodeURIComponent(hit.id)}`}>
-          <Cover src={hit.cover} title={hit.title} size="xs" />
-          <span class="hit-title">{hit.title}</span>
-          {#if hit.firstYear}<span class="mono hit-year">{hit.firstYear}</span>{/if}
-        </a>
-      {/each}
+      <div class="hit-list">
+        {#each catalogHits as hit (hit.id)}
+          <a class="hit row-hover" href={`#/catalog/${encodeURIComponent(hit.id)}`}>
+            <Cover src={hit.cover} title={hit.title} size="xs" />
+            <span class="hit-title">{hit.title}</span>
+            {#if hit.firstYear}<span class="mono hit-year">{hit.firstYear}</span>{/if}
+          </a>
+        {/each}
+      </div>
       {#if catalogTotal > catalogHits.length}
         <a class="hit-more" href={catalogListHash({ q: catalogQuery })}>カタログで続きを見る（{catalogTotal} 件）</a>
       {/if}
     </div>
   {/if}
 
-  <div class="flex flex-col" style="border-top: 1px solid var(--line);">
+  <div class="results flex flex-col" style="border-top: 1px solid var(--line);">
     {#if loading}
       <p class="search-hint">AniList・なろう・カクヨム・NDL を探しています</p>
       {#each [0, 1, 2, 3] as i (i)}
@@ -336,7 +338,7 @@
       {/each}
     {/if}
     {#if searched && results.length === 0 && !requestError}
-      <p class="py-6 text-center text-xs" style="color: var(--muted);">該当する結果がありません</p>
+      <p class="empty py-6 text-center text-xs" style="color: var(--muted);">該当する結果がありません</p>
     {/if}
     {#each results as result (resultKey(result))}
       {@const existing = existingWorkFor(result)}
@@ -481,5 +483,22 @@
     font-size: 0.75rem;
     text-decoration: underline;
     text-underline-offset: 0.2em;
+  }
+
+  /* PC: 検索欄と補助の枠は 720px まで。結果は2列 */
+  @media (min-width: 64rem) {
+    .narrow {
+      max-width: 45rem;
+    }
+    .results,
+    .hit-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 2rem;
+    }
+    .results > .search-hint,
+    .results > .empty {
+      grid-column: 1 / -1;
+    }
   }
 </style>

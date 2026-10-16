@@ -3,6 +3,7 @@
   // 色は抽出しない（画像をそのまま敷くので CORS が要らない）。
   import type { Snippet } from 'svelte';
   import type { MediaType } from '../db/schema';
+  import { viewport } from '../viewport.svelte';
   import Cover from './Cover.svelte';
   import { isSafeHttpUrl } from './release-view';
 
@@ -34,7 +35,8 @@
     <div class="hero-veil" aria-hidden="true"></div>
   {/if}
   <div class="hero-body">
-    <Cover src={url} {title} {mediaType} size="l" {onAir} />
+    <!-- 表紙の幅は props で決まり CSS から変えられないので、PC だけ fill（列いっぱい）にする -->
+    <Cover src={url} {title} {mediaType} size={viewport.wide ? 'fill' : 'l'} {onAir} />
     <div class="hero-text">
       <h1 class="hero-title">{title}</h1>
       {#if subtitle}<p class="hero-sub">{subtitle}</p>{/if}
@@ -89,5 +91,29 @@
     font-size: 0.78rem;
     color: var(--muted);
     margin: 0;
+  }
+
+  /* PC: ぼかしの背景と下罫線をやめ、表紙を列いっぱいに、題名をその下に置く */
+  @media (min-width: 64rem) {
+    .hero {
+      overflow: visible;
+      border-bottom: 0;
+    }
+    .hero.plain {
+      background: none;
+    }
+    .hero-bg,
+    .hero-veil {
+      display: none;
+    }
+    .hero-body {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1rem;
+      padding: 0;
+    }
+    .hero-title {
+      font-size: 1.5rem;
+    }
   }
 </style>

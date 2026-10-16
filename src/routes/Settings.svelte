@@ -520,605 +520,616 @@
   </label>
 {/snippet}
 
-<section class="settings">
+<section class="settings page">
   <h1 class="page-title title">Settings<span class="type-label" style="margin-left: 0.8em;">設定とデータ</span></h1>
 
-  <!-- データ -->
-  <section class="block" aria-labelledby="sec-data">
-    {@render head(Database, 'sec-data', 'データ', 'DATA')}
+  <div class="col">
+    <!-- データ -->
+    <section class="block" aria-labelledby="sec-data">
+      {@render head(Database, 'sec-data', 'データ', 'DATA')}
 
-    <div class="actions">
-      <button type="button" class="btn btn-main" disabled={exporting} onclick={onExport}>
-        <Download size={14} aria-hidden="true" />{exporting ? 'エクスポート中…' : 'JSONエクスポート'}
-      </button>
-      <button type="button" class="btn btn-main" onclick={() => fileInput?.click()}>
-        <Upload size={14} aria-hidden="true" />インポート
-      </button>
-      <input
-        bind:this={fileInput}
-        type="file"
-        accept="application/json"
-        aria-label="インポートする JSON ファイル"
-        hidden
-        onchange={onFileSelected}
-      />
-    </div>
+      <div class="actions">
+        <button type="button" class="btn btn-main" disabled={exporting} onclick={onExport}>
+          <Download size={14} aria-hidden="true" />{exporting ? 'エクスポート中…' : 'JSONエクスポート'}
+        </button>
+        <button type="button" class="btn btn-main" onclick={() => fileInput?.click()}>
+          <Upload size={14} aria-hidden="true" />インポート
+        </button>
+        <input
+          bind:this={fileInput}
+          type="file"
+          accept="application/json"
+          aria-label="インポートする JSON ファイル"
+          hidden
+          onchange={onFileSelected}
+        />
+      </div>
 
-    {#if statusMessage}
-      <p class="notice" role={statusMessage.kind === 'error' ? 'alert' : 'status'}>
-        {#if statusMessage.kind === 'ok'}
-          <Check size={14} aria-hidden="true" />
-        {:else}
-          <span class="dot" aria-hidden="true"></span>
-        {/if}
-        <span>{statusMessage.text}</span>
-      </p>
-    {/if}
-
-    <dl class="facts">
-      <div class="fact">
-        <dt class="type-label">最終エクスポート</dt>
-        <dd>
-          {#if lastExportAt}
-            <span class="mono">{formatJstDateTime(lastExportAt)}</span>
+      {#if statusMessage}
+        <p class="notice" role={statusMessage.kind === 'error' ? 'alert' : 'status'}>
+          {#if statusMessage.kind === 'ok'}
+            <Check size={14} aria-hidden="true" />
           {:else}
-            <span class="dim">未実施</span>
+            <span class="dot" aria-hidden="true"></span>
           {/if}
-        </dd>
-      </div>
-    </dl>
-    {#if exportStale}
-      <p class="alert">
-        <span class="dot" aria-hidden="true"></span>
-        <strong>要エクスポート</strong>
-        <span class="note">{lastExportAt ? `${EXPORT_STALE_DAYS}日以上前です` : 'まだ書き出していません'}</span>
-      </p>
-    {/if}
-
-    {#if importPending}
-      <div class="confirm" role="group" aria-label="インポートの確認">
-        <p class="confirm-text">
-          「{importPending.file.name}」で全データを置き換えます。現在のデータは失われます。よろしいですか？
+          <span>{statusMessage.text}</span>
         </p>
-        <div class="actions">
-          <button type="button" class="btn btn-solid" disabled={importing} onclick={confirmImport}>
-            {importing ? 'インポート中…' : '置き換える'}
-          </button>
-          <button type="button" class="btn" disabled={importing} onclick={cancelImport}>キャンセル</button>
+      {/if}
+
+      <dl class="facts">
+        <div class="fact">
+          <dt class="type-label">最終エクスポート</dt>
+          <dd>
+            {#if lastExportAt}
+              <span class="mono">{formatJstDateTime(lastExportAt)}</span>
+            {:else}
+              <span class="dim">未実施</span>
+            {/if}
+          </dd>
         </div>
+      </dl>
+      {#if exportStale}
+        <p class="alert">
+          <span class="dot" aria-hidden="true"></span>
+          <strong>要エクスポート</strong>
+          <span class="note">{lastExportAt ? `${EXPORT_STALE_DAYS}日以上前です` : 'まだ書き出していません'}</span>
+        </p>
+      {/if}
+
+      {#if importPending}
+        <div class="confirm" role="group" aria-label="インポートの確認">
+          <p class="confirm-text">
+            「{importPending.file.name}」で全データを置き換えます。現在のデータは失われます。よろしいですか？
+          </p>
+          <div class="actions">
+            <button type="button" class="btn btn-solid" disabled={importing} onclick={confirmImport}>
+              {importing ? 'インポート中…' : '置き換える'}
+            </button>
+            <button type="button" class="btn" disabled={importing} onclick={cancelImport}>キャンセル</button>
+          </div>
+        </div>
+      {/if}
+
+      <!-- Library を空にする（二段階の確認） -->
+      <div class="sub-block">
+        {@render sub('Library を空にする')}
+        {#if clearArmed}
+          <div class="confirm" role="group" aria-label="Library を空にする確認">
+            <p class="confirm-text">
+              作品 <span class="mono">{formatCount(worksCount)}</span> 件と、その版・発売予定・検知をすべて消します。元に戻せません。
+              消す前に「JSONエクスポート」で書き出しておくと、インポートで戻せます。
+            </p>
+            <div class="field-group">
+              <label class="type-label" for="clear-confirm">確かめのため、作品数（{worksCount}）を入力</label>
+              <input
+                id="clear-confirm"
+                class="field mono"
+                type="text"
+                inputmode="numeric"
+                autocomplete="off"
+                spellcheck="false"
+                bind:value={clearTyped}
+              />
+            </div>
+            <div class="actions">
+              <button type="button" class="btn btn-solid" disabled={!clearReady || clearing} onclick={onClearLibrary}>
+                <Trash size={14} aria-hidden="true" />{clearing ? '消しています…' : '本当に消す'}
+              </button>
+              <button type="button" class="btn" disabled={clearing} onclick={cancelClear}>キャンセル</button>
+            </div>
+          </div>
+        {:else}
+          <div class="actions">
+            <button
+              type="button"
+              class="btn"
+              disabled={!libraryLoaded || worksCount === 0}
+              onclick={onClearLibrary}
+            >
+              <Trash size={14} aria-hidden="true" />Library を空にする
+            </button>
+          </div>
+          <p class="note">
+            {#if libraryLoaded && worksCount === 0}
+              Library は空です。
+            {:else}
+              登録した作品をすべて消します。消す前に書き出しておくことを勧めます。
+            {/if}
+          </p>
+        {/if}
+        {#if clearError}
+          <p class="alert" role="alert"><span class="dot" aria-hidden="true"></span><span>{clearError}</span></p>
+        {/if}
       </div>
+    </section>
+
+    <!-- ストレージ（API があるブラウザだけ） -->
+    {#if showStorage}
+      <section class="block" aria-labelledby="sec-storage">
+        {@render head(HardDrive, 'sec-storage', 'ストレージ', 'STORAGE')}
+
+        <dl class="facts">
+          <div class="fact">
+            <dt class="type-label">永続化</dt>
+            <dd>
+              {#if storageInfo === null}
+                <span class="mono dim">…</span>
+              {:else if storageInfo.persisted === true}
+                済
+              {:else if storageInfo.persisted === false}
+                未
+              {:else}
+                <span class="dim">—</span>
+              {/if}
+            </dd>
+          </div>
+          <div class="fact">
+            <dt class="type-label">使用量</dt>
+            <dd class="mono">{usageText}</dd>
+          </div>
+        </dl>
+
+        {#if storageInfo?.persisted === false && storageInfo.canPersist}
+          <div class="actions">
+            <button type="button" class="btn btn-main" disabled={persistAsking} onclick={onRequestPersist}>
+              {persistAsking ? '確認中…' : '永続化を頼む'}
+            </button>
+          </div>
+          {#if persistDenied}
+            <p class="note" role="status">許可されませんでした。ホーム画面に追加すると、データが消えにくくなります。</p>
+          {:else}
+            <p class="note">永続化すると、ブラウザが容量不足でもデータを自動では消しません。</p>
+          {/if}
+        {/if}
+      </section>
     {/if}
 
-    <!-- Library を空にする（二段階の確認） -->
-    <div class="sub-block">
-      {@render sub('Library を空にする')}
-      {#if clearArmed}
-        <div class="confirm" role="group" aria-label="Library を空にする確認">
+    <!-- 同期 -->
+    <section class="block" aria-labelledby="sec-sync">
+      {@render head(RefreshCw, 'sec-sync', '同期', 'SYNC')}
+
+      <dl class="facts">
+        <div class="fact">
+          <dt class="type-label">最終同期</dt>
+          <dd>
+            {#if syncStatus.running}<span class="note running">実行中</span>{/if}
+            {#if syncStatus.lastSyncAt}
+              <span class="mono">{formatJstDateTime(syncStatus.lastSyncAt)}</span>
+            {:else}
+              <span class="dim">未実施</span>
+            {/if}
+          </dd>
+        </div>
+      </dl>
+      <div class="actions">
+        <button type="button" class="btn btn-main" disabled={syncStatus.running} onclick={onSyncNow}>
+          <RefreshCw size={14} aria-hidden="true" class={syncStatus.running ? 'spin' : ''} />
+          {syncStatus.running ? '同期中…' : '今すぐ同期'}
+        </button>
+      </div>
+
+      {@render sub('自動同期')}
+      <div class="choice-group cols-3" role="group" aria-label="自動同期">
+        {#each AUTO_SYNC_MODES as mode (mode)}
+          {@const Icon = AUTO_SYNC_ICONS[mode]}
+          <button
+            type="button"
+            class="choice-btn"
+            aria-pressed={prefs.autoSync === mode}
+            onclick={() => onSelectAutoSync(mode)}
+          >
+            <Icon size={18} aria-hidden="true" />
+            <span>{AUTO_SYNC_LABELS[mode]}</span>
+          </button>
+        {/each}
+      </div>
+      <p class="note">{AUTO_SYNC_NOTES[prefs.autoSync]}</p>
+
+      {@render sub('同期するソース')}
+      <div class="toggles">
+        {#each SYNC_SOURCES as source (source)}
+          {@render toggle(
+            `sync-source-${source}`,
+            SYNC_SOURCE_LABELS[source].name,
+            SYNC_SOURCE_LABELS[source].what,
+            prefs.syncSources[source],
+            (e) => onToggleSource(source, e),
+          )}
+        {/each}
+      </div>
+      {#if enabledSourceCount === 0}
+        <p class="alert">
+          <span class="dot" aria-hidden="true"></span>
+          <span>ソースがすべて OFF です。同期しても発売・放送の予定は取りに行きません。</span>
+        </p>
+      {:else}
+        <p class="note">OFF のソースは照会しません。前回までに取り込んだ予定はそのまま残ります。</p>
+      {/if}
+
+      {@render sub('アニメ化検知')}
+      <div class="toggles">
+        {@render toggle(
+          'sync-detection',
+          'アニメ化検知',
+          '同期のあとに、原作や前の期から新しいアニメを探す',
+          prefs.detection,
+          onToggleDetection,
+        )}
+      </div>
+
+      {@render sub('ソースごとの最後のエラー')}
+      {#if syncErrorEntries.length > 0}
+        <ul class="errors">
+          {#each syncErrorEntries as [source, error] (source)}
+            <li class="error-row">
+              <span class="dot" aria-hidden="true"></span>
+              <span class="error-body">
+                <strong>{syncKeyLabel(source)}</strong>
+                <span class="error-msg">{error.message}</span>
+                <span class="mono note">{formatJstDateTime(error.occurredAt)}</span>
+              </span>
+            </li>
+          {/each}
+        </ul>
+      {:else}
+        <p class="note">エラーなし</p>
+      {/if}
+    </section>
+
+    <!-- 新着 -->
+    <section class="block" aria-labelledby="sec-unseen">
+      {@render head(Inbox, 'sec-unseen', '新着', 'UNSEEN')}
+
+      <dl class="facts">
+        <div class="fact">
+          <dt class="type-label">未読</dt>
+          <dd>
+            {#if libraryLoaded}
+              <span><span class="mono">{formatCount(unseenIds.length)}</span> 件</span>
+            {:else}
+              <span class="mono dim">…</span>
+            {/if}
+          </dd>
+        </div>
+      </dl>
+
+      {#if markConfirm && unseenIds.length > 0}
+        <div class="confirm" role="group" aria-label="すべて既読にする確認">
           <p class="confirm-text">
-            作品 <span class="mono">{formatCount(worksCount)}</span> 件と、その版・発売予定・検知をすべて消します。元に戻せません。
-            消す前に「JSONエクスポート」で書き出しておくと、インポートで戻せます。
+            未読 <span class="mono">{formatCount(unseenIds.length)}</span> 件をすべて既読にします。Home の新着と NEW の印が消えます。
           </p>
-          <div class="field-group">
-            <label class="type-label" for="clear-confirm">確かめのため、作品数（{worksCount}）を入力</label>
-            <input
-              id="clear-confirm"
-              class="field mono"
-              type="text"
-              inputmode="numeric"
-              autocomplete="off"
-              spellcheck="false"
-              bind:value={clearTyped}
-            />
-          </div>
           <div class="actions">
-            <button type="button" class="btn btn-solid" disabled={!clearReady || clearing} onclick={onClearLibrary}>
-              <Trash size={14} aria-hidden="true" />{clearing ? '消しています…' : '本当に消す'}
+            <button type="button" class="btn btn-solid" disabled={marking} onclick={confirmMarkAllSeen}>
+              {marking ? '既読にしています…' : '既読にする'}
             </button>
-            <button type="button" class="btn" disabled={clearing} onclick={cancelClear}>キャンセル</button>
+            <button type="button" class="btn" disabled={marking} onclick={() => (markConfirm = false)}>キャンセル</button>
           </div>
         </div>
       {:else}
         <div class="actions">
           <button
             type="button"
-            class="btn"
-            disabled={!libraryLoaded || worksCount === 0}
-            onclick={onClearLibrary}
+            class="btn btn-main"
+            disabled={unseenIds.length === 0}
+            onclick={() => {
+              markConfirm = true;
+              markMessage = null;
+            }}
           >
-            <Trash size={14} aria-hidden="true" />Library を空にする
+            <CheckCheck size={14} aria-hidden="true" />すべて既読にする
           </button>
         </div>
-        <p class="note">
-          {#if libraryLoaded && worksCount === 0}
-            Library は空です。
-          {:else}
-            登録した作品をすべて消します。消す前に書き出しておくことを勧めます。
-          {/if}
-        </p>
       {/if}
-      {#if clearError}
-        <p class="alert" role="alert"><span class="dot" aria-hidden="true"></span><span>{clearError}</span></p>
+      {#if markMessage}
+        <p class="note" role="status">{markMessage}</p>
       {/if}
-    </div>
-  </section>
+    </section>
 
-  <!-- ストレージ（API があるブラウザだけ） -->
-  {#if showStorage}
-    <section class="block" aria-labelledby="sec-storage">
-      {@render head(HardDrive, 'sec-storage', 'ストレージ', 'STORAGE')}
+    <!-- アニメ化検知 -->
+    <section class="block" aria-labelledby="sec-detect">
+      {@render head(Radar, 'sec-detect', 'アニメ化検知', 'DETECTED')}
+
+      {#if !prefs.detection}
+        <p class="note">検知は OFF です（同期の節で切り替えます）。却下の取り消しはできます。</p>
+      {/if}
+
+      {@render sub('却下した候補')}
+      {#if !libraryLoaded}
+        <p class="note mono">…</p>
+      {:else if rejected.length === 0}
+        <p class="note">却下した候補はありません。</p>
+      {:else}
+        <ul class="rows">
+          {#each rejected as detection (detection.id)}
+            {@const workTitle = workTitles.get(detection.workId)}
+            <!-- 却下日を残す前に却下したものは、検知した日を出す -->
+            {@const when = detection.rejectedAt
+              ? { label: '却下', iso: detection.rejectedAt }
+              : { label: '検知', iso: detection.createdAt }}
+            <li class="row">
+              <span class="row-body">
+                <span class="row-title">{detection.candidate.title}</span>
+                <span class="note">
+                  {#if workTitle}<span>{workTitle}</span> · {/if}{when.label} <span class="mono">{jstDate(when.iso)}</span>
+                </span>
+              </span>
+              <button
+                type="button"
+                class="btn btn-small"
+                disabled={reopening !== null}
+                aria-label={`「${detection.candidate.title}」の却下を取り消す`}
+                onclick={() => onReopen(detection)}
+              >
+                <Undo2 size={13} aria-hidden="true" />{reopening === detection.id ? '戻しています…' : '取り消す'}
+              </button>
+            </li>
+          {/each}
+        </ul>
+        <p class="note">取り消すと候補に戻り、Home のアニメ化検知にまた出ます。</p>
+      {/if}
+      {#if reopenMessage}
+        <p class="note" role="status">{reopenMessage}</p>
+      {/if}
+    </section>
+  </div>
+
+  <div class="col">
+    <!-- カタログ -->
+    <section class="block" aria-labelledby="sec-catalog">
+      {@render head(BookOpen, 'sec-catalog', 'カタログ', 'CATALOG')}
+
+      {#if statsState.status === 'loading'}
+        <p class="note mono">…</p>
+      {:else if statsState.status === 'failed'}
+        <p class="alert"><span class="dot" aria-hidden="true"></span><span>件数を取得できませんでした（collector に接続できません）</span></p>
+      {:else if !statsState.stats.ready}
+        <p class="note">カタログ未作成。collector 側で次のコマンドを実行すると作られます。</p>
+        <code class="code mono">{BUILD_COMMAND}</code>
+      {:else}
+        <dl class="facts">
+          <div class="fact">
+            <dt class="type-label">作品</dt>
+            <dd><span class="mono">{formatCount(statsState.stats.works)}</span></dd>
+          </div>
+          <div class="fact">
+            <dt class="type-label">件数（全ソース）</dt>
+            <dd><span class="mono">{formatCount(statsState.stats.entries)}</span></dd>
+          </div>
+          {#each sourceRows as row (row.source)}
+            <div class="fact">
+              <dt class="source-name">{row.label}</dt>
+              <dd class="source-values">
+                <span><span class="mono">{row.entries}</span> 件</span>
+                {#if row.harvestedAt}
+                  <span class="mono note">{row.harvestedAt}</span>
+                {:else}
+                  <span class="note">未収集</span>
+                {/if}
+                {#if row.errorSlices > 0}
+                  <span class="error-inline"><span class="dot" aria-hidden="true"></span>失敗 <span class="mono">{row.errorSlices}</span></span>
+                {/if}
+              </dd>
+            </div>
+          {/each}
+        </dl>
+      {/if}
+
+      {@render sub('差分更新')}
+      <div class="actions">
+        <button
+          type="button"
+          class="btn btn-main"
+          disabled={jobStarting || jobRunning}
+          onclick={onStartJob}
+        >
+          <RotateCw size={14} aria-hidden="true" class={jobRunning ? 'spin' : ''} />
+          {jobRunning ? '実行中…' : jobStarting ? '開始しています…' : '差分更新を実行'}
+        </button>
+        <span class="note">目安 約{RECENT_JOB_MINUTES}分</span>
+      </div>
+      {#if jobNotice}
+        {#if jobNotice.kind === 'busy'}
+          <p class="busy" role="status"><Timer size={14} aria-hidden="true" /><span>{jobNotice.text}</span></p>
+        {:else}
+          <p class="alert" role="alert"><span class="dot" aria-hidden="true"></span><span>{jobNotice.text}</span></p>
+        {/if}
+      {/if}
+      {#if job && jobResult}
+        <div class="job" class:job-done={!jobRunning}>
+          <p class="job-status" role="status">
+            {#if jobResult.kind === 'ok'}
+              <Check size={14} aria-hidden="true" />
+            {:else if jobResult.kind === 'error'}
+              <span class="dot" aria-hidden="true"></span>
+            {/if}
+            <span>{jobResult.text}</span>
+          </p>
+          <p class="note">
+            開始 <span class="mono">{formatJstDateTime(job.startedAt)}</span>
+            · {jobRunning ? '経過' : '所要'} <span class="mono">{jobElapsed(job, jobNow)}</span>
+          </p>
+          {#if jobLog.length > 0 && (jobRunning || jobResult.kind === 'error')}
+            <pre class="log mono">{jobLog.join('\n')}</pre>
+          {/if}
+        </div>
+      {:else}
+        <p class="note">新しい刊行・今年以降のアニメ・上位の Web 小説だけを取り直します。終わると件数を読み直します。</p>
+      {/if}
+    </section>
+
+    <!-- collector 接続 -->
+    <section class="block" aria-labelledby="sec-collector">
+      {@render head(Plug, 'sec-collector', 'collector 接続', 'COLLECTOR')}
+
+      <div class="field-group">
+        <label class="type-label" for="collector-url">接続先 URL</label>
+        <input
+          id="collector-url"
+          class="field"
+          type="url"
+          inputmode="url"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+          placeholder="http://127.0.0.1:8000"
+          bind:value={apiBase}
+          onblur={onApiBaseBlur}
+        />
+        <p class="note">空欄のときは、このアプリと同じ場所に接続します。</p>
+      </div>
+
+      <div class="field-group">
+        <label class="type-label" for="collector-token">Bearer トークン</label>
+        <div class="token-row">
+          <input
+            id="collector-token"
+            type="password"
+            autocomplete="off"
+            class="field"
+            placeholder={tokenConfigured ? '設定済み（変更する場合のみ入力）' : '未設定'}
+            bind:value={tokenDraft}
+          />
+          <button type="button" class="btn btn-main" disabled={!tokenDraft.trim()} onclick={onTokenSave}>保存</button>
+          {#if tokenConfigured}
+            <button type="button" class="btn btn-quiet" onclick={onTokenClear}>解除</button>
+          {/if}
+        </div>
+      </div>
 
       <dl class="facts">
         <div class="fact">
-          <dt class="type-label">永続化</dt>
+          <dt class="type-label">トークン</dt>
+          <dd>{#if tokenConfigured}設定済み{:else}<span class="dim">未設定</span>{/if}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <!-- 表示 -->
+    <section class="block" aria-labelledby="sec-display">
+      {@render head(Palette, 'sec-display', '表示', 'DISPLAY')}
+
+      {@render sub('テーマ')}
+      <div class="choice-group cols-3" role="group" aria-label="テーマ">
+        {#each THEME_PREFS as pref (pref)}
+          {@const Icon = THEME_ICONS[pref]}
+          <button type="button" class="choice-btn" aria-pressed={themePref === pref} onclick={() => onSelectTheme(pref)}>
+            <Icon size={18} aria-hidden="true" />
+            <span>{THEME_LABELS[pref]}</span>
+          </button>
+        {/each}
+      </div>
+      {#if themePref === 'system'}
+        <p class="note">端末の設定に合わせて、自動で切り替わります。</p>
+      {/if}
+
+      {@render sub('起動時に開く画面')}
+      <div class="choice-group cols-4" role="group" aria-label="起動時に開く画面">
+        {#each START_SCREENS as screen (screen)}
+          {@const Icon = START_SCREEN_ICONS[screen]}
+          <button
+            type="button"
+            class="choice-btn"
+            aria-pressed={prefs.startScreen === screen}
+            onclick={() => onSelectStartScreen(screen)}
+          >
+            <Icon size={18} aria-hidden="true" />
+            <span>{START_SCREEN_LABELS[screen]}</span>
+          </button>
+        {/each}
+      </div>
+      <p class="note">ホーム画面のアイコンなどから開いた時に使います。共有されたリンクやリロードでは、その画面のままです。</p>
+
+      {@render sub('深夜の時刻')}
+      <div class="choice-group cols-2" role="group" aria-label="深夜の時刻">
+        <button
+          type="button"
+          class="choice-btn"
+          aria-pressed={prefs.timeNotation === 'late-night'}
+          onclick={() => preferences.set('timeNotation', 'late-night')}
+        >
+          <span class="mono">25:30</span>
+          <span>放送日のまま</span>
+        </button>
+        <button
+          type="button"
+          class="choice-btn"
+          aria-pressed={prefs.timeNotation === 'clock'}
+          onclick={() => preferences.set('timeNotation', 'clock')}
+        >
+          <span class="mono">翌 1:30</span>
+          <span>実際の時刻</span>
+        </button>
+      </div>
+      <p class="note">深夜番組の時刻の書き方です。並びや保存している日付は変わりません。</p>
+
+      {@render sub('週の始まり')}
+      <div class="choice-group cols-2" role="group" aria-label="週の始まり">
+        <button type="button" class="choice-btn" aria-pressed={prefs.weekStart === 'sun'} onclick={() => preferences.set('weekStart', 'sun')}>
+          <span>日曜から</span>
+        </button>
+        <button type="button" class="choice-btn" aria-pressed={prefs.weekStart === 'mon'} onclick={() => preferences.set('weekStart', 'mon')}>
+          <span>月曜から</span>
+        </button>
+      </div>
+      <p class="note">カレンダーの月の升目に使います。</p>
+    </section>
+
+    <!-- この app について -->
+    <section class="block" aria-labelledby="sec-about">
+      {@render head(Info, 'sec-about', 'この app について', 'ABOUT')}
+
+      {@render sub('データの出典')}
+      <ul class="rows">
+        {#each DATA_SOURCES as source (source.url)}
+          <li class="row source-row">
+            <span class="row-body">
+              <a class="ext-link" href={source.url} target="_blank" rel="noopener noreferrer">
+                {source.name}<ExternalLink size={12} aria-hidden="true" />
+              </a>
+              <span class="note">{source.note}</span>
+            </span>
+          </li>
+        {/each}
+      </ul>
+      <p class="note">データは collector を通して各サービスから取り、この端末にだけ保存します。</p>
+
+      <dl class="facts">
+        <div class="fact">
+          <dt class="type-label">版</dt>
+          <dd><span class="mono">{build.version}</span></dd>
+        </div>
+        <div class="fact">
+          <dt class="type-label">ビルド</dt>
           <dd>
-            {#if storageInfo === null}
-              <span class="mono dim">…</span>
-            {:else if storageInfo.persisted === true}
-              済
-            {:else if storageInfo.persisted === false}
-              未
+            {#if build.builtAt}
+              <span class="mono">{formatJstDateTime(build.builtAt)}</span>
             {:else}
               <span class="dim">—</span>
             {/if}
           </dd>
         </div>
-        <div class="fact">
-          <dt class="type-label">使用量</dt>
-          <dd class="mono">{usageText}</dd>
-        </div>
       </dl>
-
-      {#if storageInfo?.persisted === false && storageInfo.canPersist}
-        <div class="actions">
-          <button type="button" class="btn btn-main" disabled={persistAsking} onclick={onRequestPersist}>
-            {persistAsking ? '確認中…' : '永続化を頼む'}
-          </button>
-        </div>
-        {#if persistDenied}
-          <p class="note" role="status">許可されませんでした。ホーム画面に追加すると、データが消えにくくなります。</p>
-        {:else}
-          <p class="note">永続化すると、ブラウザが容量不足でもデータを自動では消しません。</p>
-        {/if}
-      {/if}
     </section>
-  {/if}
-
-  <!-- 同期 -->
-  <section class="block" aria-labelledby="sec-sync">
-    {@render head(RefreshCw, 'sec-sync', '同期', 'SYNC')}
-
-    <dl class="facts">
-      <div class="fact">
-        <dt class="type-label">最終同期</dt>
-        <dd>
-          {#if syncStatus.running}<span class="note running">実行中</span>{/if}
-          {#if syncStatus.lastSyncAt}
-            <span class="mono">{formatJstDateTime(syncStatus.lastSyncAt)}</span>
-          {:else}
-            <span class="dim">未実施</span>
-          {/if}
-        </dd>
-      </div>
-    </dl>
-    <div class="actions">
-      <button type="button" class="btn btn-main" disabled={syncStatus.running} onclick={onSyncNow}>
-        <RefreshCw size={14} aria-hidden="true" class={syncStatus.running ? 'spin' : ''} />
-        {syncStatus.running ? '同期中…' : '今すぐ同期'}
-      </button>
-    </div>
-
-    {@render sub('自動同期')}
-    <div class="choice-group cols-3" role="group" aria-label="自動同期">
-      {#each AUTO_SYNC_MODES as mode (mode)}
-        {@const Icon = AUTO_SYNC_ICONS[mode]}
-        <button
-          type="button"
-          class="choice-btn"
-          aria-pressed={prefs.autoSync === mode}
-          onclick={() => onSelectAutoSync(mode)}
-        >
-          <Icon size={18} aria-hidden="true" />
-          <span>{AUTO_SYNC_LABELS[mode]}</span>
-        </button>
-      {/each}
-    </div>
-    <p class="note">{AUTO_SYNC_NOTES[prefs.autoSync]}</p>
-
-    {@render sub('同期するソース')}
-    <div class="toggles">
-      {#each SYNC_SOURCES as source (source)}
-        {@render toggle(
-          `sync-source-${source}`,
-          SYNC_SOURCE_LABELS[source].name,
-          SYNC_SOURCE_LABELS[source].what,
-          prefs.syncSources[source],
-          (e) => onToggleSource(source, e),
-        )}
-      {/each}
-    </div>
-    {#if enabledSourceCount === 0}
-      <p class="alert">
-        <span class="dot" aria-hidden="true"></span>
-        <span>ソースがすべて OFF です。同期しても発売・放送の予定は取りに行きません。</span>
-      </p>
-    {:else}
-      <p class="note">OFF のソースは照会しません。前回までに取り込んだ予定はそのまま残ります。</p>
-    {/if}
-
-    {@render sub('アニメ化検知')}
-    <div class="toggles">
-      {@render toggle(
-        'sync-detection',
-        'アニメ化検知',
-        '同期のあとに、原作や前の期から新しいアニメを探す',
-        prefs.detection,
-        onToggleDetection,
-      )}
-    </div>
-
-    {@render sub('ソースごとの最後のエラー')}
-    {#if syncErrorEntries.length > 0}
-      <ul class="errors">
-        {#each syncErrorEntries as [source, error] (source)}
-          <li class="error-row">
-            <span class="dot" aria-hidden="true"></span>
-            <span class="error-body">
-              <strong>{syncKeyLabel(source)}</strong>
-              <span class="error-msg">{error.message}</span>
-              <span class="mono note">{formatJstDateTime(error.occurredAt)}</span>
-            </span>
-          </li>
-        {/each}
-      </ul>
-    {:else}
-      <p class="note">エラーなし</p>
-    {/if}
-  </section>
-
-  <!-- 新着 -->
-  <section class="block" aria-labelledby="sec-unseen">
-    {@render head(Inbox, 'sec-unseen', '新着', 'UNSEEN')}
-
-    <dl class="facts">
-      <div class="fact">
-        <dt class="type-label">未読</dt>
-        <dd>
-          {#if libraryLoaded}
-            <span><span class="mono">{formatCount(unseenIds.length)}</span> 件</span>
-          {:else}
-            <span class="mono dim">…</span>
-          {/if}
-        </dd>
-      </div>
-    </dl>
-
-    {#if markConfirm && unseenIds.length > 0}
-      <div class="confirm" role="group" aria-label="すべて既読にする確認">
-        <p class="confirm-text">
-          未読 <span class="mono">{formatCount(unseenIds.length)}</span> 件をすべて既読にします。Home の新着と NEW の印が消えます。
-        </p>
-        <div class="actions">
-          <button type="button" class="btn btn-solid" disabled={marking} onclick={confirmMarkAllSeen}>
-            {marking ? '既読にしています…' : '既読にする'}
-          </button>
-          <button type="button" class="btn" disabled={marking} onclick={() => (markConfirm = false)}>キャンセル</button>
-        </div>
-      </div>
-    {:else}
-      <div class="actions">
-        <button
-          type="button"
-          class="btn btn-main"
-          disabled={unseenIds.length === 0}
-          onclick={() => {
-            markConfirm = true;
-            markMessage = null;
-          }}
-        >
-          <CheckCheck size={14} aria-hidden="true" />すべて既読にする
-        </button>
-      </div>
-    {/if}
-    {#if markMessage}
-      <p class="note" role="status">{markMessage}</p>
-    {/if}
-  </section>
-
-  <!-- アニメ化検知 -->
-  <section class="block" aria-labelledby="sec-detect">
-    {@render head(Radar, 'sec-detect', 'アニメ化検知', 'DETECTED')}
-
-    {#if !prefs.detection}
-      <p class="note">検知は OFF です（同期の節で切り替えます）。却下の取り消しはできます。</p>
-    {/if}
-
-    {@render sub('却下した候補')}
-    {#if !libraryLoaded}
-      <p class="note mono">…</p>
-    {:else if rejected.length === 0}
-      <p class="note">却下した候補はありません。</p>
-    {:else}
-      <ul class="rows">
-        {#each rejected as detection (detection.id)}
-          {@const workTitle = workTitles.get(detection.workId)}
-          <!-- 却下日を残す前に却下したものは、検知した日を出す -->
-          {@const when = detection.rejectedAt
-            ? { label: '却下', iso: detection.rejectedAt }
-            : { label: '検知', iso: detection.createdAt }}
-          <li class="row">
-            <span class="row-body">
-              <span class="row-title">{detection.candidate.title}</span>
-              <span class="note">
-                {#if workTitle}<span>{workTitle}</span> · {/if}{when.label} <span class="mono">{jstDate(when.iso)}</span>
-              </span>
-            </span>
-            <button
-              type="button"
-              class="btn btn-small"
-              disabled={reopening !== null}
-              aria-label={`「${detection.candidate.title}」の却下を取り消す`}
-              onclick={() => onReopen(detection)}
-            >
-              <Undo2 size={13} aria-hidden="true" />{reopening === detection.id ? '戻しています…' : '取り消す'}
-            </button>
-          </li>
-        {/each}
-      </ul>
-      <p class="note">取り消すと候補に戻り、Home のアニメ化検知にまた出ます。</p>
-    {/if}
-    {#if reopenMessage}
-      <p class="note" role="status">{reopenMessage}</p>
-    {/if}
-  </section>
-
-  <!-- カタログ -->
-  <section class="block" aria-labelledby="sec-catalog">
-    {@render head(BookOpen, 'sec-catalog', 'カタログ', 'CATALOG')}
-
-    {#if statsState.status === 'loading'}
-      <p class="note mono">…</p>
-    {:else if statsState.status === 'failed'}
-      <p class="alert"><span class="dot" aria-hidden="true"></span><span>件数を取得できませんでした（collector に接続できません）</span></p>
-    {:else if !statsState.stats.ready}
-      <p class="note">カタログ未作成。collector 側で次のコマンドを実行すると作られます。</p>
-      <code class="code mono">{BUILD_COMMAND}</code>
-    {:else}
-      <dl class="facts">
-        <div class="fact">
-          <dt class="type-label">作品</dt>
-          <dd><span class="mono">{formatCount(statsState.stats.works)}</span></dd>
-        </div>
-        <div class="fact">
-          <dt class="type-label">件数（全ソース）</dt>
-          <dd><span class="mono">{formatCount(statsState.stats.entries)}</span></dd>
-        </div>
-        {#each sourceRows as row (row.source)}
-          <div class="fact">
-            <dt class="source-name">{row.label}</dt>
-            <dd class="source-values">
-              <span><span class="mono">{row.entries}</span> 件</span>
-              {#if row.harvestedAt}
-                <span class="mono note">{row.harvestedAt}</span>
-              {:else}
-                <span class="note">未収集</span>
-              {/if}
-              {#if row.errorSlices > 0}
-                <span class="error-inline"><span class="dot" aria-hidden="true"></span>失敗 <span class="mono">{row.errorSlices}</span></span>
-              {/if}
-            </dd>
-          </div>
-        {/each}
-      </dl>
-    {/if}
-
-    {@render sub('差分更新')}
-    <div class="actions">
-      <button
-        type="button"
-        class="btn btn-main"
-        disabled={jobStarting || jobRunning}
-        onclick={onStartJob}
-      >
-        <RotateCw size={14} aria-hidden="true" class={jobRunning ? 'spin' : ''} />
-        {jobRunning ? '実行中…' : jobStarting ? '開始しています…' : '差分更新を実行'}
-      </button>
-      <span class="note">目安 約{RECENT_JOB_MINUTES}分</span>
-    </div>
-    {#if jobNotice}
-      {#if jobNotice.kind === 'busy'}
-        <p class="busy" role="status"><Timer size={14} aria-hidden="true" /><span>{jobNotice.text}</span></p>
-      {:else}
-        <p class="alert" role="alert"><span class="dot" aria-hidden="true"></span><span>{jobNotice.text}</span></p>
-      {/if}
-    {/if}
-    {#if job && jobResult}
-      <div class="job" class:job-done={!jobRunning}>
-        <p class="job-status" role="status">
-          {#if jobResult.kind === 'ok'}
-            <Check size={14} aria-hidden="true" />
-          {:else if jobResult.kind === 'error'}
-            <span class="dot" aria-hidden="true"></span>
-          {/if}
-          <span>{jobResult.text}</span>
-        </p>
-        <p class="note">
-          開始 <span class="mono">{formatJstDateTime(job.startedAt)}</span>
-          · {jobRunning ? '経過' : '所要'} <span class="mono">{jobElapsed(job, jobNow)}</span>
-        </p>
-        {#if jobLog.length > 0 && (jobRunning || jobResult.kind === 'error')}
-          <pre class="log mono">{jobLog.join('\n')}</pre>
-        {/if}
-      </div>
-    {:else}
-      <p class="note">新しい刊行・今年以降のアニメ・上位の Web 小説だけを取り直します。終わると件数を読み直します。</p>
-    {/if}
-  </section>
-
-  <!-- collector 接続 -->
-  <section class="block" aria-labelledby="sec-collector">
-    {@render head(Plug, 'sec-collector', 'collector 接続', 'COLLECTOR')}
-
-    <div class="field-group">
-      <label class="type-label" for="collector-url">接続先 URL</label>
-      <input
-        id="collector-url"
-        class="field"
-        type="url"
-        inputmode="url"
-        autocomplete="off"
-        autocapitalize="off"
-        spellcheck="false"
-        placeholder="http://127.0.0.1:8000"
-        bind:value={apiBase}
-        onblur={onApiBaseBlur}
-      />
-      <p class="note">空欄のときは、このアプリと同じ場所に接続します。</p>
-    </div>
-
-    <div class="field-group">
-      <label class="type-label" for="collector-token">Bearer トークン</label>
-      <div class="token-row">
-        <input
-          id="collector-token"
-          type="password"
-          autocomplete="off"
-          class="field"
-          placeholder={tokenConfigured ? '設定済み（変更する場合のみ入力）' : '未設定'}
-          bind:value={tokenDraft}
-        />
-        <button type="button" class="btn btn-main" disabled={!tokenDraft.trim()} onclick={onTokenSave}>保存</button>
-        {#if tokenConfigured}
-          <button type="button" class="btn btn-quiet" onclick={onTokenClear}>解除</button>
-        {/if}
-      </div>
-    </div>
-
-    <dl class="facts">
-      <div class="fact">
-        <dt class="type-label">トークン</dt>
-        <dd>{#if tokenConfigured}設定済み{:else}<span class="dim">未設定</span>{/if}</dd>
-      </div>
-    </dl>
-  </section>
-
-  <!-- 表示 -->
-  <section class="block" aria-labelledby="sec-display">
-    {@render head(Palette, 'sec-display', '表示', 'DISPLAY')}
-
-    {@render sub('テーマ')}
-    <div class="choice-group cols-3" role="group" aria-label="テーマ">
-      {#each THEME_PREFS as pref (pref)}
-        {@const Icon = THEME_ICONS[pref]}
-        <button type="button" class="choice-btn" aria-pressed={themePref === pref} onclick={() => onSelectTheme(pref)}>
-          <Icon size={18} aria-hidden="true" />
-          <span>{THEME_LABELS[pref]}</span>
-        </button>
-      {/each}
-    </div>
-    {#if themePref === 'system'}
-      <p class="note">端末の設定に合わせて、自動で切り替わります。</p>
-    {/if}
-
-    {@render sub('起動時に開く画面')}
-    <div class="choice-group cols-4" role="group" aria-label="起動時に開く画面">
-      {#each START_SCREENS as screen (screen)}
-        {@const Icon = START_SCREEN_ICONS[screen]}
-        <button
-          type="button"
-          class="choice-btn"
-          aria-pressed={prefs.startScreen === screen}
-          onclick={() => onSelectStartScreen(screen)}
-        >
-          <Icon size={18} aria-hidden="true" />
-          <span>{START_SCREEN_LABELS[screen]}</span>
-        </button>
-      {/each}
-    </div>
-    <p class="note">ホーム画面のアイコンなどから開いた時に使います。共有されたリンクやリロードでは、その画面のままです。</p>
-
-    {@render sub('深夜の時刻')}
-    <div class="choice-group cols-2" role="group" aria-label="深夜の時刻">
-      <button
-        type="button"
-        class="choice-btn"
-        aria-pressed={prefs.timeNotation === 'late-night'}
-        onclick={() => preferences.set('timeNotation', 'late-night')}
-      >
-        <span class="mono">25:30</span>
-        <span>放送日のまま</span>
-      </button>
-      <button
-        type="button"
-        class="choice-btn"
-        aria-pressed={prefs.timeNotation === 'clock'}
-        onclick={() => preferences.set('timeNotation', 'clock')}
-      >
-        <span class="mono">翌 1:30</span>
-        <span>実際の時刻</span>
-      </button>
-    </div>
-    <p class="note">深夜番組の時刻の書き方です。並びや保存している日付は変わりません。</p>
-
-    {@render sub('週の始まり')}
-    <div class="choice-group cols-2" role="group" aria-label="週の始まり">
-      <button type="button" class="choice-btn" aria-pressed={prefs.weekStart === 'sun'} onclick={() => preferences.set('weekStart', 'sun')}>
-        <span>日曜から</span>
-      </button>
-      <button type="button" class="choice-btn" aria-pressed={prefs.weekStart === 'mon'} onclick={() => preferences.set('weekStart', 'mon')}>
-        <span>月曜から</span>
-      </button>
-    </div>
-    <p class="note">カレンダーの月の升目に使います。</p>
-  </section>
-
-  <!-- この app について -->
-  <section class="block" aria-labelledby="sec-about">
-    {@render head(Info, 'sec-about', 'この app について', 'ABOUT')}
-
-    {@render sub('データの出典')}
-    <ul class="rows">
-      {#each DATA_SOURCES as source (source.url)}
-        <li class="row source-row">
-          <span class="row-body">
-            <a class="ext-link" href={source.url} target="_blank" rel="noopener noreferrer">
-              {source.name}<ExternalLink size={12} aria-hidden="true" />
-            </a>
-            <span class="note">{source.note}</span>
-          </span>
-        </li>
-      {/each}
-    </ul>
-    <p class="note">データは collector を通して各サービスから取り、この端末にだけ保存します。</p>
-
-    <dl class="facts">
-      <div class="fact">
-        <dt class="type-label">版</dt>
-        <dd><span class="mono">{build.version}</span></dd>
-      </div>
-      <div class="fact">
-        <dt class="type-label">ビルド</dt>
-        <dd>
-          {#if build.builtAt}
-            <span class="mono">{formatJstDateTime(build.builtAt)}</span>
-          {:else}
-            <span class="dim">—</span>
-          {/if}
-        </dd>
-      </div>
-    </dl>
-  </section>
+  </div>
 </section>
 
 <style>
+  /* 余白は .page が持つ（ここで持つと PC の余白を上書きしてしまう） */
   .settings {
     display: flex;
     flex-direction: column;
     gap: 1.75rem;
-    padding: 1rem;
     min-width: 0;
   }
   .title {
     margin: 0;
+  }
+  /* 列: スマホでは今まで通り節が縦に1本並ぶだけ */
+  .col {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    min-width: 0;
   }
   .block {
     display: flex;
@@ -1595,6 +1606,20 @@
   }
   .choice-btn:focus-visible {
     z-index: 2;
+  }
+
+  /* PC: 節を左右の列に固定で振る（grid の行揃えだと短い節の下に隙間ができ、CSS columns だと節が列をまたいで動く） */
+  @media (min-width: 64rem) {
+    .settings {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 3rem;
+      row-gap: 1.75rem;
+      align-items: start;
+    }
+    .title {
+      grid-column: 1 / -1;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

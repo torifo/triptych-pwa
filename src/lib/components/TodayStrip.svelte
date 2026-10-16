@@ -1,5 +1,6 @@
 <script lang="ts">
-  // Home の「今日」: 表紙 m の横並び。表紙の左下に等幅の時刻、下に作品名と「あと 3:12」「#14」など。
+  // Home の「今日」: 表紙 m の横並び（PC は幅いっぱいに折り返す）。表紙の左下に等幅の時刻、下に作品名と「あと 3:12」「#14」など。
+  import { viewport } from '../viewport.svelte';
   import type { CoverSource } from './cover';
   import Cover from './Cover.svelte';
   import { isAiringNow, todaySubLabel, type TodayItem } from './home-view';
@@ -27,7 +28,7 @@
     {@const sub = todaySubLabel(item, now)}
     <li class="card">
       <button type="button" class="card-button" aria-label={`${cover.title} ${item.badge} ${sub.text}`} onclick={() => onopen(item)}>
-        <Cover src={cover.url} title={cover.title} mediaType={cover.mediaType} size="l" onAir={isAiringNow(item.release, now)}>
+        <Cover src={cover.url} title={cover.title} mediaType={cover.mediaType} size={viewport.wide ? 'fill' : 'l'} onAir={isAiringNow(item.release, now)}>
           {#snippet badge()}
             <span class="mono time-badge">{item.badge}</span>
           {/snippet}
@@ -107,5 +108,32 @@
   .sub.upcoming {
     color: var(--fg);
     font-weight: 500;
+  }
+
+  @media (min-width: 64rem) {
+    /* PC: 横に流さず幅いっぱいに折り返し、表紙を 160px に（端の食い込みと scroll-snap は外す） */
+    .strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, 10rem);
+      gap: 1.5rem 1rem;
+      margin: 0;
+      padding: 0;
+      overflow: visible;
+      scroll-snap-type: none;
+    }
+    .card {
+      width: auto;
+      min-width: 0;
+      scroll-snap-align: none;
+    }
+    .time-badge {
+      font-size: 13px;
+    }
+    .title {
+      font-size: 13px;
+    }
+    .sub {
+      font-size: 12px;
+    }
   }
 </style>

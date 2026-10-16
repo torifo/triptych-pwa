@@ -42,6 +42,7 @@
   import FilterChip from '../lib/components/FilterChip.svelte';
   import MonoTime from '../lib/components/MonoTime.svelte';
   import { replaceQuery, route } from '../lib/router.svelte';
+  import { viewport } from '../lib/viewport.svelte';
 
   const EXPORT_FORMATS: ExportFormat[] = ['csv', 'json'];
 
@@ -218,7 +219,7 @@
   const SKELETON_ROWS = [0, 1, 2, 3, 4, 5];
 </script>
 
-<section class="flex flex-col gap-3 p-4">
+<section class="flex flex-col gap-3 page">
   <h1 class="page-title" style="margin-bottom: 0.4rem;">
     カタログ<span class="type-label" style="margin-left: 0.8em;">CATALOG</span>
   </h1>
@@ -266,60 +267,62 @@
       <p class="text-[11px]" style="color: var(--muted);" role="status">{exportError}</p>
     {/if}
 
-    <div class="search-field">
-      <span class="search-icon" aria-hidden="true"><Search size={16} /></span>
-      <input
-        class="w-full py-1.5"
-        style="border: 0; border-bottom: 1px solid var(--fg); background: var(--bg); color: var(--fg); font-size: 1.05rem; outline: none; min-width: 0; padding-left: 1.6rem; padding-right: 0;"
-        type="search"
-        placeholder="題名・別名・読み"
-        aria-label="作品を題名・別名・読みで検索"
-        value={qText}
-        oninput={(e) => onSearchInput(e.currentTarget.value)}
-        onkeydown={(e) => {
-          if (e.key === 'Enter' && !e.isComposing) searchDebouncer.flush();
-        }}
-      />
-    </div>
+    <div class="controls">
+      <div class="search-field">
+        <span class="search-icon" aria-hidden="true"><Search size={16} /></span>
+        <input
+          class="w-full py-1.5"
+          style="border: 0; border-bottom: 1px solid var(--fg); background: var(--bg); color: var(--fg); font-size: 1.05rem; outline: none; min-width: 0; padding-left: 1.6rem; padding-right: 0;"
+          type="search"
+          placeholder="題名・別名・読み"
+          aria-label="作品を題名・別名・読みで検索"
+          value={qText}
+          oninput={(e) => onSearchInput(e.currentTarget.value)}
+          onkeydown={(e) => {
+            if (e.key === 'Enter' && !e.isComposing) searchDebouncer.flush();
+          }}
+        />
+      </div>
 
-    <div class="presets" role="group" aria-label="よく使う見え方">
-      <button type="button" class="preset" aria-pressed={airingOn} onclick={() => applyPreset(AIRING_PRESET, airingOn)}>
-        <Tv size={14} aria-hidden="true" />今期の放送中
-      </button>
-      <button type="button" class="preset" aria-pressed={booksOn} onclick={() => applyPreset(BOOKS_PRESET, booksOn)}>
-        <BookOpen size={14} aria-hidden="true" />これから出る本
-      </button>
-    </div>
+      <div class="presets" role="group" aria-label="よく使う見え方">
+        <button type="button" class="preset" aria-pressed={airingOn} onclick={() => applyPreset(AIRING_PRESET, airingOn)}>
+          <Tv size={14} aria-hidden="true" />今期の放送中
+        </button>
+        <button type="button" class="preset" aria-pressed={booksOn} onclick={() => applyPreset(BOOKS_PRESET, booksOn)}>
+          <BookOpen size={14} aria-hidden="true" />これから出る本
+        </button>
+      </div>
 
-    <div class="toolbar">
-      <button
-        type="button"
-        class="filter-toggle"
-        class:on={filterOpen || filterLabels.length > 0}
-        aria-expanded={filterOpen}
-        aria-controls="catalog-filters"
-        onclick={() => (filterOpen = !filterOpen)}
-      >
-        <SlidersHorizontal size={14} aria-hidden="true" />
-        <span>絞り込み</span>
-        {#if filterLabels.length > 0}
-          <span class="mono filter-count">{filterLabels.length}</span>
-        {/if}
-        <span class="chev" class:open={filterOpen} aria-hidden="true"><ChevronDown size={14} /></span>
-      </button>
-      <div class="sort">
-        <span class="type-label">並び</span>
-        <select
-          class="min-w-0 px-1.5 py-1 text-xs"
-          style="border: 1px solid var(--line); background: var(--bg); color: var(--fg);"
-          aria-label="並べ替え"
-          value={query.sort ?? 'popularity'}
-          onchange={(e) => update({ sort: e.currentTarget.value as CatalogSort })}
+      <div class="toolbar">
+        <button
+          type="button"
+          class="filter-toggle"
+          class:on={filterOpen || filterLabels.length > 0}
+          aria-expanded={filterOpen}
+          aria-controls="catalog-filters"
+          onclick={() => (filterOpen = !filterOpen)}
         >
-          {#each SORT_OPTIONS as o (o.value)}
-            <option value={o.value}>{o.label}</option>
-          {/each}
-        </select>
+          <SlidersHorizontal size={14} aria-hidden="true" />
+          <span>絞り込み</span>
+          {#if filterLabels.length > 0}
+            <span class="mono filter-count">{filterLabels.length}</span>
+          {/if}
+          <span class="chev" class:open={filterOpen} aria-hidden="true"><ChevronDown size={14} /></span>
+        </button>
+        <div class="sort">
+          <span class="type-label">並び</span>
+          <select
+            class="min-w-0 px-1.5 py-1 text-xs"
+            style="border: 1px solid var(--line); background: var(--bg); color: var(--fg);"
+            aria-label="並べ替え"
+            value={query.sort ?? 'popularity'}
+            onchange={(e) => update({ sort: e.currentTarget.value as CatalogSort })}
+          >
+            {#each SORT_OPTIONS as o (o.value)}
+              <option value={o.value}>{o.label}</option>
+            {/each}
+          </select>
+        </div>
       </div>
     </div>
 
@@ -401,7 +404,7 @@
       </div>
     {/if}
 
-    <div bind:this={listTop} style="scroll-margin-top: 3.5rem;"></div>
+    <div bind:this={listTop} class="list-top"></div>
 
     {#if loadError}
       <div class="flex items-center justify-between gap-2 py-2" style="border-top: 1px solid var(--line);">
@@ -430,28 +433,29 @@
       </p>
 
       <div
-        class="flex flex-col"
+        class="results flex flex-col"
         style={`border-top: 1px solid var(--line); opacity: ${loading ? 0.6 : 1};`}
         aria-busy={loading}
       >
         {#if result.items.length === 0}
-          <p class="py-6 text-center text-xs" style="color: var(--muted);">該当する作品がありません</p>
+          <p class="empty py-6 text-center text-xs" style="color: var(--muted);">該当する作品がありません</p>
         {/if}
         {#each result.items as item (item.id)}
           {@const next = formatNext(item)}
           {@const years = yearRange(item.firstYear, item.lastYear)}
           {@const status = animeStatusLabel(item.animeStatus)}
           <a href={`#/catalog/${encodeURIComponent(item.id)}`} class="row-hover catalog-row">
+            <!-- 表紙の幅は props で決まり CSS から変えられないので、PC だけ fill（格子の幅いっぱい）にする -->
             <Cover
               src={item.cover}
               title={item.title}
               mediaType={summaryMediaType(item.kinds)}
-              size="s"
+              size={viewport.wide ? 'fill' : 's'}
               onAir={isAnimeAiring(item.animeStatus)}
             />
             <div class="catalog-body">
-              <div class="flex items-baseline justify-between gap-2">
-                <span class="min-w-0 flex-1 text-sm font-medium" style="overflow-wrap: anywhere;">{item.title}</span>
+              <div class="catalog-head flex items-baseline justify-between gap-2">
+                <span class="catalog-title min-w-0 flex-1 text-sm font-medium lg:line-clamp-2" style="overflow-wrap: anywhere;">{item.title}</span>
                 {#if years}
                   <span class="text-[11px]"><MonoTime text={years} muted /></span>
                 {/if}
@@ -489,7 +493,7 @@
       {/if}
 
       {#if pages > 1}
-        <nav class="flex items-center justify-between gap-2 pt-1" aria-label="ページ送り">
+        <nav class="pager flex items-center justify-between gap-2 pt-1" aria-label="ページ送り">
           <button
             type="button"
             class="inline-flex items-center gap-1 px-3 py-1.5 text-xs disabled:opacity-40"
@@ -513,7 +517,7 @@
       {/if}
     {:else if loading}
       <p class="py-2 text-center text-xs" style="color: var(--muted);" role="status">読み込み中…</p>
-      <div class="flex flex-col" style="border-top: 1px solid var(--line);" aria-hidden="true">
+      <div class="results flex flex-col" style="border-top: 1px solid var(--line);" aria-hidden="true">
         {#each SKELETON_ROWS as n (n)}
           <div class="catalog-row">
             <div class="sk-cover"></div>
@@ -529,6 +533,13 @@
 </section>
 
 <style>
+  /* スマホは検索・近道・並びを縦に積む親の flex にそのまま置く（PC だけ1つの帯にする） */
+  .controls {
+    display: contents;
+  }
+  .list-top {
+    scroll-margin-top: 3.5rem;
+  }
   .search-field {
     position: relative;
   }
@@ -669,5 +680,75 @@
     border-color: var(--fg);
     background: var(--fg);
     color: var(--bg);
+  }
+
+  /* PC: 絞り込みを1行の帯に、結果を表紙の格子にする */
+  @media (min-width: 64rem) {
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem 1.5rem;
+    }
+    .search-field {
+      flex: 1 1 20rem;
+      max-width: 30rem;
+    }
+    .toolbar {
+      margin-left: auto;
+      gap: 0.5rem 1.25rem;
+    }
+    .list-top {
+      scroll-margin-top: 4.5rem;
+    }
+
+    .results {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 1.5rem 1rem;
+      padding-top: 1.25rem;
+    }
+    .results > .empty {
+      grid-column: 1 / -1;
+    }
+    .catalog-row {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.5rem;
+      padding: 0;
+      border-bottom: 0;
+    }
+    .catalog-row:hover {
+      background: none;
+    }
+    .catalog-row:hover .catalog-title {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .catalog-body {
+      flex: none;
+      gap: 0.3rem;
+      min-height: 0;
+    }
+    .catalog-head {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.1rem;
+    }
+    .catalog-title {
+      flex: none;
+    }
+    .catalog-meta {
+      margin-top: 0;
+    }
+    .sk-cover {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 2 / 3;
+    }
+    .pager {
+      justify-content: center;
+      gap: 1.5rem;
+    }
   }
 </style>

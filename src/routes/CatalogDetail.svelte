@@ -130,8 +130,8 @@
   }
 </script>
 
-<section class="flex flex-col">
-  <div class="px-4 pt-4 pb-2">
+<section class="detail page flex flex-col">
+  <div class="back">
     <a
       href={backHref}
       class="type-label inline-flex items-center gap-1"
@@ -141,7 +141,7 @@
   </div>
 
   {#if loadError}
-    <div class="flex flex-col gap-2 p-4" role="status" data-testid={`catalog-detail-${loadError.kind}`}>
+    <div class="notice flex flex-col gap-2" role="status" data-testid={`catalog-detail-${loadError.kind}`}>
       <p class="text-sm font-bold">{loadError.title}</p>
       <p class="text-xs" style="color: var(--muted);">{loadError.message}</p>
       {#if loadError.kind === 'not-built'}
@@ -153,151 +153,205 @@
       {/if}
     </div>
   {:else if loading || !detail}
-    <p class="px-4 py-6 text-center text-xs" style="color: var(--muted);">読み込み中…</p>
+    <p class="loading text-center text-xs" style="color: var(--muted);">読み込み中…</p>
   {:else}
-    <CoverHero src={hero?.url} title={detail.title} mediaType={hero?.mediaType} onAir={airing}>
-      <div class="flex flex-wrap items-center gap-x-1.5 gap-y-1">
-        {#each KIND_ORDER.filter((k) => detail!.kinds.includes(k)) as kind (kind)}
-          <CatalogKindBadge {kind} />
-        {/each}
-        <span class="text-[11px]" style="color: var(--muted); white-space: nowrap;">
-          <MonoTime text={String(detail.entries.length)} /> 件
-        </span>
-      </div>
-    </CoverHero>
-
-    <div class="flex flex-col gap-4 p-4">
-      <div class="flex flex-col gap-2 p-3" style="border: 1px solid var(--fg);">
-        <div class="shou" style="margin-bottom: 0.2rem;">
-          <h2 style="white-space: nowrap;">Library に追加</h2>
-          <span class="no">ADD</span>
-        </div>
-
-        {#if existingWork}
-          <div class="flex flex-col gap-1.5">
-            <div class="flex flex-wrap gap-1" role="group" aria-label="追加先">
-              <FilterChip active={addTarget === 'existing'} onclick={() => (addTarget = 'existing')}>
-                既存作品に追加
-              </FilterChip>
-              <FilterChip active={addTarget === 'new'} onclick={() => (addTarget = 'new')}>
-                新しい作品にする
-              </FilterChip>
-            </div>
-            {#if addTarget === 'existing'}
-              <p class="text-[11px]" style="color: var(--muted); overflow-wrap: anywhere;">
-                追加先: 「{existingWork.title}」
-              </p>
-            {/if}
-          </div>
-        {/if}
-
-        {#if faces.length === 0}
-          <p class="text-xs" style="color: var(--muted);">追加できる行がありません</p>
-        {:else}
-          <div class="flex flex-col" style="border-top: 1px solid var(--line);">
-            {#each faces as face (face.kind)}
-              {@const faceTitle = face.kind === 'book' ? ndlSeriesName(face.entry) : face.entry.title}
-              {@const faceCover = entryCover(face.entry)}
-              <label
-                class="row-hover flex items-center gap-2 py-2"
-                style="border-bottom: 1px solid var(--line); min-width: 0;"
-              >
-                <input
-                  type="checkbox"
-                  style="width: 1rem; height: 1rem; flex-shrink: 0;"
-                  checked={!face.registered && !!selected[face.kind]}
-                  disabled={face.registered || adding}
-                  aria-label={`${KIND_LABELS[face.kind]}「${faceTitle}」を追加する`}
-                  onchange={(e) => (selected[face.kind] = e.currentTarget.checked)}
-                />
-                <Cover src={faceCover.url} title={faceTitle} mediaType={faceCover.mediaType} size="xs" />
-                <CatalogKindBadge kind={face.kind} />
-                <span class="min-w-0 flex-1 truncate text-sm">{faceTitle}</span>
-                {#if face.registered}
-                  <span class="shrink-0 text-[11px]" style="color: var(--muted); white-space: nowrap;">登録済み</span>
-                {/if}
-              </label>
+    <div class="layout">
+      <div class="side">
+        <CoverHero src={hero?.url} title={detail.title} mediaType={hero?.mediaType} onAir={airing}>
+          <div class="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+            {#each KIND_ORDER.filter((k) => detail!.kinds.includes(k)) as kind (kind)}
+              <CatalogKindBadge {kind} />
             {/each}
+            <span class="text-[11px]" style="color: var(--muted); white-space: nowrap;">
+              <MonoTime text={String(detail.entries.length)} /> 件
+            </span>
           </div>
-
-          <button
-            type="button"
-            class="px-3 py-2 text-xs font-medium disabled:opacity-40"
-            style="border: 1px solid var(--fg); color: var(--bg); background: var(--fg); white-space: nowrap; letter-spacing: 0.08em;"
-            disabled={checked.length === 0 || adding}
-            onclick={() => add(checked.map((f) => f.entry), true)}
-          >
-            {adding ? '追加中…' : checked.length > 0 ? `選んだ ${checked.length} 件を Library に追加` : '追加する面を選んでください'}
-          </button>
-        {/if}
-
-        {#if addError}
-          <p class="text-xs" style="color: var(--muted);" role="status">{addError}</p>
-        {/if}
-        {#if notice}
-          <p class="flex flex-wrap items-center gap-x-3 text-xs" role="status">
-            <span>{notice.text}</span>
-            <a href={`#/work/${encodeURIComponent(notice.workId)}`} class="underline" style="white-space: nowrap;">
-              作品を開く
-            </a>
-          </p>
-        {/if}
+        </CoverHero>
       </div>
 
-      {#each sections as section (section.kind)}
-        {@const open = expanded[section.kind] || section.entries.length <= ROW_LIMIT}
-        {@const rows = open ? section.entries : section.entries.slice(0, ROW_LIMIT)}
-        <div class="flex flex-col" style="min-width: 0;">
-          <div class="shou" style="margin-bottom: 0;">
-            <h2 style="white-space: nowrap;">{KIND_LABELS[section.kind]}</h2>
-            <span class="no">{KIND_CODES[section.kind]}</span>
+      <div class="content flex flex-col gap-4">
+        <div class="flex flex-col gap-2 p-3" style="border: 1px solid var(--fg);">
+          <div class="shou" style="margin-bottom: 0.2rem;">
+            <h2 style="white-space: nowrap;">Library に追加</h2>
+            <span class="no">ADD</span>
           </div>
-          {#if section.kind === 'book'}
-            <p class="pt-1.5 text-[11px]" style="color: var(--muted);">
-              登録はシリーズ単位です。1冊追加すると同じシリーズの巻は登録済みになります。
-            </p>
+
+          {#if existingWork}
+            <div class="flex flex-col gap-1.5">
+              <div class="flex flex-wrap gap-1" role="group" aria-label="追加先">
+                <FilterChip active={addTarget === 'existing'} onclick={() => (addTarget = 'existing')}>
+                  既存作品に追加
+                </FilterChip>
+                <FilterChip active={addTarget === 'new'} onclick={() => (addTarget = 'new')}>
+                  新しい作品にする
+                </FilterChip>
+              </div>
+              {#if addTarget === 'existing'}
+                <p class="text-[11px]" style="color: var(--muted); overflow-wrap: anywhere;">
+                  追加先: 「{existingWork.title}」
+                </p>
+              {/if}
+            </div>
           {/if}
-          {#each rows as entry (entry.id)}
-            <CatalogEntryRow
-              {entry}
-              registered={isRegistered(entry, keys)}
-              busy={adding}
-              onadd={(e) => add([e], false)}
-            />
-          {/each}
-          {#if !open}
+
+          {#if faces.length === 0}
+            <p class="text-xs" style="color: var(--muted);">追加できる行がありません</p>
+          {:else}
+            <div class="flex flex-col" style="border-top: 1px solid var(--line);">
+              {#each faces as face (face.kind)}
+                {@const faceTitle = face.kind === 'book' ? ndlSeriesName(face.entry) : face.entry.title}
+                {@const faceCover = entryCover(face.entry)}
+                <label
+                  class="row-hover flex items-center gap-2 py-2"
+                  style="border-bottom: 1px solid var(--line); min-width: 0;"
+                >
+                  <input
+                    type="checkbox"
+                    style="width: 1rem; height: 1rem; flex-shrink: 0;"
+                    checked={!face.registered && !!selected[face.kind]}
+                    disabled={face.registered || adding}
+                    aria-label={`${KIND_LABELS[face.kind]}「${faceTitle}」を追加する`}
+                    onchange={(e) => (selected[face.kind] = e.currentTarget.checked)}
+                  />
+                  <Cover src={faceCover.url} title={faceTitle} mediaType={faceCover.mediaType} size="xs" />
+                  <CatalogKindBadge kind={face.kind} />
+                  <span class="min-w-0 flex-1 truncate text-sm">{faceTitle}</span>
+                  {#if face.registered}
+                    <span class="shrink-0 text-[11px]" style="color: var(--muted); white-space: nowrap;">登録済み</span>
+                  {/if}
+                </label>
+              {/each}
+            </div>
+
             <button
               type="button"
-              class="mt-2 self-start px-2 py-1 text-[11px]"
-              style="border: 1px solid var(--line); color: var(--muted); white-space: nowrap;"
-              onclick={() => (expanded[section.kind] = true)}
+              class="add-btn px-3 py-2 text-xs font-medium disabled:opacity-40"
+              style="border: 1px solid var(--fg); color: var(--bg); background: var(--fg); white-space: nowrap; letter-spacing: 0.08em;"
+              disabled={checked.length === 0 || adding}
+              onclick={() => add(checked.map((f) => f.entry), true)}
             >
-              ほか {section.entries.length - ROW_LIMIT} 件を表示
+              {adding ? '追加中…' : checked.length > 0 ? `選んだ ${checked.length} 件を Library に追加` : '追加する面を選んでください'}
             </button>
           {/if}
-        </div>
-      {/each}
 
-      {#if detail.candidates.length > 0}
-        <div class="flex flex-col" style="min-width: 0;">
-          <div class="shou" style="margin-bottom: 0;">
-            <h2 style="white-space: nowrap;">候補</h2>
-            <span class="no">CANDIDATES</span>
-          </div>
-          <p class="pt-1.5 text-[11px]" style="color: var(--muted);">
-            題名の照合が弱く、この作品には含めていない行です。
-          </p>
-          {#each detail.candidates as entry (entry.id)}
-            <CatalogEntryRow
-              {entry}
-              showKind
-              registered={isRegistered(entry, keys)}
-              busy={adding}
-              onadd={(e) => add([e], false)}
-            />
-          {/each}
+          {#if addError}
+            <p class="text-xs" style="color: var(--muted);" role="status">{addError}</p>
+          {/if}
+          {#if notice}
+            <p class="flex flex-wrap items-center gap-x-3 text-xs" role="status">
+              <span>{notice.text}</span>
+              <a href={`#/work/${encodeURIComponent(notice.workId)}`} class="underline" style="white-space: nowrap;">
+                作品を開く
+              </a>
+            </p>
+          {/if}
         </div>
-      {/if}
+
+        {#each sections as section (section.kind)}
+          {@const open = expanded[section.kind] || section.entries.length <= ROW_LIMIT}
+          {@const rows = open ? section.entries : section.entries.slice(0, ROW_LIMIT)}
+          <div class="flex flex-col" style="min-width: 0;">
+            <div class="shou" style="margin-bottom: 0;">
+              <h2 style="white-space: nowrap;">{KIND_LABELS[section.kind]}</h2>
+              <span class="no">{KIND_CODES[section.kind]}</span>
+            </div>
+            {#if section.kind === 'book'}
+              <p class="pt-1.5 text-[11px]" style="color: var(--muted);">
+                登録はシリーズ単位です。1冊追加すると同じシリーズの巻は登録済みになります。
+              </p>
+            {/if}
+            {#each rows as entry (entry.id)}
+              <CatalogEntryRow
+                {entry}
+                registered={isRegistered(entry, keys)}
+                busy={adding}
+                onadd={(e) => add([e], false)}
+              />
+            {/each}
+            {#if !open}
+              <button
+                type="button"
+                class="mt-2 self-start px-2 py-1 text-[11px]"
+                style="border: 1px solid var(--line); color: var(--muted); white-space: nowrap;"
+                onclick={() => (expanded[section.kind] = true)}
+              >
+                ほか {section.entries.length - ROW_LIMIT} 件を表示
+              </button>
+            {/if}
+          </div>
+        {/each}
+
+        {#if detail.candidates.length > 0}
+          <div class="flex flex-col" style="min-width: 0;">
+            <div class="shou" style="margin-bottom: 0;">
+              <h2 style="white-space: nowrap;">候補</h2>
+              <span class="no">CANDIDATES</span>
+            </div>
+            <p class="pt-1.5 text-[11px]" style="color: var(--muted);">
+              題名の照合が弱く、この作品には含めていない行です。
+            </p>
+            {#each detail.candidates as entry (entry.id)}
+              <CatalogEntryRow
+                {entry}
+                showKind
+                registered={isRegistered(entry, keys)}
+                busy={adding}
+                onadd={(e) => add([e], false)}
+              />
+            {/each}
+          </div>
+        {/if}
+      </div>
     </div>
   {/if}
 </section>
+
+<style>
+  /* スマホは左右 1rem（表紙は端まで敷く）。PC は .page が余白を持つので各所の余白を外す */
+  .back {
+    padding: 1rem 1rem 0.5rem;
+  }
+  .notice,
+  .content {
+    padding: 1rem;
+  }
+  .loading {
+    padding: 1.5rem 1rem;
+  }
+  @media not all and (min-width: 64rem) {
+    .detail {
+      padding: 0;
+    }
+  }
+
+  /* PC: 左に表紙の列（ヘッダーの下に貼る）、右に追加欄と各面の行 */
+  @media (min-width: 64rem) {
+    .back {
+      padding: 0 0 1rem;
+    }
+    .notice,
+    .content {
+      padding: 0;
+    }
+    .loading {
+      padding: 1.5rem 0;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      column-gap: 2.5rem;
+      align-items: start;
+    }
+    .side {
+      position: sticky;
+      top: 4.5rem;
+      max-height: calc(100svh - 5.5rem);
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+    .add-btn {
+      align-self: flex-start;
+      min-width: 16rem;
+    }
+  }
+</style>

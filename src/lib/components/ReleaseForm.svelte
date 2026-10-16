@@ -233,4 +233,11 @@
   :global(.dark) .field {
     color-scheme: dark;
   }
+
+  /* PC: 右の列の幅いっぱいに伸びて入力欄が間延びしないよう、フォームの幅を抑える */
+  @media (min-width: 64rem) {
+    .release-form {
+      max-width: 32rem;
+    }
+  }
 </style>

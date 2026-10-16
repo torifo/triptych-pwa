@@ -221,7 +221,7 @@
   }
 </script>
 
-<section class="flex flex-col gap-6 p-4">
+<section class="page home flex flex-col gap-6">
   <div class="flex flex-col">
     <h1 class="page-title" style="margin-bottom: 0.75rem;"><span class="hi-marker">追いかける。</span></h1>
     <!-- 紙面の日付の帯: 今日の日付・最終同期・同期の操作 -->
@@ -278,7 +278,7 @@
         </h2>
         <span class="no">DETECTED</span>
       </div>
-      <div class="flex flex-col gap-1.5">
+      <div class="detect-list flex flex-col gap-1.5">
         {#each pendingDetections as detection (detection.id)}
           {@const w = workMap.get(detection.workId)}
           {@const via = detection.via ?? 'title'}
@@ -345,11 +345,11 @@
   {/if}
 
   {#if libraryEmpty}
-    <div class="flex flex-col gap-3">
+    <div class="intro flex flex-col gap-3">
       <p class="text-xs" style="color: var(--muted);">
         Library はまだ空です。カタログや検索から、追いかける作品を足していきます。
       </p>
-      <div class="flex gap-2">
+      <div class="cta-row flex gap-2">
         <a href="#/catalog" class="cta cta-primary">
           <BookOpen size={16} strokeWidth={2} aria-hidden="true" />
           カタログを見る
@@ -396,7 +396,7 @@
       </div>
     {/if}
   {:else if loaded}
-    <div class="flex flex-col">
+    <div class="col flex flex-col">
       <div class="shou"><h2>直近</h2><span class="no">NEXT 7 DAYS</span></div>
       {#if upcoming.length === 0}
         <p class="text-xs" style="color: var(--muted);">
@@ -420,7 +420,7 @@
       {/if}
     </div>
 
-    <div class="flex flex-col">
+    <div class="col flex flex-col">
       <div class="shou"><h2>新着</h2><span class="no">UNSEEN</span></div>
       {#if fresh.length === 0}
         <p class="text-xs" style="color: var(--muted);">
@@ -595,5 +595,47 @@
     color: var(--fg);
     text-decoration: underline;
     text-underline-offset: 0.2em;
+  }
+
+  @media (min-width: 64rem) {
+    /* PC: 帯・今日・検知・空の誘導は全幅、直近と新着だけ2列に並べる */
+    .home {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: start;
+      gap: 2rem 3rem;
+    }
+    .home > * {
+      grid-column: 1 / -1;
+    }
+    .home > .col {
+      grid-column: auto;
+    }
+    /* 検知のカードは幅に合わせて複数列（1枚が横に間延びしない） */
+    .detect-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+      gap: 0.5rem 1rem;
+    }
+    /* 空の Library: 説明とボタンを1行に（ボタンは全幅に伸ばさない） */
+    .intro {
+      flex-direction: row;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .cta-row {
+      flex: 0 0 auto;
+    }
+    .cta {
+      flex: 0 0 auto;
+      padding: 0 1.25rem;
+    }
+    .shelf {
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 1.5rem 1rem;
+    }
+    .shelf-title {
+      font-size: 12px;
+    }
   }
 </style>

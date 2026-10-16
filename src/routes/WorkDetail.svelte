@@ -159,7 +159,7 @@
 </script>
 
 {#if loaded && !work}
-  <section class="flex flex-col gap-4 p-4">
+  <section class="flex flex-col gap-4 page">
     <p class="text-sm" style="color: var(--muted);">作品が見つかりません</p>
     <button
       type="button"
@@ -171,47 +171,49 @@
     </button>
   </section>
 {:else if work}
-  <div class="work">
-    <CoverHero src={cover?.url} title={work.title} mediaType={cover?.mediaType} onAir={onAirIds.size > 0}>
-      {#if mediaTypes.length > 0}
-        <div class="hero-media" aria-label="媒体">
-          {#each mediaTypes as mediaType (mediaType)}
-            <MediaBadge {mediaType} />
-          {/each}
-        </div>
-      {/if}
-      {#if onAirIds.size > 0}
-        <div class="hero-onair">
-          <OnAirLamp label="ON AIR" />
-          {#if airingTime}
-            <MonoTime text={`今日 ${airingTime}`} muted />
-          {/if}
-        </div>
-      {/if}
-      {#if !editingTitle}
-        <button type="button" class="hero-edit" onclick={startTitleEdit}>
-          <Pencil size={13} />題名を編集
-        </button>
-      {/if}
-    </CoverHero>
+  <div class="work page">
+    <div class="side">
+      <CoverHero src={cover?.url} title={work.title} mediaType={cover?.mediaType} onAir={onAirIds.size > 0}>
+        {#if mediaTypes.length > 0}
+          <div class="hero-media" aria-label="媒体">
+            {#each mediaTypes as mediaType (mediaType)}
+              <MediaBadge {mediaType} />
+            {/each}
+          </div>
+        {/if}
+        {#if onAirIds.size > 0}
+          <div class="hero-onair">
+            <OnAirLamp label="ON AIR" />
+            {#if airingTime}
+              <MonoTime text={`今日 ${airingTime}`} muted />
+            {/if}
+          </div>
+        {/if}
+        {#if !editingTitle}
+          <button type="button" class="hero-edit" onclick={startTitleEdit}>
+            <Pencil size={13} />題名を編集
+          </button>
+        {/if}
+      </CoverHero>
 
-    {#if editingTitle}
-      <form class="title-edit" onsubmit={saveTitle}>
-        <input
-          class="field title-field"
-          aria-label="作品タイトル"
-          bind:value={titleDraft}
-          {@attach focusOnMount}
-          onkeydown={(e) => {
-            if (e.key === 'Escape') editingTitle = false;
-          }}
-        />
-        <div class="title-actions">
-          <button type="submit" class="btn btn-main">保存</button>
-          <button type="button" class="btn" onclick={() => (editingTitle = false)}>やめる</button>
-        </div>
-      </form>
-    {/if}
+      {#if editingTitle}
+        <form class="title-edit" onsubmit={saveTitle}>
+          <input
+            class="field title-field"
+            aria-label="作品タイトル"
+            bind:value={titleDraft}
+            {@attach focusOnMount}
+            onkeydown={(e) => {
+              if (e.key === 'Escape') editingTitle = false;
+            }}
+          />
+          <div class="title-actions">
+            <button type="submit" class="btn btn-main">保存</button>
+            <button type="button" class="btn" onclick={() => (editingTitle = false)}>やめる</button>
+          </div>
+        </form>
+      {/if}
+    </div>
 
     <div class="body">
       {#if hasTabs}
@@ -292,6 +294,12 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
+  }
+  /* スマホは表紙を画面の端まで敷くので、.page の余白を付けない */
+  @media not all and (min-width: 64rem) {
+    .work {
+      padding: 0;
+    }
   }
 
   /* ─── ヘッダー（CoverHero の中身） ─── */
@@ -498,5 +506,46 @@
   }
   .btn-main {
     border-color: var(--fg);
+  }
+
+  /* PC: 左に表紙の列（ヘッダーの下に貼る）、右に Edition の中身 */
+  @media (min-width: 64rem) {
+    .work {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      column-gap: 2.5rem;
+      align-items: start;
+    }
+    .side {
+      position: sticky;
+      top: 4.5rem;
+      max-height: calc(100svh - 5.5rem);
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+    .title-edit {
+      padding: 0.75rem 0 0;
+      border-bottom: 0;
+    }
+    .body {
+      padding: 0;
+    }
+    .body > :first-child:not(.tabs) {
+      margin-top: 0;
+    }
+    .tabs {
+      margin: 0;
+      padding: 0;
+    }
+    .tab {
+      max-width: 14rem;
+    }
+    .add-open {
+      width: auto;
+      padding-inline: 1.25rem;
+    }
+    .add-form {
+      max-width: 36rem;
+    }
   }
 </style>
