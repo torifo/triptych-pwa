@@ -29,6 +29,32 @@ export function cellThumbs<T extends Pick<Release, 'editionId'>>(
   return { shown: unique.slice(0, max), rest: Math.max(0, unique.length - max) };
 }
 
+/**
+ * 升目の表紙: Library の Edition を先に置き、空いた枠をカタログの出来事（同じ作品は1つ・人気順）で埋める。
+ * rest は出しきれない Library の Edition とカタログの作品の合計。
+ */
+export function cellCovers<
+  R extends Pick<Release, 'editionId'>,
+  E extends { clusterId: string; popularity?: number | null },
+>(
+  cellReleases: readonly R[],
+  catalogEvents: readonly E[],
+  max: number,
+): { library: R[]; catalog: E[]; rest: number } {
+  const own = cellThumbs(cellReleases, max);
+  const unique: E[] = [];
+  const seen = new Set<string>();
+  for (const event of catalogEvents) {
+    if (seen.has(event.clusterId)) continue;
+    seen.add(event.clusterId);
+    unique.push(event);
+  }
+  // sort は安定なので、人気が同じ（または無い）もの同士は入力の順のまま
+  const byPopularity = [...unique].sort((a, b) => (b.popularity ?? 0) - (a.popularity ?? 0));
+  const catalog = byPopularity.slice(0, max - own.shown.length);
+  return { library: own.shown, catalog, rest: own.rest + unique.length - catalog.length };
+}
+
 /** 一覧に出す日: 選んだ日がこの月ならその日、無ければ今日（この月の時だけ）。 */
 export function calendarDay(
   selected: string | null,

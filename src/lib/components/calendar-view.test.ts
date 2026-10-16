@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { calendarDay, cellThumbs, dayCellLabel, dayOnAirMark } from './calendar-view';
+import { calendarDay, cellCovers, cellThumbs, dayCellLabel, dayOnAirMark } from './calendar-view';
 
 describe('dayOnAirMark', () => {
   it('放送・配信のある今日と先の日にだけ印を付ける', () => {
@@ -25,6 +25,38 @@ describe('cellThumbs', () => {
     expect(shown.map((r) => r.id)).toEqual(['1', '3']);
     expect(rest).toBe(2);
     expect(cellThumbs(list.slice(0, 2), 2)).toEqual({ shown: [list[0]], rest: 0 });
+  });
+});
+
+describe('cellCovers', () => {
+  const ev = (clusterId: string, popularity: number | null = null) => ({ clusterId, popularity });
+
+  it('Library が空なら、カタログの出来事を人気順で枠いっぱいまで出す', () => {
+    const events = [ev('a', 10), ev('b', 300), ev('c', null), ev('d', 50)];
+    const { library, catalog, rest } = cellCovers([], events, 2);
+    expect(library).toEqual([]);
+    expect(catalog.map((e) => e.clusterId)).toEqual(['b', 'd']);
+    expect(rest).toBe(2);
+  });
+
+  it('Library の表紙を先に置き、空いた枠だけカタログで埋める', () => {
+    const releases = [{ id: '1', editionId: 'x' }];
+    const { library, catalog, rest } = cellCovers(releases, [ev('a', 5), ev('b', 9)], 2);
+    expect(library.map((r) => r.id)).toEqual(['1']);
+    expect(catalog.map((e) => e.clusterId)).toEqual(['b']);
+    expect(rest).toBe(1);
+  });
+
+  it('同じ作品の出来事は1つに数え、Library で埋まればカタログは残りの数だけ', () => {
+    const releases = [
+      { id: '1', editionId: 'x' },
+      { id: '2', editionId: 'y' },
+      { id: '3', editionId: 'z' },
+    ];
+    const { library, catalog, rest } = cellCovers(releases, [ev('a', 1), ev('a', 1), ev('b', 2)], 2);
+    expect(library.map((r) => r.id)).toEqual(['1', '2']);
+    expect(catalog).toEqual([]);
+    expect(rest).toBe(3); // Library の z ＋ カタログの a・b
   });
 });
 

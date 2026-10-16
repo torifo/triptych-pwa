@@ -15,7 +15,7 @@
   import CatalogDayEvents from '../lib/components/CatalogDayEvents.svelte';
   import type { CoverSize } from '../lib/components/cover';
   import { buildCoverIndex, isAiringNow } from '../lib/components/home-view';
-  import { calendarDay, cellThumbs, dayCellLabel, dayOnAirMark } from '../lib/components/calendar-view';
+  import { calendarDay, cellCovers, dayCellLabel, dayOnAirMark } from '../lib/components/calendar-view';
   import {
     groupByDate,
     groupByMonth,
@@ -42,6 +42,7 @@
     type MediaFilter,
   } from '../lib/calendar/view';
   import {
+    dayEmptyNote,
     describeOverlayError,
     groupEventsByDate,
     libraryKeys,
@@ -446,9 +447,10 @@
         {#if cell.date && cell.day !== null}
           {@const date = cell.date}
           {@const cellReleases = releasesByDate.get(date) ?? []}
-          {@const thumbs = cellThumbs(cellReleases, GRID_ITEMS_PER_CELL)}
+          {@const cellEvents = eventsByDate.get(date) ?? []}
+          {@const thumbs = cellCovers(cellReleases, cellEvents, GRID_ITEMS_PER_CELL)}
           {@const mark = dayOnAirMark(cellReleases, date, today)}
-          {@const catalogCount = eventsByDate.get(date)?.length ?? 0}
+          {@const catalogCount = cellEvents.length}
           <button
             type="button"
             class="cell"
@@ -467,20 +469,20 @@
                 <span class="cell-dot"></span>
               {/if}
             </span>
-            {#if thumbs.shown.length > 0}
+            {#if thumbs.library.length + thumbs.catalog.length > 0}
+              <!-- Library の表紙が先、空いた枠はカタログの作品（人気順）で埋める -->
               <span class="cell-thumbs">
-                {#each thumbs.shown as release (release.id)}
+                {#each thumbs.library as release (release.id)}
                   {@const cover = covers.get(release.editionId)}
                   <MiniCover src={cover?.url} title={cover?.title ?? workTitleFor(release.editionId)} />
+                {/each}
+                {#each thumbs.catalog as event (event.clusterId)}
+                  <MiniCover src={event.cover} title={event.title} />
                 {/each}
               </span>
             {/if}
             {#if thumbs.rest > 0}
               <span class="mono cell-more">+{thumbs.rest}</span>
-            {/if}
-            {#if catalogCount > 0}
-              <!-- カタログの出来事は件数によらず無彩色の点1つ -->
-              <span class="cell-catalog" aria-hidden="true"></span>
             {/if}
           </button>
         {:else}
@@ -500,7 +502,7 @@
         {/if}
         <CatalogDayEvents events={shownDayEvents} />
         {#if shownDayReleases.length === 0 && shownDayEvents.length === 0}
-          <p class="text-xs" style="color: var(--muted);">この日の予定はありません</p>
+          <p class="text-xs" style="color: var(--muted);">{dayEmptyNote(overlayStatus)}</p>
         {/if}
       </div>
     {/if}
@@ -824,15 +826,6 @@
     line-height: 1.2;
     color: var(--muted);
     white-space: nowrap;
-  }
-  /* カタログの出来事がある日: 升目の下に無彩色の小さな点 */
-  .cell-catalog {
-    width: 4px;
-    height: 4px;
-    margin-top: auto;
-    border-radius: 50%;
-    background: var(--muted);
-    flex-shrink: 0;
   }
 
   @media (max-width: 340px) {

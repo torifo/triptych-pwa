@@ -285,3 +285,10 @@ export function overlayNote(state: OverlayStatus): string | null {
       return state.count > 0 ? `${state.count} 件` : 'この期間は無し';
   }
 }
+
+/** 月の升目で選んだ日に何も無い時の一言。カタログを読めない時は「予定なし」と言わず理由を出す。 */
+export function dayEmptyNote(state: OverlayStatus): string {
+  if (state.status === 'error') return `カタログの予定を出せません（${state.reason}）`;
+  if (state.status === 'loading') return '読み込み中…';
+  return 'この日の予定はありません';
+}

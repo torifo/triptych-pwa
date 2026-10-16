@@ -4,6 +4,7 @@ import { DETAIL_NOT_BUILT } from '../catalog/api';
 import type { CatalogEvent, CatalogEventPage, CatalogEventQuery } from '../catalog/types';
 import {
   EventsShapeError,
+  dayEmptyNote,
   describeOverlayError,
   eventCover,
   eventHref,
@@ -295,5 +296,20 @@ describe('overlayNote', () => {
     expect(overlayNote({ status: 'ready', count: 42, truncated: false })).toBe('42 件');
     expect(overlayNote({ status: 'ready', count: 0, truncated: false })).toBe('この期間は無し');
     expect(overlayNote({ status: 'ready', count: 600, truncated: true })).toBe('600 件（多いため一部）');
+  });
+});
+
+describe('dayEmptyNote', () => {
+  it('カタログを読めない時は「予定なし」と言わず、理由を出す', () => {
+    expect(dayEmptyNote({ status: 'error', reason: 'collector に接続できません' })).toBe(
+      'カタログの予定を出せません（collector に接続できません）',
+    );
+    expect(dayEmptyNote({ status: 'loading' })).toBe('読み込み中…');
+  });
+
+  it('読めた・重ねていない時は、ふつうに予定なし', () => {
+    expect(dayEmptyNote({ status: 'ready', count: 0, truncated: false })).toBe('この日の予定はありません');
+    expect(dayEmptyNote({ status: 'off' })).toBe('この日の予定はありません');
+    expect(dayEmptyNote({ status: 'no-kinds' })).toBe('この日の予定はありません');
   });
 });
