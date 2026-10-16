@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { coverUrlOf, editionCover, fallbackCoverText, sizedCoverUrl, workCover } from './cover';
+import { coverSrcset, coverUrlOf, editionCover, fallbackCoverText, sizedCoverUrl, workCover } from './cover';
 
 describe('coverUrlOf', () => {
   it('http(s) の URL だけを表紙にする', () => {
@@ -66,6 +66,19 @@ describe('fallbackCoverText', () => {
 
   it('空の題名でも何か出す', () => {
     expect(fallbackCoverText('  ', 'anime')).toEqual({ title: '—', media: 'ANIME' });
+  });
+});
+
+describe('coverSrcset', () => {
+  const base = 'https://s4.anilist.co/file/anilistcdn/media/anime/cover/';
+
+  it('幅いっぱい（棚・PC の詳細）の AniList は medium と large を並べ、ブラウザに選ばせる', () => {
+    expect(coverSrcset(`${base}small/bx1-a.jpg`, 'fill')).toBe(`${base}medium/bx1-a.jpg 230w, ${base}large/bx1-a.jpg 460w`);
+  });
+
+  it('大きさの決まった表紙と AniList 以外は出さない', () => {
+    expect(coverSrcset(`${base}small/bx1-a.jpg`, 'l')).toBeUndefined();
+    expect(coverSrcset('https://example.com/a.jpg', 'fill')).toBeUndefined();
   });
 });
 

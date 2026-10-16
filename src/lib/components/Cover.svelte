@@ -2,7 +2,7 @@
   // 表紙。比率 2:3。画像が無い・読み込めない時は題名を縦に組んだ「文字の表紙」に代える。
   import type { Snippet } from 'svelte';
   import type { MediaType } from '../db/schema';
-  import { COVER_WIDTH, fallbackCoverText, sizedCoverUrl, type CoverSize } from './cover';
+  import { COVER_WIDTH, coverSrcset, fallbackCoverText, sizedCoverUrl, type CoverSize } from './cover';
   import OnAirLamp from './OnAirLamp.svelte';
   import { isSafeHttpUrl } from './release-view';
 
@@ -28,13 +28,23 @@
 
   const safe = $derived(src && isSafeHttpUrl(src) ? sizedCoverUrl(src, size) : undefined);
   const url = $derived(safe && failedSrc !== safe ? safe : undefined);
+  // 幅いっぱいの時だけ、表示幅に足りる版をブラウザに選ばせる（PC の棚・詳細で 230px 版がぼやけないように）
+  const srcset = $derived(url && src ? coverSrcset(src, size) : undefined);
   const text = $derived(fallbackCoverText(title, mediaType));
   const width = $derived(size === 'fill' ? '100%' : `${COVER_WIDTH[size]}px`);
 </script>
 
 <div class="cover" data-size={size} style:width>
   {#if url}
-    <img src={url} alt={title} loading="lazy" decoding="async" onerror={() => (failedSrc = url)} />
+    <img
+      src={url}
+      {srcset}
+      sizes={srcset ? '(min-width: 64rem) 220px, 34vw' : undefined}
+      alt={title}
+      loading="lazy"
+      decoding="async"
+      onerror={() => (failedSrc = url)}
+    />
   {:else}
     <div class="paper" role="img" aria-label={title}>
       {#if size !== 'xs'}<span class="mark" aria-hidden="true"></span>{/if}

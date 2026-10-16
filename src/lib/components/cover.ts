@@ -27,6 +27,14 @@ export function sizedCoverUrl(url: string, size: CoverSize): string {
   return `${match[1]}${ANILIST_VARIANT[size]}${match[3]}`;
 }
 
+/** 幅いっぱいの表紙の srcset（AniList の medium・large）。幅の決まった表紙や AniList 以外は undefined。 */
+export function coverSrcset(url: string, size: CoverSize): string | undefined {
+  if (size !== 'fill') return undefined;
+  const match = ANILIST_COVER_RE.exec(url);
+  if (!match) return undefined;
+  return `${match[1]}medium${match[3]} 230w, ${match[1]}large${match[3]} 460w`;
+}
+
 /** 代表表紙に選ぶ媒体の順（色の強い・確実に表紙があるものから）。 */
 const COVER_MEDIA_ORDER: MediaType[] = ['anime', 'manga', 'light-novel', 'web-novel'];
 
