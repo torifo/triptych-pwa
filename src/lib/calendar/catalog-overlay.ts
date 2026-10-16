@@ -9,7 +9,7 @@ import type {
   CatalogEventQuery,
   CatalogEventType,
 } from '../catalog/types';
-import { addDaysYmd, isValidYmd } from '../dates';
+import { addDaysYmd, diffDaysYmd, displayReleaseTime, isValidYmd } from '../dates';
 import type { Edition, Work } from '../db/schema';
 import { normalizeTitle } from '../normalize';
 import type { CoverSource } from '../components/cover';
@@ -232,6 +232,29 @@ export async function fetchEventsRange(
  * 表示中の期間の出来事。月はアニメと本を別々に取って合わせる（1か月分を1回で取ると本だけで上限に掛かるため）。
  * 合わせた後は date 昇順→人気順（日の中の時刻順は groupEventsByDate で付ける）。
  */
+// ---------------------------------------------------------------------------
+// 放送日（朝5時区切り）に揃える
+// ---------------------------------------------------------------------------
+
+const EARLY_CLOCK_RE = /^([0-4]):(\d{2})$|^0([0-4]):(\d{2})$/;
+// collector の期間は両端を含めて最大 62 日。最後の夜を足すのはそれに収まる時だけ
+const MAX_FETCH_DAYS = 62;
+
+/** カタログの出来事は実の日付・時刻で来る。Library と同じ放送日に揃え、0:00〜4:59 は前の日の 24:00〜28:59 にする。 */
+export function toBroadcastDay<E extends Pick<CatalogEvent, 'date' | 'time'>>(event: E): E {
+  const match = event.time ? EARLY_CLOCK_RE.exec(event.time) : null;
+  if (!match || !isValidYmd(event.date)) return event;
+  const hour = Number(match[1] ?? match[3]);
+  const minute = match[2] ?? match[4];
+  return { ...event, date: addDaysYmd(event.date, -1), time: `${hour + 24}:${minute}` };
+}
+
+/** 行に出す時刻。Library の行と同じく、設定が時計表記なら 24:30 を「翌0:30」と書く。 */
+export function eventTimeText(event: Pick<CatalogEvent, 'date' | 'time'>): string {
+  const shown = displayReleaseTime({ date: event.date, time: event.time ?? undefined });
+  return shown.time ? `${shown.nextDay ? '翌' : ''}${shown.time}` : '';
+}
+
 export async function loadOverlayEvents(
   fetcher: (q: CatalogEventQuery) => Promise<unknown>,
   range: { from: string; to: string },
@@ -239,11 +262,19 @@ export async function loadOverlayEvents(
   splitKinds: boolean,
 ): Promise<CatalogEventPage> {
   if (kinds.length === 0) return { items: [], truncated: false };
-  if (!splitKinds || kinds.length === 1) return fetchEventsRange(fetcher, { ...range, kinds: [...kinds] });
+  // 期間の最後の放送日の深夜（実の翌日 0:00〜4:59）まで取る
+  const fetchRange =
+    diffDaysYmd(range.to, range.from) + 2 <= MAX_FETCH_DAYS ? { from: range.from, to: addDaysYmd(range.to, 1) } : range;
+  const inRange = (items: CatalogEvent[]) =>
+    items.map(toBroadcastDay).filter((item) => item.date >= range.from && item.date <= range.to);
 
-  const pages = await Promise.all(kinds.map((kind) => fetchEventsRange(fetcher, { ...range, kinds: [kind] })));
-  const items = pages
-    .flatMap((page) => page.items)
+  if (!splitKinds || kinds.length === 1) {
+    const page = await fetchEventsRange(fetcher, { ...fetchRange, kinds: [...kinds] });
+    return { items: inRange(page.items), truncated: page.truncated };
+  }
+
+  const pages = await Promise.all(kinds.map((kind) => fetchEventsRange(fetcher, { ...fetchRange, kinds: [kind] })));
+  const items = inRange(pages.flatMap((page) => page.items))
     .map((item, index) => ({ item, index }))
     .sort((a, b) => {
       if (a.item.date !== b.item.date) return a.item.date < b.item.date ? -1 : 1;

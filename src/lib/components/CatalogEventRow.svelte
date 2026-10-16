@@ -1,7 +1,7 @@
 <script lang="ts">
   // カレンダーに重ねるカタログの出来事の行（Library の行より薄め）。押すとカタログ詳細へ。
   import type { CatalogEvent } from '../catalog/types';
-  import { eventCover, eventHref, eventKindNote, eventKindWord, eventLabel } from '../calendar/catalog-overlay';
+  import { eventCover, eventHref, eventKindNote, eventKindWord, eventLabel, eventTimeText } from '../calendar/catalog-overlay';
   import Cover from './Cover.svelte';
 
   let { event }: { event: CatalogEvent } = $props();
@@ -13,7 +13,7 @@
 </script>
 
 <a class="event-row row-hover" href={eventHref(event)}>
-  <span class="when mono">{event.time ?? ''}</span>
+  <span class="when mono">{eventTimeText(event)}</span>
   <!-- 題名は右に文字で出すので、表紙は読み上げない -->
   <span class="thumb" aria-hidden="true">
     <Cover src={cover.url} title={cover.title} mediaType={cover.mediaType} size="xs" />

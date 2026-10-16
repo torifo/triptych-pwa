@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../api';
 import { DETAIL_NOT_BUILT } from '../catalog/api';
+import { setTimeNotation } from '../dates';
 import type { CatalogEvent, CatalogEventPage, CatalogEventQuery } from '../catalog/types';
 import {
   EventsShapeError,
@@ -10,6 +11,7 @@ import {
   eventHref,
   eventKindNote,
   eventKindWord,
+  eventTimeText,
   eventLabel,
   fetchEventsRange,
   foldEvents,
@@ -17,6 +19,7 @@ import {
   libraryKeys,
   loadOverlayEvents,
   normalizeEventPage,
+  toBroadcastDay,
   overlayEvents,
   overlayNote,
 } from './catalog-overlay';
@@ -280,6 +283,49 @@ describe('loadOverlayEvents', () => {
     ]);
     expect(result.items.map((e) => e.clusterId)).toEqual(['b1', 'a1', 'b2', 'a2']);
     expect(result.truncated).toBe(true);
+  });
+});
+
+describe('放送日（朝5時区切り）に揃える', () => {
+  it('0:00〜4:59 は前の日の 24:00〜28:59。5:00 からはその日のまま', () => {
+    const at = (date: string, time: string | null) => toBroadcastDay(ev({ clusterId: 'a', date, time }));
+    expect(at('2026-10-16', '00:30')).toMatchObject({ date: '2026-10-15', time: '24:30' });
+    expect(at('2026-10-01', '04:59')).toMatchObject({ date: '2026-09-30', time: '28:59' });
+    expect(at('2026-10-16', '05:00')).toMatchObject({ date: '2026-10-16', time: '05:00' });
+    expect(at('2026-10-16', '23:00')).toMatchObject({ date: '2026-10-16', time: '23:00' });
+    expect(at('2026-10-16', null)).toMatchObject({ date: '2026-10-16', time: null });
+  });
+
+  it('期間の最後の夜（翌日の 0:00〜4:59）まで取り、放送日が期間の外になる分は除く', async () => {
+    const fetcher = vi.fn(async (_q: CatalogEventQuery) => ({
+      items: [
+        ev({ clusterId: 'before', date: '2026-10-15', time: '00:30', event: 'episode', label: '第1話' }),
+        ev({ clusterId: 'first', date: '2026-10-15', time: '23:00', event: 'episode', label: '第2話' }),
+        ev({ clusterId: 'lastNight', date: '2026-10-22', time: '01:00', event: 'episode', label: '第3話' }),
+        ev({ clusterId: 'after', date: '2026-10-22', time: '06:00', event: 'episode', label: '第4話' }),
+      ],
+      truncated: false,
+    }));
+    const result = await loadOverlayEvents(fetcher, { from: '2026-10-15', to: '2026-10-21' }, ['anime', 'book'], false);
+    expect(fetcher.mock.calls.map(([q]) => [q.from, q.to])).toEqual([['2026-10-15', '2026-10-22']]);
+    expect(result.items.map((e) => [e.clusterId, e.date, e.time])).toEqual([
+      ['first', '2026-10-15', '23:00'],
+      ['lastNight', '2026-10-21', '25:00'],
+    ]);
+  });
+
+  it('行の時刻は Library の行と同じ書き方（設定で 24:30 か 翌0:30）', () => {
+    const late = ev({ clusterId: 'a', date: '2026-10-15', time: '24:30' });
+    try {
+      setTimeNotation('late-night');
+      expect(eventTimeText(late)).toBe('24:30');
+      setTimeNotation('clock');
+      expect(eventTimeText(late)).toBe('翌0:30');
+      expect(eventTimeText(ev({ clusterId: 'b', date: '2026-10-15', time: '23:00' }))).toBe('23:00');
+      expect(eventTimeText(ev({ clusterId: 'c', date: '2026-10-15', time: null }))).toBe('');
+    } finally {
+      setTimeNotation('late-night');
+    }
   });
 });
 
