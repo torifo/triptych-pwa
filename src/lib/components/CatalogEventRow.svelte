@@ -1,7 +1,7 @@
 <script lang="ts">
   // カレンダーに重ねるカタログの出来事の行（Library の行より薄め）。押すとカタログ詳細へ。
   import type { CatalogEvent } from '../catalog/types';
-  import { eventCover, eventHref, eventKindWord, eventLabel } from '../calendar/catalog-overlay';
+  import { eventCover, eventHref, eventKindNote, eventKindWord, eventLabel } from '../calendar/catalog-overlay';
   import Cover from './Cover.svelte';
 
   let { event }: { event: CatalogEvent } = $props();
@@ -9,6 +9,7 @@
   const cover = $derived(eventCover(event));
   const label = $derived(eventLabel(event));
   const kindWord = $derived(eventKindWord(event.event));
+  const kindNote = $derived(eventKindNote(event.event));
 </script>
 
 <a class="event-row row-hover" href={eventHref(event)}>
@@ -23,7 +24,9 @@
       <span class="label">{label}</span>
     {/if}
   </span>
-  <span class="kind mono">{kindWord}</span>
+  {#if kindNote}
+    <span class="kind mono">{kindNote}</span>
+  {/if}
 </a>
 
 <style>

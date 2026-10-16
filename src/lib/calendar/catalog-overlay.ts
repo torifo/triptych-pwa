@@ -119,6 +119,11 @@ export function eventKindWord(type: CatalogEventType): string {
   return EVENT_KIND_WORDS[type];
 }
 
+/** 行の右に出す種別。段の見出し（番組・発売）と同じことしか言わない放送・発売は出さない。 */
+export function eventKindNote(type: CatalogEventType): string | null {
+  return type === 'episode' || type === 'release' ? null : EVENT_KIND_WORDS[type];
+}
+
 /** 題名の下に出す言葉（「第3話」「2巻」）。空なら種別。 */
 export function eventLabel(event: Pick<CatalogEvent, 'label' | 'event'>): string {
   return event.label.trim() || eventKindWord(event.event);

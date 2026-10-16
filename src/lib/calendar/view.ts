@@ -3,6 +3,7 @@
 import type { CatalogEventKind } from '../catalog/types';
 import { addDaysYmd, precisionEnd } from '../dates';
 import type { Edition, MediaType, Release } from '../db/schema';
+import type { DayCategory } from './category';
 
 // ---------------------------------------------------------------------------
 // 表示の切り替え（端末に保存）
@@ -12,6 +13,7 @@ export type CalendarView = 'week' | 'month' | 'list';
 
 export const CALENDAR_VIEW_KEY = 'triptych:calendar-view';
 export const CALENDAR_OVERLAY_KEY = 'triptych:calendar-catalog';
+export const CALENDAR_FILTER_KEY = 'triptych:calendar-filter';
 
 /** localStorage そのものに触れるだけで例外になる環境があるので、取り出しも包む。 */
 function browserStorage(): Storage | null {
@@ -63,11 +65,12 @@ export function saveCatalogOverlay(on: boolean, storage: Pick<Storage, 'setItem'
 
 export type MediaFilter = 'all' | 'anime' | 'book' | 'web';
 
-export const MEDIA_FILTERS: readonly { value: MediaFilter; label: string }[] = [
-  { value: 'all', label: 'すべて' },
-  { value: 'anime', label: 'アニメ' },
-  { value: 'book', label: '本' },
-  { value: 'web', label: 'Web' },
+/** 分類のタブ「すべて｜番組｜発売｜Web」（番組と発売には印）。値は媒体の絞り込みのまま、ラベルと印を分類に合わせる。 */
+export const MEDIA_FILTERS: readonly { value: MediaFilter; label: string; category: DayCategory | null }[] = [
+  { value: 'all', label: 'すべて', category: null },
+  { value: 'anime', label: '番組', category: 'program' },
+  { value: 'book', label: '発売', category: 'release' },
+  { value: 'web', label: 'Web', category: 'web' },
 ];
 
 const MEDIA_OF_FILTER: Record<Exclude<MediaFilter, 'all'>, readonly MediaType[]> = {
@@ -75,6 +78,33 @@ const MEDIA_OF_FILTER: Record<Exclude<MediaFilter, 'all'>, readonly MediaType[]>
   book: ['light-novel', 'manga'],
   web: ['web-novel'],
 };
+
+/** Edition の媒体が当たる絞り込み（分類の元）。媒体が無い・どれにも当たらなければ null。 */
+export function mediaFilterOf(mediaType: MediaType | undefined): Exclude<MediaFilter, 'all'> | null {
+  if (!mediaType) return null;
+  for (const filter of ['anime', 'book', 'web'] as const) {
+    if (MEDIA_OF_FILTER[filter].includes(mediaType)) return filter;
+  }
+  return null;
+}
+
+/** 端末に保存した分類のタブ。保存が無い・読めない・知らない値ならすべて。 */
+export function loadCalendarFilter(storage: Pick<Storage, 'getItem'> | null = browserStorage()): MediaFilter {
+  try {
+    const value = storage?.getItem(CALENDAR_FILTER_KEY);
+    return value === 'anime' || value === 'book' || value === 'web' ? value : 'all';
+  } catch {
+    return 'all';
+  }
+}
+
+export function saveCalendarFilter(filter: MediaFilter, storage: Pick<Storage, 'setItem'> | null = browserStorage()): void {
+  try {
+    storage?.setItem(CALENDAR_FILTER_KEY, filter);
+  } catch {
+    // 同上
+  }
+}
 
 /** Library の Edition の媒体が絞り込みに当たるか（本 = 文庫と漫画）。 */
 export function matchesMediaFilter(mediaType: MediaType | undefined, filter: MediaFilter): boolean {

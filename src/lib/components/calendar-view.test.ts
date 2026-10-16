@@ -71,13 +71,16 @@ describe('calendarDay', () => {
 });
 
 describe('dayCellLabel', () => {
-  it('日付・件数・放送の有無', () => {
-    expect(dayCellLabel('2026-10-05', 0, null)).toBe('10月5日');
-    expect(dayCellLabel('2026-10-15', 3, 'today')).toBe('10月15日 3件 放送・配信あり');
+  it('日付・分類ごとの件数・放送の有無', () => {
+    expect(dayCellLabel('2026-10-05', undefined, null)).toBe('10月5日');
+    expect(dayCellLabel('2026-10-05', { program: 0, release: 0, web: 0 }, null)).toBe('10月5日');
+    expect(dayCellLabel('2026-10-15', { program: 3, release: 0, web: 0 }, 'today')).toBe('10月15日 番組 3件 放送・配信あり');
   });
 
-  it('カタログの出来事の数も読み上げる', () => {
-    expect(dayCellLabel('2026-10-15', 0, null, 12)).toBe('10月15日 カタログ 12件');
-    expect(dayCellLabel('2026-10-15', 1, 'upcoming', 0)).toBe('10月15日 1件 放送・配信あり');
+  it('0 の分類は読まず、番組 → 発売 → Web の順', () => {
+    expect(dayCellLabel('2026-10-15', { program: 17, release: 9, web: 1 }, 'upcoming')).toBe(
+      '10月15日 番組 17件 発売 9件 Web 1件 放送・配信あり',
+    );
+    expect(dayCellLabel('2026-10-15', { program: 0, release: 12, web: 0 }, null)).toBe('10月15日 発売 12件');
   });
 });

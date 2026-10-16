@@ -1,15 +1,20 @@
 import { describe, expect, it } from 'vitest';
 import {
+  CALENDAR_FILTER_KEY,
   CALENDAR_OVERLAY_KEY,
   CALENDAR_VIEW_KEY,
+  MEDIA_FILTERS,
   catalogKindsFor,
   dayHeading,
   filterByMedia,
+  loadCalendarFilter,
   loadCalendarView,
   loadCatalogOverlay,
   matchesMediaFilter,
+  mediaFilterOf,
   monthRange,
   rangeLabel,
+  saveCalendarFilter,
   saveCalendarView,
   saveCatalogOverlay,
   weekDates,
@@ -66,9 +71,42 @@ describe('表示の保存', () => {
     expect(storage.data.get(CALENDAR_OVERLAY_KEY)).toBe('on');
     expect(() => saveCatalogOverlay(true, throwing)).not.toThrow();
   });
+
+  it('分類のタブは既定ですべて。保存した番組・発売・Web はそのまま、知らない値はすべて', () => {
+    expect(loadCalendarFilter(memoryStorage())).toBe('all');
+    expect(loadCalendarFilter(memoryStorage({ [CALENDAR_FILTER_KEY]: 'anime' }))).toBe('anime');
+    expect(loadCalendarFilter(memoryStorage({ [CALENDAR_FILTER_KEY]: 'book' }))).toBe('book');
+    expect(loadCalendarFilter(memoryStorage({ [CALENDAR_FILTER_KEY]: 'web' }))).toBe('web');
+    expect(loadCalendarFilter(memoryStorage({ [CALENDAR_FILTER_KEY]: 'manga' }))).toBe('all');
+    expect(loadCalendarFilter(null)).toBe('all');
+    expect(loadCalendarFilter(throwing)).toBe('all');
+
+    const storage = memoryStorage();
+    saveCalendarFilter('book', storage);
+    expect(storage.data.get(CALENDAR_FILTER_KEY)).toBe('book');
+    expect(() => saveCalendarFilter('anime', throwing)).not.toThrow();
+    expect(() => saveCalendarFilter('anime', null)).not.toThrow();
+  });
 });
 
 describe('媒体の絞り込み', () => {
+  it('タブは「すべて｜番組｜発売｜Web」。値は媒体の絞り込みのまま', () => {
+    expect(MEDIA_FILTERS.map((item) => [item.value, item.label, item.category])).toEqual([
+      ['all', 'すべて', null],
+      ['anime', '番組', 'program'],
+      ['book', '発売', 'release'],
+      ['web', 'Web', 'web'],
+    ]);
+  });
+
+  it('Edition の媒体が当たる絞り込み', () => {
+    expect(mediaFilterOf('anime')).toBe('anime');
+    expect(mediaFilterOf('light-novel')).toBe('book');
+    expect(mediaFilterOf('manga')).toBe('book');
+    expect(mediaFilterOf('web-novel')).toBe('web');
+    expect(mediaFilterOf(undefined)).toBeNull();
+  });
+
   it('本は文庫と漫画、Web は Web 小説', () => {
     expect(matchesMediaFilter('anime', 'all')).toBe(true);
     expect(matchesMediaFilter(undefined, 'all')).toBe(true);

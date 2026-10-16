@@ -11,11 +11,12 @@
   import ReleaseRow from '../lib/components/ReleaseRow.svelte';
   import MiniCover from '../lib/components/MiniCover.svelte';
   import OnAirLamp from '../lib/components/OnAirLamp.svelte';
-  import FilterChip from '../lib/components/FilterChip.svelte';
-  import CatalogDayEvents from '../lib/components/CatalogDayEvents.svelte';
+  import CalendarDaySections from '../lib/components/CalendarDaySections.svelte';
+  import CategoryMark from '../lib/components/CategoryMark.svelte';
   import type { CoverSize } from '../lib/components/cover';
   import { buildCoverIndex, isAiringNow } from '../lib/components/home-view';
   import { calendarDay, cellCovers, dayCellLabel, dayOnAirMark } from '../lib/components/calendar-view';
+  import { viewport } from '../lib/viewport.svelte';
   import {
     groupByDate,
     groupByMonth,
@@ -30,10 +31,12 @@
     catalogKindsFor,
     dayHeading,
     filterByMedia,
+    loadCalendarFilter,
     loadCalendarView,
     loadCatalogOverlay,
     monthRange,
     rangeLabel,
+    saveCalendarFilter,
     saveCalendarView,
     saveCatalogOverlay,
     weekDates,
@@ -51,6 +54,7 @@
     overlayNote,
     type OverlayStatus,
   } from '../lib/calendar/catalog-overlay';
+  import { categoryCounts, countsByDate, daySections, filterCounts, nonZeroCounts } from '../lib/calendar/category';
   import { ICS_DAYS, buildIcs, icsEventsFor, icsFilename } from '../lib/calendar/ics';
   import { saveTextFile } from '../lib/calendar/download';
 
@@ -59,7 +63,8 @@
   let weekStartPref = $state<WeekStart>(preferences.get('weekStart'));
   onMount(() => preferences.subscribe((prefs) => (weekStartPref = prefs.weekStart)));
   const WEEKDAYS = $derived(weekStartPref === 'mon' ? [...WEEKDAYS_SUN.slice(1), WEEKDAYS_SUN[0]] : WEEKDAYS_SUN);
-  const GRID_ITEMS_PER_CELL = 2;
+  // 升目の表紙はスマホ2枚・PC 4枚。出しきれない分は件数が代わりに伝える
+  const coversPerCell = $derived(viewport.wide ? 4 : 2);
   const VIEWS: { value: CalendarView; label: string }[] = [
     { value: 'week', label: '週' },
     { value: 'month', label: '月' },
@@ -74,7 +79,8 @@
   let view = $state<CalendarView>(loadCalendarView());
   // Library の外（カタログ）の出来事も重ねる。既定は ON
   let overlayOn = $state(loadCatalogOverlay());
-  let mediaFilter = $state<MediaFilter>('all');
+  // 分類のタブ（すべて・番組・発売・Web）。選択は端末に保存（読めなければすべて）
+  let mediaFilter = $state<MediaFilter>(loadCalendarFilter());
 
   // 「今日」は JST の暦日。端末のタイムゾーンに左右されない。ON AIR と日付の切り替わりは時計で拾う
   let now = $state(new Date());
@@ -122,6 +128,11 @@
   function setOverlay(on: boolean) {
     overlayOn = on;
     saveCatalogOverlay(on);
+  }
+
+  function setFilter(next: MediaFilter) {
+    mediaFilter = next;
+    saveCalendarFilter(next);
   }
 
   function workTitleFor(editionId: string): string {
@@ -241,10 +252,12 @@
   // ---------------------------------------------------------------------------
 
   const catalogKinds = $derived(catalogKindsFor(mediaFilter));
+  // 取得はタブに関わらずアニメと本の両方（タブを替えても取り直さず、タブの件数にも使う）
+  const FETCH_KINDS = catalogKindsFor('all');
   const overlayRange = $derived(
     view === 'week' ? { from: weekFrom, to: weekTo } : view === 'month' ? monthRange(cursorYear, cursorMonth + 1) : null,
   );
-  const overlayKey = $derived(overlayRange ? `${overlayRange.from}|${overlayRange.to}|${catalogKinds.join(',')}` : '');
+  const overlayKey = $derived(overlayRange ? `${overlayRange.from}|${overlayRange.to}` : '');
 
   type Loaded = { key: string } & ({ status: 'loading' } | { status: 'ready'; page: CatalogEventPage } | { status: 'error'; reason: string });
   let overlayLoad = $state<Loaded | null>(null);
@@ -252,7 +265,7 @@
   const overlayCache = new Map<string, CatalogEventPage>();
   let overlaySeq = 0;
 
-  async function loadOverlay(key: string, range: { from: string; to: string }, kinds: typeof catalogKinds, month: boolean) {
+  async function loadOverlay(key: string, range: { from: string; to: string }, kinds: typeof FETCH_KINDS, month: boolean) {
     const cached = overlayCache.get(key);
     if (cached) {
       overlayLoad = { key, status: 'ready', page: cached };
@@ -272,20 +285,38 @@
 
   $effect(() => {
     const range = overlayRange;
-    const kinds = catalogKinds;
     const key = overlayKey;
     const month = view === 'month';
-    if (!overlayOn || !range || kinds.length === 0) return;
-    void loadOverlay(key, range, kinds, month);
+    if (!overlayOn || !range) return;
+    void loadOverlay(key, range, FETCH_KINDS, month);
   });
 
   const libKeys = $derived(libraryKeys(works, editions));
   const overlayPage = $derived(
     overlayOn && overlayLoad?.key === overlayKey && overlayLoad.status === 'ready' ? overlayLoad.page : null,
   );
-  const overlayList = $derived(overlayPage ? overlayEvents(overlayPage.items, libKeys, catalogKinds) : []);
+  const overlayAll = $derived(overlayPage ? overlayEvents(overlayPage.items, libKeys, FETCH_KINDS) : []);
+  const overlayList = $derived(overlayAll.filter((event) => catalogKinds.includes(event.kind)));
   const eventsByDate = $derived(groupEventsByDate(overlayList));
   const shownDayEvents = $derived(shownDay ? (eventsByDate.get(shownDay) ?? []) : []);
+
+  // ---------------------------------------------------------------------------
+  // 分類の件数（升目の印と数・タブ）
+  // ---------------------------------------------------------------------------
+
+  const cellCounts = $derived(countsByDate(split.days, overlayList, editionMap));
+  const allSplit = $derived(splitByPrecision(tracked));
+  // タブの件数は絞り込む前の、いま見ている範囲（週・月はその期間と未定欄、リストは全件）
+  const tabCounts = $derived.by(() => {
+    if (!overlayRange) return filterCounts(categoryCounts(tracked, [], editionMap));
+    const { from, to } = overlayRange;
+    const inRange = (date: string) => date >= from && date <= to;
+    const shown = allSplit.days.filter((r) => inRange(r.date));
+    if (view === 'month') {
+      shown.push(...monthlyUndecided(allSplit.months, cursorYear, cursorMonth + 1), ...yearlyUndecided(allSplit.years, today));
+    }
+    return filterCounts(categoryCounts(shown, overlayAll.filter((e) => inRange(e.date)), editionMap));
+  });
 
   const overlayStatus = $derived.by((): OverlayStatus => {
     if (!overlayOn) return { status: 'off' };
@@ -311,25 +342,42 @@
   }
 </script>
 
-{#snippet rows(list: Release[], timeOnly = false, coverSize: CoverSize = 'xs', live = false)}
-  <div class="flex flex-col" style={live ? undefined : 'border-top: 1px solid var(--line);'}>
+{#snippet releaseRow(release: Release, timeOnly: boolean, coverSize: CoverSize, live: boolean)}
+  <ReleaseRow
+    {release}
+    edition={editionMap.get(release.editionId)}
+    workTitle={workTitleFor(release.editionId)}
+    streaming={streaming.get(release.editionId)}
+    cover={covers.get(release.editionId)}
+    {timeOnly}
+    {coverSize}
+    onAir={live && isAiringNow(release, now)}
+    onclick={() => goToWork(release.editionId)}
+  />
+{/snippet}
+
+<!-- 週の行は時刻だけ・ON AIR 付き。PC の7列は狭いので表紙を小さく -->
+{#snippet weekRow(release: Release)}
+  {@render releaseRow(release, true, viewport.wide ? 'xs' : 's', true)}
+{/snippet}
+
+{#snippet dayRow(release: Release)}
+  {@render releaseRow(release, true, 'xs', false)}
+{/snippet}
+
+{#snippet listRow(release: Release)}
+  {@render releaseRow(release, false, 'xs', false)}
+{/snippet}
+
+{#snippet rows(list: Release[])}
+  <div class="flex flex-col" style="border-top: 1px solid var(--line);">
     {#each list as release (release.id)}
-      <ReleaseRow
-        {release}
-        edition={editionMap.get(release.editionId)}
-        workTitle={workTitleFor(release.editionId)}
-        streaming={streaming.get(release.editionId)}
-        cover={covers.get(release.editionId)}
-        {timeOnly}
-        {coverSize}
-        onAir={live && isAiringNow(release, now)}
-        onclick={() => goToWork(release.editionId)}
-      />
+      {@render listRow(release)}
     {/each}
   </div>
 {/snippet}
 
-<section class="flex flex-col gap-3 p-4">
+<section class="page flex flex-col gap-3 lg:gap-5">
   <div class="flex flex-col gap-1">
     <div class="cal-head">
       <h1 class="page-title">Calendar<span class="type-label" style="margin-left: 0.8em;">発売・配信</span></h1>
@@ -377,9 +425,17 @@
     {/if}
   </div>
 
-  <div class="chips" role="group" aria-label="媒体の絞り込み">
+  <div class="cat-tabs" role="group" aria-label="分類の絞り込み">
     {#each MEDIA_FILTERS as item (item.value)}
-      <FilterChip active={mediaFilter === item.value} onclick={() => (mediaFilter = item.value)}>{item.label}</FilterChip>
+      <button type="button" class="cat-tab" aria-pressed={mediaFilter === item.value} onclick={() => setFilter(item.value)}>
+        {#if item.category}
+          <CategoryMark category={item.category} />
+        {/if}
+        <span>{item.label}</span>
+        {#if loaded}
+          <span class="mono tab-count">{tabCounts[item.value]}<span class="sr-only">件</span></span>
+        {/if}
+      </button>
     {/each}
   </div>
 
@@ -402,8 +458,7 @@
     <ol class="week">
       {#each days as date (date)}
         {@const head = dayHeading(date)}
-        {@const dayReleases = releasesByDate.get(date) ?? []}
-        {@const dayEvents = eventsByDate.get(date) ?? []}
+        {@const sections = daySections(releasesByDate.get(date) ?? [], eventsByDate.get(date) ?? [], editionMap)}
         <li class="day" class:past={date < today} aria-current={date === today ? 'date' : undefined}>
           <h2 class="day-head">
             <span class="sr-only">{head.label}{date === today ? ' 今日' : ''}</span>
@@ -413,11 +468,9 @@
               <span class="mono today-tag" aria-hidden="true">TODAY</span>
             {/if}
           </h2>
-          {#if dayReleases.length > 0}
-            {@render rows(dayReleases, true, 's', true)}
-          {/if}
-          <CatalogDayEvents events={dayEvents} />
-          {#if dayReleases.length === 0 && dayEvents.length === 0}
+          {#if sections.length > 0}
+            <CalendarDaySections {sections} row={weekRow} narrow />
+          {:else}
             <p class="none">予定なし</p>
           {/if}
         </li>
@@ -439,7 +492,7 @@
       style="grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line);"
     >
       {#each WEEKDAYS as w (w)}
-        <div class="py-1 text-center text-[10px]" style="background: var(--bg); color: var(--muted);">
+        <div class="py-1 text-center text-[10px] lg:text-[11px]" style="background: var(--bg); color: var(--muted);">
           {w}
         </div>
       {/each}
@@ -448,9 +501,9 @@
           {@const date = cell.date}
           {@const cellReleases = releasesByDate.get(date) ?? []}
           {@const cellEvents = eventsByDate.get(date) ?? []}
-          {@const thumbs = cellCovers(cellReleases, cellEvents, GRID_ITEMS_PER_CELL)}
+          {@const thumbs = cellCovers(cellReleases, cellEvents, coversPerCell)}
           {@const mark = dayOnAirMark(cellReleases, date, today)}
-          {@const catalogCount = cellEvents.length}
+          {@const counts = cellCounts.get(date)}
           <button
             type="button"
             class="cell"
@@ -458,17 +511,30 @@
             class:selected={shownDay === date}
             aria-current={cell.isToday ? 'date' : undefined}
             aria-pressed={shownDay === date}
-            aria-label={dayCellLabel(date, cellReleases.length, mark, catalogCount)}
+            aria-label={dayCellLabel(date, counts, mark)}
             onclick={() => selectDay(date)}
           >
             <span class="cell-head">
               <span class="mono cell-day">{cell.day}</span>
               {#if mark === 'today'}
                 <OnAirLamp />
-              {:else if mark === 'upcoming'}
-                <span class="cell-dot"></span>
               {/if}
             </span>
+            <!-- 番組と発売の件数（0 の分類は出さない）。先の放送の赤い点はこの印が兼ねる -->
+            {#if counts}
+              <span class="cell-counts">
+                {#each nonZeroCounts(counts) as item (item.category)}
+                  <span class="mono cell-count">
+                    {#if item.category === 'web'}
+                      <span class="web-mark">W</span>
+                    {:else}
+                      <CategoryMark category={item.category} />
+                    {/if}
+                    <span>{item.count}</span>
+                  </span>
+                {/each}
+              </span>
+            {/if}
             {#if thumbs.library.length + thumbs.catalog.length > 0}
               <!-- Library の表紙が先、空いた枠はカタログの作品（人気順）で埋める -->
               <span class="cell-thumbs">
@@ -481,9 +547,6 @@
                 {/each}
               </span>
             {/if}
-            {#if thumbs.rest > 0}
-              <span class="mono cell-more">+{thumbs.rest}</span>
-            {/if}
           </button>
         {:else}
           <div class="cell"></div>
@@ -492,18 +555,20 @@
     </div>
 
     {#if shownDay}
+      {@const sections = daySections(shownDayReleases, shownDayEvents, editionMap)}
       <div class="flex flex-col gap-1.5">
         <div class="shou" style="margin-bottom: 0;">
           <h2 class="mono" style="font-weight: 500;">{formatReleaseDate({ date: shownDay })}</h2>
           <span class="no">{shownDay === today ? 'TODAY' : 'DAY'}</span>
         </div>
-        {#if shownDayReleases.length > 0}
-          {@render rows(shownDayReleases, true)}
-        {/if}
-        <CatalogDayEvents events={shownDayEvents} />
-        {#if shownDayReleases.length === 0 && shownDayEvents.length === 0}
-          <p class="text-xs" style="color: var(--muted);">{dayEmptyNote(overlayStatus)}</p>
-        {/if}
+        <!-- 日を替えたら「ほか n 件」の開閉を戻す -->
+        {#key shownDay}
+          {#if sections.length > 0}
+            <CalendarDaySections {sections} row={dayRow} spread />
+          {:else}
+            <p class="text-xs" style="color: var(--muted);">{dayEmptyNote(overlayStatus)}</p>
+          {/if}
+        {/key}
       </div>
     {/if}
 
@@ -528,13 +593,13 @@
     {/if}
   {:else}
     {#if loaded && tracked.length > 0 && filtered.length === 0}
-      <p class="py-6 text-center text-xs" style="color: var(--muted);">この媒体の予定はありません</p>
+      <p class="py-6 text-center text-xs" style="color: var(--muted);">この分類の予定はありません</p>
     {/if}
 
     {#each dayGroups as group (group.key)}
       <div class="flex flex-col gap-1">
         <span class="type-label">{group.year}年{group.month}月</span>
-        {@render rows(group.releases)}
+        <CalendarDaySections sections={daySections(group.releases, [], editionMap)} row={listRow} spread />
       </div>
     {/each}
 
@@ -603,7 +668,7 @@
     color: var(--muted);
   }
 
-  /* ─── 表示の切り替え・重ね表示・媒体 ─── */
+  /* ─── 表示の切り替え・重ね表示・分類のタブ ─── */
   .controls {
     display: flex;
     flex-wrap: wrap;
@@ -662,16 +727,46 @@
   }
   .seg button:focus-visible,
   .overlay-toggle:focus-visible,
+  .cat-tab:focus-visible,
   .export:focus-visible,
   .step:focus-visible,
   .today-button:focus-visible {
     outline: 2px solid var(--fg);
     outline-offset: 2px;
   }
-  .chips {
+  /* 分類のタブ: 罫の上に並べ、選んだものだけ黒い下線（太さを変えず幅が揺れないように） */
+  .cat-tabs {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.375rem;
+    min-width: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .cat-tab {
+    display: inline-flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    min-width: 0;
+    min-height: 2.5rem;
+    margin-bottom: -1px;
+    padding: 0 0.5rem;
+    border-bottom: 2px solid transparent;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    color: var(--muted);
+    transition: color 0.2s ease;
+  }
+  .cat-tab:hover,
+  .cat-tab[aria-pressed='true'] {
+    color: var(--fg);
+  }
+  .cat-tab[aria-pressed='true'] {
+    border-bottom-color: var(--fg);
+  }
+  .tab-count {
+    font-size: 10.5px;
+    color: var(--muted);
   }
 
   /* ─── 週・月の送り ─── */
@@ -808,24 +903,29 @@
     color: var(--bg);
     font-weight: 500;
   }
-  /* これから先の放送・配信がある日。点滅はさせず、今日だけ ON AIR のランプにする */
-  .cell-dot {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--onair);
-    flex-shrink: 0;
+  /* 件数は等幅の小さな字。狭い升目（320px）では折り返して2行に */
+  .cell-counts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 4px;
+    min-width: 0;
+    font-size: 9px;
+    line-height: 1.3;
+    color: var(--fg);
+  }
+  .cell-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+    white-space: nowrap;
+  }
+  .web-mark {
+    color: var(--muted);
   }
   .cell-thumbs {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 2px;
-  }
-  .cell-more {
-    font-size: 9px;
-    line-height: 1.2;
-    color: var(--muted);
-    white-space: nowrap;
   }
 
   @media (max-width: 340px) {
@@ -833,9 +933,66 @@
     .overlay-toggle {
       padding: 0 0.5rem;
     }
+    .cat-tab {
+      padding: 0 0.25rem;
+      letter-spacing: 0;
+    }
   }
+
+  @media (min-width: 64rem) {
+    .cat-tab {
+      flex: 0 0 auto;
+      padding: 0 1rem;
+    }
+
+    /* 週は7日を横に並べる。列の間は細い罫 */
+    .week {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 0;
+    }
+    .day {
+      padding: 0 0.75rem;
+    }
+    .day:first-child {
+      padding-left: 0;
+    }
+    .day:last-child {
+      padding-right: 0;
+    }
+    .day + .day {
+      border-left: 1px solid var(--line);
+    }
+    .day-head {
+      flex-wrap: wrap;
+      row-gap: 0.125rem;
+    }
+
+    /* 月の升目は高く・内側に余白。表紙は升目の幅に伸ばさず小さな定寸で左から折り返す（最大4枚） */
+    .cell {
+      min-height: 132px;
+      gap: 6px;
+      padding: 8px;
+    }
+    .cell-day {
+      font-size: 12px;
+    }
+    .cell-counts {
+      gap: 0 8px;
+      margin-bottom: 2px;
+      font-size: 11px;
+    }
+    .cell-thumbs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      --mini-w: 44px;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .export {
+    .export,
+    .cat-tab {
       transition: none;
     }
   }

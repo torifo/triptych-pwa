@@ -1,11 +1,12 @@
 <script lang="ts">
-  // 1日分の「カタログから」。多い日は上位5件＋「ほか n 件」で畳み、押すと全部開く。
+  // 日の段（番組・発売）ごとの「カタログから」。多い時は上位5件＋「ほか n 件」で畳み、押すと全部開く。
   import { Layers } from '@lucide/svelte';
   import type { CatalogEvent } from '../catalog/types';
   import { DAY_EVENT_LIMIT, foldEvents } from '../calendar/catalog-overlay';
   import CatalogEventRow from './CatalogEventRow.svelte';
 
-  let { events }: { events: readonly CatalogEvent[] } = $props();
+  // 段に Library の行も並ぶ時だけ「カタログから」で分ける（カタログだけの段では見出しの繰り返しになる）
+  let { events, labeled = true }: { events: readonly CatalogEvent[]; labeled?: boolean } = $props();
 
   let expanded = $state(false);
   const folded = $derived(foldEvents(events, expanded));
@@ -13,11 +14,13 @@
 
 {#if events.length > 0}
   <div class="catalog-day">
-    <p class="sub-head">
-      <Layers size={12} strokeWidth={2} aria-hidden="true" />
-      <span class="type-label">カタログから</span>
-      <span class="mono count">{events.length}</span>
-    </p>
+    {#if labeled}
+      <p class="sub-head">
+        <Layers size={12} strokeWidth={2} aria-hidden="true" />
+        <span class="type-label">カタログから</span>
+        <span class="mono count">{events.length}</span>
+      </p>
+    {/if}
     <ul class="rows">
       {#each folded.shown as event (`${event.clusterId}|${event.event}|${event.label}`)}
         <li><CatalogEventRow {event} /></li>
@@ -44,7 +47,7 @@
     align-items: center;
     gap: 0.375rem;
     margin: 0;
-    padding: 0.5rem 0.25rem 0.25rem;
+    padding: 0.375rem 0.25rem 0.25rem;
     color: var(--muted);
     line-height: 1.2;
   }

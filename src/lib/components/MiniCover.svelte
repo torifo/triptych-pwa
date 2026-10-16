@@ -1,5 +1,5 @@
 <script lang="ts">
-  // カレンダーの升目に並べる極小の表紙（幅は親に合わせる）。画像が無い時は生成りの面に題名の1字目。
+  // カレンダーの升目に並べる極小の表紙（幅は親に合わせ、--mini-w があればその幅）。画像が無い時は生成りの面に題名の1字目。
   import { isSafeHttpUrl } from './release-view';
 
   let { src, title }: { src?: string | null; title: string } = $props();
@@ -22,7 +22,8 @@
   .mini {
     position: relative;
     display: block;
-    width: 100%;
+    flex-shrink: 0;
+    width: var(--mini-w, 100%);
     aspect-ratio: 2 / 3;
     border-radius: 1px;
     overflow: hidden;

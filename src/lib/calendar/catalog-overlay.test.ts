@@ -8,6 +8,7 @@ import {
   describeOverlayError,
   eventCover,
   eventHref,
+  eventKindNote,
   eventKindWord,
   eventLabel,
   fetchEventsRange,
@@ -108,6 +109,13 @@ describe('行の文言', () => {
     expect(eventKindWord('season-start')).toBe('放送開始');
     expect(eventKindWord('movie')).toBe('公開');
     expect(eventKindWord('release')).toBe('発売');
+  });
+
+  it('段の見出し（番組・発売）と同じことしか言わない種別は、行の右に出さない', () => {
+    expect(eventKindNote('episode')).toBeNull();
+    expect(eventKindNote('release')).toBeNull();
+    expect(eventKindNote('season-start')).toBe('放送開始');
+    expect(eventKindNote('movie')).toBe('公開');
   });
 
   it('label が空なら種別の言葉', () => {

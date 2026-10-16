@@ -1,5 +1,6 @@
 // カレンダーの月の升目（ON AIR の印・極小の表紙・選んだ日）。純関数で vitest 固定。
 
+import { CATEGORY_LABELS, nonZeroCounts, type CategoryCounts } from '../calendar/category';
 import type { Release } from '../db/schema';
 
 const ON_AIR_KINDS = new Set<Release['kind']>(['episode', 'stream-start']);
@@ -67,17 +68,15 @@ export function calendarDay(
   return today.startsWith(prefix) ? today : null;
 }
 
-/** 升目の読み上げ（'10月15日 3件 放送・配信あり カタログ 12件'）。 */
+/** 升目の読み上げ（'10月15日 番組 17件 発売 9件 放送・配信あり'）。件数は Library とカタログの合計。 */
 export function dayCellLabel(
   date: string,
-  count: number,
+  counts: CategoryCounts | undefined,
   mark: 'today' | 'upcoming' | null,
-  catalogCount = 0,
 ): string {
   const label = `${Number(date.slice(5, 7))}月${Number(date.slice(8, 10))}日`;
   const parts = [label];
-  if (count > 0) parts.push(`${count}件`);
+  for (const { category, count } of nonZeroCounts(counts)) parts.push(`${CATEGORY_LABELS[category]} ${count}件`);
   if (mark) parts.push('放送・配信あり');
-  if (catalogCount > 0) parts.push(`カタログ ${catalogCount}件`);
   return parts.join(' ');
 }
