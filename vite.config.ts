@@ -23,6 +23,7 @@ export default defineConfig({
     tailwindcss(),
     svelte(),
     VitePWA({
+      // 登録は main.ts の virtual:pwa-register。injectRegister は既定（auto）のまま: false にすると skipWaiting が外れ、新しい SW が待ちのまま残る
       registerType: 'autoUpdate',
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
