@@ -369,14 +369,6 @@
   {@render releaseRow(release, false, 'xs', false)}
 {/snippet}
 
-{#snippet rows(list: Release[])}
-  <div class="flex flex-col" style="border-top: 1px solid var(--line);">
-    {#each list as release (release.id)}
-      {@render listRow(release)}
-    {/each}
-  </div>
-{/snippet}
-
 <section class="page flex flex-col gap-3 lg:gap-5">
   <div class="flex flex-col gap-1">
     <div class="cal-head">
@@ -578,7 +570,7 @@
           <h2>日付未定（{cursorMonth + 1}月中）</h2>
           <span class="no">THIS MONTH</span>
         </div>
-        {@render rows(monthUndecided)}
+        <CalendarDaySections sections={daySections(monthUndecided, [], editionMap)} row={listRow} spread />
       </div>
     {/if}
 
@@ -588,7 +580,7 @@
           <h2>時期未定</h2>
           <span class="no">TBA</span>
         </div>
-        {@render rows(yearUndecided)}
+        <CalendarDaySections sections={daySections(yearUndecided, [], editionMap)} row={listRow} spread />
       </div>
     {/if}
   {:else}
@@ -612,7 +604,7 @@
         {#each monthGroups as group (group.key)}
           <div class="flex flex-col gap-1">
             <span class="type-label">{group.year}年{group.month}月中</span>
-            {@render rows(group.releases)}
+            <CalendarDaySections sections={daySections(group.releases, [], editionMap)} row={listRow} spread />
           </div>
         {/each}
       </div>
@@ -624,7 +616,7 @@
           <h2>時期未定</h2>
           <span class="no">TBA</span>
         </div>
-        {@render rows(split.years)}
+        <CalendarDaySections sections={daySections(split.years, [], editionMap)} row={listRow} spread />
       </div>
     {/if}
   {/if}

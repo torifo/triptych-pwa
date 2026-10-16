@@ -83,6 +83,14 @@ describe('daySections', () => {
     expect(daySections([], [], editions)).toEqual([]);
   });
 
+  it('日付未定・時期未定の欄（カタログ無し・Library だけ）も番組 → 発売 → Web に分ける', () => {
+    const undecided = [rel('w1', 'w'), rel('m1', 'm'), rel('a1', 'a'), rel('l1', 'l')];
+    const sections = daySections(undecided, [], editions);
+    expect(sections.map((s) => s.category)).toEqual(['program', 'release', 'web']);
+    expect(sections.map((s) => s.releases.map((r) => r.id))).toEqual([['a1'], ['m1', 'l1'], ['w1']]);
+    expect(sections.every((s) => s.events.length === 0)).toBe(true);
+  });
+
   it('Library の並びは保つ（呼ぶ側の日付・時刻順）', () => {
     const releases = [rel('x', 'a', '2026-10-01'), rel('y', 'a', '2026-10-03'), rel('z', 'a', '2026-10-02')];
     expect(daySections(releases, [], editions)[0].releases.map((r) => r.id)).toEqual(['x', 'y', 'z']);
