@@ -166,23 +166,40 @@
   ]
 </script>
 
-<div class="flex min-h-svh flex-col" style="max-width: 480px; margin: 0 auto; background: var(--bg); color: var(--fg);">
-  <header
-    class="sticky top-0 z-50 flex items-center gap-2.5 px-4 py-3"
-    style="border-bottom: 1px solid var(--fg); background: var(--bg);"
-  >
-    <span aria-hidden="true" style="width: 15px; height: 15px; background: var(--fg); display: inline-block;"></span>
-    <span class="text-sm font-bold" style="letter-spacing: 0.18em;">triptych</span>
-    {#if onAir > 0}
-      <a href="#/" class="onair-link" aria-label={`今日放送・配信のある作品 ${onAir}`}>
-        <OnAirLamp label={`ON AIR ${onAir}`} />
+<div class="app-shell flex min-h-svh flex-col" style="background: var(--bg); color: var(--fg);">
+  <header class="app-header sticky top-0 z-50" style="border-bottom: 1px solid var(--fg); background: var(--bg);">
+    <div class="app-header-inner flex items-center gap-2.5 px-4 py-3">
+      <a href="#/" class="brand" aria-label="triptych ホーム">
+        <span aria-hidden="true" style="width: 15px; height: 15px; background: var(--fg); display: inline-block;"></span>
+        <span class="text-sm font-bold" style="letter-spacing: 0.18em;">triptych</span>
       </a>
-    {/if}
+      <!-- PC 幅だけの上部タブ（スマホは下のタブ） -->
+      <nav class="top-nav" aria-label="メインナビゲーション">
+        {#each navItems as item (item.path)}
+          {@const active = route.name === item.name}
+          <button
+            type="button"
+            class="top-nav-item"
+            class:active
+            aria-current={active ? 'page' : undefined}
+            onclick={() => navigate(item.path)}
+          >
+            <item.icon size={15} strokeWidth={active ? 2.25 : 1.75} aria-hidden="true" />
+            <span class="hi-underline" class:active>{item.label}</span>
+          </button>
+        {/each}
+      </nav>
+      {#if onAir > 0}
+        <a href="#/" class="onair-link" aria-label={`今日放送・配信のある作品 ${onAir}`}>
+          <OnAirLamp label={`ON AIR ${onAir}`} />
+        </a>
+      {/if}
+    </div>
   </header>
 
   {#if showA2HSBanner}
     <div
-      class="flex items-center gap-3 px-4 py-2 text-xs"
+      class="a2hs flex items-center gap-3 px-4 py-2 text-xs"
       style="border-bottom: 1px solid var(--line); background: var(--hi-soft); color: var(--fg);"
     >
       <span class="flex-1">
@@ -199,7 +216,7 @@
     </div>
   {/if}
 
-  <main class="flex-1 overflow-y-auto" style="padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));">
+  <main class="app-main flex-1 overflow-y-auto">
     {#key timeNotation}
     {#if route.name === 'home'}
       <Home />
@@ -225,7 +242,7 @@
 
   <nav
     class="bottom-nav fixed bottom-0 left-0 right-0"
-    style="max-width: 480px; margin: 0 auto; border-top: 1px solid var(--line); background: var(--bg); padding-bottom: env(safe-area-inset-bottom);"
+    style="border-top: 1px solid var(--line); background: var(--bg); padding-bottom: env(safe-area-inset-bottom);"
     aria-label="メインナビゲーション"
   >
     {#each navItems as item (item.path)}
@@ -245,10 +262,77 @@
 </div>
 
 <style>
+  /* スマホは 480px の1列＋下のタブ。PC（64rem 以上）は全幅＋上部タブ */
+  .app-shell,
+  .bottom-nav {
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .app-main {
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    color: inherit;
+    text-decoration: none;
+  }
+  .top-nav {
+    display: none;
+  }
   .onair-link {
     display: inline-flex;
     align-items: center;
     margin-left: auto;
     padding: 0.25rem 0;
+  }
+
+  @media (min-width: 64rem) {
+    .app-shell {
+      max-width: none;
+    }
+    .bottom-nav,
+    .a2hs {
+      display: none;
+    }
+    .app-main {
+      padding-bottom: 3rem;
+    }
+    .app-header-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0.875rem 2rem;
+      gap: 2.5rem;
+    }
+    .top-nav {
+      display: flex;
+      align-items: center;
+      gap: 1.75rem;
+    }
+    .top-nav-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.25rem 0;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      transition: color 0.2s ease;
+    }
+    .top-nav-item:hover,
+    .top-nav-item.active {
+      color: var(--fg);
+    }
+    .top-nav-item:focus-visible {
+      outline: 2px solid var(--fg);
+      outline-offset: 4px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .top-nav-item {
+      transition: none;
+    }
   }
 </style>

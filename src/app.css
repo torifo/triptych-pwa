@@ -219,3 +219,16 @@ textarea {
     transition: none;
   }
 }
+
+/* 各画面の一番外の箱。スマホは今の余白、PC（64rem 以上）は最大 1280px の全幅 */
+.page {
+  padding: 1rem;
+}
+@media (min-width: 64rem) {
+  .page {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 1.5rem 2rem;
+  }
+}
