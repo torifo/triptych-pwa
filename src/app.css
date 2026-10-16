@@ -220,15 +220,15 @@ textarea {
   }
 }
 
-/* 各画面の一番外の箱。スマホは今の余白、PC（64rem 以上）は最大 1280px の全幅 */
+/* 各画面の一番外の箱。スマホは今の余白、PC（64rem 以上）は最大 1200px で周りに余白を取る（端まで詰めない） */
 .page {
   padding: 1rem;
 }
 @media (min-width: 64rem) {
   .page {
     width: 100%;
-    max-width: 1280px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 1.5rem 2rem;
+    padding: 2.5rem 3rem 3rem;
   }
 }

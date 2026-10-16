@@ -10,7 +10,7 @@
 
 - スマホ: 今のまま（最大 480px の1列・下のタブ・A2HS の帯）
 - PC: 外枠の `max-width` を外し、ヘッダーを「■ triptych｜タブ（アイコン＋ラベル、選択中は黄の下線）｜右端に ON AIR n」に。下のタブと A2HS の帯は出さない。`main` の下の余白は下のタブ分を取らない
-- 中身の箱: 各画面の一番外の `<section>` に共通クラス `.page` を付ける。`.page` はスマホでは今の余白（16px）、PC では `max-width: 1280px; margin: 0 auto; padding: 24px 32px`
+- 中身の箱: 各画面の一番外の `<section>` に共通クラス `.page` を付ける。`.page` はスマホでは今の余白（16px）、PC では `max-width: 1200px; margin: 0 auto; padding: 40px 48px 48px`（本人「周りに余裕がなくてキツキツ」→ 広げた）
 
 ## 画面ごとの PC の形
 

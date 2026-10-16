@@ -296,13 +296,15 @@
     .a2hs {
       display: none;
     }
+    /* main をスクロール枠にしない（詳細画面の左の表紙列の sticky がページのスクロールに付いてくるように） */
     .app-main {
+      overflow: visible;
       padding-bottom: 3rem;
     }
     .app-header-inner {
-      max-width: 1280px;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 0.875rem 2rem;
+      padding: 1rem 3rem;
       gap: 2.5rem;
     }
     .top-nav {

@@ -12,7 +12,7 @@
 
 ### US-401: PC では上部のタブで画面を移る
 - WHEN 画面の幅が 1024px 以上の時 THE SYSTEM SHALL ナビ（HOME・検索・LIBRARY・CATALOG・CALENDAR・SETTINGS）をヘッダーの横並びのタブで出し、下のタブを出さない
-- WHEN 画面の幅が 1024px 以上の時 THE SYSTEM SHALL 中身を最大 1280px の全幅で組む（左右の余白は 32px）
+- WHEN 画面の幅が 1024px 以上の時 THE SYSTEM SHALL 中身を最大 1200px で組み、周りに余白を取る（左右 48px・上 40px。端まで詰めない）
 - WHEN 画面の幅が 1024px 未満の時 THE SYSTEM SHALL 今の1列（最大 480px）と下のタブを変えない
 - THE SYSTEM SHALL ヘッダーの ON AIR n を PC でもスマホでも出す（PC ではタブの右端）
 
