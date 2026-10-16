@@ -75,6 +75,22 @@ npm run build
 - `npm run build` は `dist/` にビルド成果物を出力します。
 - `backend/app.py` は起動時に `dist/` の有無を確認し、存在すればアプリのルート（`/`）にマウントします。`/api/*` はそのまま同居します。
 - ホスト・ポートは環境変数 `TRIPTYCH_HOST` / `TRIPTYCH_PORT` でも指定できます（`backend.app:main` 経由で起動する場合）。デフォルトは `127.0.0.1:8787` です。
+- ビルドし直すと、開いている画面は次の読み込み（またはタブに戻った時）に新しい版へ自動で入れ替わります（Service Worker の autoUpdate。`src/main.ts`）。
+
+### 常駐（launchd）
+
+Mac にログインしている間いつも動かすには、collector を LaunchAgent として登録します（`http://localhost:8000`。落ちても launchd が起こし直します）。plist は実行時にこのリポジトリの場所から作ります。
+
+```bash
+npm run build
+scripts/launchd.sh install     # 登録して起動（入れ直しにも使う）
+scripts/launchd.sh restart     # backend/ を変えた後に読み込み直す
+scripts/launchd.sh status      # 動いているか
+scripts/launchd.sh logs        # ~/Library/Logs/triptych/collector.log の末尾
+scripts/launchd.sh uninstall   # 止めて登録を消す
+```
+
+フロントエンドだけの変更なら `npm run build` だけで反映されます（再起動は不要）。
 
 ## スマホからの利用
 

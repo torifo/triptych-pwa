@@ -110,7 +110,8 @@ collector は `backend/adapters/` 配下のソースごとに独立したアダ�
 
 - **フロントエンドの挙動**: 全ビューはIndexedDBのローカルデータのみで描画されるため、collectorが止まっていても閲覧・手動編集（ステータス変更・進捗入力・手動Work/Edition作成）は問題なく続行できます。
 - **同期・検索・検知が失敗する**: 同期ボタン操作や検索操作を行うと、collectorへの接続に失敗した旨がエラーとして表示されます（Settings画面の「同期」セクション、または操作直後のエラーメッセージ）。
-- **復旧方法**: `npm run api`（開発時）または本番相当の `uvicorn backend.app:app ...` を起動し直し、必要であれば手動プルで同期をやり直してください。
+- **復旧方法**: 常駐させている場合は `scripts/launchd.sh status` で状態を、`scripts/launchd.sh logs` で理由を確かめ、`scripts/launchd.sh restart`（未登録なら `install`）。常駐させていない場合は `npm run api`（開発時）または本番相当の `uvicorn backend.app:app ...` を起動し直します。必要であれば手動プルで同期をやり直してください。
+- **カレンダー**: カタログを読めない間、月の升目で選んだ日は「カタログの予定を出せません（collector に接続できません）」と出ます。
 
 ### 外部ソースが障害・レート制限中のとき
 
