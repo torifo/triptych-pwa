@@ -490,6 +490,7 @@ def _entry(row: sqlite3.Row, link: Optional[tuple[str, float]] = None) -> Catalo
         score=data["score"],
         url=data["url"],
         cover=data["cover"],
+        sourceMaterial=data.get("source_material"),
         extra=data["extra"],
         linkMethod=link[0] if link else None,
         linkConfidence=link[1] if link else None,
@@ -659,7 +660,7 @@ def _anime_start_events(conn: sqlite3.Connection, first: str, last: str) -> list
                 event="movie" if movie else "season-start",
                 date=row["start_date"],
                 label="公開" if movie else f"{season} 放送開始" if season else "放送開始",
-                cover=row["entry_cover"] or row["work_cover"],
+                cover=row["entry_cover"] or None,  # the season's own art only (the work cover is the original's: novel / manga)
                 popularity=row["popularity"] or 0,
             )
         )
@@ -749,7 +750,7 @@ def _episode_events(
                 date=day,
                 time=clock,
                 label=f"第{episode}話" if isinstance(episode, int) and not isinstance(episode, bool) else "次回放送",
-                cover=row["entry_cover"] or row["work_cover"],
+                cover=row["entry_cover"] or None,  # the season's own art only (the work cover is the original's: novel / manga)
                 popularity=row["popularity"] or 0,
                 estimated=estimated,
             )

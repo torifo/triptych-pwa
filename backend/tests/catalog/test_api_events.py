@@ -206,11 +206,11 @@ def test_a_movie_is_a_movie_event_and_the_others_season_starts(events_catalog, c
     assert events["anilist:43"] == ("season-start", "放送開始")
 
 
-def test_an_anime_without_a_cover_of_its_own_takes_the_works(events_catalog, client):
+def test_an_anime_shows_only_its_own_cover_never_the_works_original_art(events_catalog, client):
     covers = {item["entryId"]: item["cover"] for item in anime_items(client)}
-    assert covers["anilist:11"] == "https://img/e11.jpg"  # the row's own cover first
-    assert covers["anilist:12"] == "https://img/w1.jpg"
-    assert covers["anilist:31"] is None  # nor does the work have one
+    assert covers["anilist:11"] == "https://img/e11.jpg"  # the row's own cover
+    assert covers["anilist:12"] is None  # no cover of its own: the text cover, not the work's (novel / manga) art
+    assert covers["anilist:31"] is None
 
 
 def test_only_anilist_day_precision_rows_count(events_catalog, client):
@@ -375,7 +375,7 @@ def test_an_episode_event_has_every_field(episodes_catalog, client):
         "date": "2026-10-10",
         "time": "23:30",
         "label": "第5話",
-        "cover": "https://img/w7.jpg",  # no cover of its own: the work's
+        "cover": None,  # no cover of its own: the text cover, not the work's
         "popularity": 80000,
         "estimated": False,
     }

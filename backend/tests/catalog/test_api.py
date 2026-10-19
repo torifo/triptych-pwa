@@ -778,6 +778,8 @@ def test_detail_entry_fields(built, client):
     assert (manga["startDate"], manga["startPrecision"]) == ("2017-05-01", "month")
     assert (manga["endDate"], manga["endPrecision"]) == ("2020-01-01", "year")
     assert entries["anilist:100"]["creators"] == ["日向夏"]
+    # the AniList source (LIGHT_NOVEL / MANGA / ...) tells an adaptation from the original
+    assert "sourceMaterial" in anime and entries["ndl:books/9784000000010"]["sourceMaterial"] is None
     assert entries["anilist:100"]["url"] == "https://anilist.co/manga/100"
     assert entries["ndl:books/9784000000010"]["extra"] == {"isbn": "9784000000010", "publisher": "ヒーロー文庫"}
     assert entries["ndl:books/9784000000010"]["volumes"] is None

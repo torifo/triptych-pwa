@@ -80,6 +80,7 @@ class CatalogEntry(BaseModel):
     score: Optional[int] = None
     url: Optional[str] = None
     cover: Optional[str] = None
+    sourceMaterial: Optional[str] = None  # AniList source (LIGHT_NOVEL / MANGA / ORIGINAL ...): tells an adaptation from the original
     extra: dict[str, Any] = Field(default_factory=dict)
     # How this entry joined the work: None for AniList members, else the link that attached it
     linkMethod: Optional[str] = None
