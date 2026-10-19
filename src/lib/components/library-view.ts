@@ -275,3 +275,14 @@ export function groupShelfByWork<E extends ShelfEdition>(
     };
   });
 }
+
+/** 棚のカードの行き先と表紙。絞っていない時は作品として開き代表（原作）の表紙、媒体で絞った時はその Edition のタブと表紙。 */
+export function shelfTarget(
+  lead: Pick<Edition, 'id' | 'workId'>,
+  mediaFilter: MediaType | 'all',
+): { href: string; cover: 'work' | 'edition' } {
+  const work = `#/work/${encodeURIComponent(lead.workId)}`;
+  return mediaFilter === 'all'
+    ? { href: work, cover: 'work' }
+    : { href: `${work}?edition=${encodeURIComponent(lead.id)}`, cover: 'edition' };
+}

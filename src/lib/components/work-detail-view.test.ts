@@ -40,7 +40,25 @@ function release(over: Partial<Release> & Pick<Release, 'id' | 'editionId' | 'da
 }
 
 describe('orderWorkEditions', () => {
-  it('媒体（ANIME → 漫画 → 文庫 → WEB）→ 新しい期から → 登録順に並べる', () => {
+  const mixed = () => [
+    edition('anime', {}),
+    edition('web', { mediaType: 'web-novel' }),
+    edition('manga', { mediaType: 'manga' }),
+    edition('ln', { mediaType: 'light-novel' }),
+  ];
+
+  it('原作の媒体が先頭（原作が全て）: 小説原作は 文庫 → WEB → 漫画 → ANIME、漫画原作は 漫画 → 文庫 → WEB → ANIME', () => {
+    const none = new Map();
+    expect(orderWorkEditions(mixed(), none, 'novel').map((e) => e.id)).toEqual(['ln', 'web', 'manga', 'anime']);
+    expect(orderWorkEditions(mixed(), none, 'manga').map((e) => e.id)).toEqual(['manga', 'ln', 'web', 'anime']);
+    expect(orderWorkEditions(mixed(), none, 'anime').map((e) => e.id)).toEqual(['anime', 'manga', 'ln', 'web']);
+  });
+
+  it('原作が分からない時は代表表紙と同じく小説の順', () => {
+    expect(orderWorkEditions(mixed(), new Map()).map((e) => e.id)).toEqual(['ln', 'web', 'manga', 'anime']);
+  });
+
+  it('アニメ原作では ANIME → 漫画 → 文庫 → WEB、同じ媒体は新しい期から → 登録順に並べる', () => {
     const editions = [
       edition('anime-late'),
       edition('manga', { mediaType: 'manga' }),
@@ -51,7 +69,7 @@ describe('orderWorkEditions', () => {
       ['anime-late', { date: '2026-10-04', precision: 'day' as const }],
       ['anime-early', { date: '2020-10-03', precision: 'day' as const }],
     ]);
-    expect(orderWorkEditions(editions, starts).map((e) => e.id)).toEqual([
+    expect(orderWorkEditions(editions, starts, 'anime').map((e) => e.id)).toEqual([
       'anime-late',
       'anime-early',
       'manga',
@@ -104,9 +122,10 @@ describe('initialEditionId', () => {
 });
 
 describe('workMediaTypes / suggestedMediaType', () => {
-  it('作品にある媒体を決まった順に重複なしで返す', () => {
+  it('作品にある媒体をタブと同じ順（原作の媒体が先頭）に重複なしで返す', () => {
     const editions = [{ mediaType: 'anime' as const }, { mediaType: 'web-novel' as const }, { mediaType: 'anime' as const }];
-    expect(workMediaTypes(editions)).toEqual(['anime', 'web-novel']);
+    expect(workMediaTypes(editions, 'anime')).toEqual(['anime', 'web-novel']);
+    expect(workMediaTypes(editions, 'novel')).toEqual(['web-novel', 'anime']);
     expect(workMediaTypes([])).toEqual([]);
   });
 

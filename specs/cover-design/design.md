@@ -89,6 +89,8 @@ export interface BroadcastHint { channel: string; date: string; time: string; is
 ### Work 詳細（`src/routes/WorkDetail.svelte`, `src/lib/components/{EditionCard,ReleaseList}.svelte`）
 - `CoverHero`（代表表紙・作品名・媒体の並び）
 - Edition が2つ以上ならタブ（媒体名＋見分け用の副題）で切り替え。1つならタブ無し
+- タブは原作の媒体から並べ、最初に開くのも原作のタブ（今日放送のある期があればその期。URL で Edition を指定された時はそれ）。小説原作は 文庫 → WEB → 漫画 → ANIME、漫画原作は 漫画 → 文庫 → WEB → ANIME、アニメ原作だけ ANIME から（2026-10-19、本人「原作が全て」。それまでは「色の強いアニメから」だった）。ヘッダーは開いている Edition の表紙（アニメは期ごとの絵）
+- Library の棚は絞っていない時は作品として開き代表（原作）の表紙、媒体で絞った時はその Edition のタブと表紙
 - 「次話と配信先」の先頭を次話の帯にし、帯の下に `syncHints.broadcasts` の局名と時刻（今日以降の先頭3件）、続けて配信先（既存の stream-start）
 - 既存の編集・削除・追加の操作は変えない
 

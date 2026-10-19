@@ -1,6 +1,7 @@
 // Work 詳細の補助（Edition のタブ・最初に開くタブ・作品の媒体の並び・今日の放送）。純関数で vitest 固定。
 
-import type { Edition, MediaType, Release } from '../db/schema';
+import type { Edition, MediaType, Release, WorkOrigin } from '../db/schema';
+import { ORIGIN_MEDIA_ORDER } from './cover';
 import { MEDIA_TYPE_LABELS, MEDIA_TYPES, STATUS_LABELS } from './labels';
 import { editionDisambiguators, type SeasonStart } from './library-view';
 import { BROADCAST_KINDS, compareReleases, precisionOf } from './release-view';
@@ -17,15 +18,19 @@ export interface EditionTab {
   status: string;
 }
 
-/** Work 詳細の媒体の順。表紙の色が強く、追いかける頻度の高いアニメから。 */
-const WORK_MEDIA_ORDER: MediaType[] = ['anime', 'manga', 'light-novel', 'web-novel'];
+/** Work 詳細の媒体の順: 原作の媒体が先頭（代表表紙と同じ順。原作が分からなければ小説の順）。 */
+function workMediaOrder(origin: WorkOrigin | undefined): MediaType[] {
+  return ORIGIN_MEDIA_ORDER[origin ?? 'novel'] ?? ORIGIN_MEDIA_ORDER.novel;
+}
 
-/** Work 詳細の Edition の並び（ANIME → 漫画 → 文庫 → WEB → 新しい期から → 登録順）。開始日の無い期は同じ媒体の後ろ。 */
+/** Work 詳細の Edition の並び（原作の媒体から → 同じ媒体は新しい期から → 登録順）。開始日の無い期は同じ媒体の後ろ。 */
 export function orderWorkEditions<T extends TabEdition>(
   editions: readonly T[],
   seasonStarts: ReadonlyMap<string, SeasonStart>,
+  origin?: WorkOrigin,
 ): T[] {
-  const mediaRank = (mediaType: MediaType) => WORK_MEDIA_ORDER.indexOf(mediaType);
+  const order = workMediaOrder(origin);
+  const mediaRank = (mediaType: MediaType) => order.indexOf(mediaType);
   return [...editions].sort((a, b) => {
     const byMedia = mediaRank(a.mediaType) - mediaRank(b.mediaType);
     if (byMedia !== 0) return byMedia;
@@ -66,10 +71,10 @@ export function initialEditionId(
   return ordered.find((e) => onAir.has(e.id))?.id ?? ordered[0]?.id;
 }
 
-/** 作品にある媒体（重複なし・タブと同じ ANIME → 漫画 → 文庫 → WEB の順）。ヘッダーの媒体の並びに使う。 */
-export function workMediaTypes(editions: readonly Pick<Edition, 'mediaType'>[]): MediaType[] {
+/** 作品にある媒体（重複なし・タブと同じ原作の媒体からの順）。ヘッダーの媒体の並びに使う。 */
+export function workMediaTypes(editions: readonly Pick<Edition, 'mediaType'>[], origin?: WorkOrigin): MediaType[] {
   const present = new Set(editions.map((e) => e.mediaType));
-  return WORK_MEDIA_ORDER.filter((m) => present.has(m));
+  return workMediaOrder(origin).filter((m) => present.has(m));
 }
 
 /** Edition 追加フォームの媒体の既定: まだ無い媒体のうち先頭。全部そろっていれば WEB。 */

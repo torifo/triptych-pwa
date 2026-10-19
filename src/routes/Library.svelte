@@ -22,6 +22,7 @@
     saveLibrarySort,
     type LibrarySort,
     type LibraryLayout,
+    shelfTarget,
   } from '../lib/components/library-view';
   import { broadcastDayJst, onAirEditionIds } from '../lib/components/onair';
   import { workCover } from '../lib/components/cover';
@@ -104,11 +105,12 @@
     return libraryCover(edition, workMap.get(edition.workId), editionsByWork.get(edition.workId) ?? []);
   }
 
-  /** 棚の表紙: 作品の代表表紙（原作の媒体の表紙、同じ媒体なら最初の期）。作品が見つからなければ Edition の表紙 */
+  /** 棚の表紙: 絞っていない時は作品の代表表紙（原作の媒体の表紙、同じ媒体なら最初の期）、媒体で絞った時はその Edition の表紙 */
   function shelfCoverOf(lead: Edition) {
     const work = workMap.get(lead.workId);
     const workEditions = editionsByWork.get(lead.workId) ?? [];
-    return work ? workCover(work, workEditions, seasonStarts) : libraryCover(lead, work, workEditions);
+    if (!work || shelfTarget(lead, mediaTypeFilter).cover === 'edition') return libraryCover(lead, work, workEditions);
+    return workCover(work, workEditions, seasonStarts);
   }
 
   /** 'ANIME 2 · 漫画 · 文庫' */
@@ -248,7 +250,7 @@
         {@const cover = shelfCoverOf(group.lead)}
         {@const ratio = progressRatio(group.lead.progress)}
         <li class="shelf-cell">
-          <a class="shelf-item" href={workHref(group.lead)}>
+          <a class="shelf-item" href={shelfTarget(group.lead, mediaTypeFilter).href}>
             <span class="shelf-cover" aria-hidden="true">
               <Cover src={cover.url} title={cover.title} mediaType={cover.mediaType} size="fill" onAir={group.onAir} />
               {#if ratio !== undefined}

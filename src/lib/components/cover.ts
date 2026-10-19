@@ -36,7 +36,7 @@ export function coverSrcset(url: string, size: CoverSize): string | undefined {
 }
 
 /** 原作の媒体ごとの代表表紙の順（アニメの絵は原作の表紙が無い時だけ。Web 小説は文字の表紙の媒体名にだけ使う）。 */
-const ORIGIN_MEDIA_ORDER: Record<WorkOrigin, MediaType[]> = {
+export const ORIGIN_MEDIA_ORDER: Record<WorkOrigin, MediaType[]> = {
   novel: ['light-novel', 'web-novel', 'manga', 'anime'],
   manga: ['manga', 'light-novel', 'web-novel', 'anime'],
   anime: ['anime', 'manga', 'light-novel', 'web-novel'],

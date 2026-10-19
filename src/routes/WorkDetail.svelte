@@ -50,12 +50,12 @@
 
   const otherWorks = $derived(allWorks.filter((w) => w.id !== id));
   const seasonStarts = $derived(seasonStartByEdition(releases));
-  const ordered = $derived(orderWorkEditions(editions, seasonStarts));
+  const ordered = $derived(orderWorkEditions(editions, seasonStarts, work?.origin));
   const tabs = $derived(work ? editionTabs(ordered, work.title, seasonStarts) : []);
   const hasTabs = $derived(tabs.length >= 2);
   const onAirIds = $derived(onAirEditionIds(releases, new Map(editions.map((e) => [e.id, e])), today));
   const airingTime = $derived(firstAiringTimeToday(releases, onAirIds, today));
-  const mediaTypes = $derived(workMediaTypes(editions));
+  const mediaTypes = $derived(workMediaTypes(editions, work?.origin));
   const selectedId = $derived(
     chosenId && ordered.some((e) => e.id === chosenId) ? chosenId : initialEditionId(ordered, undefined, onAirIds),
   );

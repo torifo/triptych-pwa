@@ -18,6 +18,7 @@ import {
   seasonLabel,
   seasonStartByEdition,
   sortLibraryEditions,
+  shelfTarget,
 } from './library-view';
 
 function edition(
@@ -345,5 +346,17 @@ describe('nextDateByEdition / sortLibrary', () => {
     expect(loadLibrarySort(storage)).toBe('next');
     store.set(LIBRARY_SORT_KEY, 'bogus');
     expect(loadLibrarySort(storage)).toBe('title');
+  });
+});
+
+describe('shelfTarget', () => {
+  const lead = { id: 'e-anime', workId: 'w1' };
+
+  it('媒体で絞っていない時は作品として開き、表紙は作品の代表（原作）', () => {
+    expect(shelfTarget(lead, 'all')).toEqual({ href: '#/work/w1', cover: 'work' });
+  });
+
+  it('媒体で絞っている時はその Edition のタブで開き、表紙もその Edition のもの', () => {
+    expect(shelfTarget(lead, 'anime')).toEqual({ href: '#/work/w1?edition=e-anime', cover: 'edition' });
   });
 });
