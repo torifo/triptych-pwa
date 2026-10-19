@@ -1,7 +1,7 @@
 // エクスポート/インポート（NFR: データ保全）。
 // 全テーブル（works/editions/releases/detections/meta）を単一JSONに束ねる。
 
-import { db as defaultDB, type TriptychDB } from './schema';
+import { db as defaultDB, dropMisplacedAnimeCover, type TriptychDB } from './schema';
 import type { Work, Edition, Release, DetectionEvent, MetaEntry } from './schema';
 
 export const EXPORT_VERSION = 1 as const;
@@ -131,6 +131,8 @@ export async function importAll(
   }
 
   const { tables } = parsed;
+  // 修正前のバックアップで本に入っていたアニメの表紙を持ち込まない（v3 の移行と同じ）
+  for (const edition of tables.editions) dropMisplacedAnimeCover(edition);
 
   await database.transaction(
     'rw',

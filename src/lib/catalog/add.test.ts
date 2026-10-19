@@ -117,4 +117,32 @@ describe('addEntriesToLibrary', () => {
     expect(result.workId).not.toBe('gone');
     expect(await listWorks(db)).toHaveLength(1);
   });
+
+  it('records the original medium on a new work, and only a known one', async () => {
+    const result = await addEntriesToLibrary({ title: '薬屋のひとりごと', entries: [anime], origin: 'novel' }, db);
+    expect((await listWorks(db)).find((w) => w.id === result.workId)?.origin).toBe('novel');
+
+    const other = await addEntriesToLibrary({ title: '別の作品', entries: [novel], origin: 'game' as never }, db);
+    expect((await listWorks(db)).find((w) => w.id === other.workId)?.origin).toBeUndefined();
+  });
+
+  it('fills the original medium of an existing work that has none, but never overwrites one', async () => {
+    const plain = await createWork({ title: '薬屋のひとりごと' }, db);
+    await addEntriesToLibrary({ title: '薬屋のひとりごと', entries: [anime], workId: plain.id, origin: 'novel' }, db);
+    expect((await listWorks(db)).find((w) => w.id === plain.id)?.origin).toBe('novel');
+
+    const known = await createWork({ title: '別の作品', origin: 'manga' }, db);
+    await addEntriesToLibrary({ title: '別の作品', entries: [novel], workId: known.id, origin: 'novel' }, db);
+    expect((await listWorks(db)).find((w) => w.id === known.id)?.origin).toBe('manga');
+  });
+
+  it('gives a coverless book the original novel cover and marks it automatic', async () => {
+    const result = await addEntriesToLibrary(
+      { title: '薬屋のひとりごと', entries: [bookVol('1')], novelCover: 'https://img.example/novel.jpg', mangaCover: 'https://img.example/manga.jpg' },
+      db,
+    );
+    const [ln] = await listEditionsByWork(result.workId!, db);
+    expect(ln.coverUrl).toBe('https://img.example/novel.jpg');
+    expect(ln.syncHints?.coverFrom).toBe('catalog');
+  });
 });

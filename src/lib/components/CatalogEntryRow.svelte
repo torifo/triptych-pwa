@@ -1,7 +1,7 @@
 <script lang="ts">
   import { ExternalLink } from '@lucide/svelte';
   import type { Source } from '../db/schema';
-  import type { CatalogEntry } from '../catalog/types';
+  import type { CatalogEntry, OriginCovers } from '../catalog/types';
   import {
     entryCounts,
     entryStatusLabel,
@@ -22,6 +22,7 @@
     registered,
     busy,
     showKind = false,
+    covers,
     onadd,
   }: {
     entry: CatalogEntry;
@@ -29,6 +30,8 @@
     busy: boolean;
     /** 候補欄のように面が混ざる時だけ、種別の活字バッジを出す。 */
     showKind?: boolean;
+    /** 表紙の無い本・Web 小説に出す原作の表紙（この作品の行だけ。候補欄では渡さない）。 */
+    covers?: OriginCovers;
     onadd: (entry: CatalogEntry) => void;
   } = $props();
 
@@ -37,7 +40,7 @@
   // 形式・状態は文字、期間と話数・巻数は等幅
   const meta = $derived([formatLabel(entry), entryStatusLabel(entry)].filter((v): v is string => !!v));
   const figures = $derived([period, ...entryCounts(entry)].filter((v): v is string => !!v));
-  const cover = $derived(entryCover(entry));
+  const cover = $derived(entryCover(entry, covers));
   const link = $derived(linkBadge(entry));
   const href = $derived(entry.url && isSafeHttpUrl(entry.url) ? entry.url : null);
   const creators = $derived(namesLine(entry.creators));

@@ -23,7 +23,9 @@
   import { autoSyncPlan, isAutoSyncDue, preferences, startRedirect, type AutoSyncMode } from './lib/preferences'
   import { setTimeNotation } from './lib/dates'
   import { db, type Edition, type Release } from './lib/db/schema'
-  import { listEditions, listReleases } from './lib/db/store'
+  import { listEditions, listReleases, listWorks, updateEdition, updateEditionSyncHints, updateWork } from './lib/db/store'
+  import { fetchCatalogWork, fetchCatalogWorks } from './lib/catalog/api'
+  import { backfillFromCatalog } from './lib/catalog/origin-backfill'
   import { onAirCount } from './lib/components/home-view'
   import OnAirLamp from './lib/components/OnAirLamp.svelte'
   import { initStoragePersistence, shouldPromptAddToHomeScreen } from './lib/pwa'
@@ -52,9 +54,29 @@
       // ストレージ判定に失敗してもアプリ本体は継続動作させる
     }
 
+    // 同期（時間がかかる）を待たずに走らせる。触るのは Work の origin だけで、同期とは重ならない
+    void backfillOrigins()
     if (autoSyncPlan(preferences.get('autoSync')).onLaunch) await autoSync()
     else await restoreLastSync()
   })
+
+  // 原作の媒体と、表紙の無い文庫・漫画を原作側の表紙で埋める（アニメの絵を代わりにしない）。開いている画面には次に開いた時から効く
+  async function backfillOrigins() {
+    try {
+      const [works, editions] = await Promise.all([listWorks(), listEditions()])
+      await backfillFromCatalog(works, editions, {
+        search: async (title) => (await fetchCatalogWorks({ q: title, per: 5 })).items,
+        detail: (id) => fetchCatalogWork(id),
+        setOrigin: (id, origin) => updateWork(id, { origin }),
+        setCover: async (id, url) => {
+          await updateEdition(id, { coverUrl: url })
+          await updateEditionSyncHints(id, { coverFrom: 'catalog' })
+        },
+      })
+    } catch {
+      // 表紙の手がかりだけなので、読めなくても本体は動かす
+    }
+  }
 
   // 自動同期を最後に試みた時刻。全ソース失敗で最終同期が進まなくても、1時間ごとより頻繁には試さない
   let lastAutoAttempt: number | null = null

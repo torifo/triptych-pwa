@@ -194,3 +194,65 @@ describe('Dexie v1 → v2 移行', () => {
     expect((await migrated.detections.get('d1'))?.via).toBe('relation');
   });
 });
+
+describe('Dexie v2 → v3 移行（本・Web 小説に自動で入ったアニメの表紙を外す）', () => {
+  const ANIME_COVER = 'https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx1-a.jpg';
+  const NOVEL_COVER = 'https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/bx2-b.jpg';
+
+  function covered(id: string, mediaType: string, coverUrl: string | undefined, syncHints?: Record<string, unknown>) {
+    return { ...edition(id, mediaType), coverUrl, syncHints };
+  }
+
+  async function seedV2(name: string, rows: ReturnType<typeof covered>[]): Promise<void> {
+    const v2 = new Dexie(name);
+    v2.version(2).stores({
+      works: 'id, titleNormalized',
+      editions: 'id, workId, status, mediaType',
+      releases: 'id, editionId, date, [editionId+kind+externalId]',
+      detections: 'id, workId, state',
+      meta: 'key',
+    });
+    await v2.table('editions').bulkAdd(rows);
+    v2.close();
+  }
+
+  it('anime 以外で、自動の表紙がアニメの表紙なら URL と自動の印を消す（他の手がかりは残す）', async () => {
+    await seedV2(dbName, [
+      covered('ln', 'light-novel', ANIME_COVER, { coverFrom: 'catalog', ndlLine: '' }),
+      covered('manga', 'manga', ANIME_COVER, { coverFrom: 'anilist' }),
+      covered('web', 'web-novel', ANIME_COVER, { coverFrom: 'catalog' }),
+    ]);
+    migrated = createDB(dbName);
+    const ln = await migrated.editions.get('ln');
+    expect(ln?.coverUrl).toBeUndefined();
+    expect(ln?.syncHints?.coverFrom).toBeUndefined();
+    expect(ln?.syncHints?.ndlLine).toBe('');
+    for (const id of ['manga', 'web']) {
+      const repaired = await migrated.editions.get(id);
+      expect(repaired?.coverUrl).toBeUndefined();
+      expect(repaired?.syncHints?.coverFrom).toBeUndefined();
+    }
+  });
+
+  it('手で設定した表紙・アニメの Edition・アニメ以外の表紙には触れない', async () => {
+    await seedV2(dbName, [
+      covered('manual', 'light-novel', ANIME_COVER, {}),
+      covered('manual-no-hints', 'manga', ANIME_COVER),
+      covered('anime', 'anime', ANIME_COVER, { coverFrom: 'anilist' }),
+      covered('novel', 'light-novel', NOVEL_COVER, { coverFrom: 'catalog' }),
+      covered('empty', 'manga', undefined, { coverFrom: 'catalog' }),
+    ]);
+    migrated = createDB(dbName);
+    expect((await migrated.editions.get('manual'))?.coverUrl).toBe(ANIME_COVER);
+    expect((await migrated.editions.get('manual-no-hints'))?.coverUrl).toBe(ANIME_COVER);
+    expect(await migrated.editions.get('anime')).toMatchObject({ coverUrl: ANIME_COVER, syncHints: { coverFrom: 'anilist' } });
+    expect(await migrated.editions.get('novel')).toMatchObject({ coverUrl: NOVEL_COVER, syncHints: { coverFrom: 'catalog' } });
+    expect((await migrated.editions.get('empty'))?.syncHints?.coverFrom).toBe('catalog');
+  });
+
+  it('v1 からでも v2 → v3 と続けて移行する', async () => {
+    const db = await openMigrated();
+    expect(db.verno).toBe(3);
+    expect(await db.editions.count()).toBe(4);
+  });
+});

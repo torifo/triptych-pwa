@@ -34,6 +34,7 @@ export interface CreateWorkInput {
   title: string;
   aliases?: string[];
   coverEditionId?: string;
+  origin?: Work['origin'];
 }
 
 export async function createWork(
@@ -47,6 +48,7 @@ export async function createWork(
     titleNormalized: normalizeTitle(input.title),
     aliases: input.aliases ?? [],
     coverEditionId: input.coverEditionId,
+    ...(input.origin ? { origin: input.origin } : {}),
     createdAt: ts,
     updatedAt: ts,
   };
@@ -62,7 +64,7 @@ export async function listWorks(database: TriptychDB = defaultDB): Promise<Work[
   return database.works.toArray();
 }
 
-export type UpdateWorkInput = Partial<Pick<Work, 'title' | 'aliases' | 'coverEditionId'>>;
+export type UpdateWorkInput = Partial<Pick<Work, 'title' | 'aliases' | 'coverEditionId' | 'origin'>>;
 
 export async function updateWork(
   id: string,

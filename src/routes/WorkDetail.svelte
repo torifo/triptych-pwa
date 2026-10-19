@@ -16,7 +16,7 @@
   import MonoTime from '../lib/components/MonoTime.svelte';
   import OnAirLamp from '../lib/components/OnAirLamp.svelte';
   import SectionHead from '../lib/components/SectionHead.svelte';
-  import { workCover } from '../lib/components/cover';
+  import { workHeroCover } from '../lib/components/cover';
   import { MEDIA_TYPE_LABELS, MEDIA_TYPES } from '../lib/components/labels';
   import { seasonStartByEdition } from '../lib/components/library-view';
   import { broadcastDayJst, onAirEditionIds } from '../lib/components/onair';
@@ -55,12 +55,13 @@
   const hasTabs = $derived(tabs.length >= 2);
   const onAirIds = $derived(onAirEditionIds(releases, new Map(editions.map((e) => [e.id, e])), today));
   const airingTime = $derived(firstAiringTimeToday(releases, onAirIds, today));
-  const cover = $derived(work ? workCover(work, editions) : undefined);
   const mediaTypes = $derived(workMediaTypes(editions));
   const selectedId = $derived(
     chosenId && ordered.some((e) => e.id === chosenId) ? chosenId : initialEditionId(ordered, undefined, onAirIds),
   );
   const selected = $derived(ordered.find((e) => e.id === selectedId));
+  // 開いている Edition の表紙（期ごとの絵・文庫の表紙）。無ければ作品の代表表紙（原作の絵）
+  const cover = $derived(work ? workHeroCover(work, editions, selected, seasonStarts) : undefined);
 
   async function refresh() {
     const [nextWork, nextEditions, works] = await Promise.all([getWork(id), listEditionsByWork(id), listWorks()]);

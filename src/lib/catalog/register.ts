@@ -4,7 +4,8 @@ import { isSafeHttpUrl } from '../components/release-view';
 import type { Edition, MediaType, Source, SourceRef, Work } from '../db/schema';
 import type { CreateEditionInput } from '../db/store';
 import { normalizeTitle } from '../normalize';
-import type { CatalogEntry, CatalogKind, CatalogWorkDetail } from './types';
+import { firstSeries } from './origin';
+import type { CatalogEntry, CatalogKind, CatalogWorkDetail, OriginCovers } from './types';
 import { KIND_ORDER } from './view';
 
 const NDL_SEARCH_URL = 'https://ndlsearch.ndl.go.jp/search';
@@ -114,23 +115,25 @@ export function entrySourceRefs(entry: CatalogEntry): SourceRef[] {
   return [{ source, externalId, url }];
 }
 
-/**
- * CatalogEntry -> createEdition の入力。本はシリーズ名を Edition の題名にする。
- * 表紙の無い本は、同じカタログ作品の行（siblings）から AniList の表紙を借りる。
- */
-export function toEditionInput(entry: CatalogEntry, siblings: readonly CatalogEntry[] = []): EditionInput {
+/** CatalogEntry -> createEdition の入力。表紙の無い本は原作の表紙を借り（アニメの絵は借りない）、Web 小説には表紙を持たせない。 */
+export function toEditionInput(
+  entry: CatalogEntry,
+  siblings: readonly CatalogEntry[] = [],
+  covers: OriginCovers = {},
+): EditionInput {
   const input: EditionInput = {
     mediaType: entryMediaType(entry),
     title: entry.kind === 'book' ? ndlSeriesName(entry) : entry.title,
     sourceRefs: entrySourceRefs(entry),
     linkSource: 'manual',
   };
+  if (entry.kind === 'web-novel') return input;
   if (entry.cover && isSafeHttpUrl(entry.cover)) {
     input.coverUrl = entry.cover;
     // 自動で入れた表紙の印。AniList の表紙は同期が新しいものに入れ替えてよい
     input.coverFrom = entry.source === 'anilist' ? 'anilist' : 'catalog';
   } else if (entry.kind === 'book') {
-    const borrowed = borrowedCover(input.mediaType, siblings);
+    const borrowed = borrowedCover(input.mediaType, siblings, covers);
     if (borrowed) {
       input.coverUrl = borrowed;
       input.coverFrom = 'catalog';
@@ -139,21 +142,18 @@ export function toEditionInput(entry: CatalogEntry, siblings: readonly CatalogEn
   return input;
 }
 
-/** 本が表紙を借りる面の順: 本の種別に合う面（漫画→漫画、文庫→小説）、もう一方、アニメ。 */
-function borrowOrder(mediaType: MediaType): CatalogKind[] {
-  return mediaType === 'manga' ? ['manga', 'novel', 'anime'] : ['novel', 'manga', 'anime'];
-}
-
-/** 同じカタログ作品の AniList の行から借りる表紙（http/https のみ）。面ごとに人気が最大の行を使う。 */
-function borrowedCover(mediaType: MediaType, siblings: readonly CatalogEntry[]): string | undefined {
-  for (const kind of borrowOrder(mediaType)) {
-    const withCover = siblings.filter(
-      (e) => e.kind === kind && e.source === 'anilist' && isSafeHttpUrl(text(e.cover)),
-    );
-    const best = mostPopular(withCover);
-    if (best) return text(best.cover);
-  }
-  return undefined;
+/** 本が借りる表紙: 文庫は原作小説の表紙 → AniList の小説（ノベライズでない最初のシリーズ）、漫画は漫画の表紙 → 最初の漫画。 */
+function borrowedCover(
+  mediaType: MediaType,
+  siblings: readonly CatalogEntry[],
+  covers: OriginCovers,
+): string | undefined {
+  const kind: CatalogKind = mediaType === 'manga' ? 'manga' : 'novel';
+  const fromDetail = text(kind === 'manga' ? covers.mangaCover : covers.novelCover);
+  if (isSafeHttpUrl(fromDetail)) return fromDetail;
+  const withCover = siblings.filter((e) => e.kind === kind && e.source === 'anilist' && isSafeHttpUrl(text(e.cover)));
+  const first = firstSeries(withCover, { preferOriginal: kind === 'novel' });
+  return first ? text(first.cover) : undefined;
 }
 
 // ---------------------------------------------------------------------------

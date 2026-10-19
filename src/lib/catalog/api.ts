@@ -9,6 +9,7 @@ import type {
   CatalogWorkDetail,
   CatalogWorkPage,
 } from './types';
+import { normalizeWorkDetail, normalizeWorkSummary } from './origin';
 
 /** サーバ側の上限（per は最大 100）。 */
 export const MAX_PER = 100;
@@ -49,12 +50,13 @@ export function fetchCatalogStats(): Promise<CatalogStats> {
   return apiGet<CatalogStats>('/api/catalog/stats');
 }
 
-export function fetchCatalogWorks(q: CatalogQuery): Promise<CatalogWorkPage> {
-  return apiGet<CatalogWorkPage>('/api/catalog/works', buildWorksQuery(q));
+export async function fetchCatalogWorks(q: CatalogQuery): Promise<CatalogWorkPage> {
+  const page = await apiGet<CatalogWorkPage>('/api/catalog/works', buildWorksQuery(q));
+  return { ...page, items: page.items.map(normalizeWorkSummary) };
 }
 
-export function fetchCatalogWork(id: string): Promise<CatalogWorkDetail> {
-  return apiGet<CatalogWorkDetail>(`/api/catalog/works/${encodeURIComponent(id)}`);
+export async function fetchCatalogWork(id: string): Promise<CatalogWorkDetail> {
+  return normalizeWorkDetail(await apiGet<CatalogWorkDetail>(`/api/catalog/works/${encodeURIComponent(id)}`));
 }
 
 // ---------------------------------------------------------------------------

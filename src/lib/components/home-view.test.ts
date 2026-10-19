@@ -177,7 +177,7 @@ describe('onAirCount', () => {
 describe('buildCoverIndex', () => {
   const works: Pick<Work, 'id' | 'title' | 'coverEditionId'>[] = [{ id: 'w', title: '薬屋のひとりごと' }];
 
-  it('Edition 自身の表紙を優先し、無ければ同じ作品の代表表紙を借りる', () => {
+  it('Edition 自身の表紙だけを使い、表紙の無い文庫にアニメの表紙を借りない', () => {
     const editions = [
       edition({ id: 'a', workId: 'w', mediaType: 'anime', coverUrl: 'https://x/anime.jpg' }),
       edition({ id: 'b', workId: 'w', mediaType: 'light-novel' }),
@@ -185,8 +185,18 @@ describe('buildCoverIndex', () => {
     ];
     const index = buildCoverIndex(editions, works);
     expect(index.get('a')).toEqual({ url: 'https://x/anime.jpg', title: '薬屋のひとりごと', mediaType: 'anime' });
-    expect(index.get('b')).toEqual({ url: 'https://x/anime.jpg', title: '薬屋のひとりごと', mediaType: 'anime' });
+    expect(index.get('b')).toEqual({ url: undefined, title: '薬屋のひとりごと', mediaType: 'light-novel' });
     expect(index.get('c')?.url).toBe('https://x/manga.jpg');
+  });
+
+  it('表紙の無い Web 小説は同じ作品の文庫の表紙を借りる', () => {
+    const editions = [
+      edition({ id: 'a', workId: 'w', mediaType: 'anime', coverUrl: 'https://x/anime.jpg' }),
+      edition({ id: 'n', workId: 'w', mediaType: 'light-novel', coverUrl: 'https://x/novel.jpg' }),
+      edition({ id: 'web', workId: 'w', mediaType: 'web-novel' }),
+    ];
+    expect(buildCoverIndex(editions, works).get('web')).toEqual({ url: 'https://x/novel.jpg', title: '薬屋のひとりごと', mediaType: 'web-novel' });
+    expect(buildCoverIndex([editions[0], editions[2]], works).get('web')?.url).toBeUndefined();
   });
 
   it('作品のどこにも表紙が無ければ、その Edition の文字の表紙', () => {

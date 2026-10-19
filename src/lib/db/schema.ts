@@ -5,6 +5,7 @@ export type Status = 'plan' | 'active' | 'paused' | 'done' | 'dropped';
 export type Source = 'anilist' | 'narou' | 'openbd' | 'ndl' | 'syoboi' | 'kakuyomu' | 'manual';
 export type DatePrecision = 'day' | 'month' | 'year';
 export type AiringStatus = 'NOT_YET_RELEASED' | 'RELEASING' | 'FINISHED' | 'CANCELLED' | 'HIATUS';
+export type WorkOrigin = 'novel' | 'manga' | 'anime';
 
 export interface Work {
   id: string; // nanoid
@@ -12,6 +13,7 @@ export interface Work {
   titleNormalized: string; // 検知照合用（NFKC・空白/記号除去・小文字化）
   aliases: string[]; // 略称・英題
   coverEditionId?: string; // 代表カバーに使う Edition
+  origin?: WorkOrigin; // 原作の媒体（カタログから登録した時だけ）。代表表紙を原作の絵にする
   createdAt: string;
   updatedAt: string; // ISO 8601
 }
@@ -132,6 +134,7 @@ export class TriptychDB extends Dexie {
         releases: 'id, editionId, date, [editionId+kind+externalId]',
       })
       .upgrade(upgradeToV2);
+    this.version(3).upgrade(upgradeToV3);
   }
 }
 
@@ -155,6 +158,34 @@ export async function upgradeToV2(tx: Transaction): Promise<void> {
     .toCollection()
     .modify((d: DetectionEvent) => {
       if (!d.via) d.via = 'title';
+    });
+}
+
+/** 自動で入れた表紙か（同期が次に差し替え得る）。coverFrom が無いまま coverUrl がある＝手で設定。 */
+export function isAutoCover(edition: Pick<Edition, 'coverUrl' | 'syncHints'>): boolean {
+  return !!edition.coverUrl && !!edition.syncHints?.coverFrom;
+}
+
+/** 本・Web 小説の Edition に自動で入った AniList のアニメの表紙か（原作の絵ではない）。手で設定した表紙は含めない。 */
+export function isMisplacedAnimeCover(edition: Pick<Edition, 'mediaType' | 'coverUrl' | 'syncHints'>): boolean {
+  return edition.mediaType !== 'anime' && isAutoCover(edition) && !!edition.coverUrl?.includes('/media/anime/cover/');
+}
+
+/** isMisplacedAnimeCover の表紙と自動の印をその場で外す（ほかの手がかりは残す）。外したら true。 */
+export function dropMisplacedAnimeCover(edition: Edition): boolean {
+  if (!isMisplacedAnimeCover(edition)) return false;
+  delete edition.coverUrl;
+  if (edition.syncHints) delete edition.syncHints.coverFrom;
+  return true;
+}
+
+/** v2 → v3: 本・漫画・Web 小説に借りて入れたアニメの表紙を外し、文字の表紙に戻す。 */
+export async function upgradeToV3(tx: Transaction): Promise<void> {
+  await tx
+    .table('editions')
+    .toCollection()
+    .modify((e: Edition) => {
+      dropMisplacedAnimeCover(e);
     });
 }
 

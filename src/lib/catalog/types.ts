@@ -3,6 +3,8 @@
 export type CatalogKind = 'anime' | 'manga' | 'novel' | 'web-novel' | 'book';
 export type CatalogSort = 'popularity' | 'recent' | 'upcoming' | 'title';
 export type CatalogPrecision = 'day' | 'month' | 'year';
+/** 作品の原作の媒体（collector が決める。古い collector は返さない）。 */
+export type CatalogOrigin = 'novel' | 'manga' | 'anime';
 
 export interface CatalogSourceCount {
   source: string;
@@ -33,7 +35,9 @@ export interface CatalogWorkSummary {
   nextPrecision?: CatalogPrecision | null;
   nextLabel?: string | null;
   popularity: number;
+  /** 原作の媒体の表紙（期で絞った一覧ではその期のアニメの表紙）。 */
   cover?: string | null;
+  origin?: CatalogOrigin | null;
 }
 
 export interface CatalogWorkPage {
@@ -71,6 +75,8 @@ export interface CatalogEntry {
   score?: number | null;
   url?: string | null;
   cover?: string | null;
+  /** AniList の source（その行が何を原作にしているか）。返さない collector もある。 */
+  sourceMaterial?: string | null;
   extra: Record<string, unknown>;
   linkMethod?: string | null;
   linkConfidence?: number | null;
@@ -82,7 +88,17 @@ export interface CatalogWorkDetail {
   kinds: CatalogKind[];
   entries: CatalogEntry[];
   candidates: CatalogEntry[];
+  /** 原作の媒体の表紙。 */
+  cover?: string | null;
+  origin?: CatalogOrigin | null;
+  /** 原作小説の表紙（この作品の小説の本・Web 小説に出す）。 */
+  novelCover?: string | null;
+  /** 漫画の本編の表紙（この作品の漫画の本に出す）。 */
+  mangaCover?: string | null;
 }
+
+/** 本・Web 小説の行に出す、原作小説・漫画の表紙。 */
+export type OriginCovers = Pick<CatalogWorkDetail, 'novelCover' | 'mangaCover'>;
 
 export interface CatalogQuery {
   q?: string;

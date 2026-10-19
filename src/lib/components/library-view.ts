@@ -3,7 +3,7 @@
 import type { Edition, EditionProgress, MediaType, Release, Status, Work } from '../db/schema';
 import { formatReleaseDate, isPastRelease, isValidYmd, todayJst } from '../dates';
 import { normalizeTitle } from '../normalize';
-import { editionCover, workCover, type CoverSource } from './cover';
+import { editionDisplayCover, type CoverEdition, type CoverSource } from './cover';
 import { MEDIA_TYPES, PROGRESS_UNIT_LABELS } from './labels';
 
 type LibraryEdition = Pick<Edition, 'id' | 'workId' | 'mediaType' | 'title' | 'createdAt'>;
@@ -206,18 +206,13 @@ export function saveLibraryLayout(
   }
 }
 
-/**
- * 棚・一覧の表紙。Edition 自身の表紙 → 同じ Work の代表表紙（アニメの表紙を漫画・Web の棚にも借りる）。
- * 題名は Work 名、文字の表紙に出す媒体は Edition のもの。
- */
+/** 一覧の表紙（editionDisplayCover）。漫画・文庫にアニメの絵を借りない。題名は Work 名、媒体は Edition のもの。 */
 export function libraryCover(
   edition: Pick<Edition, 'coverUrl' | 'title' | 'mediaType'>,
-  work: Pick<Work, 'title' | 'coverEditionId'> | undefined,
-  workEditions: readonly Pick<Edition, 'id' | 'coverUrl' | 'mediaType'>[],
+  work: Pick<Work, 'title'> | undefined,
+  workEditions: readonly CoverEdition[],
 ): CoverSource {
-  const own = editionCover(edition, work?.title);
-  if (own.url || !work) return own;
-  return { ...own, url: workCover(work, workEditions).url };
+  return editionDisplayCover(edition, work, workEditions);
 }
 
 /** 進捗の割合（0〜1）。全体数が分からなければ undefined。 */

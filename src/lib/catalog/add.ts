@@ -9,9 +9,11 @@ import {
   listEditions,
   listEditionsByWork,
   updateEditionSyncHints,
+  updateWork,
 } from '../db/store';
+import { catalogOrigin } from './origin';
 import { isRegistered, registeredKeys, toEditionInput, uniqueByRef, type EditionInput } from './register';
-import type { CatalogEntry } from './types';
+import type { CatalogEntry, CatalogOrigin, OriginCovers } from './types';
 
 export interface AddResult {
   /** 追加先の Work。追加するものが無く Work も指定されなかった時は undefined。 */
@@ -32,18 +34,19 @@ const hasNdlRef = (refs: readonly SourceRef[]) => refs.some((r) => r.source === 
 
 /**
  * 本の NDL 参照は同じ種別の Edition に足して1つにまとめる（新刊の同期が二重にならないように）。
- * siblings は同じカタログ作品の全行。表紙の無い本が AniList の表紙を借りるのに使う。
+ * siblings は同じカタログ作品の全行、covers はその原作小説・漫画の表紙。表紙の無い本が原作の表紙を借りるのに使う。
  */
 export function planEditions(
   entries: readonly CatalogEntry[],
   workEditions: readonly Edition[],
   siblings: readonly CatalogEntry[] = [],
+  covers: OriginCovers = {},
 ): EditionPlan {
   const create: EditionInput[] = [];
   const attach: EditionPlan['attach'] = [];
   const books: EditionInput[] = [];
   for (const entry of entries) {
-    const input = toEditionInput(entry, siblings);
+    const input = toEditionInput(entry, siblings, covers);
     if (entry.kind === 'book') books.push(input);
     else create.push({ ...input, sourceRefs: [...input.sourceRefs] });
   }
@@ -65,9 +68,18 @@ export function planEditions(
   return { create, attach };
 }
 
+export interface AddEntriesInput extends OriginCovers {
+  title: string;
+  entries: readonly CatalogEntry[];
+  workId?: string;
+  siblings?: readonly CatalogEntry[];
+  /** カタログ作品の原作の媒体。Work に残して代表表紙を原作の絵にする。 */
+  origin?: CatalogOrigin | null;
+}
+
 /** entries を1つの Work に追加する。登録済みの行は飛ばし、追加するものが無ければ Work も作らない。 */
 export async function addEntriesToLibrary(
-  input: { title: string; entries: readonly CatalogEntry[]; workId?: string; siblings?: readonly CatalogEntry[] },
+  input: AddEntriesInput,
   database: TriptychDB = defaultDB,
 ): Promise<AddResult> {
   return database.transaction('rw', database.works, database.editions, async () => {
@@ -79,9 +91,15 @@ export async function addEntriesToLibrary(
     const existing = input.workId ? await getWork(input.workId, database) : undefined;
     if (fresh.length === 0) return { workId: existing?.id, added: [], skipped };
 
-    const workId = existing?.id ?? (await createWork({ title: input.title }, database)).id;
+    const origin = catalogOrigin(input.origin);
+    const workId = existing?.id ?? (await createWork({ title: input.title, origin }, database)).id;
+    // 検索から作った Work には原作の媒体が無いので補う（すでにあるものは変えない）
+    if (existing && !existing.origin && origin) await updateWork(workId, { origin }, database);
     const workEditions = existing ? await listEditionsByWork(workId, database) : [];
-    const plan = planEditions(fresh, workEditions, input.siblings);
+    const plan = planEditions(fresh, workEditions, input.siblings, {
+      novelCover: input.novelCover,
+      mangaCover: input.mangaCover,
+    });
 
     const added: Edition[] = [];
     for (const { coverFrom, ...edition } of plan.create) {

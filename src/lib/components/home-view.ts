@@ -4,7 +4,7 @@
 import type { Edition, Release, Work } from '../db/schema';
 import type { CatalogQuery } from '../catalog/types';
 import { displayReleaseTime, todayJst } from '../dates';
-import { editionCover, workCover, type CoverSource } from './cover';
+import { editionDisplayCover, type CoverSource } from './cover';
 import { airingInstant, broadcastDayJst, countdownLabel, onAirEditionIds } from './onair';
 import { compareReleases, isTrackedEdition, precisionOf, timeMinutes } from './release-view';
 import { streamServiceName } from './release-history';
@@ -14,10 +14,10 @@ import { displayReleaseLabel } from './labels';
 // 表紙
 // ---------------------------------------------------------------------------
 
-/** Edition ごとの表紙。自身に無ければ同じ作品の代表表紙を借りる（同じ作品を同じ色で並べる）。題名は Work 名。 */
+/** Edition ごとの表紙（editionDisplayCover: 自分の表紙だけ、Web 小説だけ文庫の表紙を借りる）。題名は Work 名。 */
 export function buildCoverIndex(
   editions: readonly Edition[],
-  works: readonly Pick<Work, 'id' | 'title' | 'coverEditionId'>[],
+  works: readonly Pick<Work, 'id' | 'title'>[],
 ): Map<string, CoverSource> {
   const workMap = new Map(works.map((w) => [w.id, w]));
   const byWork = new Map<string, Edition[]>();
@@ -29,14 +29,7 @@ export function buildCoverIndex(
 
   const index = new Map<string, CoverSource>();
   for (const edition of editions) {
-    const work = workMap.get(edition.workId);
-    const own = editionCover(edition, work?.title);
-    if (own.url || !work) {
-      index.set(edition.id, own);
-      continue;
-    }
-    const shared = workCover(work, byWork.get(edition.workId) ?? []);
-    index.set(edition.id, shared.url ? shared : own);
+    index.set(edition.id, editionDisplayCover(edition, workMap.get(edition.workId), byWork.get(edition.workId) ?? []));
   }
   return index;
 }

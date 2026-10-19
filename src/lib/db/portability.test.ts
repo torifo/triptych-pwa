@@ -98,6 +98,23 @@ describe('exportAll -> importAll roundtrip', () => {
     expect(works).toHaveLength(1);
     expect(works[0].title).toBe('転生したらスライムだった件');
   });
+
+  it('古いバックアップで本に自動で入っていたアニメの表紙は外して戻す（手で設定した表紙はそのまま）', async () => {
+    const anime = 'https://s4.anilist.co/file/anilistcdn/media/anime/cover/medium/bx1-a.jpg';
+    const work = await createWork({ title: '薬屋のひとりごと' }, db);
+    const auto = await createEdition({ workId: work.id, mediaType: 'light-novel', title: '文庫', coverUrl: anime }, db);
+    const manual = await createEdition({ workId: work.id, mediaType: 'manga', title: '漫画', coverUrl: anime }, db);
+    await db.editions.update(auto.id, { syncHints: { coverFrom: 'catalog', ndlLine: '' } });
+    const json = JSON.stringify(await exportAll(db));
+
+    const target = createDB(`triptych-portability-cover-${dbCounter}-${Date.now()}`);
+    await importAll(json, 'replace', target);
+
+    const restored = await target.editions.get(auto.id);
+    expect(restored?.coverUrl).toBeUndefined();
+    expect(restored?.syncHints).toEqual({ ndlLine: '' });
+    expect((await target.editions.get(manual.id))?.coverUrl).toBe(anime);
+  });
 });
 
 describe('importAll validation', () => {

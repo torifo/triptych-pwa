@@ -1,7 +1,7 @@
 // 表紙の出どころと「文字の表紙」に組む文字を決める純関数群。
 // 色は表紙の画像だけが持つ（specs/cover-design）。画像が無い・壊れている時は文字の表紙で代える。
 
-import type { Edition, MediaType, Work } from '../db/schema';
+import type { Edition, MediaType, Work, WorkOrigin } from '../db/schema';
 import { MEDIA_TYPE_LABELS } from './labels';
 import { isSafeHttpUrl } from './release-view';
 
@@ -35,8 +35,18 @@ export function coverSrcset(url: string, size: CoverSize): string | undefined {
   return `${match[1]}medium${match[3]} 230w, ${match[1]}large${match[3]} 460w`;
 }
 
-/** 代表表紙に選ぶ媒体の順（色の強い・確実に表紙があるものから）。 */
-const COVER_MEDIA_ORDER: MediaType[] = ['anime', 'manga', 'light-novel', 'web-novel'];
+/** 原作の媒体ごとの代表表紙の順（アニメの絵は原作の表紙が無い時だけ。Web 小説は文字の表紙の媒体名にだけ使う）。 */
+const ORIGIN_MEDIA_ORDER: Record<WorkOrigin, MediaType[]> = {
+  novel: ['light-novel', 'web-novel', 'manga', 'anime'],
+  manga: ['manga', 'light-novel', 'web-novel', 'anime'],
+  anime: ['anime', 'manga', 'light-novel', 'web-novel'],
+};
+
+/** Edition ごとの始まり（アニメは放送開始日。library-view の seasonStartByEdition）。 */
+export type EditionStarts = ReadonlyMap<string, { date: string }>;
+
+/** 表紙を選ぶのに見る Edition の欄（createdAt は同じ媒体の並びに使う）。 */
+export type CoverEdition = Pick<Edition, 'id' | 'coverUrl' | 'mediaType'> & Partial<Pick<Edition, 'createdAt'>>;
 
 /** 表紙の URL（http/https のみ）。無ければ undefined。 */
 export function coverUrlOf(edition: Pick<Edition, 'coverUrl'> | undefined): string | undefined {
@@ -52,19 +62,71 @@ export function editionCover(
   return { url: coverUrlOf(edition), title: workTitle || edition.title, mediaType: edition.mediaType };
 }
 
-/** Work の代表表紙: coverEditionId → 表紙のある Edition（アニメ・漫画・文庫・Web の順）→ 文字の表紙。 */
+/** 同じ媒体の中の並び: 放送開始の早い期（分からない期は後ろ）→ 登録の早いもの。第1期・最初のシリーズを先にする。 */
+function compareEarliest(a: CoverEdition, b: CoverEdition, starts: EditionStarts | undefined): number {
+  const sa = starts?.get(a.id)?.date;
+  const sb = starts?.get(b.id)?.date;
+  if (sa !== sb) {
+    if (!sa) return 1;
+    if (!sb) return -1;
+    return sa < sb ? -1 : 1;
+  }
+  const ca = a.createdAt ?? '';
+  const cb = b.createdAt ?? '';
+  if (ca !== cb) return ca < cb ? -1 : 1;
+  return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+}
+
+/** その媒体で表紙のある最初の Edition。 */
+function earliestCovered<E extends CoverEdition>(
+  editions: readonly E[],
+  mediaType: MediaType,
+  starts: EditionStarts | undefined,
+): E | undefined {
+  return editions
+    .filter((e) => e.mediaType === mediaType && coverUrlOf(e))
+    .sort((a, b) => compareEarliest(a, b, starts))[0];
+}
+
+/** Work の代表表紙: coverEditionId → 原作の媒体の表紙（同じ媒体なら最初の期）→ 文字の表紙（原作の順で最初の媒体）。原作が不明なら小説の順。 */
 export function workCover(
-  work: Pick<Work, 'title' | 'coverEditionId'>,
-  editions: readonly Pick<Edition, 'id' | 'coverUrl' | 'mediaType'>[],
+  work: Pick<Work, 'title' | 'coverEditionId' | 'origin'>,
+  editions: readonly CoverEdition[],
+  starts?: EditionStarts,
 ): CoverSource {
-  const chosen = editions.find((e) => e.id === work.coverEditionId && coverUrlOf(e));
-  const withCover =
-    chosen ??
-    [...editions]
-      .filter((e) => coverUrlOf(e))
-      .sort((a, b) => COVER_MEDIA_ORDER.indexOf(a.mediaType) - COVER_MEDIA_ORDER.indexOf(b.mediaType))[0];
-  const mediaType = withCover?.mediaType ?? editions[0]?.mediaType;
-  return { url: coverUrlOf(withCover), title: work.title, mediaType };
+  const order = ORIGIN_MEDIA_ORDER[work.origin ?? 'novel'] ?? ORIGIN_MEDIA_ORDER.novel;
+  const chosen =
+    editions.find((e) => e.id === work.coverEditionId && coverUrlOf(e)) ??
+    order
+      .filter((m) => m !== 'web-novel')
+      .map((m) => earliestCovered(editions, m, starts))
+      .find((e) => e !== undefined);
+  const mediaType = chosen?.mediaType ?? order.find((m) => editions.some((e) => e.mediaType === m));
+  return { url: coverUrlOf(chosen), title: work.title, mediaType };
+}
+
+/** Edition に出す表紙。自分の表紙だけで他の媒体の絵は借りない（表紙の無い Web 小説だけ同じ作品の文庫の表紙）。 */
+export function editionDisplayCover(
+  edition: Pick<Edition, 'coverUrl' | 'title' | 'mediaType'>,
+  work: Pick<Work, 'title'> | undefined,
+  workEditions: readonly CoverEdition[],
+  starts?: EditionStarts,
+): CoverSource {
+  const own = editionCover(edition, work?.title);
+  if (own.url || edition.mediaType !== 'web-novel') return own;
+  return { ...own, url: coverUrlOf(earliestCovered(workEditions, 'light-novel', starts)) };
+}
+
+/** Work 詳細のヘッダー: 開いている Edition に自分の表紙があればそれ（期ごとの絵・文庫の表紙）、無ければ代表表紙。 */
+export function workHeroCover(
+  work: Pick<Work, 'title' | 'coverEditionId' | 'origin'>,
+  editions: readonly CoverEdition[],
+  selected: Pick<Edition, 'coverUrl' | 'mediaType'> | undefined,
+  starts?: EditionStarts,
+): CoverSource {
+  const own = coverUrlOf(selected);
+  if (selected && own) return { url: own, title: work.title, mediaType: selected.mediaType };
+  return workCover(work, editions, starts);
 }
 
 // 副題の区切り。'Re:ゼロ' のように最初の区切りが早すぎる時は題名全体を使う。

@@ -10,9 +10,9 @@
     ndlSeriesName,
     registeredKeys,
   } from '../lib/catalog/register';
-  import type { CatalogEntry, CatalogKind, CatalogWorkDetail } from '../lib/catalog/types';
+  import type { CatalogEntry, CatalogKind, CatalogWorkDetail, OriginCovers } from '../lib/catalog/types';
   import { KIND_CODES, KIND_LABELS, KIND_ORDER, isAiringNow } from '../lib/catalog/view';
-  import { entryCover, heroCover } from '../lib/components/catalog-cover';
+  import { detailHeroCover, entryCover } from '../lib/components/catalog-cover';
   import CatalogEntryRow from '../lib/components/CatalogEntryRow.svelte';
   import CatalogKindBadge from '../lib/components/CatalogKindBadge.svelte';
   import Cover from '../lib/components/Cover.svelte';
@@ -62,7 +62,10 @@
   const existingWork = $derived(
     detail ? findExistingWork(detail.title, detail.entries, works, editions) : undefined,
   );
-  const hero = $derived(detail ? heroCover(detail.entries, detail.title) : undefined);
+  const hero = $derived(detail ? detailHeroCover(detail) : undefined);
+  const originCovers = $derived<OriginCovers>(
+    detail ? { novelCover: detail.novelCover, mangaCover: detail.mangaCover } : {},
+  );
   const airing = $derived(detail ? isAiringNow(detail.entries) : false);
 
   async function refreshLibrary() {
@@ -114,6 +117,9 @@
         entries: list,
         workId: target,
         siblings: detail.entries,
+        origin: detail.origin,
+        novelCover: detail.novelCover,
+        mangaCover: detail.mangaCover,
       });
       await refreshLibrary();
       addTarget = 'existing'; // 追加後は、できた Work が既存の追加先になる
@@ -200,7 +206,7 @@
             <div class="flex flex-col" style="border-top: 1px solid var(--line);">
               {#each faces as face (face.kind)}
                 {@const faceTitle = face.kind === 'book' ? ndlSeriesName(face.entry) : face.entry.title}
-                {@const faceCover = entryCover(face.entry)}
+                {@const faceCover = entryCover(face.entry, originCovers)}
                 <label
                   class="row-hover flex items-center gap-2 py-2"
                   style="border-bottom: 1px solid var(--line); min-width: 0;"
@@ -263,6 +269,7 @@
             {#each rows as entry (entry.id)}
               <CatalogEntryRow
                 {entry}
+                covers={originCovers}
                 registered={isRegistered(entry, keys)}
                 busy={adding}
                 onadd={(e) => add([e], false)}

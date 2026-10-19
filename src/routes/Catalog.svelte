@@ -449,7 +449,7 @@
             <Cover
               src={item.cover}
               title={item.title}
-              mediaType={summaryMediaType(item.kinds)}
+              mediaType={summaryMediaType(item.kinds, item.origin)}
               size={viewport.wide ? 'fill' : 's'}
               onAir={isAnimeAiring(item.animeStatus)}
             />

@@ -103,6 +103,17 @@ describe('requests', () => {
     expect(String(fetchMock.mock.calls[0][0])).toBe('/api/catalog/works/anilist%3A1');
   });
 
+  it('fills the original-medium fields an older collector leaves out', async () => {
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ id: 'c1', title: 't', kinds: [], entries: [], candidates: [] })));
+    expect(await fetchCatalogWork('c1')).toMatchObject({ origin: null, cover: null, novelCover: null, mangaCover: null });
+
+    const item = { id: 'c1', title: 't', kinds: ['anime'], entryCount: 1, popularity: 0, origin: 'novel' };
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ total: 2, page: 1, per: 30, items: [item, { ...item, origin: 'x' }] })));
+    const page = await fetchCatalogWorks({});
+    expect(page.items.map((i) => i.origin)).toEqual(['novel', null]);
+    expect(page.total).toBe(2);
+  });
+
   it('downloads an export with the bearer token and saves it under the server filename', async () => {
     localStorage.setItem(TOKEN_KEY, 'secret');
     localStorage.setItem('triptych.apiBase', 'http://collector.local');

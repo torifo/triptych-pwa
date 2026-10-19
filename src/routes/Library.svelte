@@ -104,11 +104,11 @@
     return libraryCover(edition, workMap.get(edition.workId), editionsByWork.get(edition.workId) ?? []);
   }
 
-  /** 棚の表紙: 作品の代表表紙（coverEditionId → 表紙のある Edition）。作品が見つからなければ Edition の表紙 */
+  /** 棚の表紙: 作品の代表表紙（原作の媒体の表紙、同じ媒体なら最初の期）。作品が見つからなければ Edition の表紙 */
   function shelfCoverOf(lead: Edition) {
     const work = workMap.get(lead.workId);
     const workEditions = editionsByWork.get(lead.workId) ?? [];
-    return work ? workCover(work, workEditions) : libraryCover(lead, work, workEditions);
+    return work ? workCover(work, workEditions, seasonStarts) : libraryCover(lead, work, workEditions);
   }
 
   /** 'ANIME 2 · 漫画 · 文庫' */

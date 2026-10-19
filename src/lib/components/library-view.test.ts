@@ -217,12 +217,23 @@ describe('libraryCover', () => {
     });
   });
 
-  it('表紙の無い Edition は同じ Work の代表表紙を借り、媒体は自分のまま', () => {
+  it('表紙の無い Edition は他の媒体（アニメ）の表紙を借りず、文字の表紙', () => {
     expect(libraryCover(manga, work, [anime, manga])).toEqual({
-      url: 'https://x/anime.jpg',
+      url: undefined,
       title: '薬屋のひとりごと',
       mediaType: 'manga',
     });
+  });
+
+  it('表紙の無い Web 小説は同じ Work の文庫の表紙を借り、媒体は自分のまま', () => {
+    const novel = { id: 'n', coverUrl: 'https://x/novel.jpg', mediaType: 'light-novel' as const, title: '薬屋のひとりごと' };
+    const web = { id: 'w', coverUrl: undefined, mediaType: 'web-novel' as const, title: '薬屋のひとりごと' };
+    expect(libraryCover(web, work, [anime, novel, web])).toEqual({
+      url: 'https://x/novel.jpg',
+      title: '薬屋のひとりごと',
+      mediaType: 'web-novel',
+    });
+    expect(libraryCover(web, work, [anime, web]).url).toBeUndefined();
   });
 
   it('どこにも表紙が無ければ文字の表紙（url なし）', () => {
