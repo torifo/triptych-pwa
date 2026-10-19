@@ -1180,6 +1180,33 @@ def test_a_side_story_of_the_same_name_joins_the_work(tmp_path):
     assert result["clusters"] == 5
 
 
+def test_a_side_story_name_folds_only_the_forms_of_one_mark(tmp_path):
+    # 実データ: TV は全角チルダ「ぬ～べ～」、映画は波ダッシュ「ぬ〜べ〜」
+    entries = [
+        _anilist(1, "anime", "地獄先生ぬ～べ～", popularity=9000),
+        _anilist(2, "anime", "地獄先生ぬ〜べ〜", popularity=900, format="MOVIE"),
+        _anilist(3, "anime", "鍵人―カギジン―", popularity=500),
+        _anilist(4, "anime", "鍵人—カギジン—", popularity=50, format="SPECIAL"),
+        # 長音と「！」は別の作品を分けることがある（「ピース！」/「ピ－ス！」、「ファミリー」/「ファミリー!」）
+        _anilist(5, "manga", "ピース", popularity=500),
+        _anilist(6, "manga", "ピ－ス", popularity=50),
+        _anilist(7, "manga", "ファミリー", popularity=500),
+        _anilist(8, "manga", "ファミリー!", popularity=50),
+    ]
+    relations = [
+        ("anilist:1", "anilist:2", "SIDE_STORY"),
+        ("anilist:4", "anilist:3", "PARENT"),
+        ("anilist:6", "anilist:5", "PARENT"),
+        ("anilist:8", "anilist:7", "PARENT"),
+    ]
+    conn = _open(tmp_path, entries, relations)
+    run_link(conn, today=TODAY)
+    assert _members(conn, "anilist:1") == {"anilist:1", "anilist:2"}
+    assert _members(conn, "anilist:3") == {"anilist:3", "anilist:4"}
+    for n in (5, 6, 7, 8):
+        assert _members(conn, f"anilist:{n}") == {f"anilist:{n}"}
+
+
 def test_web_novel_links_to_part_split_anilist_novel_by_base_title(tmp_path):
     # 実データ: AniList の原作は部ごと、なろう版は1作品
     entries = [

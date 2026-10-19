@@ -743,9 +743,15 @@ class _UnionFind:
                 self.parent[ra] = rb
 
 
+# 同じ記号の字形違い（波ダッシュ「〜」/ 全角チルダ、各種ダッシュ）だけそろえる。NFKC の後なので「～」「－」は既に ~ / -。
+# 長音「ー」と「！」はそろえない: 別の作品を分けることがある（「ピース！」/「ピ－ス！」、「ファミリー」/「ファミリー!」）
+_MARK_FORMS = str.maketrans({"〜": "~", **{dash: "-" for dash in "‐‑‒–—―−─"}})
+
+
 def _name_key(row: _Row) -> str:
-    """The title without season markers, folded only for width / case / spaces: marks stay ("呪術廻戦≡" is not "呪術廻戦")."""
-    return fold_for_search(strip_season(row.title)).replace(" ", "")
+    """The title without season markers, folded only for width / case / spaces and the forms of one mark ("ぬ～べ～" /
+    "ぬ〜べ〜"): other marks stay ("呪術廻戦≡" is not "呪術廻戦")."""
+    return fold_for_search(strip_season(row.title)).replace(" ", "").translate(_MARK_FORMS)
 
 
 def _load_merge_edges(conn: sqlite3.Connection, rows: list[_Row], index_of: dict[str, int]) -> list[tuple[int, int]]:
