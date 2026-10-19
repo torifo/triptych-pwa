@@ -16,12 +16,12 @@ export function parseCoverUrlInput(raw: string): CoverUrlInput {
   return { ok: true, url };
 }
 
-/** 手で入れた（外した）表紙を保存する。同期が上書きしないよう coverFrom を消す。 */
+/** 手で入れた（外した）表紙を保存する。同期が上書きしないよう coverFrom を消し、外した時は入れ直さない印を付ける。 */
 export async function saveEditionCover(
   editionId: string,
   url: string | undefined,
   database?: Parameters<typeof updateEdition>[2],
 ): Promise<void> {
   await updateEdition(editionId, { coverUrl: url }, database);
-  await updateEditionSyncHints(editionId, { coverFrom: null }, database);
+  await updateEditionSyncHints(editionId, { coverFrom: null, coverCleared: url ? null : true }, database);
 }

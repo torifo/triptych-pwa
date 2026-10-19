@@ -53,6 +53,7 @@ export interface EditionSyncHints {
   syoboiTid?: string; // しょぼいカレンダーの TID
   broadcasts?: BroadcastHint[]; // しょぼかるの今日以降の番組（最大 8・日時順）。局名を次話に添える
   coverFrom?: 'anilist' | 'catalog'; // 自動で入れた表紙の出どころ。未設定で coverUrl がある＝手で設定（同期で上書きしない）
+  coverCleared?: true; // 本人が表紙を外した。同期やカタログで入れ直さない（手で入れ直すと消える）
 }
 
 export interface BroadcastHint {
@@ -168,7 +169,13 @@ export function isAutoCover(edition: Pick<Edition, 'coverUrl' | 'syncHints'>): b
 
 /** 本・Web 小説の Edition に自動で入った AniList のアニメの表紙か（原作の絵ではない）。手で設定した表紙は含めない。 */
 export function isMisplacedAnimeCover(edition: Pick<Edition, 'mediaType' | 'coverUrl' | 'syncHints'>): boolean {
-  return edition.mediaType !== 'anime' && isAutoCover(edition) && !!edition.coverUrl?.includes('/media/anime/cover/');
+  // 古いバックアップの壊れた値（文字列でない URL）で移行が止まり DB を開けなくならないように
+  return (
+    edition.mediaType !== 'anime' &&
+    isAutoCover(edition) &&
+    typeof edition.coverUrl === 'string' &&
+    edition.coverUrl.includes('/media/anime/cover/')
+  );
 }
 
 /** isMisplacedAnimeCover の表紙と自動の印をその場で外す（ほかの手がかりは残す）。外したら true。 */

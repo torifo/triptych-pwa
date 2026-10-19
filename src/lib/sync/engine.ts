@@ -358,6 +358,7 @@ async function syncCover(editionId: string, cover: string | null | undefined, ct
   await database.transaction('rw', database.editions, async () => {
     const current = await getEdition(editionId, database);
     if (!current) return;
+    if (current.syncHints?.coverCleared) return; // 本人が外した表紙は入れ直さない
     if (current.coverUrl?.trim() && current.syncHints?.coverFrom !== 'anilist') return;
     if (current.coverUrl !== url) await updateEdition(editionId, { coverUrl: url }, database);
     await updateEditionSyncHints(editionId, { coverFrom: 'anilist' }, database); // 同じ値なら書かれない

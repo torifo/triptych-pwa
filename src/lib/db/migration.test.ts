@@ -234,6 +234,16 @@ describe('Dexie v2 → v3 移行（本・Web 小説に自動で入ったアニ�
     }
   });
 
+  it('表紙の値が文字列でない古い行があっても DB を開ける（移行で止まらない）', async () => {
+    await seedV2(dbName, [
+      { ...edition('odd', 'manga'), coverUrl: 42 as unknown as string, syncHints: { coverFrom: 'catalog' } },
+      covered('ln', 'light-novel', ANIME_COVER, { coverFrom: 'catalog' }),
+    ]);
+    migrated = createDB(dbName);
+    expect((await migrated.editions.get('odd'))?.coverUrl).toBe(42);
+    expect((await migrated.editions.get('ln'))?.coverUrl).toBeUndefined();
+  });
+
   it('手で設定した表紙・アニメの Edition・アニメ以外の表紙には触れない', async () => {
     await seedV2(dbName, [
       covered('manual', 'light-novel', ANIME_COVER, {}),

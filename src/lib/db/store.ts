@@ -167,6 +167,29 @@ export async function updateEdition(
   return { ...existing, ...patch };
 }
 
+/**
+ * 自動の表紙を入れる（同期・カタログから）。表紙が空で本人が外してもいない時だけ、URL と出どころを一度に書く。
+ * 判定と書き込みを1つのトランザクションにして、その間に本人が入れた表紙を上書きしない。入れたら true。
+ */
+export async function fillAutoCover(
+  editionId: string,
+  url: string,
+  from: NonNullable<EditionSyncHints['coverFrom']>,
+  database: TriptychDB = defaultDB,
+): Promise<boolean> {
+  return database.transaction('rw', database.editions, async () => {
+    const existing = await database.editions.get(editionId);
+    if (!existing || existing.coverUrl?.trim() || existing.syncHints?.coverCleared) return false;
+    const patch: Partial<Edition> = {
+      coverUrl: url,
+      syncHints: { ...existing.syncHints, coverFrom: from },
+      updatedAt: nowISO(),
+    };
+    await database.editions.update(editionId, patch);
+    return true;
+  });
+}
+
 export async function deleteEdition(id: string, database: TriptychDB = defaultDB): Promise<void> {
   await database.transaction('rw', database.editions, database.releases, async () => {
     await database.releases.where('editionId').equals(id).delete();

@@ -24,7 +24,9 @@ import {
   listDetectionEventsByWork,
   updateDetectionEventState,
   deleteDetectionEvent,
+  fillAutoCover,
 } from './store';
+import { saveEditionCover } from '../components/edition-cover';
 
 let db: TriptychDB;
 let dbCounter = 0;
@@ -385,5 +387,41 @@ describe('DetectionEvent CRUD', () => {
     );
     await deleteDetectionEvent(event.id, db);
     expect(await getDetectionEvent(event.id, db)).toBeUndefined();
+  });
+});
+
+
+describe('自動の表紙（fillAutoCover）と本人が外した表紙', () => {
+  async function bareEdition() {
+    const work = await createWork({ title: 'W' }, db);
+    return createEdition({ workId: work.id, mediaType: 'light-novel', title: 'W' }, db);
+  }
+
+  it('表紙が空なら URL と自動の印を一度に入れる', async () => {
+    const edition = await bareEdition();
+    expect(await fillAutoCover(edition.id, 'https://img/ln.jpg', 'catalog', db)).toBe(true);
+    const after = await getEdition(edition.id, db);
+    expect(after?.coverUrl).toBe('https://img/ln.jpg');
+    expect(after?.syncHints?.coverFrom).toBe('catalog');
+  });
+
+  it('その間に本人が表紙を入れていたら上書きしない', async () => {
+    const edition = await bareEdition();
+    await saveEditionCover(edition.id, 'https://img/mine.jpg', db);
+    expect(await fillAutoCover(edition.id, 'https://img/ln.jpg', 'catalog', db)).toBe(false);
+    expect((await getEdition(edition.id, db))?.coverUrl).toBe('https://img/mine.jpg');
+  });
+
+  it('本人が外した表紙は入れ直さない。手で入れ直せば外した印は消える', async () => {
+    const edition = await bareEdition();
+    await fillAutoCover(edition.id, 'https://img/ln.jpg', 'catalog', db);
+    await saveEditionCover(edition.id, undefined, db);
+    const cleared = await getEdition(edition.id, db);
+    expect(cleared?.coverUrl).toBeUndefined();
+    expect(cleared?.syncHints?.coverCleared).toBe(true);
+    expect(await fillAutoCover(edition.id, 'https://img/ln.jpg', 'catalog', db)).toBe(false);
+
+    await saveEditionCover(edition.id, 'https://img/mine.jpg', db);
+    expect((await getEdition(edition.id, db))?.syncHints?.coverCleared).toBeUndefined();
   });
 });

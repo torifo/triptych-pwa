@@ -53,7 +53,7 @@
       // ストレージ判定に失敗してもアプリ本体は継続動作させる
     }
 
-    // 同期（時間がかかる）を待たずに走らせる。触るのは Work の origin だけで、同期とは重ならない
+    // 同期（時間がかかる）を待たずに走らせる。Work の origin と、表紙の無い文庫・漫画にだけ書く（同期はアニメの表紙だけ。表紙は空の時だけトランザクションで入れる）
     void backfillOrigins()
     if (autoSyncPlan(preferences.get('autoSync')).onLaunch) await autoSync()
     else await restoreLastSync()

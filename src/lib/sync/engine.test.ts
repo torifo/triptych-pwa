@@ -1036,6 +1036,18 @@ describe('runSync: アニメの表紙', () => {
     expect(saved?.syncHints).toBeUndefined();
   });
 
+  it('本人が外した表紙（coverCleared）は入れ直さない', async () => {
+    const anime = await setup('W', { mediaType: 'anime', title: 'A', sourceRefs: [anilistRef('1')] });
+    await updateEditionSyncHints(anime.id, { coverCleared: true }, db);
+    mockFetch({ '/api/anilist/media/': () => mediaDto('1', { cover: COVER }) });
+
+    await run();
+
+    const saved = await getEdition(anime.id, db);
+    expect(saved?.coverUrl).toBeUndefined();
+    expect(saved?.syncHints).toEqual({ coverCleared: true });
+  });
+
   it('カタログから借りた表紙（coverFrom が catalog）も上書きしない', async () => {
     const anime = await setup('W', {
       mediaType: 'anime',
