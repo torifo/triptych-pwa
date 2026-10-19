@@ -5,7 +5,9 @@
 of JPRO rows, below).
 
 1. Title matching ties every non-AniList row to at most one AniList entry
-   (syoboi -> anime, narou / kakuyomu -> novel or manga, ndl -> novel or manga).
+   (syoboi -> anime, narou / kakuyomu -> novel or manga, ndl -> novel or manga). A match through an
+   AniList synonym only makes a candidate when the authors differ, and a Web novel joins a manga only
+   when they share an author or the manga says it adapts a novel (an ORIGINAL manga of the title is another work).
 2. Works are made with union-find over the merge relations
    (ADAPTATION / SOURCE / SEQUEL / PREQUEL) and the links whose
    confidence is >= MERGE_THRESHOLD. Weaker links stay in `links` as candidates.
@@ -82,7 +84,8 @@ CONF_SERIES = 0.85
 # 部・巻ごとに分かれた AniList 原作（「本好きの下剋上 ~…~ 第一部」）と副題を除いた題名で一致
 CONF_BASE = 0.82
 BASE_INDEX_MIN = 6  # 副題を除いた AniList 側のキーはこれ以上の長さだけ索引する
-# 作者で裏を取る: 一致すれば上げ、両方に作者がいて一致しない短い題名・副題除去の一致は候補止まりにする
+# 作者で裏を取る: 一致すれば上げ、両方に作者がいて一致しない短い題名・副題除去・別名の一致は候補止まりにする
+# （AniList の別名には英題や、アンソロジーが収める話の題名が入る: 「Secret Garden」/「片恋トライアングル」）
 CONF_AUTHOR_MATCH = 0.95
 CONF_AUTHOR_MISMATCH = 0.6
 SHORT_TITLE_KEY = 10  # 「約束」「短編集」のような短い題名は偶然の一致が多い
@@ -116,6 +119,8 @@ PRECISION_RANK = {"day": 0, "month": 1, "year": 2}
 NOVELIZATION_SOURCES = frozenset(
     {"MANGA", "ANIME", "VISUAL_NOVEL", "VIDEO_GAME", "GAME", "LIVE_ACTION", "COMIC", "MULTIMEDIA_PROJECT", "PICTURE_BOOK"}
 )
+# A manga adapted from one of these may be the comic of a Web novel (an ORIGINAL one is not, whatever its title).
+_NOVEL_SOURCES = frozenset({"LIGHT_NOVEL", "NOVEL", "WEB_NOVEL"})
 
 _FAR = 10**9  # date distance when a date is missing
 
@@ -374,13 +379,18 @@ def _put(cands: _Candidates, idx: int, confidence: float, method: str, key_len: 
         cands[idx] = (confidence, method, key_len)
 
 
-def _check_authors(cands: _Candidates, row: _Row, rows: list[_Row]) -> _Candidates:
+def _check_authors(cands: _Candidates, row: _Row, rows: list[_Row], *, comics: bool = False) -> _Candidates:
+    """`comics`: the candidates are AniList manga a Web novel may be the original of. Without its authors to vouch
+    for it, one is only when it says it adapts a novel ("Southern Cross" is not ミキマキ's 2001 サザンクロス)."""
     checked: _Candidates = {}
     for idx, (confidence, method, key_len) in cands.items():
-        same = _same_author(row.creators, rows[idx].creators)
+        other = rows[idx]
+        same = _same_author(row.creators, other.creators)
         if same:
             confidence = max(confidence, CONF_AUTHOR_MATCH)
-        elif same is False and (key_len < SHORT_TITLE_KEY or method == METHOD_BASE):
+        elif same is False and (key_len < SHORT_TITLE_KEY or method in (METHOD_BASE, METHOD_SYNONYM)):
+            confidence = min(confidence, CONF_AUTHOR_MISMATCH)
+        elif comics and other.source_material not in _NOVEL_SOURCES:
             confidence = min(confidence, CONF_AUTHOR_MISMATCH)
         checked[idx] = (round(confidence, 2), method, key_len)
     return checked
@@ -468,7 +478,7 @@ def _match_web(
     best_novel = _choose(_check_authors(_web_candidates(queries, novel), row, rows), row, rows)
     if best_novel is not None and best_novel[1] >= CONF_WEB_TITLE:
         return best_novel
-    best_manga = _choose(_check_authors(_web_candidates(queries, manga), row, rows), row, rows)
+    best_manga = _choose(_check_authors(_web_candidates(queries, manga), row, rows, comics=True), row, rows)
     # Novels first; a manga only wins with a strictly better match.
     if best_novel is not None and (best_manga is None or best_novel[1] >= best_manga[1]):
         return best_novel
@@ -608,11 +618,11 @@ def _book_candidates(
     heads: dict[int, tuple[int, str]] = {}
     for key, guarded in queries:
         found = [(idx, METHOD_SERIES) for idx in index.primary.get(key, ())]
-        found += [(idx, METHOD_SERIES) for idx in index.synonym.get(key, ())] if synonyms else []
+        found += [(idx, METHOD_SYNONYM) for idx in index.synonym.get(key, ())] if synonyms else []
         found += [(idx, METHOD_BASE) for idx in index.base.get(key, ())]
         for idx, method in found:
             if not guarded:
-                _put(cands, idx, CONF_SERIES if method == METHOD_SERIES else CONF_BASE, method, len(key))
+                _put(cands, idx, CONF_BASE if method == METHOD_BASE else CONF_SERIES, method, len(key))
             elif heads.get(idx, (0, ""))[0] < len(key):
                 heads[idx] = (len(key), method)
     return cands, heads
@@ -877,9 +887,6 @@ def _build_clusters(
 
 def _best(rows: Iterable[_Row]) -> Optional[_Row]:
     return min(rows, key=lambda r: (-r.pop, r.start or date.max, r.id), default=None)
-
-
-_NOVEL_SOURCES = frozenset({"LIGHT_NOVEL", "NOVEL", "WEB_NOVEL"})
 
 
 def _first_covered(rows: Iterable[_Row], named: str = "") -> Optional[_Row]:

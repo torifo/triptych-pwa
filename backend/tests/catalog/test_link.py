@@ -292,7 +292,8 @@ def test_web_novel_methods_and_threshold(tmp_path):
     entries = [
         _anilist(1, "novel", "転生したらスライムだった件", synonyms=["転スラ"], popularity=50000),
         _anilist(2, "novel", "魔導具師ダリヤはうつむかない", popularity=8000),
-        _anilist(3, "manga", "シャングリラ・フロンティア〜クソゲーハンター、神ゲーに挑まんとす〜", popularity=40000),
+        _anilist(3, "manga", "シャングリラ・フロンティア〜クソゲーハンター、神ゲーに挑まんとす〜", popularity=40000,
+                 source_material="WEB_NOVEL"),
         _anilist(4, "novel", "ありふれた職業で世界最強", synonyms=["ありふれた職業で世界最強 WEB版"], popularity=9000),
         _anilist(5, "novel", "本好きの下剋上", popularity=30000),
         _anilist(6, "manga", "本好きの下剋上", popularity=60000),
@@ -1201,12 +1202,67 @@ def test_long_exact_title_survives_an_author_mismatch(tmp_path):
     # AniList の漫画には漫画家しか載らないことが多い
     title = "弱気MAX令嬢なのに、辣腕婚約者様の様子がおかしいのです"
     entries = [
-        _anilist(1, "manga", title, popularity=500, creators=["村田あじ"]),
+        _anilist(1, "manga", title, popularity=500, creators=["村田あじ"], source_material="LIGHT_NOVEL"),
         _entry("narou", "n1", "web-novel", title, creators=["小田 ヒロ"]),
     ]
     conn = _open(tmp_path, entries)
     run_link(conn, today=TODAY)
     assert _cluster(conn, "narou:n1") == _cluster(conn, "anilist:1")
+
+
+def test_a_synonym_match_with_other_authors_stays_a_candidate(tmp_path):
+    # 実データ: AniList の別名は英題や、アンソロジーが収める話の題名
+    entries = [
+        _anilist(1, "manga", "片恋トライアングル", synonyms=["Secret Garden"], popularity=900, creators=["天乃忍"]),
+        _entry("narou", "n1", "web-novel", "Secret Garden", creators=["蜜熊"]),
+        _anilist(2, "manga", "しあわせ夫夫 コミックアンソロジー", synonyms=["温泉で秘密のお泊り、241回目"],
+                 popularity=300, creators=["ながべ", "木下けい子"]),
+        _book("200", "温泉で秘密のお泊り、241回目 1", "温泉で秘密のお泊り、241回目", "manga", "2025-11-01",
+              creators=["未散ソノオ"]),
+        # the same authors: the synonym holds
+        _anilist(3, "manga", "ホリミヤ", synonyms=["堀さんと宮村くん"], popularity=9000, creators=["HERO", "萩原ダイスケ"]),
+        _book("300", "堀さんと宮村くん 1", "堀さんと宮村くん", "manga", "2025-01-01", creators=["HERO"]),
+    ]
+    conn = _open(tmp_path, entries)
+    run_link(conn, today=TODAY)
+    assert _links(conn, "narou:n1") == [("anilist:1", "synonym", 0.6)]
+    assert _links(conn, "ndl:200") == [("anilist:2", "synonym", 0.6)]
+    assert _cluster(conn, "narou:n1") != _cluster(conn, "anilist:1")
+    assert _cluster(conn, "ndl:200") != _cluster(conn, "anilist:2")
+    assert _links(conn, "ndl:300") == [("anilist:3", "synonym", 0.95)]
+    assert _cluster(conn, "ndl:300") == _cluster(conn, "anilist:3")
+
+
+def test_a_web_novel_joins_a_manga_only_as_the_comic_of_a_novel(tmp_path):
+    # 実データ: 英題や短い題名の Web 小説が、題名の同じ別の漫画（オリジナル作品）に入っていた
+    entries = [
+        _anilist(1, "manga", "サザンクロス", title_romaji="Southern Cross", popularity=40, creators=["ミキマキ"]),
+        _entry("kakuyomu", "1", "web-novel", "Southern Cross", creators=["星雪狼"]),
+        _anilist(2, "manga", "推しは推せるときに推せ!", popularity=300, creators=["優風"], source_material="ORIGINAL"),
+        _entry("narou", "n2", "web-novel", "推しは推せるときに推せ。", creators=["つこさん"]),
+        # no author to vouch for it either
+        _anilist(3, "manga", "白", popularity=200, creators=["二宮ひかる"], source_material="ORIGINAL"),
+        _entry("narou", "n3", "web-novel", "白"),
+        # the comic of a (light / web) novel: its artist differs, the title is enough
+        _anilist(4, "manga", "ログアウトしたのはVRMMOじゃなく本物の異世界でした ～現実に戻ってもステータスが壊れている件～",
+                 popularity=900, creators=["ひびぽん", "朱月十話"], source_material="LIGHT_NOVEL"),
+        _entry("narou", "n4", "web-novel", "ログアウトしたのはＶＲＭＭＯじゃなく本物の異世界でした ～現実に戻ってもステータスが壊れている件～",
+               creators=["とーわ"]),
+        # the same author: an original manga also holds
+        _anilist(5, "manga", "魔法使いの約束ごと", popularity=500, creators=["山田花子"], source_material="ORIGINAL"),
+        _entry("narou", "n5", "web-novel", "魔法使いの約束ごと", creators=["山田花子"]),
+    ]
+    conn = _open(tmp_path, entries)
+    run_link(conn, today=TODAY)
+    assert _links(conn, "kakuyomu:1") == [("anilist:1", "title-exact", 0.6)]
+    assert _links(conn, "narou:n2") == [("anilist:2", "title-exact", 0.6)]
+    assert _links(conn, "narou:n3") == [("anilist:3", "title-exact", 0.6)]
+    for web, anilist in (("kakuyomu:1", "anilist:1"), ("narou:n2", "anilist:2"), ("narou:n3", "anilist:3")):
+        assert _cluster(conn, web) != _cluster(conn, anilist)
+    assert _links(conn, "narou:n4") == [("anilist:4", "title-exact", 0.9)]
+    assert _cluster(conn, "narou:n4") == _cluster(conn, "anilist:4")
+    assert _links(conn, "narou:n5") == [("anilist:5", "title-exact", 0.95)]
+    assert _cluster(conn, "narou:n5") == _cluster(conn, "anilist:5")
 
 
 # --------------------------------------------------------------------------- covers: the original medium's
