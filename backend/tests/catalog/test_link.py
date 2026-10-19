@@ -1141,6 +1141,45 @@ def test_parent_relation_does_not_bridge_two_franchises(tmp_path):
     assert _cluster(conn, "anilist:1") != _cluster(conn, "anilist:4")
 
 
+def test_a_side_story_of_the_same_name_joins_the_work(tmp_path):
+    # 実データ: ゆるキャン△ の OVA は各期と SIDE_STORY / PARENT でしかつながらず、同じ題名の Work が3つ並んでいた
+    entries = [
+        _anilist(1, "manga", "ゆるキャン△", popularity=60000, source_material="ORIGINAL"),
+        _anilist(2, "anime", "ゆるキャン△", popularity=150000, source_material="MANGA"),
+        _anilist(3, "anime", "ゆるキャン△ SEASON２", popularity=90000, source_material="MANGA"),
+        _anilist(4, "anime", "ゆるキャン△ SEASON 2 OVA", popularity=8000, source_material="MANGA", format="OVA"),
+        _anilist(5, "anime", "ゆるキャン△ SEASON３", popularity=50000, source_material="MANGA"),
+        _anilist(6, "anime", "ゆるキャン△ SEASON３OVA", popularity=3000, format="OVA"),
+        # a spin-off told apart by a mark is another series ("呪術廻戦≡" / "呪術廻戦")
+        _anilist(7, "manga", "呪術廻戦", popularity=200000, source_material="ORIGINAL"),
+        _anilist(8, "manga", "呪術廻戦≡", popularity=20000, source_material="ORIGINAL"),
+        # a special tied to two franchises joins only the one it is named after
+        _anilist(9, "manga", "ONE PIECE", popularity=200000, source_material="ORIGINAL"),
+        _anilist(10, "anime", "ONE PIECE", popularity=100, format="SPECIAL"),
+        _anilist(11, "manga", "ドラゴンボール", popularity=50000, source_material="ORIGINAL"),
+    ]
+    relations = [
+        ("anilist:2", "anilist:1", "SOURCE"),
+        ("anilist:3", "anilist:2", "PREQUEL"),
+        ("anilist:5", "anilist:3", "PREQUEL"),
+        ("anilist:3", "anilist:4", "SIDE_STORY"),
+        ("anilist:4", "anilist:3", "PARENT"),
+        ("anilist:5", "anilist:6", "SIDE_STORY"),
+        ("anilist:6", "anilist:5", "PARENT"),
+        ("anilist:8", "anilist:7", "PARENT"),
+        ("anilist:10", "anilist:9", "PARENT"),
+        ("anilist:10", "anilist:11", "PARENT"),
+    ]
+    conn = _open(tmp_path, entries, relations)
+    result = run_link(conn, today=TODAY)
+    assert _members(conn, "anilist:1") == {f"anilist:{n}" for n in range(1, 7)}
+    assert _members(conn, "anilist:7") == {"anilist:7"}
+    assert _members(conn, "anilist:8") == {"anilist:8"}
+    assert _members(conn, _cluster(conn, "anilist:9")) == {"anilist:9", "anilist:10"}
+    assert _members(conn, "anilist:11") == {"anilist:11"}
+    assert result["clusters"] == 5
+
+
 def test_web_novel_links_to_part_split_anilist_novel_by_base_title(tmp_path):
     # 実データ: AniList の原作は部ごと、なろう版は1作品
     entries = [

@@ -9,7 +9,8 @@ of JPRO rows, below).
    AniList synonym only makes a candidate when the authors differ, and a Web novel joins a manga only
    when they share an author or the manga says it adapts a novel (an ORIGINAL manga of the title is another work).
 2. Works are made with union-find over the merge relations
-   (ADAPTATION / SOURCE / SEQUEL / PREQUEL) and the links whose
+   (ADAPTATION / SOURCE / SEQUEL / PREQUEL, and SIDE_STORY / PARENT between entries of the
+   same name, season markers aside: a season's OVA) and the links whose
    confidence is >= MERGE_THRESHOLD. Weaker links stay in `links` as candidates.
 3. NDL books that joined no work are grouped per (series, kindHint, line). A JPRO book
    (`extra.via = "jpro"`, not catalogued yet) joins its series' catalogued shelf when its
@@ -52,6 +53,7 @@ from typing import Any, Iterable, Optional
 from .text import (
     VolumeTitle,
     align_line,
+    fold_for_search,
     normalize_title,
     search_text,
     split_volume_title,
@@ -67,6 +69,9 @@ JPRO_VIA = "jpro"  # extra.via of an NDL row the JPRO harvester wrote (not catal
 MERGE_THRESHOLD = 0.8
 # PARENT は SIDE_STORY / SPIN_OFF の逆向き。統合に使うと共通の特番を介して別シリーズがつながる
 MERGE_RELATIONS = ("ADAPTATION", "SOURCE", "SEQUEL", "PREQUEL")
+# ただし相手と同じ名前（期の表記を除く。記号は残す）の SIDE_STORY / PARENT は統合する: 各期の OVA
+# （「ゆるキャン△ SEASON 2 OVA」）は入り、記号で分けたスピンオフ（「呪術廻戦≡」）や別の名前の作品は入らない
+NAMED_RELATIONS = ("SIDE_STORY", "PARENT")
 
 # syoboi <-> AniList anime
 CONF_TITLE_YEAR = 0.95
@@ -738,17 +743,26 @@ class _UnionFind:
                 self.parent[ra] = rb
 
 
-def _load_merge_edges(conn: sqlite3.Connection, index_of: dict[str, int]) -> list[tuple[int, int]]:
+def _name_key(row: _Row) -> str:
+    """The title without season markers, folded only for width / case / spaces: marks stay ("呪術廻戦≡" is not "呪術廻戦")."""
+    return fold_for_search(strip_season(row.title)).replace(" ", "")
+
+
+def _load_merge_edges(conn: sqlite3.Connection, rows: list[_Row], index_of: dict[str, int]) -> list[tuple[int, int]]:
     cur = conn.cursor()
     cur.row_factory = None
-    marks = ", ".join("?" * len(MERGE_RELATIONS))
+    types = MERGE_RELATIONS + NAMED_RELATIONS
+    marks = ", ".join("?" * len(types))
     edges: list[tuple[int, int]] = []
-    for from_id, to_id in cur.execute(
-        f"SELECT from_id, to_id FROM relations WHERE relation_type IN ({marks})", MERGE_RELATIONS
+    for from_id, to_id, relation in cur.execute(
+        f"SELECT from_id, to_id, relation_type FROM relations WHERE relation_type IN ({marks})", types
     ):
         a, b = index_of.get(from_id), index_of.get(to_id)
-        if a is not None and b is not None:
-            edges.append((a, b))
+        if a is None or b is None:
+            continue
+        if relation in NAMED_RELATIONS and (not _name_key(rows[a]) or _name_key(rows[a]) != _name_key(rows[b])):
+            continue
+        edges.append((a, b))
     return edges
 
 
@@ -1102,7 +1116,7 @@ def run_link(conn: sqlite3.Connection, *, today: date) -> dict[str, Any]:
     cur.row_factory = None
     rows = [_Row(idx, record) for idx, record in enumerate(cur.execute(_ENTRY_SQL))]
     index_of = {row.id: row.idx for row in rows}
-    edges = _load_merge_edges(conn, index_of)
+    edges = _load_merge_edges(conn, rows, index_of)
 
     keys = _Keys()  # shared: the work index of JPRO books reuses the keys the matching made
     links = _match_all(rows, keys)
