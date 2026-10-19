@@ -87,7 +87,10 @@ CREATE TABLE IF NOT EXISTS cluster_summary (
   next_precision  TEXT,
   next_label      TEXT,
   popularity      INTEGER NOT NULL DEFAULT 0, -- max AniList popularity in the cluster (others scaled to 0)
-  cover           TEXT
+  cover           TEXT,                       -- the original medium's cover (novel / manga / the first anime season)
+  origin          TEXT,                       -- the original medium: novel / manga / anime (NULL when unknown)
+  novel_cover     TEXT,                       -- the original novel's cover (AniList NOVEL), for the work's novel books
+  manga_cover     TEXT                        -- the main manga's cover, for the work's manga books
 );
 CREATE INDEX IF NOT EXISTS summary_pop ON cluster_summary(popularity DESC);
 CREATE INDEX IF NOT EXISTS summary_next ON cluster_summary(next_date);

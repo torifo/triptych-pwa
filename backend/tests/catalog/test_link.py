@@ -164,7 +164,11 @@ def test_kusuriya_becomes_one_work_with_every_face(tmp_path):
     assert s["seasons"] == ["2023-FALL", "2025-WINTER", "2026-FALL"]
     assert (s["next_date"], s["next_precision"], s["next_label"]) == ("2026-10-17", "day", "第2話")
     assert s["popularity"] == 200000
-    assert s["cover"] == "https://img/anime1.jpg"
+    # the anime and the manga say the source is a (light / web) novel: the novel's cover stands for the work
+    assert s["origin"] == "novel"
+    assert s["cover"] == "https://img/novel.jpg"
+    assert s["novel_cover"] == "https://img/novel.jpg"
+    assert s["manga_cover"] == "https://img/manga1.jpg"  # the main manga (the spin-off has no cover)
 
     assert _links(conn, "syoboi:6900") == [("anilist:110", "title-year", 0.95)]
     assert _links(conn, "syoboi:7300") == [("anilist:111", "title-year", 0.95)]
@@ -898,7 +902,9 @@ def test_representative_title_skips_novelizations(tmp_path):
     s = _summary(conn, "anilist:1")
     assert s["title"] == "鬼滅の刃"
     assert s["popularity"] == 500000
-    assert s["cover"] == "https://img/manga.jpg"  # the most popular AniList entry that has a cover
+    assert s["origin"] == "manga"
+    assert s["cover"] == "https://img/manga.jpg"  # the original manga, not the (more popular) anime
+    assert s["novel_cover"] is None  # the novelization has no cover
 
 
 # --------------------------------------------------------------------------- stability
@@ -1201,3 +1207,78 @@ def test_long_exact_title_survives_an_author_mismatch(tmp_path):
     conn = _open(tmp_path, entries)
     run_link(conn, today=TODAY)
     assert _cluster(conn, "narou:n1") == _cluster(conn, "anilist:1")
+
+
+# --------------------------------------------------------------------------- covers: the original medium's
+
+
+def _cover_summary(tmp_path, entries) -> dict:
+    relations = [(entries[0].id, e.id, "ADAPTATION") for e in entries[1:]]
+    conn = _open(tmp_path, entries, relations)
+    run_link(conn, today=TODAY)
+    return _summary(conn, _cluster(conn, entries[0].id))
+
+
+def test_a_light_novel_work_shows_the_novel_even_when_the_anime_is_far_more_popular(tmp_path):
+    s = _cover_summary(tmp_path, [
+        _anilist(1, "novel", "お隣", popularity=9000, start_date="2019-06-15", source_material="WEB_NOVEL", cover="https://img/ln.jpg"),
+        _anilist(2, "anime", "お隣", popularity=300000, start_date="2023-01-07", source_material="LIGHT_NOVEL", cover="https://img/s1.jpg"),
+        _anilist(3, "anime", "お隣 第2期", popularity=90000, start_date="2026-01-10", source_material="LIGHT_NOVEL", cover="https://img/s2.jpg"),
+        _anilist(4, "manga", "お隣", popularity=20000, start_date="2020-03-01", source_material="LIGHT_NOVEL", cover="https://img/manga.jpg"),
+    ])
+    assert (s["origin"], s["cover"], s["novel_cover"], s["manga_cover"]) == ("novel", "https://img/ln.jpg", "https://img/ln.jpg", "https://img/manga.jpg")
+
+
+def test_a_manga_work_shows_the_first_manga_not_a_season_visual(tmp_path):
+    s = _cover_summary(tmp_path, [
+        _anilist(1, "manga", "ゆるキャン△", popularity=50000, start_date="2015-07-24", source_material="ORIGINAL", cover="https://img/manga.jpg"),
+        _anilist(2, "anime", "ゆるキャン△", popularity=200000, start_date="2018-01-04", source_material="MANGA", cover="https://img/s1.jpg"),
+        _anilist(3, "anime", "ゆるキャン△ SEASON3", popularity=80000, start_date="2024-04-04", source_material="MANGA", cover="https://img/s3.jpg"),
+    ])
+    assert (s["origin"], s["cover"], s["manga_cover"]) == ("manga", "https://img/manga.jpg", "https://img/manga.jpg")
+
+
+def test_an_anime_original_shows_its_first_season(tmp_path):
+    s = _cover_summary(tmp_path, [
+        _anilist(1, "anime", "オリジナル", popularity=100000, start_date="2020-04-01", source_material="ORIGINAL", cover="https://img/s1.jpg"),
+        _anilist(2, "anime", "オリジナル 2", popularity=150000, start_date="2022-04-01", source_material="ORIGINAL", cover="https://img/s2.jpg"),
+        _anilist(3, "manga", "オリジナル", popularity=5000, start_date="2020-06-01", source_material="ANIME", cover="https://img/manga.jpg"),
+    ])
+    assert (s["origin"], s["cover"]) == ("anime", "https://img/s1.jpg")
+
+
+def test_without_any_source_the_medium_that_came_first_is_the_original(tmp_path):
+    s = _cover_summary(tmp_path, [
+        _anilist(1, "manga", "古い漫画", popularity=1000, start_date="2010-01-01", cover="https://img/manga.jpg"),
+        _anilist(2, "anime", "古い漫画", popularity=90000, start_date="2014-01-01", cover="https://img/anime.jpg"),
+    ])
+    assert (s["origin"], s["cover"]) == ("manga", "https://img/manga.jpg")
+
+
+def test_a_novel_work_without_a_novel_cover_falls_back_to_the_manga_then_the_anime(tmp_path):
+    s = _cover_summary(tmp_path, [
+        _anilist(1, "anime", "表紙なし", popularity=90000, start_date="2022-01-01", source_material="LIGHT_NOVEL", cover="https://img/anime.jpg"),
+        _anilist(2, "manga", "表紙なし", popularity=1000, start_date="2019-01-01", source_material="LIGHT_NOVEL", cover="https://img/manga.jpg"),
+        _anilist(3, "novel", "表紙なし", popularity=500, start_date="2017-01-01", source_material="ORIGINAL"),
+    ])
+    assert (s["origin"], s["cover"], s["novel_cover"]) == ("novel", "https://img/manga.jpg", None)
+
+
+def test_the_novel_cover_prefers_the_original_novel_over_a_novelization(tmp_path):
+    s = _cover_summary(tmp_path, [
+        _anilist(1, "novel", "原作", popularity=500, start_date="2016-01-01", source_material="ORIGINAL", cover="https://img/ln.jpg"),
+        _anilist(2, "novel", "原作 ノベライズ", popularity=9000, start_date="2014-01-01", source_material="ANIME", cover="https://img/novelization.jpg"),
+        _anilist(3, "anime", "原作", popularity=90000, start_date="2018-01-01", source_material="LIGHT_NOVEL", cover="https://img/anime.jpg"),
+    ])
+    assert s["novel_cover"] == "https://img/ln.jpg"
+
+
+def test_a_cover_comes_from_an_entry_named_after_the_work_before_an_older_stray(tmp_path):
+    # a different manga that ended up in the work (older, same source) must not stand for its manga books
+    s = _cover_summary(tmp_path, [
+        _anilist(1, "novel", "お隣の天使様", popularity=30000, start_date="2019-06-15", source_material="WEB_NOVEL", cover="https://img/ln.jpg"),
+        _anilist(2, "manga", "クールなお隣さん", popularity=196, start_date="2019-06-14", source_material="LIGHT_NOVEL", cover="https://img/stray.jpg"),
+        _anilist(3, "manga", "お隣の天使様", popularity=15260, start_date="2022-01-06", source_material="LIGHT_NOVEL", cover="https://img/manga.jpg"),
+        _anilist(4, "manga", "お隣の天使様 after", popularity=2911, start_date="2023-12-07", source_material="LIGHT_NOVEL", cover="https://img/after.jpg"),
+    ])
+    assert s["manga_cover"] == "https://img/manga.jpg"

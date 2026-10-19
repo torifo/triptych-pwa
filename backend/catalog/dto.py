@@ -41,7 +41,8 @@ class CatalogWorkSummary(BaseModel):
     nextPrecision: Optional[Literal["day", "month", "year"]] = None
     nextLabel: Optional[str] = None
     popularity: int = 0
-    cover: Optional[str] = None
+    cover: Optional[str] = None  # the original medium's cover (or the season's, when the list is narrowed to one)
+    origin: Optional[Literal["novel", "manga", "anime"]] = None  # the original medium
 
 
 class CatalogWorkPage(BaseModel):
@@ -91,6 +92,10 @@ class CatalogWorkDetail(BaseModel):
     kinds: list[CatalogKind]
     entries: list[CatalogEntry]  # members, AniList first then by kind / date
     candidates: list[CatalogEntry] = Field(default_factory=list)  # low-confidence links (< 0.8)
+    cover: Optional[str] = None  # the original medium's cover
+    origin: Optional[Literal["novel", "manga", "anime"]] = None
+    novelCover: Optional[str] = None  # the original novel's cover: for the work's novel books and web novels
+    mangaCover: Optional[str] = None  # the main manga's cover: for the work's manga books
 
 
 class CatalogEvent(BaseModel):

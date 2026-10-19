@@ -879,6 +879,77 @@ def _best(rows: Iterable[_Row]) -> Optional[_Row]:
     return min(rows, key=lambda r: (-r.pop, r.start or date.max, r.id), default=None)
 
 
+_NOVEL_SOURCES = frozenset({"LIGHT_NOVEL", "NOVEL", "WEB_NOVEL"})
+
+
+def _first_covered(rows: Iterable[_Row], named: str = "") -> Optional[_Row]:
+    """The first series (earliest start, then the more popular) among rows that have a cover.
+
+    Rows named after the work (`named`, a normalized title) come first: an older stray that ended up in the work
+    must not stand for it.
+    """
+
+    def is_named(row: _Row) -> bool:
+        return bool(named) and normalize_title(row.title or "").startswith(named)
+
+    return min(
+        (r for r in rows if r.cover),
+        key=lambda r: (not is_named(r), r.start or date.max, -r.pop, r.id),
+        default=None,
+    )
+
+
+def _origin(anilist: list[_Row]) -> Optional[str]:
+    """The work's original medium. The adaptations' AniList `source` decides; without one, the medium that came first."""
+    told = {r.source_material for r in anilist if r.kind in ("anime", "manga")}
+    if told & _NOVEL_SOURCES:
+        return "novel"
+    if "MANGA" in told:
+        return "manga"
+    # a novel / manga that calls itself the original (a novel from a web novel counts); both: the earlier one
+    claims = [
+        r for r in anilist
+        if (r.kind == "manga" and r.source_material == "ORIGINAL")
+        or (r.kind == "novel" and r.source_material in _NOVEL_SOURCES | {"ORIGINAL"})
+    ]
+    if claims:
+        return min(claims, key=lambda r: (r.start or date.max, -r.pop, r.id)).kind
+    if any(r.kind == "anime" and r.source_material == "ORIGINAL" for r in anilist):
+        return "anime"
+    candidates = [
+        r for r in anilist
+        if r.kind in ("anime", "manga") or (r.kind == "novel" and r.source_material not in NOVELIZATION_SOURCES)
+    ]
+    first = min(candidates, key=lambda r: (r.start or date.max, -r.pop, r.id), default=None)
+    return first.kind if first else None
+
+
+def _covers(anilist: list[_Row], named: str = "") -> tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
+    """(origin, the work's cover, novel cover, manga cover). The original's art stands for the work; adaptations are not.
+
+    A novel-origin work (web novels that got a light novel included) shows the original novel, a manga-origin work its
+    first manga, an anime original its first season; a medium without a cover gives way to the next one.
+    """
+    novels = [r for r in anilist if r.kind == "novel"]
+    originals = [r for r in novels if r.source_material not in NOVELIZATION_SOURCES]
+    novel = _first_covered(originals, named) or _first_covered(novels, named)
+    manga = _first_covered((r for r in anilist if r.kind == "manga"), named)
+    anime = _first_covered((r for r in anilist if r.kind == "anime"), named)
+    origin = _origin(anilist)
+    order = {
+        "novel": (_first_covered(originals, named), manga, anime),
+        "manga": (manga, anime, novel),
+        "anime": (anime, manga, novel),
+    }.get(origin or "", (_best(r for r in anilist if r.cover),))
+    chosen = next((r for r in order if r is not None), None)
+    return (
+        origin,
+        chosen.cover if chosen else None,
+        novel.cover if novel else None,
+        manga.cover if manga else None,
+    )
+
+
 def _display_title(row: _Row) -> str:
     title = row.title
     if row.source == "ndl":
@@ -975,7 +1046,7 @@ def _summary_row(
 
     anilist = [r for r in members if r.source == "anilist"]
     popularity = max((r.pop for r in anilist), default=0)
-    covered = _best(r for r in anilist if r.cover)
+    origin, cover, novel_cover, manga_cover = _covers(anilist, normalize_title(title))
 
     return (
         cluster_id,
@@ -996,7 +1067,10 @@ def _summary_row(
         upcoming[1] if upcoming else None,
         upcoming[2] if upcoming else None,
         popularity,
-        covered.cover if covered else None,
+        cover,
+        origin,
+        novel_cover,
+        manga_cover,
     )
 
 
@@ -1076,8 +1150,8 @@ def run_link(conn: sqlite3.Connection, *, today: date) -> dict[str, Any]:
         conn.executemany(
             "INSERT INTO cluster_summary (cluster_id, title, title_norm, kinds, has_anime, has_manga, "
             "has_novel, has_web_novel, has_book, entry_count, anime_status, first_year, last_year, "
-            "seasons, next_date, next_precision, next_label, popularity, cover) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "seasons, next_date, next_precision, next_label, popularity, cover, origin, novel_cover, manga_cover) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             summary_rows,
         )
         conn.executemany("INSERT INTO entries_fts (entry_id, cluster_id, text) VALUES (?, ?, ?)", fts_rows)

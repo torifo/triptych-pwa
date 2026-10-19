@@ -49,6 +49,7 @@ def build_events_catalog(path: Path) -> Path:
             book("9784000000017", "薬屋のひとりごと(17)", "2026-11-01"),
         ],
         first_year=2011, last_year=2026, popularity=90000, cover="https://img/w1.jpg",
+        origin="novel", novel_cover="https://img/ln1.jpg", manga_cover="https://img/manga1.jpg",
     )
     add_work(
         conn, "anilist:2", "無職転生",
@@ -246,7 +247,7 @@ def test_a_book_event_has_every_field(events_catalog, client):
         "date": "2026-10-31",
         "time": None,
         "label": "16巻",
-        "cover": "https://img/w1.jpg",  # the work's cover
+        "cover": "https://img/ln1.jpg",  # a novel book: the work's novel cover, never an anime visual
         "popularity": 90000,
         "estimated": False,
     }
@@ -632,3 +633,31 @@ def test_a_catalog_that_is_only_harvested_has_no_events_and_does_not_fail(catalo
 )
 def test_season_label(title, expected):
     assert catalog_api._season_label(title) == expected
+
+
+def test_a_book_takes_the_novel_or_manga_cover_of_its_work_never_an_anime(catalog_path, client):
+    conn = db.connect(catalog_path)
+    add_work(
+        conn, "anilist:60", "お隣",
+        [
+            E("anilist", "601", "anime", "お隣", cover="https://img/s1.jpg"),
+            E("ndl", "9784000000601", "book", "お隣 12", format="小説", start_date="2026-10-15", start_precision="day"),
+            E("ndl", "9784000000602", "book", "お隣 7", format="漫画", start_date="2026-10-16", start_precision="day"),
+            E("ndl", "9784000000603", "book", "お隣 公式ガイド", format="その他", start_date="2026-10-17", start_precision="day"),
+        ],
+        popularity=300000, cover="https://img/ln.jpg", origin="novel", novel_cover="https://img/ln.jpg", manga_cover="https://img/manga.jpg",
+    )
+    add_work(
+        conn, "anilist:61", "漫画なし",
+        [
+            E("anilist", "611", "anime", "漫画なし", cover="https://img/anime.jpg"),
+            E("ndl", "9784000000611", "book", "漫画なし 1", format="漫画", start_date="2026-10-15", start_precision="day"),
+        ],
+        popularity=1000, cover="https://img/anime.jpg", origin="anime",
+    )
+    conn.close()
+    covers = {item["entryId"]: item["cover"] for item in book_items(client)}
+    assert covers["ndl:9784000000601"] == "https://img/ln.jpg"
+    assert covers["ndl:9784000000602"] == "https://img/manga.jpg"
+    assert covers["ndl:9784000000603"] is None  # neither a novel nor a manga: the text cover
+    assert covers["ndl:9784000000611"] is None  # no manga cover in the work: not the anime's

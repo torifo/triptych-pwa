@@ -53,6 +53,9 @@ def add_work(
     next_label: Optional[str] = None,
     popularity: int = 0,
     cover: Optional[str] = None,
+    origin: Optional[str] = None,
+    novel_cover: Optional[str] = None,
+    manga_cover: Optional[str] = None,
 ) -> None:
     """Inserts members, their cluster rows, FTS rows and the cluster_summary row."""
     db.upsert_entries(conn, members)
@@ -66,8 +69,8 @@ def add_work(
     conn.execute(
         "INSERT INTO cluster_summary (cluster_id, title, title_norm, kinds, has_anime, has_manga, has_novel, "
         "has_web_novel, has_book, entry_count, anime_status, first_year, last_year, seasons, next_date, "
-        "next_precision, next_label, popularity, cover) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "next_precision, next_label, popularity, cover, origin, novel_cover, manga_cover) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
             cluster_id,
             title,
@@ -88,6 +91,9 @@ def add_work(
             next_label,
             popularity,
             cover,
+            origin,
+            novel_cover,
+            manga_cover,
         ),
     )
     conn.commit()
@@ -356,6 +362,7 @@ def test_work_summary_shape(built, client):
         "nextLabel": "第3期",
         "popularity": 90000,
         "cover": None,
+        "origin": None,
     }
 
 
@@ -1107,3 +1114,43 @@ def test_stats_counts_jpro_rows_within_ndl(catalog_path, client):
     assert counts["ndl"] == 2
     assert counts["jpro"] == 1  # ndl の内数
     assert body["entries"] == 2  # 二重に足さない
+
+
+# -- the original medium and its covers ---------------------------------------------------
+
+
+def _origin_work(path) -> None:
+    conn = db.connect(path)
+    add_work(
+        conn, "anilist:900", "お隣",
+        [E("anilist", "900", "novel", "お隣", cover="https://img/ln.jpg"), E("anilist", "901", "anime", "お隣", cover="https://img/s1.jpg")],
+        popularity=300000, cover="https://img/ln.jpg", origin="novel", novel_cover="https://img/ln.jpg", manga_cover="https://img/manga.jpg",
+    )
+    conn.close()
+
+
+def test_works_carry_the_original_medium(catalog_path, client):
+    _origin_work(catalog_path)
+    item = next(i for i in client.get("/api/catalog/works", params={"q": "お隣"}).json()["items"] if i["id"] == "anilist:900")
+    assert (item["origin"], item["cover"]) == ("novel", "https://img/ln.jpg")
+
+
+def test_detail_carries_the_originals_covers(catalog_path, client):
+    _origin_work(catalog_path)
+    body = client.get("/api/catalog/works/anilist:900").json()
+    assert (body["cover"], body["origin"], body["novelCover"], body["mangaCover"]) == (
+        "https://img/ln.jpg", "novel", "https://img/ln.jpg", "https://img/manga.jpg",
+    )
+
+
+def test_a_catalog_linked_before_the_origin_columns_still_answers(catalog_path, client):
+    _origin_work(catalog_path)
+    conn = db.connect(catalog_path)
+    for column in ("origin", "novel_cover", "manga_cover"):
+        conn.execute(f"ALTER TABLE cluster_summary DROP COLUMN {column}")
+    conn.commit()
+    conn.close()
+    item = next(i for i in client.get("/api/catalog/works", params={"q": "お隣"}).json()["items"] if i["id"] == "anilist:900")
+    assert item["origin"] is None and item["cover"] == "https://img/ln.jpg"
+    body = client.get("/api/catalog/works/anilist:900").json()
+    assert (body["origin"], body["novelCover"], body["mangaCover"]) == (None, None, None)

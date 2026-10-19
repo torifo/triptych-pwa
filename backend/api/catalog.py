@@ -277,6 +277,31 @@ _SUMMARY_COLUMNS = (
 )
 
 
+_ORIGIN_COLUMNS = ("origin", "novel_cover", "manga_cover")
+_ORIGINS = ("novel", "manga", "anime")
+_NOVEL_BOOK_FORMATS = ("小説", "文庫")
+_MANGA_BOOK_FORMATS = ("漫画", "コミック")
+
+
+def _origin_columns(conn: sqlite3.Connection, alias: str = "cs") -> str:
+    """The original medium's columns, or NULLs on a catalog linked before they existed (the API never alters the DB)."""
+    present = {row[1] for row in conn.execute("PRAGMA table_info(cluster_summary)")}
+    return ", ".join(f"{alias}.{name}" if name in present else f"NULL AS {name}" for name in _ORIGIN_COLUMNS)
+
+
+def _origin(value: Any) -> Optional[str]:
+    return value if value in _ORIGINS else None
+
+
+def _book_cover(book_format: Any, novel_cover: Any, manga_cover: Any) -> Optional[str]:
+    """A book shows its work's novel or manga cover by its format; never another medium's art (an anime visual)."""
+    if book_format in _NOVEL_BOOK_FORMATS:
+        return novel_cover or None
+    if book_format in _MANGA_BOOK_FORMATS:
+        return manga_cover or None
+    return None
+
+
 def _kinds(raw: Optional[str]) -> list[str]:
     try:
         values = json.loads(raw or "[]")
@@ -343,6 +368,7 @@ def _summary(row: sqlite3.Row, cover: Optional[str] = None) -> CatalogWorkSummar
         nextLabel=row["next_label"],
         popularity=row["popularity"] or 0,
         cover=cover or row["cover"],
+        origin=_origin(row["origin"]) if "origin" in row.keys() else None,
     )
 
 
@@ -402,14 +428,14 @@ def list_works(
             source = f"{_NEXT_BOOK_CTE}SELECT {{cols}} FROM cluster_summary cs JOIN nb ON nb.cid = cs.cluster_id {where_sql}"
             total = conn.execute(source.format(cols="COUNT(*)"), params).fetchone()[0]
             rows = conn.execute(
-                source.format(cols=f"{_SUMMARY_COLUMNS}, nb.d AS book_date, nb.p AS book_precision, nb.t AS book_title")
+                source.format(cols=f"{_SUMMARY_COLUMNS}, {_origin_columns(conn)}, nb.d AS book_date, nb.p AS book_precision, nb.t AS book_title")
                 + " ORDER BY nb.d_end, nb.d, cs.popularity DESC, cs.title, cs.cluster_id LIMIT :limit OFFSET :offset",
                 {**params, "limit": per, "offset": (page - 1) * per},
             ).fetchall()
         else:
             total = conn.execute(f"SELECT COUNT(*) FROM cluster_summary cs {where_sql}", params).fetchone()[0]
             rows = conn.execute(
-                f"SELECT {_SUMMARY_COLUMNS} FROM cluster_summary cs {where_sql} "
+                f"SELECT {_SUMMARY_COLUMNS}, {_origin_columns(conn)} FROM cluster_summary cs {where_sql} "
                 f"ORDER BY {_ORDER_BY[sort]} LIMIT :limit OFFSET :offset",
                 {**params, "limit": per, "offset": (page - 1) * per},
             ).fetchall()
@@ -494,7 +520,9 @@ def _best_links(rows: Iterable[sqlite3.Row]) -> dict[str, tuple[str, float]]:
 def get_work(cluster_id: str) -> CatalogWorkDetail:
     with _open() as conn:
         summary = conn.execute(
-            "SELECT cluster_id, title, kinds FROM cluster_summary WHERE cluster_id = ?", (cluster_id,)
+            f"SELECT cs.cluster_id, cs.title, cs.kinds, cs.cover, {_origin_columns(conn)} "
+            "FROM cluster_summary cs WHERE cs.cluster_id = ?",
+            (cluster_id,),
         ).fetchone()
         if summary is None:
             raise HTTPException(status_code=404, detail=WORK_NOT_FOUND)
@@ -542,6 +570,10 @@ def get_work(cluster_id: str) -> CatalogWorkDetail:
         candidates=[
             _entry(candidate_rows[a_id], candidate_links[a_id]) for a_id in candidate_ids if a_id in candidate_rows
         ],
+        cover=summary["cover"],
+        origin=_origin(summary["origin"]),
+        novelCover=summary["novel_cover"],
+        mangaCover=summary["manga_cover"],
     )
 
 
@@ -740,8 +772,8 @@ def _book_events(conn: sqlite3.Connection, first: str, last: str) -> list[Catalo
     A work's books of one day are one event: the smaller volume.
     """
     rows = conn.execute(
-        "SELECT e.id AS entry_id, e.title AS entry_title, e.start_date, c.cluster_id, "
-        "cs.title AS work_title, cs.cover AS work_cover, cs.popularity "
+        "SELECT e.id AS entry_id, e.title AS entry_title, e.start_date, e.format, c.cluster_id, "
+        f"cs.title AS work_title, cs.popularity, {_origin_columns(conn)} "
         f"{_EVENT_JOINS}"
         "WHERE +e.kind = 'book' AND e.start_date BETWEEN ? AND ? AND e.start_precision = 'day' AND cs.popularity > 0",
         (first, last),
@@ -763,7 +795,7 @@ def _book_events(conn: sqlite3.Connection, first: str, last: str) -> list[Catalo
                 event="release",
                 date=row["start_date"],
                 label=label,
-                cover=row["work_cover"],
+                cover=_book_cover(row["format"], row["novel_cover"], row["manga_cover"]),
                 popularity=row["popularity"] or 0,
             ),
         )

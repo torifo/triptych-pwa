@@ -34,8 +34,17 @@ def connect(path: Optional[Path | str] = None, *, create: bool = True) -> sqlite
     return conn
 
 
+# Columns added after the first catalogs were built: CREATE TABLE IF NOT EXISTS leaves an old table as it was.
+_ADDED_COLUMNS = {"cluster_summary": (("origin", "TEXT"), ("novel_cover", "TEXT"), ("manga_cover", "TEXT"))}
+
+
 def init_schema(conn: sqlite3.Connection) -> None:
     conn.executescript((CATALOG_DIR / "schema.sql").read_text(encoding="utf-8"))
+    for table, columns in _ADDED_COLUMNS.items():
+        present = {row[1] for row in conn.execute(f"PRAGMA table_info({table})")}
+        for name, sql_type in columns:
+            if name not in present:
+                conn.execute(f"ALTER TABLE {table} ADD COLUMN {name} {sql_type}")
     conn.commit()
 
 
