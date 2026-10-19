@@ -18,8 +18,8 @@ export interface CatalogJob {
 
 /** 実行中に状態を読み直す間隔。 */
 export const JOB_POLL_MS = 3000;
-/** 差分更新（build --recent）の所要時間の目安。 */
-export const RECENT_JOB_MINUTES = 15;
+/** 差分更新（build --recent）の目安と自動の更新（scripts/launchd.sh install で毎週月曜 5:30）。 */
+export const RECENT_JOB_NOTE = '目安 15〜30分。常駐させていれば毎週月曜 5:30 にも自動で走ります';
 /** 読み直しが続けて失敗したら、読むのをやめる回数。 */
 export const MAX_POLL_FAILURES = 5;
 

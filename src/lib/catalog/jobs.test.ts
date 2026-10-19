@@ -3,7 +3,7 @@ import { ApiError } from '../api';
 import {
   JOB_POLL_MS,
   MAX_POLL_FAILURES,
-  RECENT_JOB_MINUTES,
+  RECENT_JOB_NOTE,
   describeJobError,
   fetchCurrentJob,
   formatElapsed,
@@ -105,8 +105,8 @@ describe('describeJobError', () => {
 });
 
 describe('表示', () => {
-  it('目安は約15分', () => {
-    expect(RECENT_JOB_MINUTES).toBe(15);
+  it('目安は 15〜30 分（NDL の混み具合で延びる）と、常駐させている時の週1の自動更新', () => {
+    expect(RECENT_JOB_NOTE).toBe('目安 15〜30分。常駐させていれば毎週月曜 5:30 にも自動で走ります');
   });
 
   it('ログは末尾の n 行（空行は飛ばす）', () => {

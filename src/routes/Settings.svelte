@@ -47,7 +47,7 @@
   import type { CatalogStats } from '../lib/catalog/types';
   import { formatJstDateTime } from '../lib/catalog/view';
   import {
-    RECENT_JOB_MINUTES,
+    RECENT_JOB_NOTE,
     describeJobError,
     fetchCurrentJob,
     isAlreadyRunning,
@@ -925,7 +925,7 @@
           <RotateCw size={14} aria-hidden="true" class={jobRunning ? 'spin' : ''} />
           {jobRunning ? '実行中…' : jobStarting ? '開始しています…' : '差分更新を実行'}
         </button>
-        <span class="note">目安 約{RECENT_JOB_MINUTES}分</span>
+        <span class="note">{RECENT_JOB_NOTE}</span>
       </div>
       {#if jobNotice}
         {#if jobNotice.kind === 'busy'}
