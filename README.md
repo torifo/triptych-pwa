@@ -79,15 +79,16 @@ npm run build
 
 ### 常駐（launchd）
 
-Mac にログインしている間いつも動かすには、collector を LaunchAgent として登録します（`http://localhost:8000`。落ちても launchd が起こし直します）。plist は実行時にこのリポジトリの場所から作ります。
+Mac にログインしている間いつも動かすには、collector を LaunchAgent として登録します（`http://localhost:8000`。落ちても launchd が起こし直します）。あわせて、カタログの差分更新（`build --recent`、約15分）を毎週月曜 5:30 に設定画面と同じジョブ API で走らせます（眠っていた時は起きた時に1回）。plist は実行時にこのリポジトリの場所から作ります。
 
 ```bash
 npm run build
-scripts/launchd.sh install     # 登録して起動（入れ直しにも使う）
+scripts/launchd.sh install     # 常駐と週1の更新を登録して起動（入れ直しにも使う）
 scripts/launchd.sh restart     # backend/ を変えた後に読み込み直す
-scripts/launchd.sh status      # 動いているか
+scripts/launchd.sh status      # 動いているか・週1の更新の最後の呼び出し
 scripts/launchd.sh logs        # ~/Library/Logs/triptych/collector.log の末尾
-scripts/launchd.sh uninstall   # 止めて登録を消す
+scripts/launchd.sh weekly-run  # 週1の更新を今すぐ1回（呼び出しの記録は ~/Library/Logs/triptych/weekly.log）
+scripts/launchd.sh uninstall   # 両方を止めて登録を消す
 ```
 
 フロントエンドだけの変更なら `npm run build` だけで反映されます（再起動は不要）。
