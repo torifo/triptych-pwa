@@ -1273,11 +1273,11 @@ def test_the_novel_cover_prefers_the_original_novel_over_a_novelization(tmp_path
     assert s["novel_cover"] == "https://img/ln.jpg"
 
 
-def test_a_cover_comes_from_an_entry_named_after_the_work_before_an_older_stray(tmp_path):
-    # a different manga that ended up in the work (older, same source) must not stand for its manga books
+def test_a_cover_comes_from_an_entry_named_after_the_work_before_an_older_one_shot(tmp_path):
+    # the 2019 one-chapter manga under another title (same story, older) must not stand for the serialized manga's books
     s = _cover_summary(tmp_path, [
         _anilist(1, "novel", "お隣の天使様", popularity=30000, start_date="2019-06-15", source_material="WEB_NOVEL", cover="https://img/ln.jpg"),
-        _anilist(2, "manga", "クールなお隣さん", popularity=196, start_date="2019-06-14", source_material="LIGHT_NOVEL", cover="https://img/stray.jpg"),
+        _anilist(2, "manga", "クールなお隣さん", popularity=196, start_date="2019-06-14", source_material="LIGHT_NOVEL", cover="https://img/one-shot.jpg"),
         _anilist(3, "manga", "お隣の天使様", popularity=15260, start_date="2022-01-06", source_material="LIGHT_NOVEL", cover="https://img/manga.jpg"),
         _anilist(4, "manga", "お隣の天使様 after", popularity=2911, start_date="2023-12-07", source_material="LIGHT_NOVEL", cover="https://img/after.jpg"),
     ])

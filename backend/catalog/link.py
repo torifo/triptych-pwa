@@ -885,8 +885,8 @@ _NOVEL_SOURCES = frozenset({"LIGHT_NOVEL", "NOVEL", "WEB_NOVEL"})
 def _first_covered(rows: Iterable[_Row], named: str = "") -> Optional[_Row]:
     """The first series (earliest start, then the more popular) among rows that have a cover.
 
-    Rows named after the work (`named`, a normalized title) come first: an older stray that ended up in the work
-    must not stand for it.
+    Rows named after the work (`named`, a normalized title) come first: an older one-shot or pilot under another
+    title (お隣の天使様's 2019 one-chapter manga) must not stand for the series.
     """
 
     def is_named(row: _Row) -> bool:
