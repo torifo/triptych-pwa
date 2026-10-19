@@ -76,7 +76,7 @@
   );
 
   // 棚は作品ごとに1枚（同じ作品の Edition が並ばないように）。一覧は Edition ごとの詳しい表示
-  const shelf = $derived(groupShelfByWork(filtered, onAirIds));
+  const shelf = $derived(groupShelfByWork(filtered, onAirIds, (workId) => workMap.get(workId)?.origin));
   const countNum = $derived(layout === 'shelf' ? shelf.length : filtered.length);
   const countTotal = $derived(layout === 'shelf' ? editionsByWork.size : editions.length);
 

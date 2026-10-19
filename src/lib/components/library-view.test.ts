@@ -287,16 +287,19 @@ describe('groupShelfByWork', () => {
     expect(plain.onAir).toBe(false);
   });
 
-  it('媒体は重複なしで ANIME → 漫画 → 文庫 → WEB の順に、数も持つ', () => {
-    const [group] = groupShelfByWork(
-      [ed('w', 'A', 'plan', 'web-novel'), ed('a1', 'A'), ed('m', 'A', 'plan', 'manga'), ed('a2', 'A')],
-      new Set(),
-    );
-    expect(group.media).toEqual([
-      { mediaType: 'anime', count: 2 },
+  it('媒体は重複なしで原作の媒体から（Work 詳細のタブと同じ順）、数も持つ', () => {
+    const list = [ed('w', 'A', 'plan', 'web-novel'), ed('a1', 'A'), ed('m', 'A', 'plan', 'manga'), ed('a2', 'A')];
+    const [manga] = groupShelfByWork(list, new Set(), () => 'manga');
+    expect(manga.media).toEqual([
       { mediaType: 'manga', count: 1 },
       { mediaType: 'web-novel', count: 1 },
+      { mediaType: 'anime', count: 2 },
     ]);
+    const [anime] = groupShelfByWork(list, new Set(), () => 'anime');
+    expect(anime.media.map((m) => m.mediaType)).toEqual(['anime', 'manga', 'web-novel']);
+    // 原作が分からなければ小説の順（代表表紙と同じ）
+    const [unknown] = groupShelfByWork(list, new Set());
+    expect(unknown.media.map((m) => m.mediaType)).toEqual(['web-novel', 'manga', 'anime']);
   });
 
   it('状態はいちばん動いているもの（進行中 → 中断 → 積み → 完了 → 切り）', () => {

@@ -1,9 +1,9 @@
 // Library の一覧用。同じ Work・同じ媒体の Edition を見分ける副題と並び順、棚の表紙と表示の保存。
 
-import type { Edition, EditionProgress, MediaType, Release, Status, Work } from '../db/schema';
+import type { Edition, EditionProgress, MediaType, Release, Status, Work, WorkOrigin } from '../db/schema';
 import { formatReleaseDate, isPastRelease, isValidYmd, todayJst } from '../dates';
 import { normalizeTitle } from '../normalize';
-import { editionDisplayCover, type CoverEdition, type CoverSource } from './cover';
+import { ORIGIN_MEDIA_ORDER, editionDisplayCover, type CoverEdition, type CoverSource } from './cover';
 import { MEDIA_TYPES, PROGRESS_UNIT_LABELS } from './labels';
 
 type LibraryEdition = Pick<Edition, 'id' | 'workId' | 'mediaType' | 'title' | 'createdAt'>;
@@ -232,8 +232,6 @@ export function progressText(progress: EditionProgress | undefined): string {
 // 棚は作品ごとに1枚
 // ---------------------------------------------------------------------------
 
-/** 棚に出す媒体の順（表紙の色が強いアニメから。Work 詳細のタブと同じ）。 */
-const SHELF_MEDIA_ORDER: MediaType[] = ['anime', 'manga', 'light-novel', 'web-novel'];
 /** 作品の状態として出す順（いちばん動いているもの）。 */
 const SHELF_STATUS_ORDER: Status[] = ['active', 'paused', 'plan', 'done', 'dropped'];
 
@@ -254,6 +252,7 @@ export interface WorkShelfItem<E extends ShelfEdition> {
 export function groupShelfByWork<E extends ShelfEdition>(
   editions: readonly E[],
   onAir: ReadonlySet<string>,
+  originOf: (workId: string) => WorkOrigin | undefined = () => undefined,
 ): WorkShelfItem<E>[] {
   const byWork = new Map<string, E[]>();
   for (const edition of editions) {
@@ -270,7 +269,10 @@ export function groupShelfByWork<E extends ShelfEdition>(
       editions: list,
       lead: list.find((e) => onAir.has(e.id)) ?? list[0],
       onAir: list.some((e) => onAir.has(e.id)),
-      media: SHELF_MEDIA_ORDER.filter((m) => counts.has(m)).map((mediaType) => ({ mediaType, count: counts.get(mediaType) ?? 0 })),
+      // 媒体は原作の媒体から（Work 詳細のタブと同じ順。原作が分からなければ小説の順）
+      media: (ORIGIN_MEDIA_ORDER[originOf(workId) ?? 'novel'] ?? ORIGIN_MEDIA_ORDER.novel)
+        .filter((m) => counts.has(m))
+        .map((mediaType) => ({ mediaType, count: counts.get(mediaType) ?? 0 })),
       status: SHELF_STATUS_ORDER.find((s) => statuses.has(s)) ?? list[0].status,
     };
   });
