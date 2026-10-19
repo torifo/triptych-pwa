@@ -70,7 +70,7 @@ collector は `backend/adapters/` 配下のソースごとに独立したアダ�
 あなたの追跡データ（端末の IndexedDB）とは別に、collector 側の `backend/catalog.db`（SQLite・git 対象外）に作品カタログを持ちます。実装: `backend/catalog/`、仕様: `specs/catalog/`。
 
 - **作る**: `.venv/bin/python -m backend.catalog build`（全ソース→紐付けまで。初回は AniList が約1時間半、他は並行して1時間前後、JPRO の近刊が 12〜22 分）。取り終えた区切りは飛ばすので、途中で止めても同じコマンドで続きから再開します
-- **ふだんの更新**: `build --recent`（全ソース→紐付けで約15分。JPRO 以外で約8分＋JPRO の近刊 4〜8 分）。新しい本・放送中の作品・上位の Web 小説・前回からの近刊だけを取り直し、既存の行は更新するだけで消しません。`scripts/launchd.sh install` 済みなら毎週月曜 5:30 に自動で走ります（設定画面と同じジョブ API。呼び出しの記録は `~/Library/Logs/triptych/weekly.log`）。新刊が気になる時は設定画面かここから手動でも。`--fresh` とは同時に使えません
+- **ふだんの更新**: `build --recent`（全ソース→紐付けで15〜30分。NDL の混み具合で延びる。2026-10-19 の自動更新は 32 分で、うち NDL 18 分・JPRO の近刊 7 分）。新しい本・放送中の作品・上位の Web 小説・前回からの近刊だけを取り直し、既存の行は更新するだけで消しません。`scripts/launchd.sh install` 済みなら毎週月曜 5:30 に自動で走ります（設定画面と同じジョブ API。呼び出しの記録は `~/Library/Logs/triptych/weekly.log`）。新刊が気になる時は設定画面かここから手動でも。`--fresh` とは同時に使えません
 - **設定画面から実行**: ふだんの更新（`build --recent`）は設定画面からも実行できます（API は `POST /api/catalog/jobs/recent`、状態は `GET /api/catalog/jobs/current`）。collector が子プロセスとして起動し、出力は `local/catalog-build-recent-<YYYYMMDD-HHMMSS>.log` に残ります（画面には末尾40行）。同時に走るのは1つだけで、実行中の再要求は 409 です。`local/catalog-job.lock` の排他ロックを子プロセスが握るので、collector を再起動しても子は止まらず（画面の状態は消えますが）、終わるまで別の更新は始まりません。ロックはプロセスが終われば OS が外すため、古いロックが残って詰まることはありません。ターミナルで直接走らせる `build`・`link` も同じロックを取り、設定画面の更新（または別のターミナルの `build`）が動いている間は `already running ...（pid n）` と出して何もせず終わります（終了コード 2）。`stats`・`export` は読むだけなのでロックを取りません
 - **全部取り直す**: `build --fresh`（約2時間半）。`--recent` が見ない範囲（古い連載の状態、なろう・カクヨムの下位、昔の月の本、直近 30 日の近刊）まで新しくします。月1回程度
 - **一部だけ**: `build --source anilist,ndl --no-link` のあと `link`（`--recent` とも組み合わせられます）。試運転は `--limit 200`

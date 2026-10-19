@@ -79,7 +79,7 @@ npm run build
 
 ### 常駐（launchd）
 
-Mac にログインしている間いつも動かすには、collector を LaunchAgent として登録します（`http://localhost:8000`。落ちても launchd が起こし直します）。あわせて、カタログの差分更新（`build --recent`、約15分）を毎週月曜 5:30 に設定画面と同じジョブ API で走らせます（眠っていた時は起きた時に1回）。plist は実行時にこのリポジトリの場所から作ります。
+Mac にログインしている間いつも動かすには、collector を LaunchAgent として登録します（`http://localhost:8000`。落ちても launchd が起こし直します）。あわせて、カタログの差分更新（`build --recent`、15〜30分）を毎週月曜 5:30 に設定画面と同じジョブ API で走らせます（眠っていた時は起きた時に1回）。plist は実行時にこのリポジトリの場所から作ります。
 
 ```bash
 npm run build
