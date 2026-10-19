@@ -1,7 +1,9 @@
 // 原作の媒体と、表紙の無い文庫・漫画の Edition を、カタログの同じ題名の作品で埋める（届かなければ次の起動で）。
 
 import type { Edition, Work, WorkOrigin } from '../db/schema';
+import { listEditions, listWorks, updateEdition, updateEditionSyncHints, updateWork } from '../db/store';
 import { normalizeTitle } from '../normalize';
+import { fetchCatalogWork, fetchCatalogWorks } from './api';
 import type { CatalogWorkDetail, CatalogWorkSummary } from './types';
 
 export interface CatalogBackfill {
@@ -51,4 +53,21 @@ export async function backfillFromCatalog(
     }
   }
   return result;
+}
+
+/** 起動時・検索から足した直後に使う: Library の Work（workIds があればそれだけ）をカタログで埋める。 */
+export async function fillWorksFromCatalog(
+  workIds?: readonly string[],
+): Promise<{ origins: number; covers: number }> {
+  const [works, editions] = await Promise.all([listWorks(), listEditions()]);
+  const targets = workIds ? works.filter((w) => workIds.includes(w.id)) : works;
+  return backfillFromCatalog(targets, editions, {
+    search: async (title) => (await fetchCatalogWorks({ q: title, per: 5 })).items,
+    detail: (id) => fetchCatalogWork(id),
+    setOrigin: (id, origin) => updateWork(id, { origin }),
+    setCover: async (id, url) => {
+      await updateEdition(id, { coverUrl: url });
+      await updateEditionSyncHints(id, { coverFrom: 'catalog' });
+    },
+  });
 }

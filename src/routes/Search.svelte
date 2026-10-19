@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { fillWorksFromCatalog } from '../lib/catalog/origin-backfill';
   import { onMount } from 'svelte';
   import { apiGet, ApiError } from '../lib/api';
   import { normalizeTitle } from '../lib/normalize';
@@ -157,6 +158,8 @@
       }
 
       await refreshWorks();
+      // 原作の媒体と、文庫・漫画の原作側の表紙をすぐ埋める（次の起動を待たない。届かなければ起動時に）
+      void fillWorksFromCatalog([work.id]).catch(() => {});
 
       if (result.mediaType === 'anime') {
         originWorkId = work.id;
@@ -203,6 +206,7 @@
       originCandidates = originCandidates.filter(
         (c) => `${c.source}:${c.externalId}` !== key,
       );
+      void fillWorksFromCatalog([originWorkId]).catch(() => {});
       await refreshWorks();
     } finally {
       addingOriginKey = null;
